@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "ultimine_addition:item/miner_certificate_sealed"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "ultimine_addition:opened": 1.0
+      },
+      "model": "ultimine_addition:item/miner_certificate_opened"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "net.ixdarklord.ultimine_addition.mixin",
+  "refmap": "ultimine_addition.refmap.json",
+  "client": [],
+  "mixins": [
+    "PlayerDataSaverMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

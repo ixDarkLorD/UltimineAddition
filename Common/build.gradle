@@ -1,0 +1,90 @@
+plugins {
+    id 'org.quiltmc.loom' version '0.12.+'
+}
+
+archivesBaseName =  "${modid}-common"
+
+dependencies {
+    // Minecraft
+    minecraft "com.mojang:minecraft:${mc_version}"
+    mappings loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${mc_version}:${parchment_mappings_version}@zip")
+    }
+
+    // Mixin Dependencies
+    compileOnly 'org.ow2.asm:asm-tree:9.2'
+    compileOnly 'org.ow2.asm:asm-commons:9.2'
+    compileOnly 'org.ow2.asm:asm-util:9.2'
+    compileOnly 'org.spongepowered:mixin:0.8.5'
+
+    // Config Dependencies
+    compileOnly "curse.maven:forge-config-api-port-fabric-547434:3960064" //ForgeConfigAPIPort-v4.2.6
+
+    // Implementation
+    compileOnly 'curse.maven:ftb-ultimine-forge-386134:3993549'
+}
+
+loom {
+    mixin {
+        defaultRefmapName = "${modid}.refmap.json"
+        useLegacyMixinAp = false
+    }
+
+    runs {
+        client {
+            client()
+            setConfigName("Common Client")
+            ideConfigGenerated(false)
+            runDir("run")
+        }
+        server {
+            server()
+            setConfigName("Common Server")
+            ideConfigGenerated(false)
+            runDir("run")
+        }
+    }
+}
+
+processResources {
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+
+    inputs.property "modId", 					"${modid}"
+    inputs.property "modVersion", 				"${mod_version}"
+    inputs.property "modGroup", 				 project.group
+    inputs.property "modDescription", 			"${mod_description}"
+    inputs.property "packFormat", 				"${pack_format}"
+
+    filesMatching ('quilt.mod.json') {
+        expand (
+                'modId':                	    "${modid}",
+                'modVersion':           	    "${mod_version}",
+                'modGroup':             	     project.group
+        )
+    }
+
+    filesMatching ('pack.mcmeta') {
+        expand (
+                'modDescription':       "${mod_description}",
+                "packFormat":           "${pack_format}"
+        )
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId project.archivesBaseName
+            version project.version
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url "file://" + System.getenv("local_maven")
+        }
+    }
+}

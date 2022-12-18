@@ -1,0 +1,320 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath group: 'org.parchmentmc', name: 'librarian', version: '1.+'
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+    }
+}
+
+plugins {
+    id 'net.darkhax.curseforgegradle' version '1.0.11'
+    id 'com.modrinth.minotaur' version '2.+'
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
+
+java.withSourcesJar()
+java.withJavadocJar()
+javadoc.options.addStringOption('Xdoclint:none', '-quiet')
+
+archivesBaseName = "${modid}-forge"
+
+minecraft {
+    mappings channel: 'parchment', version: "${parchment_mappings_version}-${mc_version}"
+    //mappings channel: 'official', version: mc_version
+
+    if (project.hasProperty('forge_ats_enabled') && project.findProperty('forge_ats_enabled').toBoolean()) {
+        // This location is hardcoded in Forge and can not be changed.
+        // https://github.com/MinecraftForge/MinecraftForge/blob/be1698bb1554f9c8fa2f58e32b9ab70bc4385e60/fmlloader/src/main/java/net/minecraftforge/fml/loading/moddiscovery/ModFile.java#L123
+        accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+        project.logger.debug('Forge Access Transformers are enabled for this project.')
+    }
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            jvmArgs "-Xms${runtime_min_ram}", "-Xmx${runtime_max_ram}"
+            property 'fml.earlyprogresswindow', 'false'
+            if (project(":Common").file("src/main/resources/${modid}.common.mixins.json").exists()) {
+                arg "-mixin.config=${modid}.common.mixins.json"
+            }
+            if (project.file("src/main/resources/${modid}.forge.mixins.json").exists()) {
+                arg "-mixin.config=${modid}.forge.mixins.json"
+            }
+            ideaModule "${rootProject.name}.${project.name}.main"
+            taskName 'Client'
+            property 'terminal.ansi', 'true'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.debug.export', mixin_debug
+            mods {
+                modClientRun {
+                    source sourceSets.main
+                    source project(":Common").sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            jvmArgs "-Xms${runtime_min_ram}", "-Xmx${runtime_max_ram}"
+            arg 'nogui'
+            property 'fml.earlyprogresswindow', 'false'
+            if (project(":Common").file("src/main/resources/${modid}.common.mixins.json").exists()) {
+                arg "-mixin.config=${modid}.common.mixins.json"
+            }
+            if (project.file("src/main/resources/${modid}.forge.mixins.json").exists()) {
+                arg "-mixin.config=${modid}.forge.mixins.json"
+            }
+            ideaModule "${rootProject.name}.${project.name}.main"
+            taskName 'Server'
+            property 'terminal.ansi', 'true'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.debug.export', mixin_debug
+            mods {
+                modServerRun {
+                    source sourceSets.main
+                    source project(":Common").sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+            jvmArgs "-Xms${runtime_min_ram}", "-Xmx${runtime_max_ram}"
+            if (project(":Common").file("src/main/resources/${modid}.common.mixins.json").exists()) {
+                arg "-mixin.config=${modid}.common.mixins.json"
+            }
+            if (project.file("src/main/resources/${modid}.forge.mixins.json").exists()) {
+                arg "-mixin.config=${modid}.forge.mixins.json"
+            }
+            args '--mod', modid, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            ideaModule "${rootProject.name}.${project.name}.main"
+            taskName 'Data'
+            property 'terminal.ansi', 'true'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.debug.export', mixin_debug
+            mods {
+                modDataRun {
+                    source sourceSets.main
+                    source project(":Common").sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources.srcDir 'src/generated/resources'
+
+dependencies {
+    // Minecraft
+    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    // Common
+    implementation project(":Common")
+
+    // Implementation
+    implementation fg.deobf("curse.maven:ftb-ultimine-forge-386134:3993549")
+
+    // Compile Only
+    runtimeOnly fg.deobf("curse.maven:catalogue-459701:3873264")
+    runtimeOnly fg.deobf("curse.maven:configured-457570:4011355")
+    runtimeOnly fg.deobf("curse.maven:ftb-library-forge-404465:4123392")
+    runtimeOnly fg.deobf("curse.maven:architectury-api-419699:4147353")
+}
+
+mixin {
+    if (project.file("src/main/resources/${modid}.forge.mixins.json").exists() || project(":Common").file("src/main/resources/${modid}.common.mixins.json").exists()) {
+        add project(":Common").sourceSets.main, "${modid}.refmap.json"
+    }
+    if (project(":Common").file("src/main/resources/${modid}.common.mixins.json").exists()) {
+        config "${modid}.common.mixins.json"
+    }
+    if (project.file("src/main/resources/${modid}.forge.mixins.json").exists()) {
+        config "${modid}.forge.mixins.json"
+    }
+}
+
+processResources {
+    from project(":Common").sourceSets.main.resources
+    exclude("**/quilt.mod.json")
+
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+    inputs.property "modId",                    "${modid}"
+    inputs.property "modName",                  "${mod_name}"
+    inputs.property "modVersion",               "${mod_version}"
+    inputs.property "modDescription",           "${mod_description}"
+    inputs.property "modGroup",                 project.group
+    inputs.property "modPageUrl",               "${mod_page_url}"
+    inputs.property "modUpdateUrl",             "${mod_update_url}"
+    inputs.property "modIssueUrl",              "${mod_issue_url}"
+    inputs.property "modAuthor",                "${mod_author}"
+    inputs.property "modLicense",               "${mod_license}"
+    inputs.property "minFMLVersion",            "${min_forge_version}".replaceAll("\\..*", "")
+    inputs.property "minForgeVersion",          "${min_forge_version}"
+    inputs.property "minMinecraftVersion",      "${min_mc_version}"
+    inputs.property "nextMinecraftVersion",     rootProject.getNextVersion("${min_mc_version}")
+    inputs.property "packFormat",               "${pack_format}"
+    inputs.property "modForgeDisplayTest",      "${mod_forge_display_test}"
+
+    filesMatching ('META-INF/mods.toml') {
+        expand (
+                'modId':                        "${modid}",
+                'modName':                      "${mod_name}",
+                'modVersion':                   "${mod_version}",
+                'modDescription':               "${mod_description}",
+                'modPageUrl':                   "${mod_page_url}",
+                'modUpdateUrl':                 "${mod_update_url}",
+                'modIssueUrl':                  "${mod_issue_url}",
+                'modAuthor':                    "${mod_author}",
+                'modLicense':                   "${mod_license}",
+                'minFMLVersion':                "${min_forge_version}".replaceAll("\\..*", ""),
+                'minForgeVersion':              "${min_forge_version}",
+                'minMinecraftVersion':          "${min_mc_version}",
+                'nextMinecraftVersion':         rootProject.getNextVersion("${min_mc_version}"),
+                'modForgeDisplayTest':          "${mod_forge_display_test}"
+        )
+    }
+
+    filesMatching ('pack.mcmeta') {
+        expand (
+                'modDescription':       "${mod_description}",
+                "packFormat":           "${pack_format}"
+        )
+    }
+}
+
+compileJava {
+    source project(":Common").sourceSets.main.allSource
+}
+
+sourcesJar {
+    from project(":Common").sourceSets.main.allJava
+}
+
+javadoc {
+    source project(":Common").sourceSets.main.allJava
+}
+
+jar.finalizedBy('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId project.archivesBaseName
+            version project.version
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url "file://" + System.getenv("local_maven")
+        }
+    }
+}
+
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
+
+task curseforge(type: TaskPublishCurseForge) {
+    if (!file('../classified.properties').canRead()) { throw new FileNotFoundException("Could not read properties file") }
+    if (!file('../CHANGELOG.md').canRead()) { throw new FileNotFoundException("Could not read changelog file") }
+
+    disableVersionDetection()
+    def AdminProperties = new Properties()
+    AdminProperties.load(file('../classified.properties').newDataInputStream())
+    apiToken = AdminProperties['curseforge_api_token']
+
+    def mainFile = upload(project_curse_id, jar)
+    mainFile.changelog = file('../CHANGELOG.md')
+    mainFile.changelogType = 'markdown'
+    mainFile.displayName = "[Forge] ${mc_version} | v${mod_version} " + rootProject.UppercaseString("${project_release_type}")
+    mainFile.releaseType = project_release_type
+    mainFile.addRequirement('ftb-ultimine-forge')
+    mainFile.addGameVersion("Forge")
+    project_game_versions.split(",").each {
+        mainFile.addGameVersion(it.trim())
+    }
+}
+
+modrinth {
+    if (!file('../classified.properties').canRead()) { throw new FileNotFoundException("Could not read properties file") }
+    if (!file('../CHANGELOG.md').canRead()) { throw new FileNotFoundException("Could not read changelog file") }
+
+    def AdminProperties = new Properties()
+    AdminProperties.load(file('../classified.properties').newDataInputStream())
+    token = AdminProperties['modrinth_api_token']
+
+    projectId = project_modrinth_id
+    versionNumber = project.version
+    versionName = "[Forge] ${mc_version} | v${mod_version} " + rootProject.UppercaseString("${project_release_type}")
+    changelog = file('../CHANGELOG.md').text
+    versionType = project_release_type
+    uploadFile = jar
+    loaders.add 'forge'
+    dependencies {}
+    project_game_versions.split(",").each {
+        gameVersions.add(it.trim())
+    }
+}
+
+import groovy.json.*
+
+task copyJarToDir(type: Copy) {
+    onlyIf { project.hasProperty('build_jar_output_dir') && project.hasProperty('unique_build_number') }
+    if (project.findProperty('copy_build_jar').toBoolean()) {
+        // shortcut for jar.outputs.files
+        from jar
+        into project.findProperty('build_jar_output_dir')
+        // add build number to be able to distinguish jars when testing thorough official launcher
+        // build number is stored in global gradle.properties
+        rename { fileName -> fileName.replace("v${mod_version}", "v${mod_version}-build.${unique_build_number}") }
+    }
+}
+
+task refreshUpdateJson {
+    onlyIf { project.hasProperty('mod_resources') }
+    doLast {
+        def updateFile = file(project.findProperty('mod_resources').concat(File.separator).concat('update').concat(File.separator).concat("${modid}").concat('.json'))
+        def updateJson
+        if (updateFile.exists() && updateFile.canRead() && updateFile.length() != 0) {
+            updateJson = new JsonSlurper().parseText(updateFile.text)
+            "${project_game_versions}".replaceAll(" ", "").split(",").each { version ->
+                updateJson['promos']["${version}-latest"] = "${mod_version}"
+                // alpha and beta releases will contain 'a' or 'b' char respectively, don't update recommended for those
+                if ("${mod_version}".matches("[^a-zA-Z]+")) {
+                    updateJson['promos']["${version}-recommended"] = "${mod_version}"
+                }
+            }
+        } else {
+            def builder = new JsonBuilder()
+            updateJson = builder {
+                homepage "${mod_page_url}"
+                promos { "${project_game_versions}".replaceAll(" ", "").split(",").each { version ->
+                    "${version}-latest" "${mod_version}"
+                    // alpha and beta releases will contain 'a' or 'b' char respectively, don't update recommended for those
+                    if ("${mod_version}".matches("[^a-zA-Z]+")) {
+                        "${version}-recommended" "${mod_version}"
+                    }
+                } }
+            }
+        }
+        def output = new JsonOutput()
+        updateFile.write(output.prettyPrint(output.toJson(updateJson)))
+    }
+}
+
+build.finalizedBy project.tasks.copyJarToDir, rootProject.tasks.incrementBuildNumber
+[tasks.modrinth, tasks.curseforge].each {it.finalizedBy project.tasks.refreshUpdateJson}

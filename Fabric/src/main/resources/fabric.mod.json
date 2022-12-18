@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "${modId}",
+  "version": "${modVersion}",
+
+  "name": "${modName}",
+  "description": "${modDescription}",
+  "authors": [
+    "${modAuthor}"
+  ],
+  "contact": {
+    "homepage": "${modPageUrl}",
+    "issues": "${modIssueUrl}",
+    "sources": "${modSourceUrl}"
+  },
+
+  "license": "${modLicense}",
+  "icon": "mod_logo.png",
+
+  "environment": "${modFabricEnvironment}",
+  "entrypoints": {
+    "main": ["${mainEntryPoint}"],
+    "client": ["${clientEntryPoint}"],
+    "fabric-datagen": ["${datagenEntryPoint}"]
+  },
+  "mixins": [
+    "${modId}.fabric.mixins.json"
+  ],
+
+  "depends": {
+    "java": ">=17",
+    "minecraft": ">=${minMinecraftVersion} <${nextMinecraftVersion}",
+    "fabricloader": ">=${minFabricVersion}",
+    "fabric-api": ">=${minFabricApiVersion}",
+    "ftbultimine": ">=1902",
+    "forgeconfigapiport": ">=4.2.6",
+    "com_electronwill_night-config_core": "*",
+    "com_electronwill_night-config_toml": "*"
+  }
+}
