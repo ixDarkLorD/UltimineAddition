@@ -50,9 +50,10 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public boolean isPlayerCapable(Player player) {
         AtomicBoolean result = new AtomicBoolean(false);
-        player.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(capability -> {
-            result.set(capability.getCapability());
-        });
+        if (!player.getLevel().isClientSide) {
+            player.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(capability ->
+                    result.set(capability.getCapability()));
+        }
         return result.get();
     }
     @Override
@@ -66,25 +67,22 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public int getRequiredAmount(ItemStack stack) {
         AtomicInteger i = new AtomicInteger(0);
-        stack.getCapability(MinerCertificateProvider.CAPABILITY).ifPresent(capability -> {
-            i.set(capability.getRequiredAmount());
-        });
+        stack.getCapability(MinerCertificateProvider.CAPABILITY).ifPresent(capability ->
+                i.set(capability.getRequiredAmount()));
         return i.get();
     }
     @Override
     public int getMinedBlocks(ItemStack stack) {
         AtomicInteger i = new AtomicInteger(0);
-        stack.getCapability(MinerCertificateProvider.CAPABILITY).ifPresent(capability -> {
-            i.set(capability.getMinedBlocks());
-        });
+        stack.getCapability(MinerCertificateProvider.CAPABILITY).ifPresent(capability ->
+                i.set(capability.getMinedBlocks()));
         return i.get();
     }
     @Override
     public boolean isAccomplished(ItemStack stack) {
         AtomicBoolean i = new AtomicBoolean(false);
-        stack.getCapability(MinerCertificateProvider.CAPABILITY).ifPresent(capability -> {
-            i.set(capability.isAccomplished());
-        });
+        stack.getCapability(MinerCertificateProvider.CAPABILITY).ifPresent(capability ->
+                i.set(capability.isAccomplished()));
         return i.get();
     }
 

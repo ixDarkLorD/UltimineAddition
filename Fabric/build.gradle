@@ -45,7 +45,7 @@ dependencies {
     modRuntimeOnly "curse.maven:architectury-api-419699:4147351"
 }
 
-def dataOutput = 'src/main/generated'
+def data_output = 'src/main/generated'
 
 loom {
     mixin {
@@ -73,7 +73,7 @@ loom {
             ideConfigGenerated(true)
             runDir("run/datagen")
             vmArg "-Dfabric-api.datagen"
-            vmArg "-Dfabric-api.datagen.output-dir=${file(dataOutput)}"
+            vmArg "-Dfabric-api.datagen.output-dir=${file(data_output)}"
         }
     }
 }
@@ -135,7 +135,7 @@ processResources {
     }
 }
 
-sourceSets { main { resources { srcDirs += dataOutput }}}
+sourceSets { main { resources { srcDirs += data_output }}}
 
 compileJava {
     source project(":Common").sourceSets.main.allSource

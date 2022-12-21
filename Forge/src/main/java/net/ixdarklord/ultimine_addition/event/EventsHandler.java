@@ -1,20 +1,19 @@
 package net.ixdarklord.ultimine_addition.event;
 
 import net.ixdarklord.ultimine_addition.command.SetCapabilityCommand;
+import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.plugin.FTBUltimatePlugin;
 import net.ixdarklord.ultimine_addition.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.data.item.MinerCertificateProvider;
-import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineData;
 import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineCapabilityProvider;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineData;
 import net.ixdarklord.ultimine_addition.helper.Services;
 import net.ixdarklord.ultimine_addition.item.MinerCertificate;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -27,11 +26,6 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID)
 public class EventsHandler {
     @SubscribeEvent
-    public static void onKeyInput(final InputEvent.Key event) {
-        FTBUltimatePlugin.keyEvent(Minecraft.getInstance().player);
-    }
-
-    @SubscribeEvent
     public static void onCommandsRegister(RegisterCommandsEvent event) {
         SetCapabilityCommand.register(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
     }
@@ -43,9 +37,10 @@ public class EventsHandler {
 
     @SubscribeEvent
     public static void onPlayerTick(final TickEvent.PlayerTickEvent event) {
-        MinerCertificate.checkingBlockInFront();
-        if (!event.player.getLevel().isClientSide)
+        if (!event.player.getLevel().isClientSide) {
+            MinerCertificate.checkingBlockInFront((ServerPlayer) event.player);
             FTBUltimatePlugin.canPlayerUltimine = Services.PLATFORM.isPlayerCapable(event.player);
+        }
     }
 
     @SubscribeEvent

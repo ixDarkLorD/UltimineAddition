@@ -15,7 +15,12 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 public class ClientEventsHandler {
     @Mod.EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
-    public static class Event {}
+    public static class Event {
+        @SubscribeEvent
+        public static void onKeyInput(final InputEvent.Key event) {
+            FTBUltimatePlugin.keyEvent(Minecraft.getInstance().player);
+        }
+    }
 
     @Mod.EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class EventBus {

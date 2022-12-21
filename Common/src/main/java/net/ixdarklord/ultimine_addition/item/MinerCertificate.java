@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -109,8 +110,7 @@ public class MinerCertificate extends Item {
     public static boolean isAccomplished(ItemStack stack) {
         int MINE_COUNT = Services.PLATFORM.getMinedBlocks(stack);
         int REQUIRED_AMOUNT = Services.PLATFORM.getRequiredAmount(stack);
-        boolean RESULT = MINE_COUNT >= (REQUIRED_AMOUNT != 0 ? REQUIRED_AMOUNT : 1);
-        return RESULT;
+        return MINE_COUNT >= (REQUIRED_AMOUNT != 0 ? REQUIRED_AMOUNT : 1);
     }
 
     public static void onBreakBlock(Player player) {
@@ -128,13 +128,12 @@ public class MinerCertificate extends Item {
             }
         }
     }
-    public static void checkingBlockInFront() {
-        Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null) {
-            HitResult block = MC.player.pick(20.0D, 0.0F, false);
+    public static void checkingBlockInFront(ServerPlayer player) {
+        if (player != null) {
+            HitResult block = player.pick(20.0D, 0.0F, false);
             if (block.getType() == HitResult.Type.BLOCK) {
                 BlockPos blockPos = ((BlockHitResult)block).getBlockPos();
-                BlockState blockState = MC.player.level.getBlockState(blockPos);
+                BlockState blockState = player.level.getBlockState(blockPos);
                 boolean isBlockChanged = false;
                 if (LAST_BLOCK == null) {
                     LAST_BLOCK = blockState.getBlock();
