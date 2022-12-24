@@ -1,12 +1,13 @@
 package net.ixdarklord.ultimine_addition.data.gen;
 
-import net.ixdarklord.ultimine_addition.item.ItemsList;
+import net.ixdarklord.ultimine_addition.item.ItemRegistries;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.crafting.conditions.IConditionBuilder;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -16,8 +17,8 @@ public class RecipeProvider extends net.minecraft.data.recipes.RecipeProvider im
     }
 
     @Override
-    protected void buildCraftingRecipes(Consumer<FinishedRecipe> pFinishedRecipeConsumer) {
-        ShapedRecipeBuilder.shaped(ItemsList.MINER_CERTIFICATE)
+    protected void buildCraftingRecipes(@NotNull Consumer<FinishedRecipe> pFinishedRecipeConsumer) {
+        ShapedRecipeBuilder.shaped(ItemRegistries.MINER_CERTIFICATE.get())
                 .define('P', Items.PAPER)
                 .define('1', Items.DIAMOND_PICKAXE).define('2', Items.IRON_AXE)
                 .define('3', Items.GOLDEN_HOE).define('4', Items.STONE_SHOVEL)
@@ -25,7 +26,7 @@ public class RecipeProvider extends net.minecraft.data.recipes.RecipeProvider im
                 .pattern("2P3")
                 .pattern(" 4 ")
                 .unlockedBy("has_miner_certificate", inventoryTrigger(ItemPredicate.Builder.item()
-                        .of(ItemsList.MINER_CERTIFICATE).build()))
+                        .of(ItemRegistries.MINER_CERTIFICATE.get()).build()))
                 .save(pFinishedRecipeConsumer);
     }
 }

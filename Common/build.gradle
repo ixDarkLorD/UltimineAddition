@@ -13,9 +13,9 @@ dependencies {
     }
 
     // Mixin Dependencies
-    compileOnly 'org.ow2.asm:asm-tree:9.2'
-    compileOnly 'org.ow2.asm:asm-commons:9.2'
-    compileOnly 'org.ow2.asm:asm-util:9.2'
+    compileOnly 'org.ow2.asm:asm-tree:9.4'
+    compileOnly 'org.ow2.asm:asm-commons:9.4'
+    compileOnly 'org.ow2.asm:asm-util:9.4'
     compileOnly 'org.spongepowered:mixin:0.8.5'
 
     // Config Dependencies

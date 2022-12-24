@@ -68,7 +68,33 @@ subprojects {
         // other mod developers.
         enabled = false
     }
+
+    task deleteRunFile() {
+        def folder = new File(project.getProjectDir(), 'run')
+        def config = new File(project.getProjectDir(), 'run/config')
+        onlyIf {folder.exists()}
+        doLast {
+            if (project.name != "Fabric") {
+                delete folder
+                System.out.println("Delete run file from: ${project.name}")
+                System.out.println(folder)
+            }
+        }
+        if (project.name == "Fabric") {
+            doLast {
+                fileTree(dir: folder).exclude("config").visit { FileVisitDetails details ->
+                    delete details.file
+                }
+                fileTree(dir: config).exclude("fabric_loader_dependencies.json").visit { FileVisitDetails details ->
+                    delete details.file
+                }
+                System.out.println("Reset the run file to default from: ${project.name}")
+                System.out.println(folder)
+            }
+        }
+    }
 }
+
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 import java.util.regex.Pattern

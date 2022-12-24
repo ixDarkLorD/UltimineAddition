@@ -1,9 +1,11 @@
 package net.ixdarklord.ultimine_addition.helper.services;
 
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 
 public interface IPlatformHelper {
     String getPlatformName();
@@ -19,11 +21,13 @@ public interface IPlatformHelper {
     int getRequiredAmount(ItemStack stack);
     int getMinedBlocks(ItemStack stack);
     boolean isAccomplished(ItemStack stack);
-    void setRequiredAmount(ItemStack stack, int amount, Player player);
-    void setMinedBlocks(ItemStack stack, int amount, Player player);
-    void setAccomplished(ItemStack stack, boolean state, Player player);
-    void addMinedBlocks(ItemStack stack, int amount, Player player);
+    void setRequiredAmount(ItemStack stack, int slotID, int amount, Player player);
+    void setMinedBlocks(ItemStack stack, int slotID, int amount, Player player);
+    void setAccomplished(ItemStack stack, int slotID, boolean state, Player player);
+    void addMinedBlocks(ItemStack stack, int slotID, int amount, Player player);
 
     ParticleOptions getCelebrateParticle();
     void sendCertificateEffect(ItemStack stack, Player player);
+
+    TagKey<Block> oresTag();
 }

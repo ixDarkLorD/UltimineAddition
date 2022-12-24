@@ -6,7 +6,7 @@
   "tooltip.ultimine_addition.info": "Obtain this knowledge to develop your mining skill!",
   "tooltip.ultimine_addition.press_shift": "Press SHIFT for more info",
 
-  "tooltip.ultimine_addition.quest1.info": "To accomplish it, mine %s blocks!",
+  "tooltip.ultimine_addition.quest1.info": "To accomplish it, mine %s ores!",
   "tooltip.ultimine_addition.quest1": "Mined Blocks: %s",
 
   "info.ultimine_addition.obtain": "Congratulations on learning the excavation skill!",
@@ -14,5 +14,6 @@
   "info.ultimine_addition.incapable": "You need the excavation skill to perform this action! You have to obtain the miner certificate first.",
 
   "commands.ultimine_addition.failed": "There is an issue with the syntax occurred!",
-  "commands.ultimine_addition.set_capability": "You have successfully set the ultimine capability to %s!"
+  "commands.ultimine_addition.set_capability": "You have successfully set the ultimine capability to %s!",
+  "commands.ultimine_addition.already_setted": "The capability is already set to %s."
 }

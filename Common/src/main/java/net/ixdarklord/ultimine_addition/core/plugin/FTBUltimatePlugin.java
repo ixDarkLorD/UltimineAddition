@@ -9,8 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
 public class FTBUltimatePlugin implements FTBUltiminePlugin {
-    public static boolean canPlayerUltimine;
-
     @Override
     public void init() {
         Constants.LOGGER.info("Registering plugin to FTBUltimine!");
@@ -19,9 +17,6 @@ public class FTBUltimatePlugin implements FTBUltiminePlugin {
 
     @Override
     public boolean canUltimine(Player player) {
-        if (Services.PLATFORM.getPlatformName().equals("Forge"))
-            return canPlayerUltimine;
-
         return Services.PLATFORM.isPlayerCapable(player);
     }
 
@@ -30,10 +25,7 @@ public class FTBUltimatePlugin implements FTBUltiminePlugin {
         if (FTBUltimineClient.keyBinding.isDown()) {
             if (!isButtonPressed) {
                 String MSG = "\u2716"+ Component.translatable("info.ultimine_addition.incapable").getString();
-                if (Services.PLATFORM.getPlatformName().equals("Forge") && !canPlayerUltimine) {
-                    player.displayClientMessage(Component.literal(MSG).withStyle(ChatFormatting.RED), false);
-                }
-                if (Services.PLATFORM.getPlatformName().equals("Fabric") && !Services.PLATFORM.isPlayerCapable(player)) {
+                if (!Services.PLATFORM.isPlayerCapable(player)) {
                     player.displayClientMessage(Component.literal(MSG).withStyle(ChatFormatting.RED), false);
                 }
             }

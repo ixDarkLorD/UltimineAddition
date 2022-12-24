@@ -6,18 +6,24 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.Constants;
-import net.ixdarklord.ultimine_addition.data.DataHandler;
+import net.ixdarklord.ultimine_addition.data.IDataHandler;
 import net.ixdarklord.ultimine_addition.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.helper.services.IPlatformHelper;
-import net.ixdarklord.ultimine_addition.item.CreativeModeTabsList;
+import net.ixdarklord.ultimine_addition.item.ItemsRegistries;
 import net.ixdarklord.ultimine_addition.network.PacketHandler;
 import net.ixdarklord.ultimine_addition.particle.ParticlesList;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
+import net.ixdarklord.ultimine_addition.util.PlayerUtils;
+import net.ixdarklord.ultimine_addition.util.TagsUtils;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 
@@ -41,21 +47,27 @@ public class FabricPlatformHelper implements IPlatformHelper {
 
     @Override
     public CreativeModeTab getCreativeModeTab() {
-        return CreativeModeTabsList.ULTIMINE_ADDITION_TAB;
+        return ItemsRegistries.ULTIMINE_ADDITION_TAB;
     }
 
     @Override
     public boolean isPlayerCapable(Player player) {
-        return DataHandler.ultimineData.getCapability();
+        return ((IDataHandler) player).getPlayerUltimineData().getCapability();
     }
     @Override
     public void setPlayerCapability(Player player, boolean state) {
-        DataHandler.ultimineData.setCapability(state);
+        if (player.getLevel().isClientSide() && ClientPlayNetworking.canSend(PacketHandler.PLAYER_CAPABILITY_ID)) {
+            FriendlyByteBuf buf = PacketByteBufs.create();
+            buf.writeBoolean(state);
+            ClientPlayNetworking.send(PacketHandler.PLAYER_CAPABILITY_ID, buf);
+        } else {
+            PlayerUtils.CapabilityData.set((IDataHandler) player, state);
+        }
     }
 
     @Override
     public int getRequiredAmount(ItemStack stack) {
-        CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(DataHandler.NBT_PATH);
+        CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
         MinerCertificateData data = new MinerCertificateData();
 
         if (NBT != null) data.loadNBTData(NBT);
@@ -63,7 +75,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
     @Override
     public int getMinedBlocks(ItemStack stack) {
-        CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(DataHandler.NBT_PATH);
+        CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
         MinerCertificateData data = new MinerCertificateData();
 
         if (NBT != null) data.loadNBTData(NBT);
@@ -71,7 +83,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
     @Override
     public boolean isAccomplished(ItemStack stack) {
-        CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(DataHandler.NBT_PATH);
+        CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
         MinerCertificateData data = new MinerCertificateData();
 
         if (NBT != null) data.loadNBTData(NBT);
@@ -79,47 +91,103 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public void setRequiredAmount(ItemStack stack, int amount, Player player) {
-        if (ClientPlayNetworking.canSend(PacketHandler.MINER_CERTIFICATE_ID)) {
+    public void setRequiredAmount(ItemStack stack, int slotID, int amount, Player player) {
+        if (player.getLevel().isClientSide() && ClientPlayNetworking.canSend(PacketHandler.MINER_CERTIFICATE_ID)) {
             var buf = PacketByteBufs.create();
             buf.writeItem(stack);
-            buf.writeInt(amount);
-            buf.writeBoolean(false);
+            buf.writeVarIntArray(new ItemUtils.IntArrayMaker(slotID, amount, 0).getArray());
             buf.writeUtf("setRequiredAmount");
             ClientPlayNetworking.send(PacketHandler.MINER_CERTIFICATE_ID, buf);
+        } else if (player instanceof ServerPlayer serverPlayer && ServerPlayNetworking.canSend(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID)) {
+            CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
+            MinerCertificateData data = new MinerCertificateData();
+            if (NBT == null) NBT = new CompoundTag();
+
+            data.loadNBTData(NBT);
+            if (data.getRequiredAmount() == 0) data.setRequiredAmount(amount);
+            data.saveNBTData(NBT);
+            stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
+
+            int[] newValues = new int[]{slotID, data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
+            var newBuf = PacketByteBufs.create();
+            newBuf.writeItem(stack);
+            newBuf.writeVarIntArray(newValues);
+            ServerPlayNetworking.send(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID, newBuf);
         }
     }
     @Override
-    public void setMinedBlocks(ItemStack stack, int amount, Player player) {
-        if (ClientPlayNetworking.canSend(PacketHandler.MINER_CERTIFICATE_ID)) {
+    public void setMinedBlocks(ItemStack stack, int slotID, int amount, Player player) {
+        if (player.getLevel().isClientSide() && ClientPlayNetworking.canSend(PacketHandler.MINER_CERTIFICATE_ID)) {
             var buf = PacketByteBufs.create();
             buf.writeItem(stack);
-            buf.writeInt(amount);
-            buf.writeBoolean(false);
+            buf.writeVarIntArray(new ItemUtils.IntArrayMaker(slotID, amount, 0).getArray());
             buf.writeUtf("setMinedBlocks");
             ClientPlayNetworking.send(PacketHandler.MINER_CERTIFICATE_ID, buf);
+        } else if (player instanceof ServerPlayer serverPlayer && ServerPlayNetworking.canSend(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID)) {
+            CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
+            MinerCertificateData data = new MinerCertificateData();
+            if (NBT == null) NBT = new CompoundTag();
+
+            data.loadNBTData(NBT);
+            data.setMinedBlocks(amount);
+            data.saveNBTData(NBT);
+            stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
+
+            int[] newValues = new int[]{slotID, data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
+            var newBuf = PacketByteBufs.create();
+            newBuf.writeItem(stack);
+            newBuf.writeVarIntArray(newValues);
+            ServerPlayNetworking.send(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID, newBuf);
         }
     }
     @Override
-    public void setAccomplished(ItemStack stack, boolean state, Player player) {
-        if (ClientPlayNetworking.canSend(PacketHandler.MINER_CERTIFICATE_ID)) {
+    public void setAccomplished(ItemStack stack, int slotID, boolean state, Player player) {
+        if (player.getLevel().isClientSide() && ClientPlayNetworking.canSend(PacketHandler.MINER_CERTIFICATE_ID)) {
             var buf = PacketByteBufs.create();
             buf.writeItem(stack);
-            buf.writeInt(0);
-            buf.writeBoolean(state);
+            buf.writeVarIntArray(new ItemUtils.IntArrayMaker(slotID, 0, (state) ? 1 : 0).getArray());
             buf.writeUtf("setAccomplished");
             ClientPlayNetworking.send(PacketHandler.MINER_CERTIFICATE_ID, buf);
+        } else if (player instanceof ServerPlayer serverPlayer && ServerPlayNetworking.canSend(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID)) {
+            CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
+            MinerCertificateData data = new MinerCertificateData();
+            if (NBT == null) NBT = new CompoundTag();
+
+            data.loadNBTData(NBT);
+            data.setAccomplished(state);
+            data.saveNBTData(NBT);
+            stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
+
+            int[] newValues = new int[]{slotID, data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
+            var newBuf = PacketByteBufs.create();
+            newBuf.writeItem(stack);
+            newBuf.writeVarIntArray(newValues);
+            ServerPlayNetworking.send(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID, newBuf);
         }
     }
     @Override
-    public void addMinedBlocks(ItemStack stack, int amount, Player player) {
-        if (ClientPlayNetworking.canSend(PacketHandler.MINER_CERTIFICATE_ID)) {
+    public void addMinedBlocks(ItemStack stack, int slotID, int amount, Player player) {
+        if (player.getLevel().isClientSide() && ClientPlayNetworking.canSend(PacketHandler.MINER_CERTIFICATE_ID)) {
             var buf = PacketByteBufs.create();
             buf.writeItem(stack);
-            buf.writeInt(amount);
-            buf.writeBoolean(false);
+            buf.writeVarIntArray(new ItemUtils.IntArrayMaker(slotID, amount, 0).getArray());
             buf.writeUtf("addMinedBlocks");
             ClientPlayNetworking.send(PacketHandler.MINER_CERTIFICATE_ID, buf);
+        } else if (player instanceof ServerPlayer serverPlayer && ServerPlayNetworking.canSend(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID)) {
+            CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
+            MinerCertificateData data = new MinerCertificateData();
+            if (NBT == null) NBT = new CompoundTag();
+
+            data.loadNBTData(NBT);
+            data.addMinedBlocks(amount);
+            data.saveNBTData(NBT);
+            stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
+
+            int[] newValues = new int[]{slotID, data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
+            var newBuf = PacketByteBufs.create();
+            newBuf.writeItem(stack);
+            newBuf.writeVarIntArray(newValues);
+            ServerPlayNetworking.send(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID, newBuf);
         }
     }
 
@@ -129,11 +197,16 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
     @Override
     public void sendCertificateEffect(ItemStack stack, Player player) {
-        var buf = PacketByteBufs.create();
-        buf.writeItem(stack);
-        buf.writeInt(player.getId());
-        if (player instanceof ServerPlayer serverPlayer) {
-            ServerPlayNetworking.send(serverPlayer, PacketHandler.CERTIFICATE_EFFECT_ID, buf);
+        if (ClientPlayNetworking.canSend(PacketHandler.CERTIFICATE_EFFECT_ID)) {
+            var buf = PacketByteBufs.create();
+            buf.writeItem(stack);
+            buf.writeInt(player.getId());
+            ClientPlayNetworking.send(PacketHandler.CERTIFICATE_EFFECT_ID, buf);
         }
+    }
+
+    @Override
+    public TagKey<Block> oresTag() {
+        return TagsUtils.Blocks.COMMON_ORES;
     }
 }

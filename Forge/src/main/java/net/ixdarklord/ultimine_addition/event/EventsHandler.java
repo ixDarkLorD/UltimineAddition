@@ -2,13 +2,13 @@ package net.ixdarklord.ultimine_addition.event;
 
 import net.ixdarklord.ultimine_addition.command.SetCapabilityCommand;
 import net.ixdarklord.ultimine_addition.core.Constants;
-import net.ixdarklord.ultimine_addition.core.plugin.FTBUltimatePlugin;
 import net.ixdarklord.ultimine_addition.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.data.item.MinerCertificateProvider;
 import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineCapabilityProvider;
 import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineData;
-import net.ixdarklord.ultimine_addition.helper.Services;
 import net.ixdarklord.ultimine_addition.item.MinerCertificate;
+import net.ixdarklord.ultimine_addition.network.PacketHandler;
+import net.ixdarklord.ultimine_addition.network.packet.PlayerCapabilityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -32,14 +32,20 @@ public class EventsHandler {
 
     @SubscribeEvent
     public static void onBlockBreak(final BlockEvent.BreakEvent event) {
-        MinerCertificate.onBreakBlock(event.getPlayer());
+        if (!event.getLevel().isClientSide()) {
+            MinerCertificate.onBreakBlock(event.getPos(), event.getPlayer());
+        }
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(final TickEvent.PlayerTickEvent event) {
-        if (!event.player.getLevel().isClientSide) {
-            MinerCertificate.checkingBlockInFront((ServerPlayer) event.player);
-            FTBUltimatePlugin.canPlayerUltimine = Services.PLATFORM.isPlayerCapable(event.player);
+    public static void onPlayerJoinWorld(final EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide()) {
+            if (event.getEntity() instanceof ServerPlayer player) {
+                player.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(capability -> {
+                        PacketHandler.sendToPlayer(new PlayerCapabilityPacket.DataSyncS2C(capability.getCapability()), player);
+                    }
+                );
+            }
         }
     }
 

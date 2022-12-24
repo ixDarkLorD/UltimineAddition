@@ -1,11 +1,11 @@
 package net.ixdarklord.ultimine_addition.item;
 
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.helper.Services;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
@@ -20,11 +20,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,44 +30,66 @@ public class MinerCertificate extends Item {
     public MinerCertificate(Properties properties) {
         super(properties);
     }
-
-    private static Block LAST_BLOCK;
+    private static final int PARTICLE_COUNT = 60;
+    private static boolean PLAY_ANIMATION = false;
+    private static boolean CONSUME_ITEM = false;
+    private static boolean PLAY_SOUND = false;
 
     @Override
     public InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
-        if (isAccomplished(stack) && !level.isClientSide) {
-            if (Services.PLATFORM.isPlayerCapable(player)) {
-                player.displayClientMessage(Component.translatable("info.ultimine_addition.obtained_already", "\u2714").withStyle(ChatFormatting.YELLOW), true);
-                return InteractionResultHolder.fail(stack);
-            } else {
-                Services.PLATFORM.setPlayerCapability(player, true);
-                Services.PLATFORM.sendCertificateEffect(stack, player);
-                if (!player.isCreative()) stack.shrink(1);
-                player.displayClientMessage(Component.translatable("info.ultimine_addition.obtain").withStyle(ChatFormatting.GREEN), true);
-                return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+        if (!level.isClientSide) {
+            if (isAccomplished(stack)) {
+                if (Services.PLATFORM.isPlayerCapable(player)) {
+                    player.displayClientMessage(Component.translatable("info.ultimine_addition.obtained_already", "\u2714").withStyle(ChatFormatting.YELLOW), true);
+                    return InteractionResultHolder.fail(stack);
+                } else {
+                    Services.PLATFORM.setPlayerCapability(player, true);
+                    PLAY_ANIMATION = true;
+                    CONSUME_ITEM = true;
+                    player.displayClientMessage(Component.translatable("info.ultimine_addition.obtain").withStyle(ChatFormatting.GREEN), true);
+                    return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+                }
             }
         }
+
         return InteractionResultHolder.fail(stack);
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
-        if (ConfigHandler.COMMON.QUEST_MODE.get()) {
-            Services.PLATFORM.setRequiredAmount(stack, ConfigHandler.COMMON.REQUIRED_AMOUNT.get(), (Player) entity);
-        } else {
-            Services.PLATFORM.setMinedBlocks(stack, 1, (Player) entity);
-            Services.PLATFORM.setAccomplished(stack, true, (Player) entity);
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
+        if (!level.isClientSide()) {
+            if (ConfigHandler.COMMON.QUEST_MODE.get()) {
+                Services.PLATFORM.setRequiredAmount(stack, slotID, ConfigHandler.COMMON.REQUIRED_AMOUNT.get(), (Player) entity);
+            } else {
+                Services.PLATFORM.setMinedBlocks(stack, slotID, 1, (Player) entity);
+                Services.PLATFORM.setAccomplished(stack, slotID, true, (Player) entity);
+            }
+            if (isAccomplished(stack) && !Services.PLATFORM.isAccomplished(stack)) {
+                Services.PLATFORM.setAccomplished(stack, slotID, true, (Player) entity);
+                PLAY_SOUND = true;
+            }
+            if (CONSUME_ITEM && !PLAY_ANIMATION) {
+                if (!((Player) entity).isCreative()) stack.shrink(1);
+                CONSUME_ITEM = false;
+            }
         }
-        if (isAccomplished(stack) && !Services.PLATFORM.isAccomplished(stack)) {
-            Player player = (Player) entity;
-            player.playSound(SoundEvents.NOTE_BLOCK_BELL, 1.0F, 1.0F);
-            player.playSound(SoundEvents.BOOK_PAGE_TURN, 1.0F, 1.0F);
-            Services.PLATFORM.setAccomplished(stack, true, player);
+        if (level.isClientSide()) {
+            if (PLAY_ANIMATION) {
+                Services.PLATFORM.sendCertificateEffect(stack, (Player) entity);
+                PLAY_ANIMATION = false;
+            }
+            if (PLAY_SOUND) {
+                LocalPlayer player = (LocalPlayer) entity;
+                player.playSound(SoundEvents.NOTE_BLOCK_BELL, 1.0F, 1.0F);
+                player.playSound(SoundEvents.BOOK_PAGE_TURN, 1.0F, 1.0F);
+                PLAY_SOUND = false;
+            }
         }
 
-        super.inventoryTick(stack, level, entity, slotId, isSelected);
+        super.inventoryTick(stack, level, entity, slotID, isSelected);
     }
+
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
@@ -113,51 +131,34 @@ public class MinerCertificate extends Item {
         return MINE_COUNT >= (REQUIRED_AMOUNT != 0 ? REQUIRED_AMOUNT : 1);
     }
 
-    public static void onBreakBlock(Player player) {
-        if (LAST_BLOCK == Blocks.COBBLESTONE) {
-            Constants.LOGGER.warn("It was a Cobblestone");
-        }
-        if (Services.PLATFORM.getPlatformName().equals("Forge")) {
-            Services.PLATFORM.addMinedBlocks(new ItemStack(ItemsList.MINER_CERTIFICATE), 1, player);
-            return;
-        }
-        NonNullList<ItemStack> items = player.getInventory().items;
-        for (var item : items) {
-            if (item.sameItem(new ItemStack(ItemsList.MINER_CERTIFICATE))) {
-                Services.PLATFORM.addMinedBlocks(item, 1, player);
+    public static void onBreakBlock(BlockPos pos, Player player) {
+        BlockState blockState = player.getLevel().getBlockState(pos);
+        if (blockState.is(Services.PLATFORM.oresTag())) {
+
+            NonNullList<ItemStack> items = player.getInventory().items;
+            for (int i = 0; i < items.size(); i++) {
+                if (items.get(i).getItem() == ItemsList.MINER_CERTIFICATE) {
+                    Services.PLATFORM.addMinedBlocks(items.get(i), i, 1, player);
+                }
             }
         }
     }
-    public static void checkingBlockInFront(ServerPlayer player) {
-        if (player != null) {
-            HitResult block = player.pick(20.0D, 0.0F, false);
-            if (block.getType() == HitResult.Type.BLOCK) {
-                BlockPos blockPos = ((BlockHitResult)block).getBlockPos();
-                BlockState blockState = player.level.getBlockState(blockPos);
-                boolean isBlockChanged = false;
-                if (LAST_BLOCK == null) {
-                    LAST_BLOCK = blockState.getBlock();
-                    isBlockChanged = true;
-                }
-                if (LAST_BLOCK != blockState.getBlock()) {
-                    LAST_BLOCK = blockState.getBlock();
-                    isBlockChanged = true;
-                }
-                if (isBlockChanged && Services.PLATFORM.isDevelopmentEnvironment())
-                    Constants.LOGGER.warn("The block you looked at: {}", blockState.getBlock().getName().getString());
-            }
+    public static void playParticleAndSound(Entity entity) {
+        if (entity instanceof ServerPlayer player) {
+            player.getLevel().sendParticles(player, Services.PLATFORM.getCelebrateParticle(), true,
+                    player.getX(), player.getY()+0.15d, player.getZ(),
+                    PARTICLE_COUNT, 0.5d, 1.0d, 0.5d, 0.02d
+            );
+            player.getLevel().sendParticles(player, ParticleTypes.TOTEM_OF_UNDYING, true,
+                    player.getX(), player.getY()+0.15d, player.getZ(),
+                    PARTICLE_COUNT, 0.85d, 1.0d, 0.85d, 0.02d
+            );
+            player.getLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TOTEM_USE, player.getSoundSource(), 0.25F, 2.5F);
+            player.getLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_CHIME, player.getSoundSource(), 1.0F, 1.0F);
         }
     }
     public static void playAnimation(ItemStack stack, Entity entity) {
         var MC = Minecraft.getInstance();
-        MC.particleEngine.createTrackingEmitter(entity, Services.PLATFORM.getCelebrateParticle());
-        MC.particleEngine.createTrackingEmitter(entity, ParticleTypes.TOTEM_OF_UNDYING);
-        var level = MC.level;
-        if (level != null) {
-            level.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.TOTEM_USE, entity.getSoundSource(), 0.25F, 2.5F, false);
-            level.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.NOTE_BLOCK_CHIME, entity.getSoundSource(), 1.0F, 1.0F, false);
-        }
-
         if (entity == MC.player) {
             MC.gameRenderer.displayItemActivation(stack);
         }
