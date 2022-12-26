@@ -8,6 +8,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -63,13 +65,14 @@ public class PlayerCapabilityPacket {
 
         public void handle(Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context context = supplier.get();
-            context.enqueueWork(() -> {
+            context.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 LocalPlayer player = Minecraft.getInstance().player;
                 if (player != null) {
                     player.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(capability ->
                             capability.setCapability(state));
                 }
-            });
+            }));
+            context.setPacketHandled(true);
         }
     }
 }

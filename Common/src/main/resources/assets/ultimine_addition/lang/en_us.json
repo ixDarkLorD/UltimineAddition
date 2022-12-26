@@ -15,5 +15,7 @@
 
   "commands.ultimine_addition.failed": "There is an issue with the syntax occurred!",
   "commands.ultimine_addition.set_capability": "You have successfully set the ultimine capability to %s!",
+  "commands.ultimine_addition.set_capability.sender": "You have successfully changed the ultimine capability to %s for:",
+  "commands.ultimine_addition.set_capability.other": "Your ultimine capability has been set to %s! (by %s)",
   "commands.ultimine_addition.already_setted": "The capability is already set to %s."
 }

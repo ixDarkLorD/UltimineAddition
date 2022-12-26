@@ -3,7 +3,6 @@ package net.ixdarklord.ultimine_addition.event;
 import net.ixdarklord.ultimine_addition.command.SetCapabilityCommand;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.data.item.MinerCertificateData;
-import net.ixdarklord.ultimine_addition.data.item.MinerCertificateProvider;
 import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineCapabilityProvider;
 import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineData;
 import net.ixdarklord.ultimine_addition.item.MinerCertificate;
@@ -13,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -33,7 +32,8 @@ public class EventsHandler {
     @SubscribeEvent
     public static void onBlockBreak(final BlockEvent.BreakEvent event) {
         if (!event.getLevel().isClientSide()) {
-            MinerCertificate.onBreakBlock(event.getPos(), event.getPlayer());
+            BlockState blockState = event.getLevel().getBlockState(event.getPos());
+            MinerCertificate.onBreakBlock(blockState, event.getPlayer());
         }
     }
 
@@ -41,9 +41,8 @@ public class EventsHandler {
     public static void onPlayerJoinWorld(final EntityJoinLevelEvent event) {
         if (!event.getLevel().isClientSide()) {
             if (event.getEntity() instanceof ServerPlayer player) {
-                player.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(capability -> {
-                        PacketHandler.sendToPlayer(new PlayerCapabilityPacket.DataSyncS2C(capability.getCapability()), player);
-                    }
+                player.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(capability ->
+                        PacketHandler.sendToPlayer(new PlayerCapabilityPacket.DataSyncS2C(capability.getCapability()), player)
                 );
             }
         }
@@ -55,13 +54,6 @@ public class EventsHandler {
             if (!event.getObject().getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).isPresent()) {
                 event.addCapability(new ResourceLocation(Constants.MOD_ID, "properties"), new PlayerUltimineCapabilityProvider());
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onAttachCapabilitiesItem(AttachCapabilitiesEvent<ItemStack> event) {
-        if (event.getObject().getItem() instanceof MinerCertificate) {
-            event.addCapability(new ResourceLocation(Constants.MOD_ID, "properties"), new MinerCertificateProvider());
         }
     }
 

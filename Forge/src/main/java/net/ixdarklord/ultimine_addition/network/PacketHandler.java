@@ -1,12 +1,11 @@
 package net.ixdarklord.ultimine_addition.network;
 
 import net.ixdarklord.ultimine_addition.core.Constants;
-import net.ixdarklord.ultimine_addition.network.packet.CertificateEffectPacket;
+import net.ixdarklord.ultimine_addition.network.packet.CelebrateActionPacket;
 import net.ixdarklord.ultimine_addition.network.packet.MinerCertificatePacket;
 import net.ixdarklord.ultimine_addition.network.packet.PlayerCapabilityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
@@ -29,19 +28,19 @@ public class PacketHandler {
             .simpleChannel();
 
     public static void register() {
-        MOD_CHANNEL.messageBuilder(CertificateEffectPacket.class,
-                        IDHolder(id(), "certificate_effect", "C2S"),
+        MOD_CHANNEL.messageBuilder(CelebrateActionPacket.class,
+                        IDHolder(id(), "celebrate_action", "C2S"),
                         NetworkDirection.PLAY_TO_SERVER)
-                .decoder(CertificateEffectPacket::new)
-                .encoder(CertificateEffectPacket::encode)
-                .consumerMainThread(CertificateEffectPacket::handle)
+                .decoder(CelebrateActionPacket::new)
+                .encoder(CelebrateActionPacket::encode)
+                .consumerMainThread(CelebrateActionPacket::handle)
                 .add();
-        MOD_CHANNEL.messageBuilder(CertificateEffectPacket.Play2Client.class,
-                        IDHolder(id(), "certificate_effect.play_to_client", "S2C"),
+        MOD_CHANNEL.messageBuilder(CelebrateActionPacket.Play2Client.class,
+                        IDHolder(id(), "celebrate_action.play_to_client", "S2C"),
                         NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(CertificateEffectPacket.Play2Client::new)
-                .encoder(CertificateEffectPacket.Play2Client::encode)
-                .consumerMainThread(CertificateEffectPacket.Play2Client::handle)
+                .decoder(CelebrateActionPacket.Play2Client::new)
+                .encoder(CelebrateActionPacket.Play2Client::encode)
+                .consumerMainThread(CelebrateActionPacket.Play2Client::handle)
                 .add();
 
         MOD_CHANNEL.messageBuilder(PlayerCapabilityPacket.class,
@@ -59,13 +58,6 @@ public class PacketHandler {
                 .consumerMainThread(PlayerCapabilityPacket.DataSyncS2C::handle)
                 .add();
 
-        MOD_CHANNEL.messageBuilder(MinerCertificatePacket.class,
-                        IDHolder(id(), "miner_certificate", "C2S"),
-                        NetworkDirection.PLAY_TO_SERVER)
-                .decoder(MinerCertificatePacket::new)
-                .encoder(MinerCertificatePacket::encode)
-                .consumerMainThread(MinerCertificatePacket::handle)
-                .add();
         MOD_CHANNEL.messageBuilder(MinerCertificatePacket.DataSyncS2C.class,
                         IDHolder(id(), "miner_certificate.data_sync_s2c", "S2C"),
                         NetworkDirection.PLAY_TO_CLIENT)

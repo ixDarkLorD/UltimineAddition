@@ -19,19 +19,20 @@ public class MinerCertificateData {
         return isAccomplished;
     }
 
-    public void setRequiredAmount(int requiredAmount) {
-        this.requiredAmount = requiredAmount;
+    public void setRequiredAmount(int amount) {
+        this.requiredAmount = amount;
     }
 
-    public void addMinedBlocks(int add) {
-        this.minedBlocks = Math.min(minedBlocks + add, requiredAmount);
-    }
-    public void setMinedBlocks(int num) {
-        this.minedBlocks = num;
+    public void setMinedBlocks(int amount) {
+        this.minedBlocks = Math.min(amount, requiredAmount);
     }
 
-    public void setAccomplished(boolean accomplished) {
-        isAccomplished = accomplished;
+    public void setAccomplished(boolean state) {
+        isAccomplished = state;
+    }
+
+    public void addMinedBlocks(int amount) {
+        this.minedBlocks = Math.min(minedBlocks + amount, requiredAmount);
     }
 
     public void saveNBTData(CompoundTag NBT) {

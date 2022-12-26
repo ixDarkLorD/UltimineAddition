@@ -20,15 +20,14 @@ public class EventsHandler {
     }
 
     private static void onWorldJoin() {
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            PlayerUtils.CapabilityData.sync((IDataHandler) handler.player);
-        });
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+                PlayerUtils.CapabilityData.sync((IDataHandler) handler.player));
     }
 
     private static void onBlockBreak() {
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
             if (!world.isClientSide()) {
-                MinerCertificate.onBreakBlock(pos, player);
+                MinerCertificate.onBreakBlock(state, player);
             }
         });
     }

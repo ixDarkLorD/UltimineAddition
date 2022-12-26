@@ -27,7 +27,7 @@ public interface IPlatformHelper {
     void addMinedBlocks(ItemStack stack, int slotID, int amount, Player player);
 
     ParticleOptions getCelebrateParticle();
-    void sendCertificateEffect(ItemStack stack, Player player);
+    void sendCelebrateAction(String actionName, ItemStack stack, Player player);
 
     TagKey<Block> oresTag();
 }

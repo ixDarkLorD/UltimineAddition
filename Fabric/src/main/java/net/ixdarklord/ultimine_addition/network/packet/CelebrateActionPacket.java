@@ -14,23 +14,27 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 
-public class CertificateEffectPacket {
+public class CelebrateActionPacket {
     public static void receive(MinecraftServer server, ServerPlayer player,
                                ServerGamePacketListenerImpl ignored1,
                                FriendlyByteBuf buf, PacketSender ignored2) {
 
+        String actionName = buf.readUtf();
         ItemStack stack = buf.readItem();
         Minecraft MC = Minecraft.getInstance();
         assert MC.level != null;
         Entity entity = MC.level.getEntity(buf.readInt());
         assert entity != null;
-        server.execute(() -> {
-            MinerCertificate.playParticleAndSound(player);
 
+        server.execute(() -> {
+            if (actionName.equals("obtained")) {
+                MinerCertificate.playParticleAndSound(player);
+            }
             var buffer = PacketByteBufs.create();
+            buffer.writeUtf(actionName);
             buffer.writeItem(stack);
             buffer.writeInt(entity.getId());
-            ServerPlayNetworking.send(player, PacketHandler.CERTIFICATE_EFFECT_SYNC_ID, buffer);
+            ServerPlayNetworking.send(player, PacketHandler.CELEBRATE_ACTION_SYNC_ID, buffer);
         });
     }
 
@@ -38,11 +42,17 @@ public class CertificateEffectPacket {
         public static void receive(Minecraft client, ClientPacketListener ignored1,
                                    FriendlyByteBuf buf, PacketSender ignored2) {
 
+            String actionName = buf.readUtf();
             ItemStack stack = buf.readItem();
             assert client.level != null;
             Entity entity = client.level.getEntity(buf.readInt());
+            assert entity != null;
+
             client.execute(() -> {
-                MinerCertificate.playAnimation(stack, entity);
+                switch (actionName) {
+                    case "obtained" -> MinerCertificate.playAnimation(stack, entity);
+                    case "accomplished" -> MinerCertificate.playClientSound(entity);
+                }
             });
         }
     }
