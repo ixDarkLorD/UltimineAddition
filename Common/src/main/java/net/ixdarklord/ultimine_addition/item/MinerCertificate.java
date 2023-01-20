@@ -1,13 +1,15 @@
 package net.ixdarklord.ultimine_addition.item;
 
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.helper.Services;
+import net.ixdarklord.ultimine_addition.platform.Services;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -36,13 +38,13 @@ public class MinerCertificate extends Item {
         if (!level.isClientSide) {
             if (isAccomplished(stack)) {
                 if (Services.PLATFORM.isPlayerCapable(player)) {
-                    player.displayClientMessage(Component.translatable("info.ultimine_addition.obtained_already", "\u2714").withStyle(ChatFormatting.YELLOW), true);
+                    player.displayClientMessage(new TranslatableComponent("info.ultimine_addition.obtained_already", "\u2714").withStyle(ChatFormatting.YELLOW), true);
                     return InteractionResultHolder.fail(stack);
                 } else {
                     Services.PLATFORM.setPlayerCapability(player, true);
                     Services.PLATFORM.sendCelebrateAction("obtained", stack, player);
                     if (!player.isCreative()) stack.shrink(1);
-                    player.displayClientMessage(Component.translatable("info.ultimine_addition.obtain").withStyle(ChatFormatting.GREEN), true);
+                    player.displayClientMessage(new TranslatableComponent("info.ultimine_addition.obtain").withStyle(ChatFormatting.GREEN), true);
                     return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
                 }
             }
@@ -75,27 +77,27 @@ public class MinerCertificate extends Item {
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
         int MINE_COUNT = Services.PLATFORM.getMinedBlocks(stack);
         int REQUIRED_AMOUNT = Services.PLATFORM.getRequiredAmount(stack);
-        String SEALED = Component.translatable("tooltip.ultimine_addition.certificate.sealed").getString();
-        String OPENED = Component.translatable("tooltip.ultimine_addition.certificate.opened").getString();
-        String QUEST1 = Component.translatable("tooltip.ultimine_addition.quest1", MINE_COUNT).getString();
+        String SEALED = new TranslatableComponent("tooltip.ultimine_addition.certificate.sealed").getString();
+        String OPENED = new TranslatableComponent("tooltip.ultimine_addition.certificate.opened").getString();
+        String QUEST1 = new TranslatableComponent("tooltip.ultimine_addition.quest1", MINE_COUNT).getString();
 
         if (isAccomplished(stack)) {
-            tooltipComponents.add(Component.literal("\u00A78\u300E\u00A76" + OPENED + "\u00A78\u300F"));
+            tooltipComponents.add(new TextComponent("\u00A78\u300E\u00A76" + OPENED + "\u00A78\u300F"));
         } else {
-            tooltipComponents.add(Component.literal("\u00A78\u300E\u00A75" + SEALED + "\u00A78\u300F"));
+            tooltipComponents.add(new TextComponent("\u00A78\u300E\u00A75" + SEALED + "\u00A78\u300F"));
         }
         if (REQUIRED_AMOUNT == 0) {
-            tooltipComponents.add(Component.translatable("tooltip.ultimine_addition.info"));
+            tooltipComponents.add(new TranslatableComponent("tooltip.ultimine_addition.info"));
             return;
         }
 
         if (!Screen.hasShiftDown()) {
-            tooltipComponents.add(Component.translatable("tooltip.ultimine_addition.press_shift").withStyle(ChatFormatting.YELLOW));
+            tooltipComponents.add(new TranslatableComponent("tooltip.ultimine_addition.press_shift").withStyle(ChatFormatting.YELLOW));
             return;
         }
 
-        if (!isAccomplished(stack)) tooltipComponents.add(Component.translatable("tooltip.ultimine_addition.quest1.info", REQUIRED_AMOUNT).withStyle(ChatFormatting.DARK_AQUA));
-        tooltipComponents.add(Component.literal("\u00A77\u27A4 \u00A7b" + QUEST1));
+        if (!isAccomplished(stack)) tooltipComponents.add(new TranslatableComponent("tooltip.ultimine_addition.quest1.info", REQUIRED_AMOUNT).withStyle(ChatFormatting.DARK_AQUA));
+        tooltipComponents.add(new TextComponent("\u00A77\u27A4 \u00A7b" + QUEST1));
 
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
     }

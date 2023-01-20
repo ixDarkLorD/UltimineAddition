@@ -33,14 +33,14 @@ public class PacketHandler {
                         NetworkDirection.PLAY_TO_SERVER)
                 .decoder(CelebrateActionPacket::new)
                 .encoder(CelebrateActionPacket::encode)
-                .consumerMainThread(CelebrateActionPacket::handle)
+                .consumer(CelebrateActionPacket::handle)
                 .add();
         MOD_CHANNEL.messageBuilder(CelebrateActionPacket.Play2Client.class,
                         IDHolder(id(), "celebrate_action.play_to_client", "S2C"),
                         NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(CelebrateActionPacket.Play2Client::new)
                 .encoder(CelebrateActionPacket.Play2Client::encode)
-                .consumerMainThread(CelebrateActionPacket.Play2Client::handle)
+                .consumer(CelebrateActionPacket.Play2Client::handle)
                 .add();
 
         MOD_CHANNEL.messageBuilder(PlayerCapabilityPacket.class,
@@ -48,14 +48,14 @@ public class PacketHandler {
                         NetworkDirection.PLAY_TO_SERVER)
                 .decoder(PlayerCapabilityPacket::new)
                 .encoder(PlayerCapabilityPacket::encode)
-                .consumerMainThread(PlayerCapabilityPacket::handle)
+                .consumer(PlayerCapabilityPacket::handle)
                 .add();
         MOD_CHANNEL.messageBuilder(PlayerCapabilityPacket.DataSyncS2C.class,
                         IDHolder(id(), "player_capability.data_sync_s2c", "S2C"),
                         NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(PlayerCapabilityPacket.DataSyncS2C::new)
                 .encoder(PlayerCapabilityPacket.DataSyncS2C::encode)
-                .consumerMainThread(PlayerCapabilityPacket.DataSyncS2C::handle)
+                .consumer(PlayerCapabilityPacket.DataSyncS2C::handle)
                 .add();
 
         MOD_CHANNEL.messageBuilder(MinerCertificatePacket.DataSyncS2C.class,
@@ -63,7 +63,7 @@ public class PacketHandler {
                         NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(MinerCertificatePacket.DataSyncS2C::new)
                 .encoder(MinerCertificatePacket.DataSyncS2C::encode)
-                .consumerMainThread(MinerCertificatePacket.DataSyncS2C::handle)
+                .consumer(MinerCertificatePacket.DataSyncS2C::handle)
                 .add();
     }
 

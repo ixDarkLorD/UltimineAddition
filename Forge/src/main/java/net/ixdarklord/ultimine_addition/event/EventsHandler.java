@@ -2,7 +2,6 @@ package net.ixdarklord.ultimine_addition.event;
 
 import net.ixdarklord.ultimine_addition.command.SetCapabilityCommand;
 import net.ixdarklord.ultimine_addition.core.Constants;
-import net.ixdarklord.ultimine_addition.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineCapabilityProvider;
 import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineData;
 import net.ixdarklord.ultimine_addition.item.MinerCertificate;
@@ -16,9 +15,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -26,20 +25,20 @@ import net.minecraftforge.fml.common.Mod;
 public class EventsHandler {
     @SubscribeEvent
     public static void onCommandsRegister(RegisterCommandsEvent event) {
-        SetCapabilityCommand.register(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
+        SetCapabilityCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent
     public static void onBlockBreak(final BlockEvent.BreakEvent event) {
-        if (!event.getLevel().isClientSide()) {
-            BlockState blockState = event.getLevel().getBlockState(event.getPos());
+        if (!event.getWorld().isClientSide()) {
+            BlockState blockState = event.getWorld().getBlockState(event.getPos());
             MinerCertificate.onBreakBlock(blockState, event.getPlayer());
         }
     }
 
     @SubscribeEvent
-    public static void onPlayerJoinWorld(final EntityJoinLevelEvent event) {
-        if (!event.getLevel().isClientSide()) {
+    public static void onPlayerJoinWorld(final EntityJoinWorldEvent event) {
+        if (!event.getWorld().isClientSide()) {
             if (event.getEntity() instanceof ServerPlayer player) {
                 player.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(capability ->
                         PacketHandler.sendToPlayer(new PlayerCapabilityPacket.DataSyncS2C(capability.getCapability()), player)
@@ -69,6 +68,5 @@ public class EventsHandler {
     @SubscribeEvent
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
         event.register(PlayerUltimineData.class);
-        event.register(MinerCertificateData.class);
     }
 }

@@ -1,11 +1,11 @@
-package net.ixdarklord.ultimine_addition.helper;
+package net.ixdarklord.ultimine_addition.platform;
 
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.data.IDataHandler;
 import net.ixdarklord.ultimine_addition.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineCapabilityProvider;
-import net.ixdarklord.ultimine_addition.helper.services.IPlatformHelper;
+import net.ixdarklord.ultimine_addition.platform.services.IPlatformHelper;
 import net.ixdarklord.ultimine_addition.item.ItemRegistries;
 import net.ixdarklord.ultimine_addition.item.MinerCertificate;
 import net.ixdarklord.ultimine_addition.network.PacketHandler;
@@ -108,8 +108,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, newValues), serverPlayer);
+            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished()), serverPlayer);
         }
     }
     @Override
@@ -124,8 +123,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, newValues), serverPlayer);
+            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished()), serverPlayer);
         }
     }
     @Override
@@ -140,8 +138,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, newValues), serverPlayer);
+            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished()), serverPlayer);
         }
     }
     @Override
@@ -156,8 +153,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, newValues), serverPlayer);
+            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished()), serverPlayer);
         }
     }
 

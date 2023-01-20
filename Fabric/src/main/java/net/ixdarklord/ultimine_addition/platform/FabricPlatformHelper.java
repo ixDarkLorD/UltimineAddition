@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.helper;
+package net.ixdarklord.ultimine_addition.platform;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -8,11 +8,11 @@ import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.data.IDataHandler;
 import net.ixdarklord.ultimine_addition.data.item.MinerCertificateData;
-import net.ixdarklord.ultimine_addition.helper.services.IPlatformHelper;
 import net.ixdarklord.ultimine_addition.item.ItemsRegistries;
 import net.ixdarklord.ultimine_addition.item.MinerCertificate;
 import net.ixdarklord.ultimine_addition.network.PacketHandler;
 import net.ixdarklord.ultimine_addition.particle.ParticlesList;
+import net.ixdarklord.ultimine_addition.platform.services.IPlatformHelper;
 import net.ixdarklord.ultimine_addition.util.PlayerUtils;
 import net.ixdarklord.ultimine_addition.util.TagsUtils;
 import net.minecraft.core.particles.ParticleOptions;
@@ -102,11 +102,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            var newBuf = PacketByteBufs.create();
-            newBuf.writeItem(stack);
-            newBuf.writeVarIntArray(newValues);
-            ServerPlayNetworking.send(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID, newBuf);
+            updateMinerCertificateData(serverPlayer, stack, data);
         }
     }
     @Override
@@ -121,11 +117,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            var newBuf = PacketByteBufs.create();
-            newBuf.writeItem(stack);
-            newBuf.writeVarIntArray(newValues);
-            ServerPlayNetworking.send(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID, newBuf);
+            updateMinerCertificateData(serverPlayer, stack, data);
         }
     }
     @Override
@@ -140,11 +132,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            var newBuf = PacketByteBufs.create();
-            newBuf.writeItem(stack);
-            newBuf.writeVarIntArray(newValues);
-            ServerPlayNetworking.send(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID, newBuf);
+            updateMinerCertificateData(serverPlayer, stack, data);
         }
     }
     @Override
@@ -159,12 +147,17 @@ public class FabricPlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            var newBuf = PacketByteBufs.create();
-            newBuf.writeItem(stack);
-            newBuf.writeVarIntArray(newValues);
-            ServerPlayNetworking.send(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID, newBuf);
+            updateMinerCertificateData(serverPlayer, stack, data);
         }
+    }
+
+    private void updateMinerCertificateData(ServerPlayer player, ItemStack stack, MinerCertificateData data) {
+        var newBuf = PacketByteBufs.create();
+        newBuf.writeItem(stack);
+        newBuf.writeInt(data.getRequiredAmount());
+        newBuf.writeInt(data.getMinedBlocks());
+        newBuf.writeBoolean(data.isAccomplished());
+        ServerPlayNetworking.send(player, PacketHandler.MINER_CERTIFICATE_SYNC_ID, newBuf);
     }
 
     @Override

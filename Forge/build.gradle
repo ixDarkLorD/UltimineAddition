@@ -125,13 +125,11 @@ dependencies {
     implementation project(":Common")
 
     // Implementation
-    implementation fg.deobf("curse.maven:ftb-ultimine-forge-386134:3993549")
+    implementation fg.deobf("curse.maven:ftb-ultimine-forge-386134:4216216")
 
     // Compile Only
-    runtimeOnly fg.deobf("curse.maven:catalogue-459701:3873264")
-    runtimeOnly fg.deobf("curse.maven:configured-457570:4011355")
-    runtimeOnly fg.deobf("curse.maven:ftb-library-forge-404465:4123392")
-    runtimeOnly fg.deobf("curse.maven:architectury-api-419699:4147353")
+    runtimeOnly fg.deobf("curse.maven:ftb-library-forge-404465:4210935")
+    runtimeOnly fg.deobf("curse.maven:architectury-api-419699:4147231")
 }
 
 mixin {
@@ -229,13 +227,10 @@ publishing {
 import net.darkhax.curseforgegradle.TaskPublishCurseForge
 
 task curseforge(type: TaskPublishCurseForge) {
-    if (!file('../classified.properties').canRead()) { throw new FileNotFoundException("Could not read properties file") }
     if (!file('../CHANGELOG.md').canRead()) { throw new FileNotFoundException("Could not read changelog file") }
 
     disableVersionDetection()
-    def AdminProperties = new Properties()
-    AdminProperties.load(file('../classified.properties').newDataInputStream())
-    apiToken = AdminProperties['curseforge_api_token']
+    apiToken = curseforge_api_token
 
     def mainFile = upload(project_curse_id, jar)
     mainFile.changelog = file('../CHANGELOG.md')
@@ -250,12 +245,9 @@ task curseforge(type: TaskPublishCurseForge) {
 }
 
 modrinth {
-    if (!file('../classified.properties').canRead()) { throw new FileNotFoundException("Could not read properties file") }
     if (!file('../CHANGELOG.md').canRead()) { throw new FileNotFoundException("Could not read changelog file") }
 
-    def AdminProperties = new Properties()
-    AdminProperties.load(file('../classified.properties').newDataInputStream())
-    token = AdminProperties['modrinth_api_token']
+    token = modrinth_api_token
 
     projectId = project_modrinth_id
     versionNumber = project.version
@@ -287,7 +279,7 @@ task copyJarToDir(type: Copy) {
 task refreshUpdateJson {
     onlyIf { project.hasProperty('mod_resources') }
     doLast {
-        def updateFile = file(project.findProperty('mod_resources').concat(File.separator).concat('update').concat(File.separator).concat("${modid}").concat('.json'))
+        def updateFile = file(project.findProperty('mod_resources').concat(File.separator).concat('updates').concat(File.separator).concat("${modid}").concat('.json'))
         def updateJson
         if (updateFile.exists() && updateFile.canRead() && updateFile.length() != 0) {
             updateJson = new JsonSlurper().parseText(updateFile.text)

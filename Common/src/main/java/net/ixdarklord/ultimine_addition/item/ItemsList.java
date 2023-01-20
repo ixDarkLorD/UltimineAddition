@@ -1,11 +1,10 @@
 package net.ixdarklord.ultimine_addition.item;
 
-import net.ixdarklord.ultimine_addition.helper.Services;
+import net.ixdarklord.ultimine_addition.platform.Services;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 
 public class ItemsList {
-
     public static final Item MINER_CERTIFICATE = new MinerCertificate(new Item.Properties()
             .stacksTo(1)
             .rarity(Rarity.EPIC)

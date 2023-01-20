@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.helper.services;
+package net.ixdarklord.ultimine_addition.platform.services;
 
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.tags.TagKey;
@@ -11,6 +11,10 @@ public interface IPlatformHelper {
     String getPlatformName();
     boolean isModLoaded(String modId);
     boolean isDevelopmentEnvironment();
+    default String getEnvironmentName() {
+
+        return isDevelopmentEnvironment() ? "development" : "production";
+    }
     void registerConfig();
 
     CreativeModeTab getCreativeModeTab();

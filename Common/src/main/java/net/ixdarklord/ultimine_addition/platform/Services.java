@@ -1,7 +1,7 @@
-package net.ixdarklord.ultimine_addition.helper;
+package net.ixdarklord.ultimine_addition.platform;
 
 import net.ixdarklord.ultimine_addition.core.Constants;
-import net.ixdarklord.ultimine_addition.helper.services.IPlatformHelper;
+import net.ixdarklord.ultimine_addition.platform.services.IPlatformHelper;
 
 import java.util.ServiceLoader;
 

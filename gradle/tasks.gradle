@@ -1,3 +1,26 @@
+task deleteRunAll(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':Common:deleteRunFile',
+            ':Fabric:deleteRunFile',
+            ':Forge:deleteRunFile'
+    ]
+}
+task deleteRunFabric(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':Common:deleteRunFile',
+            ':Fabric:deleteRunFile'
+    ]
+}
+task deleteRunForge(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':Common:deleteRunFile',
+            ':Forge:deleteRunFile'
+    ]
+}
+
 task forgeClean(type: GradleBuild) {
     group = '_main'
     tasks = [

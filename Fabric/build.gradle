@@ -72,14 +72,13 @@ dependencies {
     // Config Dependencies
     implementation 'com.electronwill.night-config:core:3.6.6'
     implementation 'com.electronwill.night-config:toml:3.6.6'
-    modImplementation "curse.maven:forge-config-api-port-fabric-547434:4143545" //ForgeConfigAPIPort-v4.2.9
+    modImplementation "curse.maven:forge-config-api-port-fabric-547434:3943250" //ForgeConfigAPIPort-v4.2.9
 
     // Mods
-    modImplementation "curse.maven:ftb-ultimine-fabric-448231:3993548"
-    modRuntimeOnly "com.terraformersmc:modmenu:4.1.2"
-    modRuntimeOnly "curse.maven:catalogue-fabric-667377:4171029"
-    modRuntimeOnly "curse.maven:ftb-library-fabric-438495:4210869"
-    modRuntimeOnly "curse.maven:architectury-api-419699:4147351"
+    modImplementation "curse.maven:ftb-ultimine-fabric-448231:4216215"
+    modRuntimeOnly "com.terraformersmc:modmenu:3.2.5"
+    modRuntimeOnly "curse.maven:ftb-library-fabric-438495:4210934"
+    modRuntimeOnly "curse.maven:architectury-api-419699:4147228"
 }
 
 processResources {
@@ -170,13 +169,10 @@ publishing {
 import net.darkhax.curseforgegradle.TaskPublishCurseForge
 
 task curseforge(type: TaskPublishCurseForge) {
-    if (!file('../classified.properties').canRead()) { throw new FileNotFoundException("Could not read properties file") }
     if (!file('../CHANGELOG.md').canRead()) { throw new FileNotFoundException("Could not read changelog file") }
 
     disableVersionDetection()
-    def AdminProperties = new Properties()
-    AdminProperties.load(file('../classified.properties').newDataInputStream())
-    apiToken = AdminProperties['curseforge_api_token']
+    apiToken = curseforge_api_token
 
     def mainFile = upload(project_curse_id, remapJar)
     mainFile.changelog = file('../CHANGELOG.md')
@@ -192,12 +188,9 @@ task curseforge(type: TaskPublishCurseForge) {
 }
 
 modrinth {
-    if (!file('../classified.properties').canRead()) { throw new FileNotFoundException("Could not read properties file") }
     if (!file('../CHANGELOG.md').canRead()) { throw new FileNotFoundException("Could not read changelog file") }
 
-    def AdminProperties = new Properties()
-    AdminProperties.load(file('../classified.properties').newDataInputStream())
-    token = AdminProperties['modrinth_api_token']
+    token = modrinth_api_token
 
     projectId = project_modrinth_id
     versionNumber = project.version
