@@ -11,7 +11,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemRegistries {
-    public static final CreativeModeTab ULTIMINE_ADDITION_TAB = new CreativeModeTab("ultimine_addition.tab") {
+    public static final CreativeModeTab ULTIMINE_ADDITION_TAB = new CreativeModeTab(Constants.MOD_ID + ".tab") {
         @Override
         public @NotNull ItemStack makeIcon() {
             return new ItemStack(MINER_CERTIFICATE.get());

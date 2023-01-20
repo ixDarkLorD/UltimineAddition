@@ -8,7 +8,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-public class ParticlesList {
+public class ParticlesRegistries {
     public static final DeferredRegister<ParticleType<?>> PARTICLE_TYPES = DeferredRegister
             .create(ForgeRegistries.PARTICLE_TYPES, Constants.MOD_ID);
 

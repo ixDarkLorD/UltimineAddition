@@ -19,6 +19,7 @@ public class PlayerUltimineData {
         NBT.putBoolean("can_ultimine", isCapable);
     }
     public void loadNBTData(CompoundTag NBT) {
+        System.out.println(NBT.getAsString());
         isCapable = NBT.getBoolean("can_ultimine");
     }
 }

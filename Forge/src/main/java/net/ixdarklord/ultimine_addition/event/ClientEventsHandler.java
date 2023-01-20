@@ -4,7 +4,7 @@ import net.ixdarklord.ultimine_addition.client.ItemsRenderer;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.plugin.FTBUltimatePlugin;
 import net.ixdarklord.ultimine_addition.particle.CelebrateParticle;
-import net.ixdarklord.ultimine_addition.particle.ParticlesList;
+import net.ixdarklord.ultimine_addition.particle.ParticlesRegistries;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
@@ -31,7 +31,7 @@ public class ClientEventsHandler {
 
         @SubscribeEvent
         public static void registerParticleFactories(final RegisterParticleProvidersEvent event) {
-            event.register(ParticlesList.CELEBRATE_PARTICLE.get(), CelebrateParticle.Provider::new);
+            event.register(ParticlesRegistries.CELEBRATE_PARTICLE.get(), CelebrateParticle.Provider::new);
         }
     }
 }

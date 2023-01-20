@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.config;
 
-import net.ixdarklord.ultimine_addition.helper.Services;
+import net.ixdarklord.ultimine_addition.platform.Services;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 

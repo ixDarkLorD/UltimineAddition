@@ -100,12 +100,17 @@ println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getPro
 import java.util.regex.Pattern
 
 task incrementBuildNumber {
-    onlyIf { project.hasProperty('unique_build_number') }
+    onlyIf { project.hasProperty('copy_build_jar') && project.hasProperty('unique_build_number') }
     doLast {
         def propertiesName = 'gradle.properties'
         // build number is stored in global gradle.properties
         def propertiesFile = new File(project.gradle.gradleUserHomeDir, propertiesName)
         if (!propertiesFile.canRead()) { throw new FileNotFoundException("Could not read file ".concat(propertiesName)) }
+        def properties = new Properties()
+        properties.load(file(propertiesFile).newDataInputStream())
+        if (Boolean.parseBoolean(properties['separate_unique_build_numbers'])) {
+            propertiesFile = new File(getRootDir(), propertiesName)
+        }
         def buildNumberMatcher = Pattern.compile("unique_build_number=(\\d+)").matcher(propertiesFile.getText())
         buildNumberMatcher.find()
         def versionCode = Integer.parseInt(buildNumberMatcher.group(1))

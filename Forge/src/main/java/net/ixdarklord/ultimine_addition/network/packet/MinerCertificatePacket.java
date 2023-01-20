@@ -2,7 +2,6 @@ package net.ixdarklord.ultimine_addition.network.packet;
 
 import net.ixdarklord.ultimine_addition.data.IDataHandler;
 import net.ixdarklord.ultimine_addition.data.item.MinerCertificateData;
-import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
@@ -16,21 +15,28 @@ public class MinerCertificatePacket {
 
     public static class DataSyncS2C {
         private final ItemStack stack;
-        private final int[] intList;
-
-        public DataSyncS2C(ItemStack stack, int[] intList) {
+        private final int requiredAmount;
+        private final int minedBlocks;
+        private final boolean isAccomplished;
+        public DataSyncS2C(ItemStack stack, int requiredAmount, int minedBlocks, boolean isAccomplished) {
             this.stack = stack;
-            this.intList = intList;
+            this.requiredAmount = requiredAmount;
+            this.minedBlocks = minedBlocks;
+            this.isAccomplished = isAccomplished;
         }
 
         public DataSyncS2C(FriendlyByteBuf buf) {
             this.stack = buf.readItem();
-            this.intList = buf.readVarIntArray();
+            this.requiredAmount = buf.readInt();
+            this.minedBlocks = buf.readInt();
+            this.isAccomplished = buf.readBoolean();
         }
 
         public void encode(FriendlyByteBuf buf) {
             buf.writeItem(stack);
-            buf.writeVarIntArray(intList);
+            buf.writeInt(requiredAmount);
+            buf.writeInt(minedBlocks);
+            buf.writeBoolean(isAccomplished);
         }
 
         public void handle(Supplier<NetworkEvent.Context> supplier) {
@@ -41,9 +47,9 @@ public class MinerCertificatePacket {
                 if (NBT == null) NBT = new CompoundTag();
 
                 data.loadNBTData(NBT);
-                data.setRequiredAmount(intList[0]);
-                data.setMinedBlocks(intList[1]);
-                data.setAccomplished(ItemUtils.IntArrayMaker.getBoolean(intList[2]));
+                data.setRequiredAmount(requiredAmount);
+                data.setMinedBlocks(minedBlocks);
+                data.setAccomplished(isAccomplished);
                 data.saveNBTData(NBT);
                 stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
             }));

@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.core.plugin;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
 import dev.ftb.mods.ftbultimine.integration.FTBUltiminePlugin;
 import net.ixdarklord.ultimine_addition.core.Constants;
-import net.ixdarklord.ultimine_addition.helper.Services;
+import net.ixdarklord.ultimine_addition.platform.Services;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;

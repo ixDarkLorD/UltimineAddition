@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.item;
 
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.helper.Services;
+import net.ixdarklord.ultimine_addition.platform.Services;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;

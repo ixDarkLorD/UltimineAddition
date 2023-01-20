@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.core;
 
 import net.ixdarklord.ultimine_addition.item.ItemRegistries;
 import net.ixdarklord.ultimine_addition.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.particle.ParticlesList;
+import net.ixdarklord.ultimine_addition.particle.ParticlesRegistries;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -15,7 +15,7 @@ public class ForgeSetup {
 
         new CommonSetup();
         ItemRegistries.register(modEventBus);
-        ParticlesList.register(modEventBus);
+        ParticlesRegistries.register(modEventBus);
         PacketHandler.register();
 
         MinecraftForge.EVENT_BUS.register(this);

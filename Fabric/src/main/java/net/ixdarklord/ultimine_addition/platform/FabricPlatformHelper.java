@@ -1,73 +1,67 @@
-package net.ixdarklord.ultimine_addition.helper;
+package net.ixdarklord.ultimine_addition.platform;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.data.IDataHandler;
 import net.ixdarklord.ultimine_addition.data.item.MinerCertificateData;
-import net.ixdarklord.ultimine_addition.data.player.PlayerUltimineCapabilityProvider;
-import net.ixdarklord.ultimine_addition.helper.services.IPlatformHelper;
-import net.ixdarklord.ultimine_addition.item.ItemRegistries;
+import net.ixdarklord.ultimine_addition.platform.services.IPlatformHelper;
+import net.ixdarklord.ultimine_addition.item.ItemsRegistries;
 import net.ixdarklord.ultimine_addition.item.MinerCertificate;
 import net.ixdarklord.ultimine_addition.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.network.packet.CelebrateActionPacket;
-import net.ixdarklord.ultimine_addition.network.packet.MinerCertificatePacket;
-import net.ixdarklord.ultimine_addition.network.packet.PlayerCapabilityPacket;
 import net.ixdarklord.ultimine_addition.particle.ParticlesList;
+import net.ixdarklord.ultimine_addition.util.PlayerUtils;
 import net.ixdarklord.ultimine_addition.util.TagsUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.api.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.loading.FMLLoader;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-public class ForgePlatformHelper implements IPlatformHelper {
+public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public String getPlatformName() {
-        return "Forge";
+        return "Fabric";
     }
     @Override
     public boolean isModLoaded(String modId) {
-        return ModList.get() != null && ModList.get().isLoaded(modId);
+        return FabricLoader.getInstance().isModLoaded(modId);
     }
     @Override
     public boolean isDevelopmentEnvironment() {
-        return !FMLLoader.isProduction();
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
     @Override
     public void registerConfig() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.COMMON.SPEC, Constants.MOD_ID + "/common-config.toml");
+        ModLoadingContext.registerConfig(Constants.MOD_ID, ModConfig.Type.CLIENT, ConfigHandler.COMMON.SPEC, Constants.MOD_ID + "/common-config.toml");
     }
 
     @Override
     public CreativeModeTab getCreativeModeTab() {
-        return ItemRegistries.ULTIMINE_ADDITION_TAB;
+        return ItemsRegistries.ULTIMINE_ADDITION_TAB;
     }
 
     @Override
     public boolean isPlayerCapable(Player player) {
-        AtomicBoolean result = new AtomicBoolean(false);
-        player.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(capability ->
-                result.set(capability.getCapability()));
-        return result.get();
+        return ((IDataHandler) player).getPlayerUltimineData().getCapability();
     }
     @Override
     public void setPlayerCapability(Player player, boolean state) {
-        if (player instanceof ServerPlayer serverPlayer) {
-            serverPlayer.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(capability ->
-                    capability.setCapability(state));
-            PacketHandler.sendToPlayer(new PlayerCapabilityPacket.DataSyncS2C(state), serverPlayer);
-        } else if (Minecraft.getInstance().getConnection() != null) {
-            PacketHandler.sendToServer(new PlayerCapabilityPacket(player, state));
+        if (player.getLevel().isClientSide() && ClientPlayNetworking.canSend(PacketHandler.PLAYER_CAPABILITY_ID)) {
+            FriendlyByteBuf buf = PacketByteBufs.create();
+            buf.writeBoolean(state);
+            ClientPlayNetworking.send(PacketHandler.PLAYER_CAPABILITY_ID, buf);
+        } else {
+            PlayerUtils.CapabilityData.set((IDataHandler) player, state);
         }
     }
 
@@ -98,7 +92,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public void setRequiredAmount(ItemStack stack, int slotID, int amount, Player player) {
-        if (player instanceof ServerPlayer serverPlayer) {
+        if (player instanceof ServerPlayer serverPlayer && ServerPlayNetworking.canSend(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID)) {
             CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
             MinerCertificateData data = new MinerCertificateData();
             if (NBT == null) NBT = new CompoundTag();
@@ -108,13 +102,12 @@ public class ForgePlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, newValues), serverPlayer);
+            updateMinerCertificateData(serverPlayer, stack, data);
         }
     }
     @Override
     public void setMinedBlocks(ItemStack stack, int slotID, int amount, Player player) {
-        if (player instanceof ServerPlayer serverPlayer) {
+        if (player instanceof ServerPlayer serverPlayer && ServerPlayNetworking.canSend(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID)) {
             CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
             MinerCertificateData data = new MinerCertificateData();
             if (NBT == null) NBT = new CompoundTag();
@@ -124,13 +117,12 @@ public class ForgePlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, newValues), serverPlayer);
+            updateMinerCertificateData(serverPlayer, stack, data);
         }
     }
     @Override
     public void setAccomplished(ItemStack stack, int slotID, boolean state, Player player) {
-        if (player instanceof ServerPlayer serverPlayer) {
+        if (player instanceof ServerPlayer serverPlayer && ServerPlayNetworking.canSend(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID)) {
             CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
             MinerCertificateData data = new MinerCertificateData();
             if (NBT == null) NBT = new CompoundTag();
@@ -140,13 +132,12 @@ public class ForgePlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, newValues), serverPlayer);
+            updateMinerCertificateData(serverPlayer, stack, data);
         }
     }
     @Override
     public void addMinedBlocks(ItemStack stack, int slotID, int amount, Player player) {
-        if (player instanceof ServerPlayer serverPlayer) {
+        if (player instanceof ServerPlayer serverPlayer && ServerPlayNetworking.canSend(serverPlayer, PacketHandler.MINER_CERTIFICATE_SYNC_ID)) {
             CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(IDataHandler.NBT_PATH);
             MinerCertificateData data = new MinerCertificateData();
             if (NBT == null) NBT = new CompoundTag();
@@ -156,29 +147,45 @@ public class ForgePlatformHelper implements IPlatformHelper {
             data.saveNBTData(NBT);
             stack.getOrCreateTag().put(IDataHandler.NBT_PATH, NBT);
 
-            int[] newValues = new int[]{data.getRequiredAmount(), data.getMinedBlocks(), data.isAccomplished() ? 1 : 0};
-            PacketHandler.sendToPlayer(new MinerCertificatePacket.DataSyncS2C(stack, newValues), serverPlayer);
+            updateMinerCertificateData(serverPlayer, stack, data);
         }
+    }
+
+    private void updateMinerCertificateData(ServerPlayer player, ItemStack stack, MinerCertificateData data) {
+        var newBuf = PacketByteBufs.create();
+        newBuf.writeItem(stack);
+        newBuf.writeInt(data.getRequiredAmount());
+        newBuf.writeInt(data.getMinedBlocks());
+        newBuf.writeBoolean(data.isAccomplished());
+        ServerPlayNetworking.send(player, PacketHandler.MINER_CERTIFICATE_SYNC_ID, newBuf);
     }
 
     @Override
     public ParticleOptions getCelebrateParticle() {
-        return ParticlesList.CELEBRATE_PARTICLE.get();
+        return ParticlesList.CELEBRATE_PARTICLE;
     }
     @Override
     public void sendCelebrateAction(String actionName, ItemStack stack, Player player) {
-        if (player.getLevel().isClientSide() && Minecraft.getInstance().getConnection() != null) {
-            PacketHandler.sendToServer(new CelebrateActionPacket(actionName, stack, player));
-        } else if (player instanceof ServerPlayer serverPlayer){
+        if (player.getLevel().isClientSide() && ClientPlayNetworking.canSend(PacketHandler.CELEBRATE_ACTION_ID)) {
+            var buf = PacketByteBufs.create();
+            buf.writeUtf(actionName);
+            buf.writeItem(stack);
+            buf.writeInt(player.getId());
+            ClientPlayNetworking.send(PacketHandler.CELEBRATE_ACTION_ID, buf);
+        } else if (player instanceof ServerPlayer serverPlayer && ServerPlayNetworking.canSend(serverPlayer, PacketHandler.CELEBRATE_ACTION_SYNC_ID)) {
             if (actionName.equals("obtained")) {
                 MinerCertificate.playParticleAndSound(serverPlayer);
             }
-            PacketHandler.sendToPlayer(new CelebrateActionPacket.Play2Client(actionName, stack, serverPlayer), serverPlayer);
+            var buffer = PacketByteBufs.create();
+            buffer.writeUtf(actionName);
+            buffer.writeItem(stack);
+            buffer.writeInt(player.getId());
+            ServerPlayNetworking.send(serverPlayer, PacketHandler.CELEBRATE_ACTION_SYNC_ID, buffer);
         }
     }
 
     @Override
     public TagKey<Block> oresTag() {
-        return TagsUtils.Blocks.FORGE_ORES;
+        return TagsUtils.Blocks.COMMON_ORES;
     }
 }
