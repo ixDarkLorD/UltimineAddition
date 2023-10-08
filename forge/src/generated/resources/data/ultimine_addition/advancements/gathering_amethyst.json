@@ -1,0 +1,42 @@
+{
+  "parent": "ultimine_addition:root",
+  "criteria": {
+    "has_amethyst": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:amethyst_shard"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.ultimine_addition.obtain",
+      "with": [
+        {
+          "translate": "item.minecraft.amethyst_shard"
+        }
+      ]
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.ultimine_addition.amethyst_gathering"
+    }
+  },
+  "requirements": [
+    [
+      "has_amethyst"
+    ]
+  ]
+}

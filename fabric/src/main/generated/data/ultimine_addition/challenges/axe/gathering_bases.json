@@ -1,0 +1,18 @@
+{
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  },
+  "for_card_tier": 1,
+  "for_card_type": "axe",
+  "required_amount": {
+    "max": 8,
+    "min": 4
+  },
+  "targeted_blocks": [
+    "minecraft:crafting_table",
+    "minecraft:chest",
+    "minecraft:barrel",
+    "#minecraft:beds"
+  ]
+}

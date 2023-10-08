@@ -1,0 +1,18 @@
+{
+  "type": "ultimine_addition:item_storage_data",
+  "group": "ultimine_addition",
+  "ingredients": [
+    {
+      "amount": 50,
+      "tag": "ultimine_addition:more_valuable_pigment"
+    },
+    {
+      "amount": 10,
+      "tag": "ultimine_addition:less_valuable_pigment"
+    }
+  ],
+  "result": {
+    "item": "ultimine_addition:pen",
+    "storage_name": "ink_chamber"
+  }
+}

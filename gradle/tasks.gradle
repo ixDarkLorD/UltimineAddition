@@ -1,0 +1,140 @@
+task forgeClean(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':common:clean',
+            ':forge:clean'
+    ]
+}
+
+task fabricClean(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':common:clean',
+            ':fabric:clean'
+    ]
+}
+
+task allClean(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':common:clean',
+            ':forge:clean',
+            ':fabric:clean'
+    ]
+}
+
+task forgeBuild(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':common:clean',
+            ':forge:clean',
+            ':forge:build'
+    ]
+}
+
+task fabricBuild(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':common:clean',
+            ':fabric:clean',
+            ':fabric:build'
+    ]
+}
+
+task allBuild(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':common:clean',
+            ':forge:clean',
+            ':fabric:clean',
+            ':common:build',
+            ':forge:build',
+            ':fabric:build'
+    ]
+}
+
+task forgeUploadCurseforge(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':forge:curseforge'
+    ]
+}
+task forgeUploadModrinth(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':forge:modrinth'
+    ]
+}
+
+task fabricUploadCurseforge(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':fabric:curseforge'
+    ]
+}
+task fabricUploadModrinth(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':fabric:modrinth'
+    ]
+}
+
+task allUploadCurseforge(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':forge:curseforge',
+            ':fabric:curseforge'
+    ]
+}
+task allUploadModrinth(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':forge:modrinth',
+            ':fabric:modrinth'
+    ]
+}
+task allUpload(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':forge:curseforge',
+            ':forge:modrinth',
+            ':fabric:curseforge',
+            ':fabric:modrinth'
+    ]
+}
+
+task genRuns(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':fabric:ideaSyncTask',
+            ':forge:ideaSyncTask'
+    ]
+}
+
+task forgeClient(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':forge:runClient'
+    ]
+}
+
+task fabricClient(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':fabric:runClient'
+    ]
+}
+
+task forgeServer(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':forge:runServer'
+    ]
+}
+
+task fabricServer(type: GradleBuild) {
+    group = '_main'
+    tasks = [
+            ':fabric:runServer'
+    ]
+}

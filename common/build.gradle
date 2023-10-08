@@ -1,0 +1,71 @@
+architectury {
+    common(enabled_platforms.split(","))
+}
+
+loom {
+    if (file("src/main/resources/${modid}.accesswidener").exists()) {
+        accessWidenerPath = file("src/main/resources/${modid}.accesswidener")
+        logger.info('Access Widener are enabled for this project.')
+    }
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${fabric_version}"
+    modApi "dev.architectury:architectury:${architectury_version}"
+    modCompileOnly "net.ixdarklord.coolcat_lib:common:v1.0.0-release"
+
+    implementation 'com.electronwill.night-config:core:3.6.6'
+    implementation 'com.electronwill.night-config:toml:3.6.6'
+    modImplementation "curse.maven:forge-config-api-port-fabric-547434:4401535" //ForgeConfigAPIPort-v4.2.11
+
+    modCompileOnly "curse.maven:ftb-ultimine-forge-386134:4598468"
+    modCompileOnly "curse.maven:ftb-library-forge-404465:4661834"
+    modCompileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+}
+
+processResources {
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+
+    inputs.property "modId", 			        "${modid}"
+    inputs.property "modDescription", 			"${mod_description}"
+    inputs.property "packFormat", 				"${pack_format}"
+    inputs.property "mixinPackagePath", 		"${project.group}.common.mixin"
+
+    filesMatching ('architectury.common.json') {
+        expand (
+                'modId':       "${modid}"
+        )
+    }
+
+    filesMatching ("${modid}.common.mixins.json") {
+        expand (
+                'modId':                	"${modid}",
+                'mixinPackagePath':         "${project.group}.common.mixin"
+        )
+    }
+
+    filesMatching ('pack.mcmeta') {
+        expand (
+                'modDescription':       "${mod_description}",
+                "packFormat":           "${pack_format}"
+        )
+    }
+}
+
+publishing {
+    publications {
+        mavenCommon(MavenPublication) {
+            groupId rootProject.group
+            artifactId rootProject.archivesBaseName
+            version rootProject.version
+            from components.java
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        maven {
+            url "file://" + System.getenv("local_maven")
+        }
+    }
+}

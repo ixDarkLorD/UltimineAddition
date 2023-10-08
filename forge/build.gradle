@@ -1,0 +1,214 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+loom {
+    if (project(":common").file("src/main/resources/${modid}.accesswidener").exists()) {
+        accessWidenerPath = project(":common").loom.accessWidenerPath
+        project.logger.info('Access Wideners are enabled for this project.')
+    }
+
+    forge {
+        useForgeLoggerConfig = true
+
+        if (project(":common").file("src/main/resources/${modid}.accesswidener").exists()) {
+            convertAccessWideners = true
+            extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+        }
+
+        if (project(":common").file("src/main/resources/${modid}.common.mixins.json").exists()) {
+            mixinConfig "${modid}.common.mixins.json"
+        }
+        if (project.file("src/main/resources/${modid}.mixins.json").exists()) {
+            mixinConfig "${modid}.mixins.json"
+        }
+
+        runs {
+            client {
+                client()
+                setConfigName("Forge Client")
+                ideConfigGenerated(true)
+                runDir("run")
+                vmArg "-Xms${runtime_min_ram}"
+                vmArg "-Xmx${runtime_max_ram}"
+                property 'mixin.debug.export', mixin_debug
+                property 'fml.earlyprogresswindow', 'false'
+                property 'forge.logging.markers', 'REGISTRIES'
+                property 'forge.logging.console.level', 'debug'
+                property 'terminal.ansi', 'true'
+            }
+            server {
+                server()
+                setConfigName("Forge Server")
+                ideConfigGenerated(true)
+                runDir("run")
+                vmArg "-Xms${runtime_min_ram}"
+                vmArg "-Xmx${runtime_max_ram}"
+                property 'mixin.debug.export', mixin_debug
+                property 'terminal.ansi', 'true'
+            }
+            data {
+                data()
+                setConfigName("Forge Data")
+                ideConfigGenerated(true)
+                runDir("run")
+                vmArg "-Xms${runtime_min_ram}"
+                vmArg "-Xmx${runtime_max_ram}"
+                property 'mixin.debug.export', mixin_debug
+                property 'terminal.ansi', 'true'
+                programArgs "--all", "--mod", "${modid}"
+                programArgs "--output", file("src/generated/resources").absolutePath
+                programArgs "--existing", project(":common").file("src/main/resources").absolutePath
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+}
+
+dependencies {
+    forge "net.minecraftforge:forge:${mc_version}-${forge_version}"
+    modApi "dev.architectury:architectury-forge:${architectury_version}"
+
+    modImplementation "net.ixdarklord.coolcat_lib:forge:v1.0.0-release"
+    modImplementation "curse.maven:ftb-ultimine-forge-386134:4598468"
+    modImplementation "curse.maven:ftb-library-forge-404465:4661834"
+
+    modCompileOnly "mezz.jei:jei-${mc_version}-forge-api:${jei_version}"
+//    modRuntimeOnly "mezz.jei:jei-${mc_version}-forge:${jei_version}"
+    modRuntimeOnly "curse.maven:jei-238222:4712866"
+
+    modRuntimeOnly "curse.maven:catalogue-459701:3873264"
+    modRuntimeOnly "curse.maven:configured-457570:4462837"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+}
+
+processResources {
+    from project(":common").file('src/main/resources/pack.mcmeta')
+    from project(":common").file('src/main/resources/mod_logo.png')
+
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+    inputs.property "modId",                    "${modid}"
+    inputs.property "modName",                  "${mod_name}"
+    inputs.property "modVersion",               "${mod_version}"
+    inputs.property "modDescription",           "${mod_description}"
+    inputs.property "modGroup",                 project.group
+    inputs.property "modPageUrl",               "${mod_page_url}"
+    inputs.property "modUpdateUrl",             "${mod_update_url}"
+    inputs.property "modIssueUrl",              "${mod_issue_url}"
+    inputs.property "modAuthor",                "${mod_author}"
+    inputs.property "modLicense",               "${mod_license}"
+    inputs.property "minFMLVersion",            "${min_forge_version}".replaceAll("\\..*", "")
+    inputs.property "minForgeVersion",          "${min_forge_version}"
+    inputs.property "minMinecraftVersion",      "${min_mc_version}"
+    inputs.property "nextMinecraftVersion",     rootProject.getNextVersion("${min_mc_version}")
+    inputs.property "packFormat",               "${pack_format}"
+    inputs.property "mixinPackagePath", 		"${project.group}.forge.mixin"
+    inputs.property "modForgeDisplayTest",      "${mod_forge_display_test}"
+    inputs.property "archVersion",              "${architectury_version}"
+    inputs.property "ccLibVersion",             "${coolcatlib_version}"
+    inputs.property "ftbUltimineVersion",       "${ftbultimine_version}"
+
+    filesMatching ('META-INF/mods.toml') {
+        expand (
+                'modId':                        "${modid}",
+                'modName':                      "${mod_name}",
+                'modVersion':                   "${mod_version}",
+                'modDescription':               "${mod_description}",
+                'modPageUrl':                   "${mod_page_url}",
+                'modUpdateUrl':                 "${mod_update_url}",
+                'modIssueUrl':                  "${mod_issue_url}",
+                'modAuthor':                    "${mod_author}",
+                'modLicense':                   "${mod_license}",
+                'minFMLVersion':                "${min_forge_version}".replaceAll("\\..*", ""),
+                'minForgeVersion':              "${min_forge_version}",
+                'minMinecraftVersion':          "${min_mc_version}",
+                'nextMinecraftVersion':         rootProject.getNextVersion("${min_mc_version}"),
+                'modForgeDisplayTest':          "${mod_forge_display_test}",
+                'archVersion':                  "${architectury_version}",
+                'ccLibVersion':                 "${coolcatlib_version}",
+                'ftbUltimineVersion':           "${ftbultimine_version}"
+        )
+    }
+
+    filesMatching ("${modid}.mixins.json") {
+        expand (
+                'modId':                	"${modid}",
+                'mixinPackagePath':         "${project.group}.forge.mixin"
+        )
+    }
+
+    filesMatching ('pack.mcmeta') {
+        expand (
+                'modDescription':       "${mod_description}",
+                "packFormat":           "${pack_format}"
+        )
+    }
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier.convention("dev-shadow")
+    archiveClassifier.set("dev-shadow")
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+
+    archiveClassifier.convention(null)
+    archiveClassifier.set(null)
+}
+
+jar {
+    archiveClassifier.convention("dev")
+    archiveClassifier.set("dev")
+}
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+publishing {
+    publications {
+        mavenForge(MavenPublication) {
+            groupId project.group
+            artifactId project.archivesBaseName
+            version project.version
+            from components.java
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        maven {
+            url "file://" + System.getenv("local_maven")
+        }
+    }
+}

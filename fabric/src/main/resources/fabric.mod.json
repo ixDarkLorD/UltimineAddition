@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "${modId}",
+  "version": "${modVersion}",
+
+  "name": "${modName}",
+  "description": "${modDescription}",
+  "authors": [
+    "${modAuthor}"
+  ],
+  "contact": {
+    "homepage": "${modPageUrl}",
+    "issues": "${modIssueUrl}",
+    "sources": "${modSourceUrl}"
+  },
+
+  "license": "${modLicense}",
+  "icon": "mod_logo.png",
+
+  "environment": "${modFabricEnvironment}",
+  "entrypoints": {
+    "main": ["${mainEntryPoint}"],
+    "client": ["${clientEntryPoint}"],
+    "fabric-datagen": ["${datagenEntryPoint}"],
+    "jei_mod_plugin": ["net.ixdarklord.ultimine_addition.integration.jei.JEIIntegration"]
+  },
+  "mixins": [
+    "${modId}.mixins.json",
+    "${modId}.common.mixins.json"
+  ],
+
+  "depends": {
+    "java": ">=17",
+    "minecraft": ">=${minMinecraftVersion} <${nextMinecraftVersion}",
+    "fabricloader": ">=${minFabricVersion}",
+    "fabric-api": ">=${minFabricApiVersion}",
+    "forgeconfigapiport": ">=${forgeConfigAPIVersion}",
+    "com_electronwill_night-config_core": "*",
+    "com_electronwill_night-config_toml": "*",
+    "architectury": ">=${archVersion}",
+    "coolcat_lib": ">=${ccLibVersion}",
+    "ftbultimine": ">=${ftbUltimineVersion}"
+  },
+  "suggests": {
+    "jei": ">=11.4"
+  }
+}

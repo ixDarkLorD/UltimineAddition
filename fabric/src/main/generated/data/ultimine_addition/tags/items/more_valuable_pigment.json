@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#c:black_dyes",
+    "#c:red_dyes",
+    "#c:green_dyes",
+    "#c:blue_dyes"
+  ]
+}

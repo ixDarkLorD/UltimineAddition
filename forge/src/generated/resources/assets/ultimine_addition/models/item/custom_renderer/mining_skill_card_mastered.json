@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ultimine_addition:item/custom_renderer/mining_skill_card_mastered"
+  }
+}

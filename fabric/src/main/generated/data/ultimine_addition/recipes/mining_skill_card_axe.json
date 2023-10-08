@@ -1,0 +1,15 @@
+{
+  "type": "ultimine_addition:mc_recipe",
+  "group": "ultimine_addition",
+  "ingredients": [
+    {
+      "item": "ultimine_addition:mining_skill_card_empty"
+    },
+    {
+      "tag": "c:axes"
+    }
+  ],
+  "result": {
+    "item": "ultimine_addition:mining_skill_card_axe"
+  }
+}

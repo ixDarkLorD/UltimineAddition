@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "ultimine_addition",
+  "ingredients": [
+    {
+      "item": "ultimine_addition:mining_skill_card_empty"
+    },
+    {
+      "item": "ultimine_addition:card_blueprint"
+    }
+  ],
+  "result": {
+    "count": 2,
+    "item": "ultimine_addition:mining_skill_card_empty"
+  }
+}

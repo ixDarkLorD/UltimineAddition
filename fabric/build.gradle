@@ -1,0 +1,207 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+}
+
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+loom {
+    if (project(":common").file("src/main/resources/${modid}.accesswidener").exists()) {
+        accessWidenerPath = project(":common").loom.accessWidenerPath
+        project.logger.info('Access Wideners are enabled for this project.')
+    }
+
+    runs {
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("run")
+            vmArg "-Xms${runtime_min_ram}"
+            vmArg "-Xmx${runtime_max_ram}"
+            vmArg "-Dmixin.debug.export=${mixin_debug}"
+            property 'terminal.ansi', 'true'
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("run")
+            vmArg "-Xms${runtime_min_ram}"
+            vmArg "-Xmx${runtime_max_ram}"
+            vmArg "-Dmixin.debug.export=${mixin_debug}"
+            property 'terminal.ansi', 'true'
+        }
+        data {
+            inherit client
+            setConfigName("Fabric Data")
+            ideConfigGenerated(true)
+            runDir("run")
+            vmArg "-Xms${runtime_min_ram}"
+            vmArg "-Xmx${runtime_max_ram}"
+            vmArg "-Dfabric-api.datagen"
+            vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
+            vmArg "-Dfabric-api.datagen.modid=${modid}"
+            vmArg "-Dmixin.debug.export=${mixin_debug}"
+            property 'terminal.ansi', 'true'
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/main/generated' }
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${fabric_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}+${mc_version}"
+    modApi "dev.architectury:architectury-fabric:${architectury_version}"
+
+    implementation 'com.electronwill.night-config:core:3.6.6'
+    implementation 'com.electronwill.night-config:toml:3.6.6'
+    modImplementation "curse.maven:forge-config-api-port-fabric-547434:4401535" //ForgeConfigAPIPort-v4.2.11
+
+    modImplementation "net.ixdarklord.coolcat_lib:fabric:v1.0.0-release"
+    modImplementation "curse.maven:ftb-library-fabric-438495:4661833"
+    modImplementation "curse.maven:ftb-ultimine-fabric-448231:4598467"
+
+    modCompileOnlyApi "mezz.jei:jei-${mc_version}-fabric-api:${jei_version}"
+    modRuntimeOnly "mezz.jei:jei-${mc_version}-fabric:${jei_version}"
+
+    modRuntimeOnly "maven.modrinth:modmenu:4.2.0-beta.2"
+//    modRuntimeOnly "curse.maven:catalogue-fabric-667377:4171029"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+}
+
+processResources {
+    from project(":common").file('src/main/resources/pack.mcmeta')
+    from project(":common").file('src/main/resources/mod_logo.png')
+
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+    inputs.property "modId", 					"${modid}"
+    inputs.property "modName", 					"${mod_name}"
+    inputs.property "modVersion", 				"${mod_version}"
+    inputs.property "modDescription", 			"${mod_description}"
+    inputs.property "modGroup", 				project.group
+    inputs.property "modPageUrl", 				"${mod_page_url}"
+    inputs.property "modIssueUrl", 				"${mod_issue_url}"
+    inputs.property "modSourceUrl", 		    "${mod_source_url}"
+    inputs.property "modAuthor", 				"${mod_author}"
+    inputs.property "modLicense", 				"${mod_license}"
+    inputs.property "minFabricVersion", 		"${min_fabric_version}"
+    inputs.property "minFabricApiVersion", 		"${min_fabric_api_version}"
+    inputs.property "minMinecraftVersion", 		"${min_mc_version}"
+    inputs.property "nextMinecraftVersion", 	rootProject.getNextVersion("${min_mc_version}")
+    inputs.property "packFormat", 				"${pack_format}"
+    inputs.property "mainEntryPoint", 			"${project.group}.core.fabric.FabricSetup"
+    inputs.property "clientEntryPoint", 		"${project.group}.core.fabric.FabricClientSetup"
+    inputs.property "datagenEntryPoint", 		"${project.group}.datagen.DataGeneration"
+    inputs.property "mixinPackagePath", 		"${project.group}.fabric.mixin"
+    inputs.property "archVersion",              "${architectury_version}"
+    inputs.property "forgeConfigAPIVersion",    "${forge_config_api_version}"
+    inputs.property "ccLibVersion",             "${coolcatlib_version}"
+    inputs.property "ftbUltimineVersion",       "${ftbultimine_version}"
+    
+
+
+    filesMatching ('fabric.mod.json') {
+        expand (
+                'modId':                	"${modid}",
+                'modName':              	"${mod_name}",
+                'modVersion':           	"${mod_version}",
+                'modDescription':       	"${mod_description}",
+                'modGroup':             	project.group,
+                'modPageUrl':           	"${mod_page_url}",
+                'modIssueUrl':          	"${mod_issue_url}",
+                'modSourceUrl':          	"${mod_source_url}",
+                'modAuthor':            	"${mod_author}",
+                'modLicense':            	"${mod_license}",
+                'minFabricVersion':     	"${min_fabric_version}",
+                'minFabricApiVersion':  	"${min_fabric_api_version}",
+                'minMinecraftVersion':  	"${min_mc_version}",
+                "nextMinecraftVersion": 	rootProject.getNextVersion("${min_mc_version}"),
+                "mainEntryPoint": 			"${project.group}.core.fabric.FabricSetup",
+                "clientEntryPoint": 		"${project.group}.core.fabric.FabricClientSetup",
+                "datagenEntryPoint": 		"${project.group}.datagen.DataGeneration",
+                "modFabricEnvironment":		"${mod_fabric_environment}",
+                'archVersion':              "${architectury_version}",
+                'forgeConfigAPIVersion':    "${forge_config_api_version}",
+                'ccLibVersion':             "${coolcatlib_version}",
+                'ftbUltimineVersion':       "${ftbultimine_version}"
+        )
+    }
+
+    filesMatching ('architectury.common.json') {
+        expand (
+                'modId':       "${modid}"
+        )
+    }
+
+    filesMatching ('pack.mcmeta') {
+        expand (
+                'modDescription':       "${mod_description}",
+                "packFormat":           "${pack_format}"
+        )
+    }
+}
+
+shadowJar {
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier.convention("dev-shadow")
+    archiveClassifier.set("dev-shadow")
+}
+
+remapJar {
+    injectAccessWidener = true
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    archiveClassifier.convention(null)
+    archiveClassifier.set(null)
+}
+
+jar {
+    archiveClassifier.convention("dev")
+    archiveClassifier.set("dev")
+}
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+publishing {
+    publications {
+        mavenFabric(MavenPublication) {
+            groupId project.group
+            artifactId project.archivesBaseName
+            version project.version
+            from components.java
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        maven {
+            url "file://" + System.getenv("local_maven")
+        }
+    }
+}
