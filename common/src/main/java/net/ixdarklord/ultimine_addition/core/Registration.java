@@ -14,6 +14,8 @@ import net.ixdarklord.ultimine_addition.common.command.arguments.CardTierArgumen
 import net.ixdarklord.ultimine_addition.common.command.arguments.ChallengesArgument;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
+import net.ixdarklord.ultimine_addition.common.data.item.ItemStorageData;
+import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.recipe.ItemStorageDataRecipe;
 import net.ixdarklord.ultimine_addition.common.data.recipe.MCRecipe;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
@@ -26,6 +28,7 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -66,25 +69,9 @@ public class Registration {
         UAApi.getTypes().forEach(type -> {
             String name = "mining_skill_card_" + new ResourceLocation(type.name()).getPath();
             ITEMS.register(Constants.getLocation(name), () -> new MiningSkillCardItem(new Item.Properties()
-                    .stacksTo(1)
-                    .arch$tab(Registration.ULTIMINE_ADDITION_TAB), type));
+                    .stacksTo(1), type));
         });
         ITEMS.register();
-
-        ITEMS.forEach(supplier -> {
-            CreativeTabRegistry.modify(ULTIMINE_ADDITION_TAB, (flags, output, canUseGameMasterBlocks) -> {
-                if (supplier.get() instanceof MiningSkillCardItem item) {
-                    ItemStack stack = item.getDefaultInstance();
-                    item.getData(stack).setTier(MiningSkillCardItem.Tier.Mastered).saveData(stack);
-                    output.acceptAfter(item, stack);
-                }
-                if (supplier.get() instanceof PenItem item) {
-                    ItemStack stack = item.getDefaultInstance();
-                    item.getData(stack).setCapacity(item.getMaxCapacity()).saveData(stack);
-                    output.acceptAfter(item, stack);
-                }
-            });
-        });
     }
 
     public static void registerParticleProviders() {
@@ -92,8 +79,35 @@ public class Registration {
     }
 
     public static final RegistrySupplier<CreativeModeTab> ULTIMINE_ADDITION_TAB = TABS.register("general_tab", () ->
-            CreativeTabRegistry.create(Component.translatable("itemGroup.ultimine_addition.tab"),
-                    ModItems.MINER_CERTIFICATE::getDefaultInstance));
+            CreativeTabRegistry.create(builder -> {
+                builder.title(Component.translatable("itemGroup.ultimine_addition.tab"));
+                builder.icon(ModItems.MINER_CERTIFICATE::getDefaultInstance);
+                builder.displayItems((itemDisplayParameters, output) -> {
+                    output.accept(ModItems.SKILLS_RECORD);
+                    output.accept(ModItems.INK_CHAMBER);
+                    output.accept(ModItems.PEN);
+                    ItemStack penStack = ModItems.PEN.getDefaultInstance();
+                    ItemStorageData storageData = ((PenItem) penStack.getItem()).getData(ModItems.PEN.getDefaultInstance());
+                    storageData.setCapacity(storageData.getMaxCapacity()).saveData(penStack);
+                    output.accept(penStack);
+                    output.accept(ModItems.MINER_CERTIFICATE);
+                    output.accept(ModItems.CARD_BLUEPRINT);
+                    output.accept(ModItems.MINING_SKILL_CARD_EMPTY);
+                    for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
+                        String name = "mining_skill_card_" + new ResourceLocation(type.name()).getPath();
+                        Item item = BuiltInRegistries.ITEM.get(Constants.getLocation(name));
+                        if (item instanceof MiningSkillCardItem cardItem && cardItem.getType() != MiningSkillCardItem.Type.EMPTY) {
+                            ItemStack cardStack = cardItem.getDefaultInstance();
+                            MiningSkillCardData cardData = new MiningSkillCardData().loadData(cardStack).setTier(MiningSkillCardItem.Tier.Mastered);
+                            cardData.saveData(cardStack);
+                            output.accept(item);
+                            output.accept(cardStack);
+                        }
+                    }
+                });
+                builder.build();
+            }));
+
 
     // Items
     public static final RegistrySupplier<Item> MINER_CERTIFICATE = ITEMS.register("miner_certificate", () -> ModItems.MINER_CERTIFICATE);

@@ -118,7 +118,7 @@ public class LanguageBuilder {
         add("challenge", "various_blocks", "one of these blocks (%s)");
 
         add("info", "obtain", "Congratulations on learning the excavation skill!");
-        add("info", "obtained_already", "You have already obtained this knowledge! %s");
+        add("info", "obtained_already", "You have already obtained this knowledge!");
         add("info", "incapable", "You need the excavation skill to perform this action! First, Obtain a Miner Certificate or drink a Mine-Go Juice.");
         add("info", "required_skill.pickaxe", "Required Skill for: Pickaxe");
         add("info", "required_skill.axe", "Required Skill for: Axe");

@@ -68,7 +68,7 @@
   "gui.ultimine_addition.skills_record.select_card": "Select a card by right click it to discover the challenges.",
   "info.ultimine_addition.incapable": "You need the excavation skill to perform this action! First, Obtain a Miner Certificate or drink a Mine-Go Juice.",
   "info.ultimine_addition.obtain": "Congratulations on learning the excavation skill!",
-  "info.ultimine_addition.obtained_already": "You have already obtained this knowledge! %s",
+  "info.ultimine_addition.obtained_already": "You have already obtained this knowledge!",
   "info.ultimine_addition.required_skill.all": "Required Skill for: All Tools",
   "info.ultimine_addition.required_skill.axe": "Required Skill for: Axe",
   "info.ultimine_addition.required_skill.hoe": "Required Skill for: Hoe",
