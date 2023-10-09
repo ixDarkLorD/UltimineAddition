@@ -64,12 +64,12 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${fabric_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}+${mc_version}"
     modApi "dev.architectury:architectury-fabric:${architectury_version}"
+    modApi "net.ixdarklord.coolcat_lib:fabric:${mc_version}-v1.0.0-release"
 
     implementation 'com.electronwill.night-config:core:3.6.6'
     implementation 'com.electronwill.night-config:toml:3.6.6'
-    modImplementation "curse.maven:forge-config-api-port-fabric-547434:4401535" //ForgeConfigAPIPort-v4.2.11
+    modApi "curse.maven:forge-config-api-port-fabric-547434:${forge_config_api_version_id}"
 
-    modImplementation "net.ixdarklord.coolcat_lib:fabric:v1.0.0-release"
     modImplementation "curse.maven:ftb-library-fabric-438495:4661833"
     modImplementation "curse.maven:ftb-ultimine-fabric-448231:4598467"
 
@@ -111,7 +111,7 @@ processResources {
     inputs.property "forgeConfigAPIVersion",    "${forge_config_api_version}"
     inputs.property "ccLibVersion",             "${coolcatlib_version}"
     inputs.property "ftbUltimineVersion",       "${ftbultimine_version}"
-    
+
 
 
     filesMatching ('fabric.mod.json') {

@@ -82,8 +82,8 @@ configurations {
 dependencies {
     forge "net.minecraftforge:forge:${mc_version}-${forge_version}"
     modApi "dev.architectury:architectury-forge:${architectury_version}"
+    modApi "net.ixdarklord.coolcat_lib:forge:${mc_version}-v1.0.0-release"
 
-    modImplementation "net.ixdarklord.coolcat_lib:forge:v1.0.0-release"
     modImplementation "curse.maven:ftb-ultimine-forge-386134:4598468"
     modImplementation "curse.maven:ftb-library-forge-404465:4661834"
 

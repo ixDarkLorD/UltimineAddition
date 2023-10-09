@@ -66,10 +66,10 @@ public class ChunkData extends DataHandler<ChunkData, CompoundTag> {
 
     @Override
     public ChunkData loadData(CompoundTag data) {
-//        CompoundTag NBT = (CompoundTag) data.get(this.NBTBase);
-//        if (NBT == null) NBT = new CompoundTag();
-//
-//        this.placedBlocks = getPlacedBlocksFromNBT(NBT);
+        CompoundTag NBT = (CompoundTag) data.get(this.NBTBase);
+        if (NBT == null) NBT = new CompoundTag();
+
+        this.placedBlocks = getPlacedBlocksFromNBT(NBT);
         return this;
     }
 
