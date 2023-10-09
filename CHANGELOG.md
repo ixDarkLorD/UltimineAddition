@@ -1,7 +1,7 @@
 # Changelog
 This file is for listing all the changes to this project
 
-## v1.0.2 Release | Oct 9, 2023
+## v1.0.2 Release | Oct 10, 2023
 ### Changed
 - Cleaning codes
 
