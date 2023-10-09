@@ -719,8 +719,9 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 info = Component.translatable("challenge.ultimine_addition.various_blocks", Component.literal(displayItem.getHoverName().getString()).withStyle(questStyle));
             } else info = Component.literal(itemList.get(0).getHoverName().getString()).withStyle(questStyle);
 
+            @SuppressWarnings("UnnecessaryUnicodeEscape")
             Component title = ScreenUtils.limitComponent(Component.literal("\u300E").append(Component.translatable("challenge.ultimine_addition.title", identifier.order())).append("\u300F"), this.textScreen.getWidth());
-            Component consume = Component.literal("\u2716 ").append(Component.translatable("challenge.ultimine_addition.consume")).withStyle(ChatFormatting.RED);
+            Component consume = Component.literal("✖ ").append(Component.translatable("challenge.ultimine_addition.consume")).withStyle(ChatFormatting.RED);
             Component description = Component.translatable(String.format("challenge.ultimine_addition.%s", type), info);
             Style descStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GRAY);
             Style counterStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GOLD);
@@ -741,7 +742,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 result.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(consume, this.textScreen.getWidth(), consume.getStyle())));
             result.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(description, this.textScreen.getWidth(), descStyle)));
 
-            result.add(FormattedCharSequence.forward(String.format("\u27A4 %s/%s", values.getCurrent(), values.getRequired()), counterStyle));
+            result.add(FormattedCharSequence.forward(String.format("➤ %s/%s", values.getCurrent(), values.getRequired()), counterStyle));
             if (!this.textScreen.isEmpty()) this.textScreen.add(FormattedCharSequence.EMPTY).addAll(result); else this.textScreen.addAll(result);
         });
         this.calculateProgression(currentValues.get(), requiredValues.get());
