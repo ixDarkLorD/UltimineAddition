@@ -1,19 +1,24 @@
 package net.ixdarklord.ultimine_addition.datagen.tag;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBlockTags;
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.concurrent.CompletableFuture;
+
 public class BlockTagGenerator extends FabricTagProvider.BlockTagProvider {
-    public BlockTagGenerator(FabricDataGenerator dataGenerator) {
-        super(dataGenerator);
+
+    public BlockTagGenerator(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, registriesFuture);
     }
 
     @Override
-    protected void generateTags() {
+    protected void addTags(HolderLookup.Provider arg) {
         this.getOrCreateTagBuilder(ModBlockTags.DENY_IS_PLACED_BY_ENTITY)
                 .forceAddTag(ConventionalBlockTags.CHESTS)
                 .forceAddTag(BlockTags.BEDS)

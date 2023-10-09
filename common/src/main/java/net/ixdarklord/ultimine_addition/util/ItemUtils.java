@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.util;
 
-import net.ixdarklord.ultimine_addition.core.ServicePlatform;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DiggerItem;
@@ -25,7 +25,7 @@ public class ItemUtils {
             stack = player.getMainHandItem();
         } else stack = player.getOffhandItem();
 
-        return stack.is(ServicePlatform.Tags.getPickaxes());
+        return stack.is(ItemTags.PICKAXES);
     }
     public static boolean isItemInHandAxe(Player player) {
         ItemStack stack;
@@ -33,7 +33,7 @@ public class ItemUtils {
             stack = player.getMainHandItem();
         } else stack = player.getOffhandItem();
 
-        return stack.is(ServicePlatform.Tags.getAxes());
+        return stack.is(ItemTags.AXES);
     }
     public static boolean isItemInHandShovel(Player player) {
         ItemStack stack;
@@ -41,7 +41,7 @@ public class ItemUtils {
             stack = player.getMainHandItem();
         } else stack = player.getOffhandItem();
 
-        return stack.is(ServicePlatform.Tags.getShovels());
+        return stack.is(ItemTags.SHOVELS);
     }
     public static boolean isItemInHandHoe(Player player) {
         ItemStack stack;
@@ -49,10 +49,10 @@ public class ItemUtils {
             stack = player.getMainHandItem();
         } else stack = player.getOffhandItem();
 
-        return stack.is(ServicePlatform.Tags.getHoes());
+        return stack.is(ItemTags.HOES);
     }
 
     public static TagKey<Item> createTag(String name, String prefix) {
-        return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(name + prefix));
+        return TagKey.create(Registries.ITEM, new ResourceLocation(name + prefix));
     }
 }

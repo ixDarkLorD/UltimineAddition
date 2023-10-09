@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.integration.jei;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
+import com.mojang.math.Axis;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.ITickTimer;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -22,7 +22,7 @@ import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -81,7 +81,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         storageDataRecipes.forEach(recipe -> recipe.getDataIngredients().forEach(i -> {
             NonNullList<DataIngredient> items = NonNullList.create();
             items.add(DataIngredient.of(i.getAmount(), i.getItems()));
-            result.add(new ItemStorageDataRecipe(recipe.getId(), recipe.getGroup(), recipe.getResultItem(), recipe.getStorageName(), items));
+            result.add(new ItemStorageDataRecipe(recipe.getId(), recipe.getGroup(), recipe.getCategory(), recipe.getResultItem(), recipe.getStorageName(), items));
         }));
         return result;
     }
@@ -128,7 +128,9 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
     }
 
     @Override
-    public void draw(@NotNull ItemStorageDataRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull PoseStack poseStack, double mouseX, double mouseY) {
+    public void draw(@NotNull ItemStorageDataRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphics guiGraphics, double mouseX, double mouseY) {
+        PoseStack poseStack = guiGraphics.pose();
+
         // CRAFTING
         poseStack.pushPose();
         RenderSystem.enableBlend();
@@ -139,7 +141,9 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         poseStack.translate(8.0F, 8.0F, 0.0F);
         poseStack.scale(1.0F, -1.0F, 1.0F);
         poseStack.scale(16.0F, 16.0F, 16.0F);
-        poseStack.mulPose(new Quaternion(30, 45, 1, true));
+        poseStack.mulPose(Axis.XP.rotationDegrees(30));
+        poseStack.mulPose(Axis.YP.rotationDegrees(45));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(1));
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
@@ -152,8 +156,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         poseStack.pushPose();
         poseStack.translate(0.0F, Math.sin(this.timer.getValue() / 20.0F), 120.0F);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, TEXTURES);
-        GuiComponent.blit(poseStack, 69, 14, 0, 42, 12, 12, 256, 256);
+        guiGraphics.blit(TEXTURES, 69, 14, 0, 42, 12, 12, 256, 256);
         poseStack.popPose();
 
         // TEXT
@@ -161,7 +164,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         Font font = Minecraft.getInstance().font;
         int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrCreateTag().getInt("amount");
         Component component = ScreenUtils.limitComponent(Component.translatable(String.format("jei.ultimine_addition.recipe.item_storage.%s", recipe.getStorageName()), value), 27);
-        font.draw(poseStack, component, 5, 30, Color.WHITE.getRGB());
+        guiGraphics.drawString(font, component, 5, 30, Color.WHITE.getRGB());
         poseStack.popPose();
     }
 }

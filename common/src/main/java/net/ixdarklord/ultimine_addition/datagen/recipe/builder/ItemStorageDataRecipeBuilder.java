@@ -9,11 +9,14 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.data.recipes.CraftingRecipeBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +27,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class ItemStorageDataRecipeBuilder implements RecipeBuilder {
+public class ItemStorageDataRecipeBuilder extends CraftingRecipeBuilder implements RecipeBuilder {
+    private final RecipeCategory category;
     private final Item result;
     private final int count;
     private String storageName;
@@ -33,17 +37,18 @@ public class ItemStorageDataRecipeBuilder implements RecipeBuilder {
     @Nullable
     private String group;
 
-    private ItemStorageDataRecipeBuilder(ItemLike result, int count) {
+    private ItemStorageDataRecipeBuilder(RecipeCategory category, ItemLike result, int count) {
+        this.category = category;
         this.result = result.asItem();
         this.count = count;
     }
 
-    public static ItemStorageDataRecipeBuilder create(ItemLike item) {
-        return new ItemStorageDataRecipeBuilder(item, 1);
+    public static ItemStorageDataRecipeBuilder create(RecipeCategory category, ItemLike item) {
+        return new ItemStorageDataRecipeBuilder(category, item, 1);
     }
 
-    public static ItemStorageDataRecipeBuilder create(ItemLike item, int count) {
-        return new ItemStorageDataRecipeBuilder(item, count);
+    public static ItemStorageDataRecipeBuilder create(RecipeCategory category, ItemLike item, int count) {
+        return new ItemStorageDataRecipeBuilder(category, item, count);
     }
 
     public ItemStorageDataRecipeBuilder storage(String name, int size) {
@@ -92,11 +97,10 @@ public class ItemStorageDataRecipeBuilder implements RecipeBuilder {
 
     @Override
     public void save(Consumer<FinishedRecipe> consumer, @NotNull ResourceLocation actionLocation) {
-        ResourceLocation location = new ResourceLocation(actionLocation.getNamespace(), Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.result)).getPath() + "_" + actionLocation.getPath());
-        this.ensureValid(location);
-        this.advancement.parent(new ResourceLocation("recipes/root")).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(location)).rewards(AdvancementRewards.Builder.recipe(location)).requirements(RequirementsStrategy.OR);
-        //noinspection DataFlowIssue
-        consumer.accept(new Result(location, this.result, this.count, this.storageName, this.group == null ? "" : this.group, this.ingredients, this.advancement, new ResourceLocation(location.getNamespace(), "recipes/" + this.result.getItemCategory().getRecipeFolderName() + "/" + location.getPath())));
+        ResourceLocation recipeId = new ResourceLocation(actionLocation.getNamespace(), Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.result)).getPath() + "_" + actionLocation.getPath());
+        this.ensureValid(recipeId);
+        this.advancement.parent(new ResourceLocation("recipes/root")).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipeId)).rewards(AdvancementRewards.Builder.recipe(recipeId)).requirements(RequirementsStrategy.OR);
+        consumer.accept(new Result(recipeId, this.result, this.count, this.storageName, this.group == null ? "" : this.group, determineBookCategory(this.category), this.ingredients, this.advancement, recipeId.withPrefix("recipes/" + this.category.getFolderName() + "/")));
     }
 
     private void ensureValid(ResourceLocation p_126208_) {
@@ -105,7 +109,7 @@ public class ItemStorageDataRecipeBuilder implements RecipeBuilder {
         }
     }
 
-    public static class Result implements FinishedRecipe {
+    public static class Result extends CraftingRecipeBuilder.CraftingResult {
         private final ResourceLocation id;
         private final Item result;
         private final int count;
@@ -115,7 +119,8 @@ public class ItemStorageDataRecipeBuilder implements RecipeBuilder {
         private final Advancement.Builder advancement;
         private final ResourceLocation advancementId;
 
-        public Result(ResourceLocation id, Item result, int count, String storageName, String group, List<DataIngredient> ingredients, Advancement.Builder advancement, ResourceLocation advancementId) {
+        public Result(ResourceLocation id, Item result, int count, String storageName, String group, CraftingBookCategory category, List<DataIngredient> ingredients, Advancement.Builder advancement, ResourceLocation advancementId) {
+            super(category);
             this.id = id;
             this.result = result;
             this.count = count;
@@ -127,6 +132,7 @@ public class ItemStorageDataRecipeBuilder implements RecipeBuilder {
         }
 
         public void serializeRecipeData(@NotNull JsonObject json) {
+            super.serializeRecipeData(json);
             if (!this.group.isEmpty()) {
                 json.addProperty("group", this.group);
             }

@@ -25,7 +25,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -36,8 +35,6 @@ import java.util.List;
 
 @Mixin(value = FTBUltimine.class)
 public abstract class FTBUltimineMixin {
-
-    @Shadow public static FTBUltimine instance;
 
     @Redirect(method = "blockBroken", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/config/FTBUltimineServerConfig;getMaxBlocks(Lnet/minecraft/server/level/ServerPlayer;)I"))
     private int redirect$MaxBlocks$1(ServerPlayer player) {
@@ -61,7 +58,7 @@ public abstract class FTBUltimineMixin {
     private void redirect$RightClickEvent(Player player, InteractionHand hand, BlockPos clickPos, Direction face, CallbackInfoReturnable<EventResult> cir) {
         if (player instanceof ServerPlayer serverPlayer) {
             ItemStack stack = player.getItemInHand(hand);
-            Level level = player.getLevel();
+            Level level = serverPlayer.serverLevel();
             BlockState originalState = level.getBlockState(clickPos);
             BlockState finalState = originalState;
             HitResult result = FTBUltiminePlayerData.rayTrace(serverPlayer);
@@ -93,8 +90,8 @@ public abstract class FTBUltimineMixin {
                 playerData.clearCache();
                 playerData.updateBlocks((ServerPlayer) player, context.getClickedPos(), context.getClickedFace(), false, FTBUltimineIntegration.getMaxBlocks((ServerPlayer) player));
                 List<BlockPos> blockPosList = new ArrayList<>();
-                if (playerData.isPressed() && playerData.cachedBlocks != null && !playerData.cachedBlocks.isEmpty()) {
-                    blockPosList.addAll(playerData.cachedBlocks.stream().filter(pos -> context.getLevel().getBlockState(pos).is(originalState.getBlock())).toList());
+                if (playerData.isPressed() && playerData.cachedPositions() != null && !playerData.cachedPositions().isEmpty()) {
+                    blockPosList.addAll(playerData.cachedPositions().stream().filter(pos -> context.getLevel().getBlockState(pos).is(originalState.getBlock())).toList());
                 }
 
                 for (BlockPos pos : blockPosList) {

@@ -13,7 +13,7 @@ public class ClientMinerCertificateHandler {
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
 
-        player.playSound(SoundEvents.NOTE_BLOCK_BELL, 1.0F, 1.0F);
+        player.playSound(SoundEvents.NOTE_BLOCK_BELL.value(), 1.0F, 1.0F);
         player.playSound(SoundEvents.BOOK_PAGE_TURN, 1.0F, 1.0F);
     }
 

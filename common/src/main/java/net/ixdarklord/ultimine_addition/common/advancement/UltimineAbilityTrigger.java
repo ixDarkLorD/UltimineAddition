@@ -3,8 +3,8 @@ package net.ixdarklord.ultimine_addition.common.advancement;
 import com.google.gson.JsonObject;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.DeserializationContext;
-import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,20 +19,21 @@ public class UltimineAbilityTrigger extends SimpleCriterionTrigger<UltimineAbili
     }
 
     @Override
-    public @NotNull Instance createInstance(@NotNull JsonObject json, EntityPredicate.@NotNull Composite player, @NotNull DeserializationContext condition) {
-        return new Instance(player);
+    public @NotNull Instance createInstance(@NotNull JsonObject json, ContextAwarePredicate predicate, @NotNull DeserializationContext condition) {
+        return new Instance(predicate);
     }
 
     public void trigger(ServerPlayer player) {
         this.trigger(player, (instance) -> true);
     }
 
+
     public static class Instance extends AbstractCriterionTriggerInstance {
-        public Instance(EntityPredicate.Composite player) {
+        public Instance(ContextAwarePredicate player) {
             super(UltimineAbilityTrigger.ID, player);
         }
         public static Instance obtain() {
-            return new Instance(EntityPredicate.Composite.ANY);
+            return new Instance(ContextAwarePredicate.ANY);
         }
     }
 }

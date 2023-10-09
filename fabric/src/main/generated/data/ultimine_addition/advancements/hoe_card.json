@@ -38,5 +38,6 @@
     [
       "has_hoe_card"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

@@ -13,6 +13,14 @@ public abstract class StorageDataAbstractItem extends DataAbstractItem<ItemStora
         this.maxCapacity = maxCapacity;
     }
 
+    public String getStorageName() {
+        return storageName;
+    }
+
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
     @Override
     public boolean isBarVisible(ItemStack itemStack) {
         return !getData(itemStack).isFull();

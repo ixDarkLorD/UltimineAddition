@@ -8,11 +8,13 @@ import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
@@ -25,14 +27,16 @@ import java.util.List;
 public class ItemStorageDataRecipe extends CustomRecipe {
     private final ResourceLocation id;
     final String group;
+    final CraftingBookCategory category;
     final ItemStack result;
     final String storageName;
     final NonNullList<DataIngredient> ingredients;
 
-    public ItemStorageDataRecipe(ResourceLocation id, String group, ItemStack result, String storageName, NonNullList<DataIngredient> ingredients) {
-        super(id);
+    public ItemStorageDataRecipe(ResourceLocation id, String group, CraftingBookCategory category, ItemStack result, String storageName, NonNullList<DataIngredient> ingredients) {
+        super(id, category);
         this.id = id;
         this.group = group;
+        this.category = category;
         this.result = result;
         this.storageName = storageName;
         this.ingredients = ingredients;
@@ -102,7 +106,7 @@ public class ItemStorageDataRecipe extends CustomRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(@NotNull CraftingContainer container) {
+    public @NotNull ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
         int amount = 0;
         var data = new ItemStorageData(this.storageName);
         ItemStack itemStack = null;
@@ -127,8 +131,17 @@ public class ItemStorageDataRecipe extends CustomRecipe {
         return width * height >= this.ingredients.size();
     }
 
+
+    public CraftingBookCategory getCategory() {
+        return category;
+    }
+
+    public ItemStack getResultItem() {
+        return result;
+    }
+
     @Override
-    public @NotNull ItemStack getResultItem() {
+    public @NotNull ItemStack getResultItem(RegistryAccess registryAccess) {
         return this.result;
     }
 
@@ -152,15 +165,16 @@ public class ItemStorageDataRecipe extends CustomRecipe {
 
     public static class Serializer implements RecipeSerializer<ItemStorageDataRecipe> {
         public static final ResourceLocation NAME = Constants.getLocation("item_storage_data");
-        public @NotNull ItemStorageDataRecipe fromJson(@NotNull ResourceLocation id, @NotNull JsonObject pJson) {
-            String group = GsonHelper.getAsString(pJson, "group", "");
-            NonNullList<DataIngredient> nonnulllist = itemsFromJson(GsonHelper.getAsJsonArray(pJson, "ingredients"));
+        public @NotNull ItemStorageDataRecipe fromJson(@NotNull ResourceLocation id, @NotNull JsonObject json) {
+            String group = GsonHelper.getAsString(json, "group", "");
+            CraftingBookCategory craftingBookCategory = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, "category", (String)null), CraftingBookCategory.MISC);
+            NonNullList<DataIngredient> nonnulllist = itemsFromJson(GsonHelper.getAsJsonArray(json, "ingredients"));
             if (nonnulllist.isEmpty()) {
                 throw new JsonParseException("No ingredients for shapeless recipe");
             } else {
-                ItemStack stack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(pJson, "result"));
-                String storageName = GsonHelper.getAsString(GsonHelper.getAsJsonObject(pJson, "result"), "storage_name", "storage");
-                return new ItemStorageDataRecipe(id, group, stack, storageName, nonnulllist);
+                ItemStack stack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, "result"));
+                String storageName = GsonHelper.getAsString(GsonHelper.getAsJsonObject(json, "result"), "storage_name", "storage");
+                return new ItemStorageDataRecipe(id, group, craftingBookCategory, stack, storageName, nonnulllist);
             }
         }
 
@@ -177,6 +191,7 @@ public class ItemStorageDataRecipe extends CustomRecipe {
 
         public @NotNull ItemStorageDataRecipe fromNetwork(@NotNull ResourceLocation id, FriendlyByteBuf buffer) {
             String group = buffer.readUtf();
+            CraftingBookCategory craftingBookCategory = buffer.readEnum(CraftingBookCategory.class);
             int i = buffer.readVarInt();
             NonNullList<DataIngredient> nonnulllist = NonNullList.withSize(i, DataIngredient.EMPTY);
 
@@ -184,18 +199,19 @@ public class ItemStorageDataRecipe extends CustomRecipe {
 
             ItemStack itemstack = buffer.readItem();
             String storageName = buffer.readUtf();
-            return new ItemStorageDataRecipe(id, group, itemstack, storageName, nonnulllist);
+            return new ItemStorageDataRecipe(id, group, craftingBookCategory, itemstack, storageName, nonnulllist);
         }
 
         public void toNetwork(FriendlyByteBuf buffer, ItemStorageDataRecipe recipe) {
             buffer.writeUtf(recipe.getGroup());
+            buffer.writeEnum(recipe.category);
             buffer.writeVarInt(recipe.getDataIngredients().size());
 
             for (DataIngredient ingredient : recipe.ingredients) {
                 ingredient.toNetwork(buffer);
             }
 
-            buffer.writeItem(recipe.getResultItem());
+            buffer.writeItem(recipe.result);
             buffer.writeUtf(recipe.getStorageName());
         }
     }

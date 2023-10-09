@@ -5,6 +5,7 @@ import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
@@ -14,8 +15,9 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemModelGenerator extends ItemModelProvider {
-    public ItemModelGenerator(DataGenerator generator, ExistingFileHelper existingFileHelper) {
-        super(generator, Constants.MOD_ID, existingFileHelper);
+
+    public ItemModelGenerator(PackOutput output, ExistingFileHelper existingFileHelper) {
+        super(output, Constants.MOD_ID, existingFileHelper);
     }
 
     @Override
@@ -176,10 +178,5 @@ public class ItemModelGenerator extends ItemModelProvider {
 
     private ItemModelBuilder specialRendererItem(String folder, ResourceLocation location) {
         return getBuilder(folder + location.getPath()).parent(new ModelFile.UncheckedModelFile(new ResourceLocation("builtin/entity")));
-    }
-
-    @Override
-    public @NotNull String getName() {
-        return String.format("%s %s", Constants.MOD_NAME, "Item Models");
     }
 }

@@ -5,31 +5,31 @@ import com.mojang.serialization.JsonOps;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.datagen.challenge.builder.ChallengesBuilder;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.Type.*;
 
 public abstract class ChallengeProvider implements DataProvider {
-    private final DataGenerator generator;
+    private final PackOutput output;
     private final Map<ResourceLocation, ChallengesData> data = new TreeMap<>();
 
     protected abstract void buildChallenges(Consumer<ChallengesBuilder.Result> consumer);
 
-    public ChallengeProvider(DataGenerator generator) {
-        this.generator = generator;
+    public ChallengeProvider(PackOutput output) {
+        this.output = output;
     }
 
     @Override
-    public void run(@NotNull CachedOutput cache) throws IOException {
+    public @NotNull CompletableFuture<?> run(@NotNull CachedOutput cache) {
         clear();
         buildChallenges(result -> {
             if (data.containsKey(result.id())) {
@@ -38,18 +38,19 @@ public abstract class ChallengeProvider implements DataProvider {
         });
 
         if (this.data.isEmpty()) throw new IllegalStateException("The challenges data is empty!");
-        generateChallenge(cache);
-    }
+        CompletableFuture<?>[] futures = new CompletableFuture<?>[this.data.size()];
 
-    private void generateChallenge(CachedOutput cache) throws IOException {
+        int i = 0;
         for (var data : data.entrySet()) {
             AtomicReference<JsonObject> JSONProperties = new AtomicReference<>(new JsonObject());
             ChallengesData.CODEC.encodeStart(JsonOps.INSTANCE, data.getValue()).result().ifPresent(json -> JSONProperties.set(json.getAsJsonObject()));
-            DataProvider.saveStable(cache, JSONProperties.get(), pathProvider(data.getValue()).json(data.getKey()));
+            futures[i++] = DataProvider.saveStable(cache, JSONProperties.get(), pathProvider(data.getValue()).json(data.getKey()));
         }
+
+        return CompletableFuture.allOf(futures);
     }
 
-    private DataGenerator.PathProvider pathProvider(ChallengesData value) {
+    private PackOutput.PathProvider pathProvider(ChallengesData value) {
         String path = "";
         if (value.getForCardType().equals(PICKAXE)) {
             path = "/pickaxe";
@@ -60,7 +61,7 @@ public abstract class ChallengeProvider implements DataProvider {
         } else if (value.getForCardType().equals(HOE)) {
             path = "/hoe";
         }
-        return generator.createPathProvider(DataGenerator.Target.DATA_PACK, "challenges" + path);
+        return output.createPathProvider(PackOutput.Target.DATA_PACK, "challenges" + path);
     }
 
     private void clear() {
@@ -68,7 +69,7 @@ public abstract class ChallengeProvider implements DataProvider {
     }
 
     @Override
-    public @NotNull String getName() {
-        return "Challenges";
+    public final @NotNull String getName() {
+        return "Ultimine Addition Challenges";
     }
 }

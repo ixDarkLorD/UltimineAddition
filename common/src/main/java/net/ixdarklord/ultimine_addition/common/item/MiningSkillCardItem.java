@@ -13,7 +13,6 @@ import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,7 +21,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
@@ -86,18 +84,6 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-        if (getType() == EMPTY) super.fillItemCategory(creativeModeTab, nonNullList);
-        if (this.allowedIn(creativeModeTab) && getType() != EMPTY) {
-            ItemStack stack = getDefaultInstance();
-            getData(stack).setTier(Tier.Mastered).saveData(stack);
-
-            nonNullList.add(new ItemStack(this));
-            nonNullList.add(stack);
-        }
-    }
-
-    @Override
     public boolean isBarVisible(ItemStack itemStack) {
         var data = getData(itemStack);
         if (!itemStack.hasTag() || type == EMPTY || data.getTier() == Tier.Unlearned || data.getTier() == Tier.Mastered) return false;
@@ -148,7 +134,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
             try {
                 return DataResult.success(Type.fromString(s));
             } catch (CodecException e) {
-                return DataResult.error(s + " is not present.");
+                return DataResult.error(() -> s + " is not present.");
             }
         }, Type::name);
 

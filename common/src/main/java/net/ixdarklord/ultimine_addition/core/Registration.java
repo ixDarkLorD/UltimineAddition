@@ -19,13 +19,15 @@ import net.ixdarklord.ultimine_addition.common.data.recipe.MCRecipe;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
+import net.ixdarklord.ultimine_addition.common.item.PenItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -39,16 +41,18 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import static net.ixdarklord.ultimine_addition.core.Constants.MOD_ID;
 
 public class Registration {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(MOD_ID, Registry.ITEM_REGISTRY);
-    public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(MOD_ID, Registry.MOB_EFFECT_REGISTRY);
-    public static final DeferredRegister<Potion> POTIONS = DeferredRegister.create(MOD_ID, Registry.POTION_REGISTRY);
-    public static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(MOD_ID, Registry.MENU_REGISTRY);
-    public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(MOD_ID, Registry.RECIPE_SERIALIZER_REGISTRY);
-    public static final DeferredRegister<ParticleType<?>> PARTICLE_TYPES = DeferredRegister.create(MOD_ID, Registry.PARTICLE_TYPE_REGISTRY);
-    public static final DeferredRegister<ArgumentTypeInfo<?, ?>> ARGUMENT_TYPES = DeferredRegister.create(MOD_ID, Registry.COMMAND_ARGUMENT_TYPE_REGISTRY);
+    public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(MOD_ID, Registries.CREATIVE_MODE_TAB);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(MOD_ID, Registries.ITEM);
+    public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(MOD_ID, Registries.MOB_EFFECT);
+    public static final DeferredRegister<Potion> POTIONS = DeferredRegister.create(MOD_ID, Registries.POTION);
+    public static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(MOD_ID, Registries.MENU);
+    public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(MOD_ID, Registries.RECIPE_SERIALIZER);
+    public static final DeferredRegister<ParticleType<?>> PARTICLE_TYPES = DeferredRegister.create(MOD_ID, Registries.PARTICLE_TYPE);
+    public static final DeferredRegister<ArgumentTypeInfo<?, ?>> ARGUMENT_TYPES = DeferredRegister.create(MOD_ID, Registries.COMMAND_ARGUMENT_TYPE);
 
     public static void register() {
         registerItems();
+        TABS.register();
         MOB_EFFECTS.register();
         POTIONS.register();
         CONTAINERS.register();
@@ -63,17 +67,33 @@ public class Registration {
             String name = "mining_skill_card_" + new ResourceLocation(type.name()).getPath();
             ITEMS.register(Constants.getLocation(name), () -> new MiningSkillCardItem(new Item.Properties()
                     .stacksTo(1)
-                    .tab(Registration.ULTIMINE_ADDITION_TAB), type));
+                    .arch$tab(Registration.ULTIMINE_ADDITION_TAB), type));
         });
         ITEMS.register();
+
+        ITEMS.forEach(supplier -> {
+            CreativeTabRegistry.modify(ULTIMINE_ADDITION_TAB, (flags, output, canUseGameMasterBlocks) -> {
+                if (supplier.get() instanceof MiningSkillCardItem item) {
+                    ItemStack stack = item.getDefaultInstance();
+                    item.getData(stack).setTier(MiningSkillCardItem.Tier.Mastered).saveData(stack);
+                    output.acceptAfter(item, stack);
+                }
+                if (supplier.get() instanceof PenItem item) {
+                    ItemStack stack = item.getDefaultInstance();
+                    item.getData(stack).setCapacity(item.getMaxCapacity()).saveData(stack);
+                    output.acceptAfter(item, stack);
+                }
+            });
+        });
     }
 
     public static void registerParticleProviders() {
         ParticleProviderRegistry.register(Registration.CELEBRATE_PARTICLE, CelebrateParticle.Provider::new);
     }
 
-    public static final CreativeModeTab ULTIMINE_ADDITION_TAB = CreativeTabRegistry.create(new ResourceLocation(MOD_ID,"tab"), () ->
-            new ItemStack(Registration.MINER_CERTIFICATE.get()));
+    public static final RegistrySupplier<CreativeModeTab> ULTIMINE_ADDITION_TAB = TABS.register("general_tab", () ->
+            CreativeTabRegistry.create(Component.translatable("itemGroup.ultimine_addition.tab"),
+                    ModItems.MINER_CERTIFICATE::getDefaultInstance));
 
     // Items
     public static final RegistrySupplier<Item> MINER_CERTIFICATE = ITEMS.register("miner_certificate", () -> ModItems.MINER_CERTIFICATE);

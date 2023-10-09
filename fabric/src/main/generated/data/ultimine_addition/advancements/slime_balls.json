@@ -38,5 +38,6 @@
     [
       "has_slime_balls"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

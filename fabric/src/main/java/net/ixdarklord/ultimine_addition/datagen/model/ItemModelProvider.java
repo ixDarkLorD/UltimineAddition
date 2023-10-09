@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.ixdarklord.coolcat_lib.util.JsonUtils;
 import net.ixdarklord.ultimine_addition.core.Registration;
@@ -17,6 +17,7 @@ import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.models.model.TextureSlot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -25,8 +26,8 @@ import java.util.function.Supplier;
 public abstract class ItemModelProvider extends FabricModelProvider {
     private final List<ModelBuilder> builders = new ArrayList<>();
 
-    public ItemModelProvider(FabricDataGenerator dataGenerator) {
-        super(dataGenerator);
+    public ItemModelProvider(FabricDataOutput output) {
+        super(output);
         registerModels();
     }
 
@@ -102,7 +103,7 @@ public abstract class ItemModelProvider extends FabricModelProvider {
         return builder;
     }
 
-    public String getName() {
+    public final @NotNull String getName() {
         return "Item Models";
     }
 

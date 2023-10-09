@@ -23,25 +23,29 @@ public class ConfigHandler {
         public static final ForgeConfigSpec.ConfigValue<Boolean> ANIMATIONS_MODE;
         public static final ForgeConfigSpec.IntValue PROGRESS_BAR;
         public static final ForgeConfigSpec.BooleanValue MSC_RENDERER;
+        public static final ForgeConfigSpec.BooleanValue TEXT_SCREEN_SHADOW;
 
         static {
             BUILDER.push("Visuals");
+            TEXT_SCREEN_SHADOW = BUILDER
+                    .comment("This will Enable or Disable the drop shadow effect in the text screen of the Skills Record.")
+                    .define("text_screen_shadow", true);
             BACKGROUND_COLOR = BUILDER
-                    .comment(" This is the background color for the skills record GUI.")
+                    .comment("This is the background color for the skills record GUI.")
                     .defineEnum("background_color", SkillsRecordScreen.BGColor.DEFAULT);
             ANIMATIONS_MODE = BUILDER
-                    .comment(" This will enable or disable the animations on the skills record GUI.")
+                    .comment("This will enable or disable the animations on the skills record GUI.")
                     .define("animations_mode", true);
             PROGRESS_BAR = BUILDER
-                    .comment(" Here you can choose whatever mode you prefer for the bar visibility",
-                            " In the skills record GUI.",
-                            " 0: Always on.",
-                            " 1: On holding its keybind. \"Default Keybind: Shift\"",
-                            " 2: Disabled.")
+                    .comment("Here you can choose whatever mode you prefer for the bar visibility",
+                            "In the skills record GUI.",
+                            "0: Always on.",
+                            "1: On holding its keybind. \"Default Keybind: Shift\"",
+                            "2: Disabled.")
                     .defineInRange("progress_bar_mode", 0, 0, 2);
             MSC_RENDERER = BUILDER
-                    .comment(" Here you can enable or disable the Mining Skill Card Renderer",
-                            " It's not recommended for now! [WIP]")
+                    .comment("Here you can enable or disable the Mining Skill Card Renderer",
+                            "It's not recommended for now! [WIP]")
                     .define("msc_renderer", false);
             BUILDER.pop();
             SPEC = BUILDER.build();
@@ -85,28 +89,28 @@ public class ConfigHandler {
         static {
             BUILDER.push("General");
             PAPER_CONSUMPTION_RATE = BUILDER
-                    .comment(" Here, you can change the rate of paper consumption in the Skills Record.")
+                    .comment("Here, you can change the rate of paper consumption in the Skills Record.")
                     .defineInRange("paper_consummation_rate", 0.35, 0, 1);
             CHALLENGE_VALIDATOR = BUILDER
-                    .comment(" Here, You can change the time to validate the challenges in the mining skills card for fixing the corrupted data if present.",
-                            " It's formatted in seconds.")
+                    .comment("Here, You can change the time to validate the challenges in the mining skills card for fixing the corrupted data if present.",
+                            "It's formatted in seconds.")
                     .defineInRange("challenge_validator", 2, 1, 600);
             BUILDER.pop();
 
             BUILDER.push("Ability");
             TIER_BASED_MAX_BLOCKS = BUILDER
-                    .comment(" This makes the ultimine max blocks value different for every tier.")
+                    .comment("This makes the ultimine max blocks value different for every tier.")
                     .define("tier_based_max_blocks", true);
 
             TIER_1_MAX_BLOCKS = BUILDER
-                    .comment(" You can change the ultimine max blocks value for each tier.")
+                    .comment("You can change the ultimine max blocks value for each tier.")
                     .defineInRange("tier_1_max_blocks", 8, 1, 64);
             TIER_2_MAX_BLOCKS = BUILDER.defineInRange("tier_2_max_blocks", 16, 1, 64);
             TIER_3_MAX_BLOCKS = BUILDER.defineInRange("tier_3_max_blocks", 32, 1, 64);
 
             TIER_1_TIME = BUILDER
-                    .comment(" You can change the ultimine ability time per tier.",
-                            " It's formatted in seconds.")
+                    .comment("You can change the ultimine ability time per tier.",
+                            "It's formatted in seconds.")
                     .defineInRange("tier_1_time", 300, 60, 3600);
             TIER_2_TIME = BUILDER.defineInRange("tier_2_time", 600, 60, 3600);
             TIER_3_TIME = BUILDER.defineInRange("tier_3_time", 1200, 60, 3600);
@@ -114,10 +118,10 @@ public class ConfigHandler {
 
             BUILDER.push("Debug");
             CHUNK_DATA_LOGGER = BUILDER
-                    .comment(" Enable or disable the ChunkData logger.")
+                    .comment("Enable or disable the ChunkData logger.")
                     .define("chunk_data_logger", false);
             CHALLENGE_MANAGER_LOGGER = BUILDER
-                    .comment(" Enable or disable the ChallengeManager logger.")
+                    .comment("Enable or disable the ChallengeManager logger.")
                     .define("challenge_manager_logger", false);
             CHALLENGE_ACTIONS_LOGGER = BUILDER
                     .define("challenge_actions_logger", false);

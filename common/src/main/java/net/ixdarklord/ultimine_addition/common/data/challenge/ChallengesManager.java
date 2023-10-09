@@ -8,13 +8,14 @@ import dev.architectury.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Constants;
-import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.player.Player;
@@ -110,11 +111,11 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
         for (String value : data.getTargetedBlocks()) {
             if (value.startsWith("#")) {
                 List<Block> blocks = new ArrayList<>();
-                Registry.BLOCK.getTag(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(value.replaceAll("#", "")))).ifPresent(holders ->
+                BuiltInRegistries.BLOCK.getTag(TagKey.create(Registries.BLOCK, new ResourceLocation(value.replaceAll("#", "")))).ifPresent(holders ->
                         blocks.addAll(holders.stream().map(Holder::value).toList()));
                 if (!blocks.isEmpty()) list.addAll(blocks);
             } else {
-                Block block = Registry.BLOCK.get(new ResourceLocation(value));
+                Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(value));
                 if (block != Blocks.AIR) list.add(block);
             }
         }
@@ -125,13 +126,13 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
         if (MiningSkillCardItem.Type.isCustomType(challengesData.getForCardType())) {
             return player.getInventory().getSelected().is(ItemUtils.createTag(challengesData.getForCardType().name(), "_card_type"));
         } else if (challengesData.getForCardType().equals(PICKAXE)) {
-            return player.getInventory().getSelected().is(ServicePlatform.Tags.getPickaxes());
+            return player.getInventory().getSelected().is(ItemTags.PICKAXES);
         } else if (challengesData.getForCardType().equals(AXE)) {
-            return player.getInventory().getSelected().is(ServicePlatform.Tags.getAxes());
+            return player.getInventory().getSelected().is(ItemTags.AXES);
         } else if (challengesData.getForCardType().equals(SHOVEL)) {
-            return player.getInventory().getSelected().is(ServicePlatform.Tags.getShovels());
+            return player.getInventory().getSelected().is(ItemTags.SHOVELS);
         } else if (challengesData.getForCardType().equals(HOE)) {
-            return player.getInventory().getSelected().is(ServicePlatform.Tags.getHoes());
+            return player.getInventory().getSelected().is(ItemTags.HOES);
         } else if (challengesData.getForCardType().equals(EMPTY)) {
             return !(player.getInventory().getSelected().getItem() instanceof DiggerItem);
         }

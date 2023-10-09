@@ -83,17 +83,18 @@ public class CardsCommand {
                 i++;
 
                 if (player == source.getPlayer()) {
-                    source.sendSuccess(Component.translatable("command.ultimine_addition.challenge.success", cData.getFirst().toString(), oldValue, newValue).withStyle(ChatFormatting.DARK_AQUA), true);
+                    source.sendSuccess(() -> Component.translatable("command.ultimine_addition.challenge.success", cData.getFirst().toString(), oldValue, newValue).withStyle(ChatFormatting.DARK_AQUA), true);
                 }
                 if (i > 1 && player != source.getPlayer() && !player.hasPermissions(2)) {
                     player.displayClientMessage(Component.translatable("command.ultimine_addition.challenge.receiver", cData.getFirst().toString(), oldValue, newValue, Objects.requireNonNull(source.getPlayer()).getName().getString()).withStyle(ChatFormatting.GRAY), false);
                 }
                 if (i > 1) {
-                    source.sendSuccess(Component.translatable("command.ultimine_addition.challenge.sender", cData.getFirst().toString(), oldValue, newValue).withStyle(ChatFormatting.GRAY), true);
+                    source.sendSuccess(() -> Component.translatable("command.ultimine_addition.challenge.sender", cData.getFirst().toString(), oldValue, newValue).withStyle(ChatFormatting.GRAY), true);
                     int x = 1;
                     for (ServerPlayer p : targets) {
                         if (p != source.getPlayer()) {
-                            source.sendSuccess(Component.literal(x + ": " + p.getName().getString()).withStyle(ChatFormatting.YELLOW), true);
+                            int finalX = x;
+                            source.sendSuccess(() -> Component.literal(finalX + ": " + p.getName().getString()).withStyle(ChatFormatting.YELLOW), true);
                             x++;
                         }
                     }
@@ -119,17 +120,18 @@ public class CardsCommand {
                 i++;
 
                 if (player == source.getPlayer()) {
-                    source.sendSuccess(Component.translatable("command.ultimine_addition.cards.tier.set.success", stack.getHoverName(), tier.name()).withStyle(ChatFormatting.DARK_AQUA), true);
+                    source.sendSuccess(() -> Component.translatable("command.ultimine_addition.cards.tier.set.success", stack.getHoverName(), tier.name()).withStyle(ChatFormatting.DARK_AQUA), true);
                 }
                 if (i > 1 && player != source.getPlayer() && !player.hasPermissions(2)) {
                     player.displayClientMessage(Component.translatable("command.ultimine_addition.cards.tier.set.receiver", stack.getHoverName(), tier.name(), Objects.requireNonNull(source.getPlayer()).getName().getString()).withStyle(ChatFormatting.GRAY), false);
                 }
                 if (i > 1) {
-                    source.sendSuccess(Component.translatable("command.ultimine_addition.cards.tier.set.sender", stack.getHoverName(), tier.name()).withStyle(ChatFormatting.GRAY), true);
+                    source.sendSuccess(() -> Component.translatable("command.ultimine_addition.cards.tier.set.sender", stack.getHoverName(), tier.name()).withStyle(ChatFormatting.GRAY), true);
                     int x = 1;
                     for (ServerPlayer p : targets) {
                         if (p != source.getPlayer()) {
-                            source.sendSuccess(Component.literal(x + ": " + p.getName().getString()).withStyle(ChatFormatting.YELLOW), true);
+                            int finalX = x;
+                            source.sendSuccess(() -> Component.literal(finalX + ": " + p.getName().getString()).withStyle(ChatFormatting.YELLOW), true);
                             x++;
                         }
                     }

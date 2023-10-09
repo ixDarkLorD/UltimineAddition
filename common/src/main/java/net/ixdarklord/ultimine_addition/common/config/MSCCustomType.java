@@ -5,7 +5,8 @@ import com.google.gson.GsonBuilder;
 import dev.architectury.platform.Platform;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -51,11 +52,11 @@ public class MSCCustomType {
         for (String value : requiredTools) {
             if (value.startsWith("#")) {
                 List<Item> blocks = new ArrayList<>();
-                Registry.ITEM.getTag(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(value.replaceAll("#", "")))).ifPresent(holders ->
+                BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, new ResourceLocation(value.replaceAll("#", "")))).ifPresent(holders ->
                         blocks.addAll(holders.stream().map(Holder::value).toList()));
                 if (!blocks.isEmpty()) list.addAll(blocks);
             } else {
-                Item item = Registry.ITEM.get(new ResourceLocation(value));
+                Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(value));
                 if (item != Items.AIR) list.add(item);
             }
         }

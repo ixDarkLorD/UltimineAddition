@@ -60,5 +60,6 @@
     [
       "has_card_blueprint"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

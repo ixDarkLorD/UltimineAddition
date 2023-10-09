@@ -60,5 +60,6 @@
     [
       "has_pen"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

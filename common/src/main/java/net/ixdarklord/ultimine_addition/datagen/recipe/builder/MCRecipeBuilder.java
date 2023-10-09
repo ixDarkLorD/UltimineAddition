@@ -10,11 +10,14 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.data.recipes.CraftingRecipeBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +28,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class MCRecipeBuilder implements RecipeBuilder {
+public class MCRecipeBuilder extends CraftingRecipeBuilder implements RecipeBuilder {
+    private final RecipeCategory category;
     private final Item result;
     private final int count;
     private final List<MCIngredient> ingredients = new ArrayList<>();
@@ -33,17 +37,18 @@ public class MCRecipeBuilder implements RecipeBuilder {
     @Nullable
     private String group;
 
-    private MCRecipeBuilder(ItemLike result, int count) {
+    private MCRecipeBuilder(RecipeCategory category, ItemLike result, int count) {
+        this.category = category;
         this.result = result.asItem();
         this.count = count;
     }
 
-    public static MCRecipeBuilder create(ItemLike item) {
-        return new MCRecipeBuilder(item, 1);
+    public static MCRecipeBuilder create(RecipeCategory category, ItemLike item) {
+        return new MCRecipeBuilder(category, item, 1);
     }
 
-    public static MCRecipeBuilder create(ItemLike item, int count) {
-        return new MCRecipeBuilder(item, count);
+    public static MCRecipeBuilder create(RecipeCategory category, ItemLike item, int count) {
+        return new MCRecipeBuilder(category, item, count);
     }
 
     public MCRecipeBuilder requires(ItemLike item) {
@@ -89,9 +94,8 @@ public class MCRecipeBuilder implements RecipeBuilder {
     @Override
     public void save(Consumer<FinishedRecipe> consumer, @NotNull ResourceLocation recipeId) {
         this.ensureValid(recipeId);
-        this.advancement.parent(new ResourceLocation("recipes/root")).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipeId)).rewards(AdvancementRewards.Builder.recipe(recipeId)).requirements(RequirementsStrategy.OR);
-        //noinspection DataFlowIssue
-        consumer.accept(new Result(recipeId, this.result, this.count, this.group == null ? "" : this.group, this.ingredients, this.advancement, new ResourceLocation(recipeId.getNamespace(), "recipes/" + this.result.getItemCategory().getRecipeFolderName() + "/" + recipeId.getPath())));
+        this.advancement.parent(ROOT_RECIPE_ADVANCEMENT).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipeId)).rewards(AdvancementRewards.Builder.recipe(recipeId)).requirements(RequirementsStrategy.OR);
+        consumer.accept(new Result(recipeId, this.result, this.count, this.group == null ? "" : this.group, determineBookCategory(this.category), this.ingredients, this.advancement, recipeId.withPrefix("recipes/" + this.category.getFolderName() + "/")));
     }
 
     private void ensureValid(ResourceLocation p_126208_) {
@@ -100,7 +104,7 @@ public class MCRecipeBuilder implements RecipeBuilder {
         }
     }
 
-    public static class Result implements FinishedRecipe {
+    public static class Result extends CraftingRecipeBuilder.CraftingResult {
         private final ResourceLocation id;
         private final Item result;
         private final int count;
@@ -109,7 +113,8 @@ public class MCRecipeBuilder implements RecipeBuilder {
         private final Advancement.Builder advancement;
         private final ResourceLocation advancementId;
 
-        public Result(ResourceLocation id, Item result, int count, String group, List<MCIngredient> ingredients, Advancement.Builder advancement, ResourceLocation advancementId) {
+        public Result(ResourceLocation id, Item result, int count, String group, CraftingBookCategory category, List<MCIngredient> ingredients, Advancement.Builder advancement, ResourceLocation advancementId) {
+            super(category);
             this.id = id;
             this.result = result;
             this.count = count;
@@ -120,6 +125,7 @@ public class MCRecipeBuilder implements RecipeBuilder {
         }
 
         public void serializeRecipeData(@NotNull JsonObject json) {
+            super.serializeRecipeData(json);
             if (!this.group.isEmpty()) {
                 json.addProperty("group", this.group);
             }

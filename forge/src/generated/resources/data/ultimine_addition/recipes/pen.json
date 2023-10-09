@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "misc",
   "group": "ultimine_addition",
   "key": {
     "C": {
@@ -22,5 +23,6 @@
   ],
   "result": {
     "item": "ultimine_addition:pen"
-  }
+  },
+  "show_notification": true
 }

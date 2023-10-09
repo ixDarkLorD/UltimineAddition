@@ -6,7 +6,7 @@ import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -46,17 +46,17 @@ public class MineGoJuiceRecipe extends BrewingRecipe {
         var data = new MiningSkillCardData().loadData(stack);
 
         ItemStack tier1 = stack.copy();
-        Potion potion1 = Registry.POTION.get(output);
+        Potion potion1 = BuiltInRegistries.POTION.get(output);
         data.setTier(MiningSkillCardItem.Tier.Novice).saveData(tier1);
         BrewingRecipeRegistry.addRecipe(new MineGoJuiceRecipe(Registration.KNOWLEDGE_POTION.get(), tier1, potion1));
 
         ItemStack tier2 = stack.copy();
-        Potion potion2 = Registry.POTION.get(new ResourceLocation(output + "_2"));
+        Potion potion2 = BuiltInRegistries.POTION.get(new ResourceLocation(output + "_2"));
         data.setTier(MiningSkillCardItem.Tier.Apprentice).saveData(tier2);
         BrewingRecipeRegistry.addRecipe(new MineGoJuiceRecipe(Registration.KNOWLEDGE_POTION.get(), tier2, potion2));
 
         ItemStack tier3 = stack.copy();
-        Potion potion3 = Registry.POTION.get(new ResourceLocation(output + "_3"));
+        Potion potion3 = BuiltInRegistries.POTION.get(new ResourceLocation(output + "_3"));
         data.setTier(MiningSkillCardItem.Tier.Adept).saveData(tier3);
         BrewingRecipeRegistry.addRecipe(new MineGoJuiceRecipe(Registration.KNOWLEDGE_POTION.get(), tier3, potion3));
     }

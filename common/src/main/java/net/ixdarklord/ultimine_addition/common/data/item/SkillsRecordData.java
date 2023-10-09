@@ -62,7 +62,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                 if (i.get() == 0) {
                     var challengeData = ChallengesManager.INSTANCE.getAllChallenges().get(identifier.id());
                     List<Block> blocks = ChallengesManager.INSTANCE.utilizeTargetedBlocks(challengeData);
-                    ChunkAccess chunk = player.getLevel().getChunk(pos);
+                    ChunkAccess chunk = player.level().getChunk(pos);
                     int inkChamber = getPenSlot().getItem() instanceof PenItem
                             ? ((PenItem)getAllSlots().get(4).getItem()).getData(getAllSlots().get(4)).getCapacity()
                             : 0;
@@ -96,7 +96,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                                 cardData.addAmount(identifier.id(), 1).saveData(stack);
                                 if (hasCorrectGamemode) consumeContents((ServerPlayer) player);
                                 isConsumed.set(Pair.of(true, true));
-                                player.getLevel().destroyBlock(pos, false, player);
+                                player.level().destroyBlock(pos, false, player);
                             }
                         } else {
                             cardData.addAmount(identifier.id(), 1).saveData(stack);

@@ -7,11 +7,13 @@ import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
@@ -24,13 +26,15 @@ import java.util.List;
 public class MCRecipe extends ShapelessRecipe {
     private final ResourceLocation id;
     final String group;
+    final CraftingBookCategory category;
     final ItemStack result;
     final NonNullList<MCIngredient> ingredients;
 
-    public MCRecipe(ResourceLocation id, String group, ItemStack result, NonNullList<MCIngredient> ingredients) {
-        super(id, group, result, MCIngredient.toNormal(ingredients));
+    public MCRecipe(ResourceLocation id, String group, CraftingBookCategory category, ItemStack result, NonNullList<MCIngredient> ingredients) {
+        super(id, group, category, result, MCIngredient.toNormal(ingredients));
         this.id = id;
         this.group = group;
+        this.category = category;
         this.result = result;
         this.ingredients = ingredients;
     }
@@ -61,8 +65,8 @@ public class MCRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(@NotNull CraftingContainer container) {
-        ItemStack stack = getResultItem().copy();
+    public @NotNull ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
+        ItemStack stack = getResultItem(registryAccess).copy();
         if (stack.getItem() instanceof MiningSkillCardItem item) {
             NonNullList<ItemStack> inputs = NonNullList.create();
             for (int i = 0; i < container.getContainerSize(); i++) {
@@ -79,8 +83,16 @@ public class MCRecipe extends ShapelessRecipe {
         return width * height >= this.ingredients.size();
     }
 
+    public CraftingBookCategory getCategory() {
+        return category;
+    }
+
+    public ItemStack getResultItem() {
+        return result;
+    }
+
     @Override
-    public @NotNull ItemStack getResultItem() {
+    public @NotNull ItemStack getResultItem(RegistryAccess registryAccess) {
         return this.result;
     }
 
@@ -105,14 +117,15 @@ public class MCRecipe extends ShapelessRecipe {
 
     public static class Serializer implements RecipeSerializer<MCRecipe> {
         public static final ResourceLocation NAME = Constants.getLocation("mc_recipe");
-        public @NotNull MCRecipe fromJson(@NotNull ResourceLocation recipeId, @NotNull JsonObject pJson) {
-            String group = GsonHelper.getAsString(pJson, "group", "");
-            NonNullList<MCIngredient> nonnulllist = itemsFromJson(GsonHelper.getAsJsonArray(pJson, "ingredients"));
+        public @NotNull MCRecipe fromJson(@NotNull ResourceLocation recipeId, @NotNull JsonObject json) {
+            String group = GsonHelper.getAsString(json, "group", "");
+            CraftingBookCategory craftingBookCategory = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, "category", null), CraftingBookCategory.MISC);
+            NonNullList<MCIngredient> nonnulllist = itemsFromJson(GsonHelper.getAsJsonArray(json, "ingredients"));
             if (nonnulllist.isEmpty()) {
                 throw new JsonParseException("No ingredients for shapeless recipe");
             } else {
-                ItemStack stack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(pJson, "result"));
-                return new MCRecipe(recipeId, group, stack, nonnulllist);
+                ItemStack stack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, "result"));
+                return new MCRecipe(recipeId, group, craftingBookCategory, stack, nonnulllist);
             }
         }
 
@@ -127,11 +140,12 @@ public class MCRecipe extends ShapelessRecipe {
 
         public @NotNull MCRecipe fromNetwork(@NotNull ResourceLocation pRecipeId, FriendlyByteBuf buffer) {
             String group = buffer.readUtf();
+            CraftingBookCategory craftingBookCategory = buffer.readEnum(CraftingBookCategory.class);
             int i = buffer.readVarInt();
             NonNullList<MCIngredient> nonnulllist = NonNullList.withSize(i, MCIngredient.EMPTY);
             nonnulllist.replaceAll(ignored -> MCIngredient.fromNetwork(buffer));
             ItemStack stack = buffer.readItem();
-            return new MCRecipe(pRecipeId, group, stack, nonnulllist);
+            return new MCRecipe(pRecipeId, group, craftingBookCategory, stack, nonnulllist);
         }
 
         public void toNetwork(FriendlyByteBuf buffer, MCRecipe recipe) {
@@ -140,7 +154,7 @@ public class MCRecipe extends ShapelessRecipe {
             for(MCIngredient ingredient : recipe.getMCIngredients()) {
                 ingredient.toNetwork(buffer);
             }
-            buffer.writeItem(recipe.getResultItem());
+            buffer.writeItem(recipe.result);
         }
     }
 }

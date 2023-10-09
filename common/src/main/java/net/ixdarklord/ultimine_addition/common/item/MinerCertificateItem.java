@@ -73,16 +73,16 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
     public void playParticleAndSound(Entity entity) {
         final int PARTICLE_COUNT = 80;
         if (entity instanceof ServerPlayer serverPlayer) {
-            serverPlayer.getLevel().sendParticles(Registration.CELEBRATE_PARTICLE.get(),
+            serverPlayer.serverLevel().sendParticles(Registration.CELEBRATE_PARTICLE.get(),
                     serverPlayer.getX(), serverPlayer.getY()+0.15d, serverPlayer.getZ(),
                     PARTICLE_COUNT, 1.0d, 1.0d, 1.0d, 0.02d
             );
-            serverPlayer.getLevel().sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
+            serverPlayer.serverLevel().sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
                     serverPlayer.getX(), serverPlayer.getY()+0.15d, serverPlayer.getZ(),
                     PARTICLE_COUNT, 1.0d, 1.0d, 1.0d, 0.02d
             );
-            serverPlayer.getLevel().playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.TOTEM_USE, serverPlayer.getSoundSource(), 0.25F, 2.5F);
-            serverPlayer.getLevel().playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.NOTE_BLOCK_CHIME, serverPlayer.getSoundSource(), 1.0F, 1.0F);
+            serverPlayer.level().playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.TOTEM_USE, serverPlayer.getSoundSource(), 0.25F, 2.5F);
+            serverPlayer.level().playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.NOTE_BLOCK_CHIME.value(), serverPlayer.getSoundSource(), 1.0F, 1.0F);
         }
     }
 

@@ -1,6 +1,7 @@
 package net.ixdarklord.ultimine_addition.datagen.language;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.datagen.language.builder.LanguageBuilder;
@@ -9,8 +10,8 @@ import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.NotNull;
 
 public class LanguageGenerator extends FabricLanguageProvider {
-    public LanguageGenerator(FabricDataGenerator generator, String locale) {
-        super(generator, locale);
+    public LanguageGenerator(FabricDataOutput output, String locale) {
+        super(output, locale);
     }
 
     @Override

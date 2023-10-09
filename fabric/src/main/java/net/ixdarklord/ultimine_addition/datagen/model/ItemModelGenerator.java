@@ -1,14 +1,13 @@
 package net.ixdarklord.ultimine_addition.datagen.model;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import org.jetbrains.annotations.NotNull;
 
 public class ItemModelGenerator extends ItemModelProvider {
-    public ItemModelGenerator(FabricDataGenerator generator) {
-        super(generator);
+    public ItemModelGenerator(FabricDataOutput output) {
+        super(output);
     }
 
     @Override
@@ -135,10 +134,5 @@ public class ItemModelGenerator extends ItemModelProvider {
         simpleItem(Constants.getLocation("custom_renderer/mining_skill_card"), "_2").addStringToFileName();
         simpleItem(Constants.getLocation("custom_renderer/mining_skill_card"), "_3").addStringToFileName();
         simpleItem(Constants.getLocation("custom_renderer/mining_skill_card"), "_mastered").addStringToFileName();
-    }
-
-    @Override
-    public @NotNull String getName() {
-        return String.format("%s %s", Constants.MOD_NAME, "Item Models");
     }
 }

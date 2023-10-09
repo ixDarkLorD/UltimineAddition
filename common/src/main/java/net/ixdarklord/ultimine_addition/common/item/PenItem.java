@@ -4,11 +4,9 @@ import net.ixdarklord.coolcat_lib.util.ScreenUtils;
 import net.ixdarklord.ultimine_addition.client.gui.screen.SkillsRecordScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -38,17 +36,6 @@ public class PenItem extends StorageDataAbstractItem {
             tooltipComponents.addAll(components);
             return;
         }
-        tooltipComponents.add(Component.literal("§8\u2022 ").append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber", getData(stack).getCapacity()).withStyle(ChatFormatting.GRAY)));
-    }
-
-    @Override
-    public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-        if (this.allowedIn(creativeModeTab)) {
-            ItemStack stack = new ItemStack(this);
-            getData(stack).fullCapacity().saveData(stack);
-
-            nonNullList.add(new ItemStack(this));
-            nonNullList.add(stack);
-        }
+        tooltipComponents.add(Component.literal("§8• ").append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber", getData(stack).getCapacity()).withStyle(ChatFormatting.GRAY)));
     }
 }

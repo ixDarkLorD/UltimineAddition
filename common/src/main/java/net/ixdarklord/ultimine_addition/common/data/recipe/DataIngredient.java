@@ -8,7 +8,8 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -181,7 +182,7 @@ public final class DataIngredient implements Predicate<ItemStack> {
             return new ItemValue(new ItemStack(item), amount);
         } else if (json.has("tag")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
-            TagKey<Item> tagKey = TagKey.create(Registry.ITEM_REGISTRY, resourceLocation);
+            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, resourceLocation);
             int amount = GsonHelper.getAsInt(json, "amount");
             return new TagValue(tagKey, amount);
         } else {
@@ -206,7 +207,7 @@ public final class DataIngredient implements Predicate<ItemStack> {
 
         public Collection<ItemStack> getItems() {
             List<ItemStack> list = Lists.newArrayList();
-            for (Holder<Item> holder : Registry.ITEM.getTagOrEmpty(this.tag)) {
+            for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
                 list.add(new ItemStack(holder));
             }
             return list;

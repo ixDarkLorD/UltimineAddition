@@ -14,7 +14,7 @@ public class AdvancementTriggers {
     }
 
     public static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... args) {
-        return new InventoryChangeTrigger.TriggerInstance(EntityPredicate.Composite.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, args);
+        return new InventoryChangeTrigger.TriggerInstance(ContextAwarePredicate.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, args);
     }
 
     public static PlayerTrigger.TriggerInstance advancementTrigger(Advancement advancement) {
@@ -23,11 +23,11 @@ public class AdvancementTriggers {
 
     public static PlayerTrigger.TriggerInstance advancementTrigger(String name) {
         return new PlayerTrigger.TriggerInstance(CriteriaTriggers.TICK.getId(),
-                EntityPredicate.Composite.create(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS,
+                ContextAwarePredicate.create(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS,
                         EntityPredicate.Builder.entity().subPredicate(PlayerPredicate.Builder.player().checkAdvancementDone(Constants.getLocation(name), true).build())).build()));
     }
 
     public static TradeTrigger.TriggerInstance tradedWithVillager(ItemPredicate.Builder itemPredicate) {
-        return new TradeTrigger.TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, itemPredicate.build());
+        return new TradeTrigger.TriggerInstance(ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, itemPredicate.build());
     }
 }

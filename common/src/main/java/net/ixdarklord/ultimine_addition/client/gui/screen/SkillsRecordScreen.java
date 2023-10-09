@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.ixdarklord.coolcat_lib.client.button.CustomImageButton;
 import net.ixdarklord.coolcat_lib.client.components.TextScreen;
 import net.ixdarklord.coolcat_lib.util.ColorUtils;
@@ -26,16 +26,18 @@ import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.BakedModel;
@@ -49,6 +51,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
@@ -112,7 +115,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
     @Override
     protected void init() {
         super.init();
-        this.textScreen = new TextScreen(leftPos+10, topPos+17, 157, 82).build(2);
+        this.textScreen = new TextScreen(leftPos+10, topPos+17, 157, 82, ConfigHandler.CLIENT.TEXT_SCREEN_SHADOW.get()).build(2);
         this.resetOptionsWindow();
         createButtons(this.leftPos, this.topPos);
     }
@@ -121,29 +124,29 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         this.configurationButton = this.addRenderableWidget(new CustomImageButton(x+160, y+4, 9, 9, 177, 0, 9, TEXTURE, 256, 256, button -> {
             this.isOptionsShown ^= true;
             this.resetOptionsWindow();
-        }, (button, poseStack, i, j) -> {
-            Component component = Component.translatable("gui.ultimine_addition.skills_record.configuration");
-            if (button.isActive() && !this.isOptionsShown)
-                this.renderTooltip(poseStack, Component.literal("§8\u27A4 ").append(component).withStyle(ChatFormatting.ITALIC), i, j);
         }, CommonComponents.EMPTY));
 
         double X = this.optionsX.get(0);
         double Y = this.optionsY.get(0);
         this.backgroundColorButton = this.addRenderableWidget(new ImageButton((int) (X+9), (int) (Y+29), 100, 10, 0, 0, 0, TEXTURE, 0, 0,
         button -> {
-            if (!Screen.hasShiftDown())
-                this.backgroundColor = this.backgroundColor.next();
-            else
-                this.backgroundColor = this.backgroundColor.previous();
+            if (!Screen.hasShiftDown()) this.backgroundColor = this.backgroundColor.next();
+            else this.backgroundColor = this.backgroundColor.previous();
+            this.configurationButton.setColor(this.backgroundColor.color);
+            this.saveValuesToConfig();
         }, Component.translatable("gui.ultimine_addition.skills_record.option.bg_color")));
 
         this.animationsButton = this.addRenderableWidget(new ImageButton((int) (X+9), (int) (Y+42), 100, 10, 0, 0, 0, TEXTURE, 0, 0,
-        button -> this.isAnimationsEnabled ^= true, Component.translatable("gui.ultimine_addition.skills_record.option.animations")));
+        button -> {
+            this.isAnimationsEnabled ^= true;
+            this.saveValuesToConfig();
+        }, Component.translatable("gui.ultimine_addition.skills_record.option.animations")));
 
         this.progressionBarButton = this.addRenderableWidget(new ImageButton((int) (X+9), (int) (Y+55), 100, 10, 0, 0, 0, TEXTURE, 0, 0,
         button -> {
             this.progressMode = (this.progressMode >= 2) ? 0 : this.progressMode + 1;
             if (this.progressMode == 1) this.isProgressionBarShown = false;
+            this.saveValuesToConfig();
         }, Component.translatable("gui.ultimine_addition.skills_record.option.progression_bar")));
 
         this.optionsButtonList.clear();
@@ -155,17 +158,29 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         this.updateButton(0, 0);
     }
     private void updateButton(int mouseX, int mouseY) {
-        this.configurationButton.setColor(this.backgroundColor.color);
-        this.backgroundColorButton.visible = this.isOptionsShown;
-        this.animationsButton.visible = this.isOptionsShown;
-        this.progressionBarButton.visible = this.isOptionsShown;
-
         AtomicInteger length = new AtomicInteger(this.getButtonsTextLength());
         length.set(Math.max(this.font.width(Component.translatable("gui.ultimine_addition.skills_record.configuration")), length.get()));
         int spacing = Math.max(length.get() - 100 + 2, 0);
         if (spacing > 0) this.optionsButtonList.forEach(button -> button.setWidth(length.get()));
 
+        this.configurationButton.setColor(this.backgroundColor.color);
         this.configurationButton.active = !MouseHelper.isMouseOver(mouseX, mouseY, this.leftPos, this.topPos, 160, 4, 9, 9) || !MouseHelper.isMouseOver(mouseX, mouseY, this.optionsX.get(0), this.optionsY.get(0), 0.0, 0.0, this.isOptionsShown ? 118 + spacing : 0, this.isOptionsShown ? 108 : 0);
+        if (!this.configurationButton.active) {
+            this.configurationButton.setTooltip(null);
+        } else {
+            Component component = Component.translatable("gui.ultimine_addition.skills_record.configuration");
+            this.configurationButton.setTooltip(Tooltip.create(Component.literal("§8➤ ").append(component).withStyle(ChatFormatting.ITALIC), component));
+        }
+        if (!this.configurationButton.isMouseOver(mouseX, mouseY) && this.configurationButton.isFocused()) {
+            this.configurationButton.setFocused(false);
+        }
+
+        for (Button button : this.optionsButtonList) {
+            button.visible = this.isOptionsShown;
+            if (!button.isMouseOver(mouseX, mouseY) && button.isFocused()) {
+                button.setFocused(false);
+            }
+        }
     }
     private void update(float partialTick) {
         if (!Screen.hasControlDown()) {
@@ -185,7 +200,6 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         this.notEnoughInk = hasCorrectGamemode && this.selectedSlot > -1 && this.container.getInkAmount() == 0;
 
         if (this.isOptionsShown) {
-            this.saveValuesToConfig();
             this.isProgressionBarShown = false;
             this.container.getAllSlots().forEach(slot -> ((CustomSlot)slot).setEnabled(false));
         } else {
@@ -206,39 +220,39 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
     }
 
     @Override
-    public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.update(partialTick);
-        this.renderBackground(poseStack);
-        super.render(poseStack, mouseX, mouseY, partialTick);
+        this.renderBackground(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        this.renderScroller(poseStack, this.leftPos, this.topPos, mouseX, mouseY);
-        this.renderProgressBar(poseStack, this.leftPos, this.topPos, mouseX, mouseY);
-        this.renderConsumeButton(poseStack, this.leftPos, this.topPos, mouseX, mouseY);
-        this.renderTextBoxComponent(poseStack, mouseX, mouseY);
-        this.renderOptions(poseStack, mouseX, mouseY);
-        this.renderTooltip(poseStack, mouseX, mouseY);
+        this.renderScroller(guiGraphics, this.leftPos, this.topPos, mouseX, mouseY);
+        this.renderProgressBar(guiGraphics, this.leftPos, this.topPos, mouseX, mouseY);
+        this.renderConsumeButton(guiGraphics, this.leftPos, this.topPos, mouseX, mouseY);
+        this.renderTextBoxComponent(guiGraphics, mouseX, mouseY);
+        this.renderOptions(guiGraphics, mouseX, mouseY);
+        this.renderTooltip(guiGraphics, mouseX, mouseY);
         this.updateButton(mouseX, mouseY);
     }
 
     @Override
-    protected void renderBg(@NotNull PoseStack poseStack, float partialTick, int mouseX, int mouseY) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
         RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
-        RenderSystem.setShaderTexture(0, this.TEXTURE);
-        this.blit(poseStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        this.renderGhostItem(poseStack, this.leftPos, this.topPos);
-        this.renderSlotDecorations(poseStack, this.leftPos, this.topPos);
-        this.renderTextBox(poseStack);
+        guiGraphics.blit(this.TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+
+        this.renderGhostItem(guiGraphics, this.leftPos, this.topPos);
+        this.renderSlotDecorations(guiGraphics, this.leftPos, this.topPos);
+        this.renderTextBox(guiGraphics);
     }
 
     @Override
-    protected void renderLabels(@NotNull PoseStack poseStack, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         Color color = ColorUtils.blendColors(new Color(0, 0, 0), this.backgroundColor.color, 0.75);
-        this.font.draw(poseStack, this.title, (float)this.titleLabelX, (float)this.titleLabelY, color.getRGB());
-        this.font.draw(poseStack, this.playerInventoryTitle, (float)this.inventoryLabelX, (float)this.inventoryLabelY, color.getRGB());
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, color.getRGB(), false);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
     }
 
-    private void renderGhostItem(PoseStack poseStack, int x, int y) {
+    private void renderGhostItem(GuiGraphics guiGraphics, int x, int y) {
+        PoseStack poseStack = guiGraphics.pose();
         List<ItemStack> listOfCards = List.of(
         new ItemStack(ModItems.MINING_SKILL_CARD_PICKAXE),
         new ItemStack(ModItems.MINING_SKILL_CARD_AXE),
@@ -255,12 +269,13 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
             ItemStack stack = slot.getItem();
             if (stack == ItemStack.EMPTY || isOptionsShown) {
                 poseStack.pushPose();
-                poseStack.translate(x + slot.x, y + slot.y, 100.0F + this.itemRenderer.blitOffset);
+                poseStack.translate(x + slot.x, y + slot.y, 100.0F);
                 poseStack.translate(8.0, 8.0, 0.0);
                 poseStack.scale(1.0F, -1.0F, 1.0F);
                 poseStack.scale(16.0F, 16.0F, 16.0F);
                 MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-                BakedModel model = this.itemRenderer.getModel(displayItem, null, null, 0);
+                assert this.minecraft != null;
+                BakedModel model = this.minecraft.getItemRenderer().getModel(displayItem, null, null, 0);
                 RenderSystem.applyModelViewMatrix();
                 boolean bl = !model.usesBlockLight();
                 if (bl) {
@@ -277,7 +292,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 size = this.isAnimationsEnabled ? size : 0.90F;
                 poseStack.scale(size, size, size);
 
-                this.itemRenderer.render(displayItem, ItemTransforms.TransformType.GUI, false, poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, model);
+                this.minecraft.getItemRenderer().render(displayItem, ItemDisplayContext.GUI, false, poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, model);
                 RenderSystem.enableDepthTest();
                 bufferSource.endBatch();
                 poseStack.popPose();
@@ -297,34 +312,32 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
 
             if (stack == ItemStack.EMPTY || notEnoughInk || isOptionsShown) {
                 poseStack.pushPose();
-                RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
-                poseStack.translate(x + slot.x, y + slot.y, this.itemRenderer.blitOffset + 100.0F);
+                poseStack.translate(x + slot.x, y + slot.y, 100.0F);
                 poseStack.translate(8.0, 8.0, 0.0);
-                GuiComponent.fill(poseStack, -8, -8, 8, 8, ColorUtils.RGBToRGBA(color, alpha));
+                RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
+                guiGraphics.fill(RenderType.guiOverlay(), -8, -8, 8, 8, ColorUtils.RGBToRGBA(color, alpha));
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 poseStack.popPose();
             }
         }
     }
 
-    private void renderSlotDecorations(PoseStack poseStack, int x, int y) {
+    private void renderSlotDecorations(GuiGraphics guiGraphics, int x, int y) {
         if (this.isOptionsShown) return;
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, TEXTURE);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F ,1.0F);
-
         if (container.getSlot(4).getItem() != ItemStack.EMPTY)
-            this.blit(poseStack, x+133, y+99, 157, 219, 5, 8);
+            guiGraphics.blit(this.TEXTURE, x+133, y+99, 157, 219, 5, 8);
 
         if (container.getSlot(5).getItem() != ItemStack.EMPTY)
-            this.blit(poseStack, x+153, y+99, 157, 219, 5, 8);
+            guiGraphics.blit(this.TEXTURE, x+153, y+99, 157, 219, 5, 8);
 
         if (this.selectedSlot == -1) return;
         int X = 18 + (20 * this.selectedSlot);
-        this.blit(poseStack, x+X, y+99, 157, 219, 5, 8);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F ,1.0F);
+        guiGraphics.blit(this.TEXTURE, x+X, y+99, 157, 219, 5, 8);
     }
 
-    private void renderTextBox(PoseStack poseStack) {
+    private void renderTextBox(GuiGraphics guiGraphics) {
         ItemStack stack = selectedSlot > -1 ? this.container.getCardSlots().get(this.selectedSlot).getItem() : ItemStack.EMPTY;
         MiningSkillCardData data = new MiningSkillCardData().loadData(stack);
 
@@ -370,7 +383,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
             if (!this.container.getAllSlots().get(4).hasItem()) missingItems.add(ModItems.PEN.getDefaultInstance());
             if (!this.container.getAllSlots().get(5).hasItem()) missingItems.add(Items.PAPER.getDefaultInstance());
             for (ItemStack item : missingItems) {
-                textScreen.add(Component.literal("§c\u2022 ")
+                textScreen.add(Component.literal("§c• ")
                         .append(Component.empty().append(item.getHoverName())
                                 .withStyle(style -> style.withColor(ChatFormatting.GRAY).withItalic(true).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(item)))))
                         .getVisualOrderText());
@@ -385,7 +398,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         } else textScreen.selectBox(1)
                 .shouldRender(false);
 
-        this.textScreen.renderAllBoxes(poseStack, Color.DARK_GRAY.getRGB(), this.backgroundColor.color);
+        this.textScreen.renderAllBoxes(guiGraphics, Color.DARK_GRAY.getRGB(), this.backgroundColor.color);
     }
 
     private void moveOptionsWindowTo(double newX, double newY) {
@@ -393,78 +406,74 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         this.optionsY.set(0, newY);
     }
 
-    private void renderScroller(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
+    private void renderScroller(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
         if (!this.textScreen.canScroll()) return;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, TEXTURE);
-        RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
 
         float offset = this.textScreen.getScrollOffset() / Math.max(1.0F, this.textScreen.getRemainingLines());
         float delta = Mth.clamp(offset, 0.0F, 1.0F);
         int Y = (int) Mth.lerp(delta, this.topPos + 16, this.topPos + 88);
         boolean isOverButton = MouseHelper.isMouseOver(mouseX, mouseY, x+174, Y, 0, 0, 9, 10);
-        this.blit(poseStack, x+173, y+10, 177, 28, 16, 95);
-        this.blit(poseStack, x+174, Y, 177, (!isOverButton ? 124 : 135), 9, 11);
+
+        RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
+        guiGraphics.blit(this.TEXTURE, x+173, y+10, 177, 28, 16, 95);
+        guiGraphics.blit(this.TEXTURE, x+174, Y, 177, (!isOverButton ? 124 : 135), 9, 11);
     }
 
-    private void renderProgressBar(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
+    private void renderProgressBar(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
         if (!this.isProgressionBarShown) return;
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, this.TEXTURE);
+        PoseStack poseStack = guiGraphics.pose();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.blit(poseStack, x+10, y + 91, 0, 219, 156, 7);
+        guiGraphics.blit(this.TEXTURE, x+10, y + 91, 0, 219, 156, 7);
         float value = (float) this.currentProgress / this.maxProgress;
         int bar = (int) Mth.lerp(value, 0, 154);
 
         poseStack.pushPose();
         poseStack.translate(x+11, y+97, 0);
-        poseStack.mulPose(Vector3f.ZN.rotationDegrees(90));
-        fillGradient(poseStack, 0, 0, 5, bar, ColorUtils.RGBToRGBA(getProgressionBarColor(), 0.55F), ColorUtils.RGBToRGBA(getProgressionBarColor(), 0.75F));
+        poseStack.mulPose(Axis.ZN.rotationDegrees(90));
+        guiGraphics.fillGradient(RenderType.guiOverlay(), 0, 0, 5, bar, ColorUtils.RGBToRGBA(getProgressionBarColor(), 0.55F), ColorUtils.RGBToRGBA(getProgressionBarColor(), 0.75F), 0);
         poseStack.popPose();
 
         if (this.isOptionsShown) return;
         if (MouseHelper.isMouseOver(mouseX, mouseY, x, y, 10, 91, 156, 7)) {
-            String text = Component.translatable("gui.ultimine_addition.skills_record.progress", "§r%" + this.currentProgress).getString();
-            ScreenUtils.renderTooltip(poseStack, Component.literal("§7" + text), getProgressionBarColor(), mouseX - 50, mouseY - 5);
+            Component component = Component.translatable("gui.ultimine_addition.skills_record.progress", Component.literal("%" + this.currentProgress).withStyle(Style.EMPTY.withColor(getProgressionBarColor()))).withStyle(ChatFormatting.GRAY);
+            guiGraphics.renderTooltip(this.font, component, mouseX - 50, mouseY - 5);
         }
     }
 
-    private void renderConsumeButton(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
+    private void renderConsumeButton(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
         if (!this.isOptionsShown && !this.isConsumeChallengeExists()) return;
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, this.TEXTURE);
         RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
-        this.blit(poseStack, x+86, y+106, 177, 147, 9, 18);
-
+        guiGraphics.blit(this.TEXTURE, x+86, y+106, 177, 147, 9, 18);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        int color = (this.container.getData().isConsumeMode()) ? new Color(0x00FF4F).getRGB() : new Color(0xD92121).getRGB();
-        fillGradient(poseStack, x+87, y+107, x+94, y+123, ColorUtils.RGBToRGBA(color, 1.0F), ColorUtils.RGBToRGBA(color, 0.75F));
 
-        RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
+        int color = (this.container.getData().isConsumeMode()) ? new Color(0x00FF4F).getRGB() : new Color(0xD92121).getRGB();
+        guiGraphics.fillGradient(x+87, y+107, x+94, y+123, ColorUtils.RGBToRGBA(color, 1.0F), ColorUtils.RGBToRGBA(color, 0.75F));
+
         int yPos = (this.container.getData().isConsumeMode()) ? 115 : 107;
-        this.blit(poseStack, x+87, y+yPos, 177, 166, 7, 8);
+        RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
+        guiGraphics.blit(this.TEXTURE, x+87, y+yPos, 177, 166, 7, 8);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         if (!this.isOptionsShown && MouseHelper.isMouseOver(mouseX, mouseY, x, y, 86, 106, 9, 18)) {
             Component state = (this.container.getData().isConsumeMode()) ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
-            Component info = Component.literal("\u27A4 ").append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.ITALIC));
-            ScreenUtils.renderTooltip(poseStack, info, BGColor.DEFAULT.color.getRGB(), mouseX, mouseY);
+            Component info = Component.literal("➤ ").withStyle(ChatFormatting.GRAY).append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.WHITE, ChatFormatting.ITALIC));
+            guiGraphics.renderTooltip(this.font, info, mouseX, mouseY);
         }
     }
 
-    private void renderTextBoxComponent(PoseStack poseStack, int mouseX, int mouseY) {
+    private void renderTextBoxComponent(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         if (isOptionsShown) return;
         Style style = this.textScreen.getComponentStyleAt(mouseX, mouseY);
         if (style != null && style.getHoverEvent() != null) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, TEXTURE);
-            RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
-
             var styleHoverEvent = style.getHoverEvent();
             if (styleHoverEvent.getValue(HoverEvent.Action.SHOW_TEXT) != null) {
                 Component component = style.getHoverEvent().getValue(HoverEvent.Action.SHOW_TEXT);
-                if (component != null)
-                    this.renderTooltip(poseStack, this.font.split(component, Math.max(this.width / 2, 200)), mouseX, mouseY);
+                if (component != null) {
+                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                    guiGraphics.renderTooltip(this.font, this.font.split(component, Math.max(this.width / 2, 200)), mouseX, mouseY);
+                }
             }
             if (styleHoverEvent.getValue(HoverEvent.Action.SHOW_ITEM) != null) {
                 var stackInfo = styleHoverEvent.getValue(HoverEvent.Action.SHOW_ITEM);
@@ -472,18 +481,15 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 int X = -10;
                 int Y = -30;
 
-                poseStack.pushPose();
-                this.renderItemTooltip(poseStack, stackInfo.getItemStack(), style, mouseX+X , mouseY+Y);
-                poseStack.popPose();
+                guiGraphics.pose().pushPose();
+                this.renderItemTooltip(guiGraphics, stackInfo.getItemStack(), style, mouseX+X , mouseY+Y);
+                guiGraphics.pose().popPose();
             }
         }
     }
 
-    private void renderOptions(PoseStack poseStack, int mouseX, int mouseY) {
+    private void renderOptions(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         if (!this.isOptionsShown) return;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, this.OPTIONS_TEXTURE);
-        RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
         if (this.isDraggingWindow) {
             if (this.optionsX.get(1) == 0.0) {
                 this.optionsX.set(1, Math.abs(this.optionsX.get(0) - mouseX));
@@ -500,59 +506,62 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         length.set(Math.max(this.font.width(Component.translatable("gui.ultimine_addition.skills_record.configuration")), length.get()));
         int spacing = Math.max(length.get() - 100 + 2, 0);
 
-        poseStack.pushPose();
-        poseStack.translate(this.optionsX.get(0), this.optionsY.get(0), this.itemRenderer.blitOffset + 350.0F);
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(this.optionsX.get(0), this.optionsY.get(0), 350.0F);
         int filling = 5;
-        this.blit(poseStack, 0, 0, 0, 0, 59, 108);
+        RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
+        guiGraphics.blit(this.OPTIONS_TEXTURE, 0, 0, 0, 0, 59, 108);
         for (int i = 0; i <= spacing / filling; i++)
-            this.blit(poseStack, 59 + (filling * i), 0, 9, 0, filling, 108);
-        this.blit(poseStack, 59+spacing, 0, 60, 0, 58, 108);
-        GuiComponent.drawCenteredString(poseStack, this.font, Component.translatable("gui.ultimine_addition.skills_record.configuration"), 59+(spacing/2), 17, Color.WHITE.getRGB());
+            guiGraphics.blit(this.OPTIONS_TEXTURE, 59 + (filling * i), 0, 9, 0, filling, 108);
+        guiGraphics.blit(this.OPTIONS_TEXTURE, 59+spacing, 0, 60, 0, 58, 108);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        guiGraphics.drawCenteredString(this.font, Component.translatable("gui.ultimine_addition.skills_record.configuration"), 59+(spacing/2), 17, Color.WHITE.getRGB());
 
         for (int i = 0; i < this.optionsButtonList.size(); i++) {
             int l = 13 * i;
-            this.optionsButtonList.get(i).x = (int) (this.optionsX.get(0)+9);
-            this.optionsButtonList.get(i).y = (int) (this.optionsY.get(0)+29+l);
-            GuiComponent.fill(poseStack, 9, 29+l, 108+spacing, 39+l, ColorUtils.RGBToRGBA(Color.WHITE.getRGB(), this.optionsButtonList.get(i).isHoveredOrFocused() ? 0.45F : 0.25F));
-            GuiComponent.drawCenteredString(poseStack, this.font, this.optionsButtonList.get(i).getMessage(), 59+(spacing/2), 30+l, Color.WHITE.getRGB());
-            this.renderOptionsTooltip(poseStack, this.optionsButtonList.get(i), (int) (mouseX-this.optionsX.get(0)), (int) (mouseY-this.optionsY.get(0)));
+            this.optionsButtonList.get(i).setX((int) (this.optionsX.get(0)+9));
+            this.optionsButtonList.get(i).setY((int) (this.optionsY.get(0)+29+l));
+            guiGraphics.fill(9, 29+l, 108+spacing, 39+l, ColorUtils.RGBToRGBA(Color.WHITE.getRGB(), this.optionsButtonList.get(i).isHoveredOrFocused() ? 0.45F : 0.25F));
+            guiGraphics.drawCenteredString(this.font, this.optionsButtonList.get(i).getMessage(), 59+(spacing/2), 30+l, Color.WHITE.getRGB());
+            this.renderOptionsTooltip(guiGraphics, this.optionsButtonList.get(i), (int) (mouseX-this.optionsX.get(0)), (int) (mouseY-this.optionsY.get(0)));
         }
 
-        if (this.isDraggingWindow) GuiComponent.fill(poseStack, 7, 4, 110+spacing, 13, ColorUtils.RGBToRGBA(Color.WHITE.getRGB(), 0.25F));
-        poseStack.popPose();
+        if (this.isDraggingWindow)
+            guiGraphics.fill(7, 4, 110+spacing, 13, ColorUtils.RGBToRGBA(Color.WHITE.getRGB(), 0.25F));
+        guiGraphics.pose().popPose();
     }
 
-    private void renderOptionsTooltip(PoseStack poseStack, @NotNull Button button, int mouseX, int mouseY) {
-        if (!button.isHoveredOrFocused()) return;
-        Component text = Component.empty();
-        int color = Color.WHITE.getRGB();
-
+    private void renderOptionsTooltip(GuiGraphics guiGraphics, @NotNull Button button, int mouseX, int mouseY) {
+        if (!button.isHovered()) return;
+        MutableComponent component = Component.empty();
 
         if (button == this.backgroundColorButton) {
-            text = Component.translatable(String.format("gui.ultimine_addition.color.%s", this.backgroundColor.name().toLowerCase()));
-            color = ColorUtils.RGBToRGBA(this.backgroundColor.color.getRGB(), this.backgroundColor.getAlpha());
+            int color = ColorUtils.RGBToRGBA(this.backgroundColor.color.getRGB(), this.backgroundColor.getAlpha());
+            component = Component.translatable(String.format("gui.ultimine_addition.color.%s", this.backgroundColor.name().toLowerCase())).withStyle(Style.EMPTY.withColor(color));
         } else if (button == this.animationsButton) {
-            text = this.isAnimationsEnabled ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
+            component = this.isAnimationsEnabled ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
         } else if (button == this.progressionBarButton) {
             switch (this.progressMode) {
-                case 0 -> text = Component.translatable("options.on").withStyle(ChatFormatting.GREEN);
+                case 0 -> component = Component.translatable("options.on").withStyle(ChatFormatting.GREEN);
                 case 1 -> {
                     String[] parts = KeyHandler.KEY_SHOW_PROGRESSION_BAR.saveString().split("\\.");
-                    text = Component.translatable("gui.ultimine_addition.skills_record.option.hold_keybind", parts[parts.length - 1].toUpperCase()).withStyle(ChatFormatting.AQUA);
+                    component = Component.translatable("gui.ultimine_addition.skills_record.option.hold_keybind", parts[parts.length - 1].toUpperCase()).withStyle(ChatFormatting.AQUA);
                     if (I18n.exists(KeyHandler.KEY_SHOW_PROGRESSION_BAR.saveString()))
-                        text = Component.translatable("gui.ultimine_addition.skills_record.option.hold_keybind", I18n.get(KeyHandler.KEY_SHOW_PROGRESSION_BAR.saveString())).withStyle(ChatFormatting.AQUA);
+                        component = Component.translatable("gui.ultimine_addition.skills_record.option.hold_keybind", I18n.get(KeyHandler.KEY_SHOW_PROGRESSION_BAR.saveString())).withStyle(ChatFormatting.AQUA);
                 }
-                case 2 -> text = Component.translatable("options.off").withStyle(ChatFormatting.RED);
+                case 2 -> component = Component.translatable("options.off").withStyle(ChatFormatting.RED);
             }
         }
-        poseStack.pushPose();
-        ScreenUtils.renderTooltip(poseStack, Component.literal("§8\u27A4§r " + text.getString()).withStyle(text.getStyle()).withStyle(ChatFormatting.ITALIC), color, mouseX, mouseY);
-        poseStack.popPose();
+        guiGraphics.pose().pushPose();
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        guiGraphics.renderTooltip(this.font, Component.literal("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(component).withStyle(ChatFormatting.ITALIC), mouseX, mouseY);
+        guiGraphics.pose().popPose();
     }
 
-    private void renderItemTooltip(@NotNull PoseStack poseStack, ItemStack stack, Style style, int mouseX, int mouseY) {
+    private void renderItemTooltip(GuiGraphics guiGraphics, ItemStack stack, Style style, int mouseX, int mouseY) {
+        assert this.minecraft != null;
         AtomicInteger length = new AtomicInteger();
-        List<Component> tooltip = this.getTooltipFromItem(stack);
+        List<Component> tooltip = Screen.getTooltipFromItem(this.minecraft, stack);
         List<ClientTooltipComponent> tooltipComponents = tooltip.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Collectors.toList());
         tooltipComponents.forEach(component -> length.set(Math.max(length.get(), component.getWidth(this.font))));
 
@@ -564,13 +573,15 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         boolean isExceedingWindow = (mouseX+12+18) + length.get() > this.width;
         int alignPosX = isExceedingWindow ? 6 : 0;
 
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, this.itemRenderer.blitOffset + 100.0F);
-        this.blit(poseStack, mouseX+alignPosX, mouseY, 0, 227, 26, 26);
-        poseStack.popPose();
-        this.itemRenderer.renderAndDecorateFakeItem(stack, mouseX+alignPosX+5, mouseY+5);
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
+        RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
+        guiGraphics.blit(this.TEXTURE, mouseX+alignPosX, mouseY, 0, 227, 26, 26);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        guiGraphics.pose().popPose();
+        guiGraphics.renderFakeItem(stack, mouseX+alignPosX+5, mouseY+5);
         int spacing = 6 - tooltipComponents.size() * 6;
-        this.renderTooltipInternal(poseStack, tooltipComponents, mouseX+18, mouseY+21+spacing);
+        guiGraphics.renderTooltipInternal(this.font, tooltipComponents, mouseX+18, mouseY+21+spacing, DefaultTooltipPositioner.INSTANCE);
     }
 
     private boolean isConsumeChallengeExists() {
@@ -709,8 +720,9 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 info = Component.translatable("challenge.ultimine_addition.various_blocks", Component.literal(displayItem.getHoverName().getString()).withStyle(questStyle));
             } else info = Component.literal(itemList.get(0).getHoverName().getString()).withStyle(questStyle);
 
+            @SuppressWarnings("UnnecessaryUnicodeEscape")
             Component title = ScreenUtils.limitComponent(Component.literal("\u300E").append(Component.translatable("challenge.ultimine_addition.title", identifier.order())).append("\u300F"), this.textScreen.getWidth());
-            Component consume = Component.literal("\u2716 ").append(Component.translatable("challenge.ultimine_addition.consume")).withStyle(ChatFormatting.RED);
+            Component consume = Component.literal("✖ ").append(Component.translatable("challenge.ultimine_addition.consume")).withStyle(ChatFormatting.RED);
             Component description = Component.translatable(String.format("challenge.ultimine_addition.%s", type), info);
             Style descStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GRAY);
             Style counterStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GOLD);
@@ -731,7 +743,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 result.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(consume, this.textScreen.getWidth(), consume.getStyle())));
             result.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(description, this.textScreen.getWidth(), descStyle)));
 
-            result.add(FormattedCharSequence.forward(String.format("\u27A4 %s/%s", values.getCurrent(), values.getRequired()), counterStyle));
+            result.add(FormattedCharSequence.forward(String.format("➤ %s/%s", values.getCurrent(), values.getRequired()), counterStyle));
             if (!this.textScreen.isEmpty()) this.textScreen.add(FormattedCharSequence.EMPTY).addAll(result); else this.textScreen.addAll(result);
         });
         this.calculateProgression(currentValues.get(), requiredValues.get());

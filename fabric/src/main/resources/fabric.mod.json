@@ -35,8 +35,6 @@
     "fabricloader": ">=${minFabricVersion}",
     "fabric-api": ">=${minFabricApiVersion}",
     "forgeconfigapiport": ">=${forgeConfigAPIVersion}",
-    "com_electronwill_night-config_core": "*",
-    "com_electronwill_night-config_toml": "*",
     "architectury": ">=${archVersion}",
     "coolcat_lib": ">=${ccLibVersion}",
     "ftbultimine": ">=${ftbUltimineVersion}"

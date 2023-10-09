@@ -35,5 +35,6 @@
       "killed_by_something",
       "killed_something"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

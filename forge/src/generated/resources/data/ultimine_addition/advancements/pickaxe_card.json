@@ -38,5 +38,6 @@
     [
       "has_pickaxe_card"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

@@ -1,12 +1,13 @@
 {
   "type": "ultimine_addition:mc_recipe",
+  "category": "misc",
   "group": "ultimine_addition",
   "ingredients": [
     {
       "item": "ultimine_addition:mining_skill_card_empty"
     },
     {
-      "tag": "forge:tools/hoes"
+      "tag": "minecraft:hoes"
     }
   ],
   "result": {

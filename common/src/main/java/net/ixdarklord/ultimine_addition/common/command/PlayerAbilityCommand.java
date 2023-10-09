@@ -35,17 +35,18 @@ public class PlayerAbilityCommand {
                 i++;
 
                 if (player == source.getPlayer()) {
-                    source.sendSuccess(Component.translatable("command.ultimine_addition.set_ability.success", State).withStyle(ChatFormatting.DARK_AQUA), true);
+                    source.sendSuccess(() -> Component.translatable("command.ultimine_addition.set_ability.success", State).withStyle(ChatFormatting.DARK_AQUA), true);
                 }
                 if (i > 1 && player != source.getPlayer() && !player.hasPermissions(2)) {
                     player.displayClientMessage(Component.translatable("command.ultimine_addition.set_ability.receiver", State, Objects.requireNonNull(source.getPlayer()).getName().getString()).withStyle(ChatFormatting.GRAY), false);
                 }
                 if (i > 1) {
-                    source.sendSuccess(Component.translatable("command.ultimine_addition.set_ability.sender", State).withStyle(ChatFormatting.GRAY), true);
+                    source.sendSuccess(() -> Component.translatable("command.ultimine_addition.set_ability.sender", State).withStyle(ChatFormatting.GRAY), true);
                     int x = 1;
                     for (ServerPlayer p : targets) {
                         if (p != source.getPlayer()) {
-                            source.sendSuccess(Component.literal(x + ": " + p.getName().getString()).withStyle(ChatFormatting.YELLOW), true);
+                            int finalX = x;
+                            source.sendSuccess(() -> Component.literal(finalX + ": " + p.getName().getString()).withStyle(ChatFormatting.YELLOW), true);
                             x++;
                         }
                     }

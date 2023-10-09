@@ -1,13 +1,10 @@
 package net.ixdarklord.ultimine_addition.client.gui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -29,55 +26,55 @@ public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
         return this.gridSizeX() * 18 + 2;
     }
 
-    public void renderImage(Font font, int x, int y, PoseStack stack, ItemRenderer itemRenderer, int o) {
+    @Override
+    public void renderImage(Font font, int x, int y, GuiGraphics guiGraphics) {
         int i = this.gridSizeX();
         int j = this.gridSizeY();
         int k = 0;
 
         for(int l = 0; l < j; ++l) {
-            for(int i1 = 0; i1 < i; ++i1) {
-                int j1 = x + i1 * 18 + 1;
-                int k1 = y + l * 20 + 1;
-                this.renderSlot(j1, k1, k++, false, font, stack, itemRenderer, o);
+            for(int m = 0; m < i; ++m) {
+                int n = x + m * 18 + 1;
+                int o = y + l * 20 + 1;
+                this.renderSlot(n, o, k++, false, guiGraphics, font);
             }
         }
 
-        this.drawBorder(x, y, i, j, stack, o);
+        this.drawBorder(x, y, i, j, guiGraphics);
     }
 
-    private void renderSlot(int x, int y, int i, boolean blocked, Font font, PoseStack stack, ItemRenderer itemRenderer, int o) {
-        if (i >= this.items.size()) {
-            this.blit(stack, x, y, o, blocked ? ClientSkillsRecordTooltip.Texture.BLOCKED_SLOT : ClientSkillsRecordTooltip.Texture.SLOT);
+    private void renderSlot(int x, int y, int itemIndex, boolean isBundleFull, GuiGraphics guiGraphics, Font font) {
+        if (itemIndex >= this.items.size()) {
+            this.blit(guiGraphics, x, y, isBundleFull ? Texture.BLOCKED_SLOT : Texture.SLOT);
         } else {
-            ItemStack itemstack = this.items.get(i);
-            this.blit(stack, x, y, o, ClientSkillsRecordTooltip.Texture.SLOT);
-            itemRenderer.renderAndDecorateItem(itemstack, x + 1, y + 1, i);
-            itemRenderer.renderGuiItemDecorations(font, itemstack, x + 1, y + 1);
+            ItemStack itemStack = this.items.get(itemIndex);
+            this.blit(guiGraphics, x, y, Texture.SLOT);
+            guiGraphics.renderItem(itemStack, x + 1, y + 1, itemIndex);
+            guiGraphics.renderItemDecorations(font, itemStack, x + 1, y + 1);
         }
     }
 
-    private void drawBorder(int x, int y, int xSize, int ySize, PoseStack stack, int o) {
-        this.blit(stack, x, y, o, ClientSkillsRecordTooltip.Texture.BORDER_CORNER_TOP);
-        this.blit(stack, x + xSize * 18 + 1, y, o, ClientSkillsRecordTooltip.Texture.BORDER_CORNER_TOP);
+    private void drawBorder(int x, int y, int slotWidth, int slotHeight, GuiGraphics guiGraphics) {
+        this.blit(guiGraphics, x, y, Texture.BORDER_CORNER_TOP);
+        this.blit(guiGraphics, x + slotWidth * 18 + 1, y, Texture.BORDER_CORNER_TOP);
 
-        for(int i = 0; i < xSize; ++i) {
-            this.blit(stack, x + 1 + i * 18, y, o, ClientSkillsRecordTooltip.Texture.BORDER_HORIZONTAL_TOP);
-            this.blit(stack, x + 1 + i * 18, y + ySize * 20, o, ClientSkillsRecordTooltip.Texture.BORDER_HORIZONTAL_BOTTOM);
+        int i;
+        for(i = 0; i < slotWidth; ++i) {
+            this.blit(guiGraphics, x + 1 + i * 18, y, Texture.BORDER_HORIZONTAL_TOP);
+            this.blit(guiGraphics, x + 1 + i * 18, y + slotHeight * 20, Texture.BORDER_HORIZONTAL_BOTTOM);
         }
 
-        for(int j = 0; j < ySize; ++j) {
-            this.blit(stack, x, y + j * 20 + 1, o, ClientSkillsRecordTooltip.Texture.BORDER_VERTICAL);
-            this.blit(stack, x + xSize * 18 + 1, y + j * 20 + 1, o, ClientSkillsRecordTooltip.Texture.BORDER_VERTICAL);
+        for(i = 0; i < slotHeight; ++i) {
+            this.blit(guiGraphics, x, y + i * 20 + 1, Texture.BORDER_VERTICAL);
+            this.blit(guiGraphics, x + slotWidth * 18 + 1, y + i * 20 + 1, Texture.BORDER_VERTICAL);
         }
 
-        this.blit(stack, x, y + ySize * 20, o, ClientSkillsRecordTooltip.Texture.BORDER_CORNER_BOTTOM);
-        this.blit(stack, x + xSize * 18 + 1, y + ySize * 20, o, ClientSkillsRecordTooltip.Texture.BORDER_CORNER_BOTTOM);
+        this.blit(guiGraphics, x, y + slotHeight * 20, Texture.BORDER_CORNER_BOTTOM);
+        this.blit(guiGraphics, x + slotWidth * 18 + 1, y + slotHeight * 20, Texture.BORDER_CORNER_BOTTOM);
     }
 
-    private void blit(PoseStack stack, int x, int y, int o, ClientSkillsRecordTooltip.Texture texture) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, TEXTURE_LOCATION);
-        GuiComponent.blit(stack, x, y, o, (float)texture.x, (float)texture.y, texture.w, texture.h, 128, 128);
+    private void blit(GuiGraphics guiGraphics, int x, int y, Texture texture) {
+        guiGraphics.blit(TEXTURE_LOCATION, x, y, 0, (float)texture.x, (float)texture.y, texture.w, texture.h, 128, 128);
     }
 
     private int gridSizeX() {

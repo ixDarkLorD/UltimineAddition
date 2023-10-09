@@ -82,17 +82,17 @@ configurations {
 dependencies {
     forge "net.minecraftforge:forge:${mc_version}-${forge_version}"
     modApi "dev.architectury:architectury-forge:${architectury_version}"
+    modApi "net.ixdarklord.coolcat_lib:forge:${mc_version}-v${coolcatlib_version}-release"
 
-    modImplementation "net.ixdarklord.coolcat_lib:forge:v1.0.0-release"
-    modImplementation "curse.maven:ftb-ultimine-forge-386134:4598468"
-    modImplementation "curse.maven:ftb-library-forge-404465:4661834"
+    modImplementation "curse.maven:ftb-library-forge-404465:4720056"
+    modImplementation "curse.maven:ftb-ultimine-forge-386134:4597013"
 
     modCompileOnly "mezz.jei:jei-${mc_version}-forge-api:${jei_version}"
 //    modRuntimeOnly "mezz.jei:jei-${mc_version}-forge:${jei_version}"
-    modRuntimeOnly "curse.maven:jei-238222:4712866"
+    modRuntimeOnly "curse.maven:jei-238222:4712868"
 
-    modRuntimeOnly "curse.maven:catalogue-459701:3873264"
-    modRuntimeOnly "curse.maven:configured-457570:4462837"
+    modRuntimeOnly "curse.maven:catalogue-459701:4766090"
+//    modRuntimeOnly "curse.maven:configured-457570:4462837"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }

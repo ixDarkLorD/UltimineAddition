@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "misc",
   "group": "ultimine_addition",
   "key": {
     "A": {
@@ -19,5 +20,6 @@
   ],
   "result": {
     "item": "ultimine_addition:card_blueprint"
-  }
+  },
+  "show_notification": true
 }

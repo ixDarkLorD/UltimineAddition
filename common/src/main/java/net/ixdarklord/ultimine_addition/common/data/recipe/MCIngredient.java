@@ -9,7 +9,8 @@ import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -208,7 +209,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
             return new ItemValue(new ItemStack(item), tier);
         } else if (json.has("tag")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
-            TagKey<Item> tagKey = TagKey.create(Registry.ITEM_REGISTRY, resourceLocation);
+            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, resourceLocation);
             MiningSkillCardItem.Tier tier = json.has("tier") ? MiningSkillCardItem.Tier.fromInt(GsonHelper.getAsInt(json, "tier")) : null;
             return new TagValue(tagKey, tier);
         } else {
@@ -233,7 +234,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
 
         public Collection<ItemStack> getItems() {
             List<ItemStack> list = new ArrayList<>();
-            for (Holder<Item> holder : Registry.ITEM.getTagOrEmpty(this.tag)) {
+            for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
                 ItemStack stack = new ItemStack(holder);
                 if (this.tier != null && holder instanceof MiningSkillCardItem item) {
                     item.getData(stack).setTier(this.tier).saveData(stack);

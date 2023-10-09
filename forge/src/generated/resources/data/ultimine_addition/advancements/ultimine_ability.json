@@ -31,5 +31,6 @@
     [
       "has_ultimine_ability"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

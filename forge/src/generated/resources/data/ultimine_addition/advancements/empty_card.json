@@ -49,5 +49,6 @@
       "trade_for_empty_card",
       "has_empty_card"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

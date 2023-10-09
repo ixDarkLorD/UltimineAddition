@@ -117,7 +117,7 @@ public class ChallengesData {
             try {
                 return DataResult.success(Type.fromValues(pair.getFirst(), pair.getSecond()));
             } catch (EnumConstantNotPresentException e) {
-                return DataResult.error(pair + " is not present.");
+                return DataResult.error(() -> pair + " is not present.");
             }
         }, Type::getPair);
 

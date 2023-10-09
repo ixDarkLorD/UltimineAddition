@@ -1,15 +1,14 @@
 package net.ixdarklord.ultimine_addition.common.data.chunk;
 
 import dev.architectury.platform.Platform;
-import dev.architectury.registry.registries.Registries;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,7 +22,7 @@ public class ChunkData extends DataHandler<ChunkData, CompoundTag> {
     private Map<EntityIdentifier, List<BlockInfo>> placedBlocks = new HashMap<>();
 
     public void addBlock(Entity entity, BlockInfo blockInfo) {
-        ResourceLocation id = Registries.getId(entity.getType(), ResourceKey.createRegistryKey(new ResourceLocation("entity_type")));
+        ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
         var list = placedBlocks.get(new EntityIdentifier(id, entity.getUUID()));
         if (list == null) list = new ArrayList<>();
         AtomicBoolean isPosExists = new AtomicBoolean();
@@ -66,10 +65,10 @@ public class ChunkData extends DataHandler<ChunkData, CompoundTag> {
 
     @Override
     public ChunkData loadData(CompoundTag data) {
-//        CompoundTag NBT = (CompoundTag) data.get(this.NBTBase);
-//        if (NBT == null) NBT = new CompoundTag();
-//
-//        this.placedBlocks = getPlacedBlocksFromNBT(NBT);
+        CompoundTag NBT = (CompoundTag) data.get(this.NBTBase);
+        if (NBT == null) NBT = new CompoundTag();
+
+        this.placedBlocks = getPlacedBlocksFromNBT(NBT);
         return this;
     }
 
@@ -124,7 +123,7 @@ public class ChunkData extends DataHandler<ChunkData, CompoundTag> {
             ListTag listTag2 = tag.getList("Blocks", 10);
             for (int j = 0; j < listTag2.size(); j++) {
                 CompoundTag tag2 =  listTag2.getCompound(i);
-                BlockState blockState = NbtUtils.readBlockState((CompoundTag) Objects.requireNonNull(tag2.get("State")));
+                BlockState blockState = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), (CompoundTag) Objects.requireNonNull(tag2.get("State")));
                 BlockPos pos = NbtUtils.readBlockPos((CompoundTag) Objects.requireNonNull(tag2.get("Pos")));
                 blockInfoList.add(new BlockInfo(blockState, pos));
             }
