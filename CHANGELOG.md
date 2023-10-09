@@ -1,6 +1,14 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.0.2 Release | Oct 9, 2023
+### Changed
+- Cleaning codes
+
+## v1.0.1 Release | Oct 9, 2023
+### Fixing
+- ChunkData not loading properly
+
 ## v1.0.0 Release | Oct 7, 2023
 ### Added
 - New Way to Obtain The Ultimine Ability

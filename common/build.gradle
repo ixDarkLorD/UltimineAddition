@@ -12,7 +12,7 @@ loom {
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${fabric_version}"
     modApi "dev.architectury:architectury:${architectury_version}"
-    modApi "net.ixdarklord.coolcat_lib:common:${mc_version}-v1.0.0-release"
+    modApi "net.ixdarklord.coolcat_lib:common:${mc_version}-v${coolcatlib_version}-release"
 
     implementation 'com.electronwill.night-config:core:3.6.6'
     implementation 'com.electronwill.night-config:toml:3.6.6'

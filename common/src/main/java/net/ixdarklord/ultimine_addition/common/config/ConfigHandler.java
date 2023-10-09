@@ -23,9 +23,13 @@ public class ConfigHandler {
         public static final ForgeConfigSpec.ConfigValue<Boolean> ANIMATIONS_MODE;
         public static final ForgeConfigSpec.IntValue PROGRESS_BAR;
         public static final ForgeConfigSpec.BooleanValue MSC_RENDERER;
+        public static final ForgeConfigSpec.BooleanValue TEXT_SCREEN_SHADOW;
 
         static {
             BUILDER.push("Visuals");
+            TEXT_SCREEN_SHADOW = BUILDER
+                    .comment("This will Enable or Disable the drop shadow effect in the text screen of the Skills Record.")
+                    .define("text_screen_shadow", true);
             BACKGROUND_COLOR = BUILDER
                     .comment(" This is the background color for the skills record GUI.")
                     .defineEnum("background_color", SkillsRecordScreen.BGColor.DEFAULT);

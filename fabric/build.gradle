@@ -64,7 +64,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${fabric_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}+${mc_version}"
     modApi "dev.architectury:architectury-fabric:${architectury_version}"
-    modApi "net.ixdarklord.coolcat_lib:fabric:${mc_version}-v1.0.0-release"
+    modApi "net.ixdarklord.coolcat_lib:fabric:${mc_version}-v${coolcatlib_version}-release"
 
     implementation 'com.electronwill.night-config:core:3.6.6'
     implementation 'com.electronwill.night-config:toml:3.6.6'
