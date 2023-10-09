@@ -122,9 +122,9 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
             this.isOptionsShown ^= true;
             this.resetOptionsWindow();
         }, (button, poseStack, i, j) -> {
-            Component component = Component.translatable("gui.ultimine_addition.skills_record.configuration");
+            Component component = Component.translatable("gui.ultimine_addition.skills_record.configuration").withStyle(ChatFormatting.WHITE);
             if (button.isActive() && !this.isOptionsShown)
-                this.renderTooltip(poseStack, Component.literal("➤ ").withStyle(ChatFormatting.GRAY).append(component).withStyle(ChatFormatting.ITALIC), i, j);
+                this.renderTooltip(poseStack, Component.literal("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(component).withStyle(ChatFormatting.ITALIC), i, j);
         }, CommonComponents.EMPTY));
 
         double X = this.optionsX.get(0);
