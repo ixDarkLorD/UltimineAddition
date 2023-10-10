@@ -1,7 +1,7 @@
 # Changelog
 This file is for listing all the changes to this project
 
-## v0.1.0a Beta | Oct 11, 2023
+## v0.1.1 Beta | Oct 11, 2023
 - Fixing issue related to packet
 
 ## v0.1.0 Beta | Oct 9, 2023
