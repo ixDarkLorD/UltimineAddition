@@ -150,6 +150,7 @@ public class MCRecipe extends ShapelessRecipe {
 
         public void toNetwork(FriendlyByteBuf buffer, MCRecipe recipe) {
             buffer.writeUtf(recipe.getGroup());
+            buffer.writeEnum(recipe.category);
             buffer.writeVarInt(recipe.getIngredients().size());
             for(MCIngredient ingredient : recipe.getMCIngredients()) {
                 ingredient.toNetwork(buffer);
