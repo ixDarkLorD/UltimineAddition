@@ -106,7 +106,7 @@ public class ChallengesInfoPanel {
                 }
             });
         }
-        PANEL_LIST.removeIf(trashList::contains);
+        slideOutPanels(trashList.stream());
     }
 
     private static void validatePanels(SkillsRecordData recordData, Window window, Font font) {
