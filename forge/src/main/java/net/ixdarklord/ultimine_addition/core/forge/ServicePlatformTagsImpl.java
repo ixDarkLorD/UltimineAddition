@@ -1,20 +1,20 @@
 package net.ixdarklord.ultimine_addition.core.forge;
 
+import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.Tags;
 
 public class ServicePlatformTagsImpl {
     public static TagKey<Item> getPickaxes() {
-        return Tags.Items.TOOLS_PICKAXES;
+        return ModItemTags.PICKAXES;
     }
     public static TagKey<Item> getAxes() {
-        return Tags.Items.TOOLS_AXES;
+        return ModItemTags.AXES;
     }
     public static TagKey<Item> getShovels() {
-        return Tags.Items.TOOLS_SHOVELS;
+        return ModItemTags.SHOVELS;
     }
     public static TagKey<Item> getHoes() {
-        return Tags.Items.TOOLS_HOES;
+        return ModItemTags.HOES;
     }
 }

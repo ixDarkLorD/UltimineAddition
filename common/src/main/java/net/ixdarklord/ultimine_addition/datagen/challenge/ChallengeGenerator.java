@@ -347,11 +347,11 @@ public class ChallengeGenerator extends ChallengeProvider {
                 .requiredAmount(64, 128)
                 .targetedBlocks(Blocks.PODZOL)
                 .save(consumer);
-        ChallengesBuilder.create(getLocation("gathering_mud"), MiningSkillCardItem.Type.SHOVEL)
+        ChallengesBuilder.create(getLocation("gathering_coarse_dirt"), MiningSkillCardItem.Type.SHOVEL)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Novice)
                 .requiredAmount(64, 128)
-                .targetedBlocks(Blocks.MUD)
+                .targetedBlocks(Blocks.COARSE_DIRT)
                 .save(consumer);
         ChallengesBuilder.create(getLocation("gathering_snow"), MiningSkillCardItem.Type.SHOVEL)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
@@ -407,11 +407,11 @@ public class ChallengeGenerator extends ChallengeProvider {
                 .requiredAmount(256, 512)
                 .targetedBlocks(Blocks.SAND)
                 .save(consumer);
-        ChallengesBuilder.create(getLocation("gathering_mud_hardcore"), MiningSkillCardItem.Type.SHOVEL)
+        ChallengesBuilder.create(getLocation("gathering_coarse_dirt_hardcore"), MiningSkillCardItem.Type.SHOVEL)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Adept)
                 .requiredAmount(128, 256)
-                .targetedBlocks(Blocks.MUD)
+                .targetedBlocks(Blocks.COARSE_DIRT)
                 .save(consumer);
         ChallengesBuilder.create(getLocation("gathering_podzol_hardcore"), MiningSkillCardItem.Type.SHOVEL)
                 .forType(ChallengesData.Type.BREAK_BLOCK_CONSUME)
@@ -500,11 +500,11 @@ public class ChallengeGenerator extends ChallengeProvider {
                 .requiredAmount(16, 128)
                 .targetedBlocks(Blocks.KELP)
                 .save(consumer);
-        ChallengesBuilder.create(getLocation("gathering_sculk"), MiningSkillCardItem.Type.HOE)
-                .forType(ChallengesData.Type.BREAK_BLOCK)
+        ChallengesBuilder.create(getLocation("gathering_dark_oak_leaves_hardcore"), MiningSkillCardItem.Type.HOE)
+                .forType(ChallengesData.Type.BREAK_BLOCK_CONSUME)
                 .forTier(MiningSkillCardItem.Tier.Apprentice)
-                .requiredAmount(32, 128)
-                .targetedBlocks(Blocks.SCULK, Blocks.SCULK_VEIN)
+                .requiredAmount(128, 256)
+                .targetedBlocks(Blocks.DARK_OAK_LEAVES)
                 .save(consumer);
         ChallengesBuilder.create(getLocation("gathering_sculk_sensor"), MiningSkillCardItem.Type.HOE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
@@ -512,11 +512,11 @@ public class ChallengeGenerator extends ChallengeProvider {
                 .requiredAmount(4, 16)
                 .targetedBlocks(Blocks.SCULK_SENSOR)
                 .save(consumer);
-        ChallengesBuilder.create(getLocation("gathering_sculk_catalyst"), MiningSkillCardItem.Type.HOE)
+        ChallengesBuilder.create(getLocation("break_seagrass"), MiningSkillCardItem.Type.HOE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Apprentice)
-                .requiredAmount(4, 16)
-                .targetedBlocks(Blocks.SCULK_CATALYST)
+                .requiredAmount(64, 128)
+                .targetedBlocks(Blocks.SEAGRASS)
                 .save(consumer);
         ChallengesBuilder.create(getLocation("break_shroomlight"), MiningSkillCardItem.Type.HOE)
                 .forType(ChallengesData.Type.BREAK_BLOCK_CONSUME)

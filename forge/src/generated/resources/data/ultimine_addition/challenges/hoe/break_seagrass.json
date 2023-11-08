@@ -1,0 +1,15 @@
+{
+  "required_amount": {
+    "max": 128,
+    "min": 64
+  },
+  "targeted_blocks": [
+    "minecraft:seagrass"
+  ],
+  "for_card_type": "hoe",
+  "for_card_tier": 2,
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  }
+}

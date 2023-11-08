@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "ultimine_addition:mining_skill_card_empty",
     "ultimine_addition:mining_skill_card_pickaxe",

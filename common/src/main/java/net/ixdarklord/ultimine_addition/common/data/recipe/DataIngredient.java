@@ -138,12 +138,31 @@ public final class DataIngredient implements Predicate<ItemStack> {
 
     public static NonNullList<Ingredient> toNormal(NonNullList<DataIngredient> inputs) {
         NonNullList<Ingredient> result = NonNullList.create();
-        result.addAll(inputs.stream().map(ingredient -> {
-            ItemStack[] items = Arrays.stream(ingredient.getItems()).peek(stack ->
-                    stack.getOrCreateTag().putInt("amount", ingredient.getAmount()))
-                    .toArray(ItemStack[]::new);
-            return Ingredient.of(items);
-        }).toList());
+
+        // Item Values
+        result.addAll(inputs.stream()
+                .filter(ingredient -> !Arrays.stream(ingredient.values)
+                        .filter(value -> value instanceof DataIngredient.ItemValue).toList().isEmpty())
+                .map(ingredient -> {
+                    ItemStack[] items = Arrays.stream(ingredient.getItems()).peek(stack ->
+                            stack.getOrCreateTag().putInt("amount", ingredient.getAmount()))
+                            .toArray(ItemStack[]::new);
+                    return Ingredient.of(items);
+                })
+                .toList()
+        );
+
+        // Tag Values
+        result.addAll(inputs.stream()
+                .filter(ingredient -> !Arrays.stream(ingredient.values).filter(value -> value instanceof DataIngredient.TagValue).toList().isEmpty())
+                .map(ingredient -> {
+                    Stream<Ingredient.TagValue> tagValueStream = Arrays.stream(ingredient.values)
+                            .filter(value -> value instanceof DataIngredient.TagValue)
+                            .map(value -> new Ingredient.TagValue(((DataIngredient.TagValue) value).tag));
+                    return Ingredient.fromValues(tagValueStream);
+                })
+                .toList()
+        );
         return result;
     }
 

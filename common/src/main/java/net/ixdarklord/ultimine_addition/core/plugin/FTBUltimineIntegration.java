@@ -12,8 +12,9 @@ import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
@@ -53,31 +54,31 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
     public static void keyEvent(Player player) {
         if (FTBUltimineClient.keyBinding.isDown()) {
             if (!isButtonPressed) {
-                MutableComponent MSG = Component.translatable("info.ultimine_addition.incapable");
+                MutableComponent MSG = new TranslatableComponent("info.ultimine_addition.incapable");
                 if (!ServicePlatform.Players.isPlayerUltimineCapable(player)) {
                      if (ItemUtils.isItemInHandPickaxe(player)) {
                         if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_PICKAXE)) {
                             player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                            player.displayClientMessage(Component.literal("\u2716 ").append(Component.translatable("info.ultimine_addition.required_skill.pickaxe")).withStyle(ChatFormatting.GRAY), false);
+                            player.displayClientMessage(new TextComponent("✖ ").append(new TranslatableComponent("info.ultimine_addition.required_skill.pickaxe")).withStyle(ChatFormatting.GRAY), false);
                         }
                     } else if (ItemUtils.isItemInHandAxe(player)) {
                         if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_AXE)) {
                             player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                            player.displayClientMessage(Component.literal("\u2716 ").append(Component.translatable("info.ultimine_addition.required_skill.axe")).withStyle(ChatFormatting.GRAY), false);
+                            player.displayClientMessage(new TextComponent("✖ ").append(new TranslatableComponent("info.ultimine_addition.required_skill.axe")).withStyle(ChatFormatting.GRAY), false);
                         }
                     } else if (ItemUtils.isItemInHandShovel(player)) {
                         if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_SHOVEL)) {
                             player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                            player.displayClientMessage(Component.literal("\u2716 ").append(Component.translatable("info.ultimine_addition.required_skill.shovel")).withStyle(ChatFormatting.GRAY), false);
+                            player.displayClientMessage(new TextComponent("✖ ").append(new TranslatableComponent("info.ultimine_addition.required_skill.shovel")).withStyle(ChatFormatting.GRAY), false);
                         }
                     } else if (ItemUtils.isItemInHandHoe(player)) {
                         if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_HOE)) {
                             player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                            player.displayClientMessage(Component.literal("\u2716 ").append(Component.translatable("info.ultimine_addition.required_skill.hoe")).withStyle(ChatFormatting.GRAY), false);
+                            player.displayClientMessage(new TextComponent("✖ ").append(new TranslatableComponent("info.ultimine_addition.required_skill.hoe")).withStyle(ChatFormatting.GRAY), false);
                         }
                     } else if (ItemUtils.isItemInHandNotTools(player)) {
                          player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                         player.displayClientMessage(Component.literal("\u2716 ").append(Component.translatable("info.ultimine_addition.required_skill.all")).withStyle(ChatFormatting.GRAY), false);
+                         player.displayClientMessage(new TextComponent("✖ ").append(new TranslatableComponent("info.ultimine_addition.required_skill.all")).withStyle(ChatFormatting.GRAY), false);
                      }
                 }
             }

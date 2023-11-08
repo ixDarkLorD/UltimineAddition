@@ -10,7 +10,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 public class CardTierArgument implements ArgumentType<MiningSkillCardItem.Tier> {
     private static final Collection<String> EXAMPLES = Arrays.asList("novice", "adept");
     public static final DynamicCommandExceptionType ERROR_UNKNOWN_TIER = new DynamicCommandExceptionType((entry) ->
-            Component.translatable("argument.ultimine_addition.cards.tier.unknown", entry));
+            new TranslatableComponent("argument.ultimine_addition.cards.tier.unknown", entry));
 
     public static CardTierArgument tier() {
         return new CardTierArgument();

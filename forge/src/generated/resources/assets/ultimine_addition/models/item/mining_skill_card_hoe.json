@@ -1,38 +1,38 @@
 {
   "parent": "minecraft:item/generated",
-  "overrides": [
-    {
-      "model": "ultimine_addition:item/custom_renderer/mining_skill_card",
-      "predicate": {
-        "ultimine_addition:is_custom_renderer": 1.0
-      }
-    },
-    {
-      "model": "ultimine_addition:item/mining_skill_card_hoe_1",
-      "predicate": {
-        "ultimine_addition:tier_1": 1.0
-      }
-    },
-    {
-      "model": "ultimine_addition:item/mining_skill_card_hoe_2",
-      "predicate": {
-        "ultimine_addition:tier_2": 1.0
-      }
-    },
-    {
-      "model": "ultimine_addition:item/mining_skill_card_hoe_3",
-      "predicate": {
-        "ultimine_addition:tier_3": 1.0
-      }
-    },
-    {
-      "model": "ultimine_addition:item/mining_skill_card_hoe_mastered",
-      "predicate": {
-        "ultimine_addition:tier_maxed": 1.0
-      }
-    }
-  ],
   "textures": {
     "layer0": "ultimine_addition:item/mining_skill_card_hoe_unlearned"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "ultimine_addition:is_custom_renderer": 1.0
+      },
+      "model": "ultimine_addition:item/custom_renderer/mining_skill_card"
+    },
+    {
+      "predicate": {
+        "ultimine_addition:tier_1": 1.0
+      },
+      "model": "ultimine_addition:item/mining_skill_card_hoe_1"
+    },
+    {
+      "predicate": {
+        "ultimine_addition:tier_2": 1.0
+      },
+      "model": "ultimine_addition:item/mining_skill_card_hoe_2"
+    },
+    {
+      "predicate": {
+        "ultimine_addition:tier_3": 1.0
+      },
+      "model": "ultimine_addition:item/mining_skill_card_hoe_3"
+    },
+    {
+      "predicate": {
+        "ultimine_addition:tier_maxed": 1.0
+      },
+      "model": "ultimine_addition:item/mining_skill_card_hoe_mastered"
+    }
+  ]
 }

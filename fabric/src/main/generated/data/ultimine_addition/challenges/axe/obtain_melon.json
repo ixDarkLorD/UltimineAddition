@@ -1,15 +1,15 @@
 {
-  "challenge_type": {
-    "consume_block": false,
-    "id": "break_block"
-  },
-  "for_card_tier": 2,
-  "for_card_type": "axe",
   "required_amount": {
     "max": 32,
     "min": 16
   },
   "targeted_blocks": [
     "minecraft:melon"
-  ]
+  ],
+  "for_card_type": "axe",
+  "for_card_tier": 2,
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  }
 }

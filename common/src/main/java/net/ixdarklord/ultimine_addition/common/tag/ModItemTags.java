@@ -12,10 +12,21 @@ public class ModItemTags {
     public static final TagKey<Item> LESS_VALUABLE_PIGMENT = create("less_valuable_pigment");
     public static final TagKey<Item> SLIMEBALLS_FABRIC = createFabric("slime_balls");
 
-    private static TagKey<Item> create(String name) {
+    public static final TagKey<Item> PICKAXES = createMC("pickaxes");
+    public static final TagKey<Item> AXES = createMC("axes");
+    public static final TagKey<Item> SHOVELS = createMC("shovels");
+    public static final TagKey<Item> HOES = createMC("hoes");
+
+    public static TagKey<Item> create(String name) {
         return TagKey.create(Registry.ITEM_REGISTRY, Constants.getLocation(name));
     }
-    private static TagKey<Item> createFabric(String name) {
+    public static TagKey<Item> createMC(String name) {
+        return TagKey.create(Registry.ITEM_REGISTRY, Constants.getMCLocation(name));
+    }
+    public static TagKey<Item> createForge(String name) {
+        return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation("forge", name));
+    }
+    public static TagKey<Item> createFabric(String name) {
         return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation("c", name));
     }
 }

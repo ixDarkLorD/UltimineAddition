@@ -7,6 +7,7 @@ import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -56,7 +57,7 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
         if (this.isShiftButtonNotPressed(tooltipComponents)) return;
-        Component component = Component.translatable("tooltip.ultimine_addition.certificate.info").withStyle(ChatFormatting.GRAY);
+        Component component = new TranslatableComponent("tooltip.ultimine_addition.certificate.info").withStyle(ChatFormatting.GRAY);
         List<Component> components = ScreenUtils.splitComponent(component, getSplitterLength());
         tooltipComponents.addAll(components);
     }

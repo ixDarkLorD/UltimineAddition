@@ -59,6 +59,10 @@ public class ConfigHandler {
 
         public static final ForgeConfigSpec.IntValue CHALLENGE_VALIDATOR;
         public static final ForgeConfigSpec.BooleanValue TIER_BASED_MAX_BLOCKS;
+        public static final ForgeConfigSpec.IntValue TIER_0_CHALLENGES_AMOUNT;
+        public static final ForgeConfigSpec.IntValue TIER_1_CHALLENGES_AMOUNT;
+        public static final ForgeConfigSpec.IntValue TIER_2_CHALLENGES_AMOUNT;
+        public static final ForgeConfigSpec.IntValue TIER_3_CHALLENGES_AMOUNT;
         public static final ForgeConfigSpec.IntValue TIER_1_MAX_BLOCKS;
         public static final ForgeConfigSpec.IntValue TIER_2_MAX_BLOCKS;
         public static final ForgeConfigSpec.IntValue TIER_3_MAX_BLOCKS;
@@ -97,6 +101,17 @@ public class ConfigHandler {
                     .defineInRange("challenge_validator", 2, 1, 600);
             BUILDER.pop();
 
+            BUILDER.push("Challenges");
+            TIER_0_CHALLENGES_AMOUNT = BUILDER
+                    .comment("You can change the values on how many challenges should be given in each tier.",
+                            "But remember that you must have the exact number of challenges in the Datapack.",
+                            "Otherwise, it will make the game crash!")
+                    .defineInRange("tier_0_challenges_amount", 1, 1, 20);
+            TIER_1_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_1_challenges_amount", 2, 1, 20);
+            TIER_2_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_2_challenges_amount", 4, 1, 20);
+            TIER_3_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_3_challenges_amount", 5, 1, 20);
+            BUILDER.pop();
+
             BUILDER.push("Ability");
             TIER_BASED_MAX_BLOCKS = BUILDER
                     .comment(" This makes the ultimine max blocks value different for every tier.")
@@ -128,9 +143,9 @@ public class ConfigHandler {
             BUILDER.pop();
             SPEC = BUILDER.build();
 
-            TIER_1_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_1_time", TIER_1_TIME.getDefault());
-            TIER_2_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_2_time", TIER_2_TIME.getDefault());
-            TIER_3_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_3_time", TIER_3_TIME.getDefault());
+            TIER_1_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_1_time", 300);
+            TIER_2_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_2_time", 600);
+            TIER_3_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_3_time", 1200);
         }
     }
 }

@@ -1,25 +1,25 @@
 {
   "type": "minecraft:crafting_shaped",
   "group": "ultimine_addition",
-  "key": {
-    "C": {
-      "item": "ultimine_addition:ink_chamber"
-    },
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "I": {
-      "item": "minecraft:iron_nugget"
-    },
-    "S": {
-      "tag": "forge:slimeballs"
-    }
-  },
   "pattern": [
     " GS",
     "GCG",
     "IG "
   ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "S": {
+      "tag": "forge:slimeballs"
+    },
+    "C": {
+      "item": "ultimine_addition:ink_chamber"
+    },
+    "I": {
+      "item": "minecraft:iron_nugget"
+    }
+  },
   "result": {
     "item": "ultimine_addition:pen"
   }

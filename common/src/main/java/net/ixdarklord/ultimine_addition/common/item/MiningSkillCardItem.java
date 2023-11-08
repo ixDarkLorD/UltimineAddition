@@ -16,6 +16,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -64,23 +66,23 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         if (!(Minecraft.getInstance().screen instanceof SkillsRecordScreen) && this.isShiftButtonNotPressed(tooltipComponents)) return;
         MutableComponent component;
         if (getType() == EMPTY) {
-            component = Component.translatable("tooltip.ultimine_addition.skill_card.info.empty").withStyle(ChatFormatting.GRAY);
+            component = new TranslatableComponent("tooltip.ultimine_addition.skill_card.info.empty").withStyle(ChatFormatting.GRAY);
             List<Component> components = ScreenUtils.splitComponent(component, getSplitterLength());
             tooltipComponents.addAll(components);
             return;
         }
 
-        component = Component.translatable("tooltip.ultimine_addition.skill_card.tier", !stack.hasTag() ? "§kNawaf" : getData(stack).getTier().getDisplayName());
-        tooltipComponents.add(Component.literal("§8• ").append(component));
+        component = new TranslatableComponent("tooltip.ultimine_addition.skill_card.tier", !stack.hasTag() ? "§kNawaf" : getData(stack).getTier().getDisplayName());
+        tooltipComponents.add(new TextComponent("§8• ").append(component));
         if (stack.hasTag() && type != EMPTY && getData(stack).getTier() != Tier.Unlearned && getData(stack).getTier() != Tier.Mastered) {
-            component = Component.translatable("tooltip.ultimine_addition.skill_card.potion_point", getData(stack).getPotionPoints());
-            tooltipComponents.add(Component.literal("§8• ").append(component));
+            component = new TranslatableComponent("tooltip.ultimine_addition.skill_card.potion_point", getData(stack).getPotionPoints());
+            tooltipComponents.add(new TextComponent("§8• ").append(component));
         }
 
         if (Minecraft.getInstance().screen instanceof SkillsRecordScreen screen &&
                 screen.getMenu().getCardSlots().stream().anyMatch(slot -> slot.getItem().equals(stack))) return;
 
-        component = Component.translatable("tooltip.ultimine_addition.skill_card.info").withStyle(ChatFormatting.GRAY);
+        component = new TranslatableComponent("tooltip.ultimine_addition.skill_card.info").withStyle(ChatFormatting.GRAY);
         List<Component> components = ScreenUtils.splitComponent(component, getSplitterLength());
         tooltipComponents.addAll(components);
     }
@@ -88,7 +90,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     @Override
     public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
         if (getType() == EMPTY) super.fillItemCategory(creativeModeTab, nonNullList);
-        if (this.allowedIn(creativeModeTab) && getType() != EMPTY) {
+        if (this.allowdedIn(creativeModeTab) && getType() != EMPTY) {
             ItemStack stack = getDefaultInstance();
             getData(stack).setTier(Tier.Mastered).saveData(stack);
 
@@ -202,11 +204,11 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
 
         public MutableComponent getDisplayName() {
             return switch (tier) {
-                case 1 -> Component.translatable(this.descriptionId()).withStyle(ChatFormatting.GREEN);
-                case 2 -> Component.translatable(this.descriptionId()).withStyle(ChatFormatting.AQUA);
-                case 3 -> Component.translatable(this.descriptionId()).withStyle(ChatFormatting.LIGHT_PURPLE);
-                case 4 -> Component.translatable(this.descriptionId()).withStyle(ChatFormatting.GOLD);
-                default -> Component.translatable(this.descriptionId());
+                case 1 -> new TranslatableComponent(this.descriptionId()).withStyle(ChatFormatting.GREEN);
+                case 2 -> new TranslatableComponent(this.descriptionId()).withStyle(ChatFormatting.AQUA);
+                case 3 -> new TranslatableComponent(this.descriptionId()).withStyle(ChatFormatting.LIGHT_PURPLE);
+                case 4 -> new TranslatableComponent(this.descriptionId()).withStyle(ChatFormatting.GOLD);
+                default -> new TranslatableComponent(this.descriptionId());
             };
         }
 

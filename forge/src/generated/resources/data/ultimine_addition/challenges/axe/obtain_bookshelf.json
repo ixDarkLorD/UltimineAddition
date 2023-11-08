@@ -1,15 +1,15 @@
 {
-  "challenge_type": {
-    "consume_block": false,
-    "id": "break_block"
-  },
-  "for_card_tier": 2,
-  "for_card_type": "axe",
   "required_amount": {
     "max": 16,
     "min": 8
   },
   "targeted_blocks": [
     "minecraft:bookshelf"
-  ]
+  ],
+  "for_card_type": "axe",
+  "for_card_tier": 2,
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  }
 }

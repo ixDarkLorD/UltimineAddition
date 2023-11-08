@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.client.handler;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -22,9 +22,9 @@ public class ClientMinerCertificateHandler {
         if (player == null) return;
 
         if (!ServicePlatform.Players.isPlayerUltimineCapable(player))
-            player.displayClientMessage(Component.translatable("info.ultimine_addition.obtain").withStyle(ChatFormatting.GOLD), true);
+            player.displayClientMessage(new TranslatableComponent("info.ultimine_addition.obtain").withStyle(ChatFormatting.GOLD), true);
         else
-            player.displayClientMessage(Component.translatable("info.ultimine_addition.obtained_already").withStyle(ChatFormatting.RED), true);
+            player.displayClientMessage(new TranslatableComponent("info.ultimine_addition.obtained_already").withStyle(ChatFormatting.RED), true);
 
     }
 

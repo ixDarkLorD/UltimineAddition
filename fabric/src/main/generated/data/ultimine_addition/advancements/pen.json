@@ -1,40 +1,12 @@
 {
   "parent": "ultimine_addition:slime_balls",
-  "criteria": {
-    "has_pen": {
-      "conditions": {
-        "items": [
-          {
-            "items": [
-              "ultimine_addition:pen"
-            ]
-          }
-        ]
-      },
-      "trigger": "minecraft:inventory_changed"
-    },
-    "slime_adv": {
-      "conditions": {
-        "player": [
-          {
-            "condition": "minecraft:entity_properties",
-            "entity": "this",
-            "predicate": {
-              "type_specific": {
-                "type": "player",
-                "advancements": {
-                  "ultimine_addition:slime_balls": true
-                }
-              }
-            }
-          }
-        ]
-      },
-      "trigger": "minecraft:tick"
-    }
-  },
   "display": {
-    "announce_to_chat": true,
+    "icon": {
+      "item": "ultimine_addition:pen"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.craft.pen"
+    },
     "description": {
       "translate": "advancement.ultimine_addition.craft",
       "with": [
@@ -44,13 +16,40 @@
       ]
     },
     "frame": "task",
-    "hidden": false,
-    "icon": {
-      "item": "ultimine_addition:pen"
-    },
     "show_toast": true,
-    "title": {
-      "translate": "advancement.ultimine_addition.craft.pen"
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "slime_adv": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "predicate": {
+              "player": {
+                "advancements": {
+                  "ultimine_addition:slime_balls": true
+                }
+              }
+            },
+            "entity": "this"
+          }
+        ]
+      }
+    },
+    "has_pen": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "ultimine_addition:pen"
+            ]
+          }
+        ]
+      }
     }
   },
   "requirements": [

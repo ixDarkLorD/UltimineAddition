@@ -1,7 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.handler;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceLocation;
@@ -16,6 +15,8 @@ public class KeyHandler {
     }
 
     public static void register() {
-        KeyMappingRegistry.register(KEY_SHOW_PROGRESSION_BAR);
+//        ClientLifecycleEvent.CLIENT_SETUP.register(instance -> {
+//            KeyMappingRegistry.register(KEY_SHOW_PROGRESSION_BAR);
+//        });
     }
 }

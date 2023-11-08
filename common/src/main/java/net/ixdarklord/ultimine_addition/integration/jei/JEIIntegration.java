@@ -3,11 +3,14 @@ package net.ixdarklord.ultimine_addition.integration.jei;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.registration.*;
+import mezz.jei.common.Internal;
+import mezz.jei.common.network.IConnectionToServer;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.core.Constants;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +20,6 @@ import java.util.stream.Stream;
 
 @JeiPlugin
 public class JEIIntegration implements IModPlugin {
-
     @Override
     public @NotNull ResourceLocation getPluginUid() {
         return Constants.getLocation("jei_integration");
@@ -49,8 +51,8 @@ public class JEIIntegration implements IModPlugin {
                     item.getData(stack).setTier(MiningSkillCardItem.Tier.Mastered).saveData(stack);
                     return stack;
                 }).toList();
-        registration.addItemStackInfo(cards, Component.translatable("jei.ultimine_addition.info.cards.grade_up"));
-        registration.addItemStackInfo(ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), Component.translatable("jei.ultimine_addition.info.cards.obtain"));
+        registration.addItemStackInfo(cards, new TranslatableComponent("jei.ultimine_addition.info.cards.grade_up"));
+        registration.addItemStackInfo(ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), new TranslatableComponent("jei.ultimine_addition.info.cards.obtain"));
     }
 
     @Override
@@ -60,6 +62,8 @@ public class JEIIntegration implements IModPlugin {
 
     @Override
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
-        registration.addRecipeTransferHandler(new MCRecipeTransferHandler(registration.getTransferHelper()), RecipeTypes.CRAFTING);
+        IConnectionToServer serverConnection = Internal.getServerConnection();
+        IJeiHelpers jeiHelpers = registration.getJeiHelpers();
+        registration.addRecipeTransferHandler(new MCRecipeTransferHandler(serverConnection, jeiHelpers.getStackHelper(), registration.getTransferHelper()), RecipeTypes.CRAFTING);
     }
 }

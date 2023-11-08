@@ -70,15 +70,14 @@ dependencies {
     implementation 'com.electronwill.night-config:toml:3.6.6'
     modApi "curse.maven:forge-config-api-port-fabric-547434:${forge_config_api_version_id}"
 
-    modImplementation "curse.maven:ftb-library-fabric-438495:4661833"
-    modImplementation "curse.maven:ftb-ultimine-fabric-448231:4598467"
+    modImplementation "curse.maven:ftb-library-fabric-438495:4396791"
+    modImplementation "curse.maven:ftb-ultimine-fabric-448231:4781901"
 
     modCompileOnlyApi "mezz.jei:jei-${mc_version}-fabric-api:${jei_version}"
     modRuntimeOnly "mezz.jei:jei-${mc_version}-fabric:${jei_version}"
 
-    modRuntimeOnly "maven.modrinth:modmenu:4.2.0-beta.2"
-//    modRuntimeOnly "curse.maven:catalogue-fabric-667377:4171029"
-
+    modRuntimeOnly "maven.modrinth:modmenu:3.2.5"
+    
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 }

@@ -1,13 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "group": "ultimine_addition",
+  "pattern": [
+    "INI",
+    "RGB",
+    "INI"
+  ],
   "key": {
-    "B": {
-      "item": "minecraft:blue_dye"
-    },
-    "G": {
-      "item": "minecraft:green_dye"
-    },
     "I": {
       "item": "minecraft:iron_ingot"
     },
@@ -16,13 +15,14 @@
     },
     "R": {
       "item": "minecraft:red_dye"
+    },
+    "G": {
+      "item": "minecraft:green_dye"
+    },
+    "B": {
+      "item": "minecraft:blue_dye"
     }
   },
-  "pattern": [
-    "INI",
-    "RGB",
-    "INI"
-  ],
   "result": {
     "item": "ultimine_addition:ink_chamber"
   }

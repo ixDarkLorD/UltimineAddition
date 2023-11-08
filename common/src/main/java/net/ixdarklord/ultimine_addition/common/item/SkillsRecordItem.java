@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.common.item;
 
 import dev.architectury.registry.menu.MenuRegistry;
 import net.ixdarklord.coolcat_lib.util.ScreenUtils;
-import net.ixdarklord.ultimine_addition.client.gui.components.SkillsRecordTooltip;
+import net.ixdarklord.ultimine_addition.client.gui.component.SkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
@@ -10,6 +10,8 @@ import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -30,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
-    private static final Component TITLE = Component.translatable("item.ultimine_addition.skills_record");
+    private static final Component TITLE = new TranslatableComponent("item.ultimine_addition.skills_record");
     public static final int CONTAINER_SIZE = 6;
     public SkillsRecordItem(Properties properties) {
         super(properties, ComponentType.TOOLS);
@@ -70,23 +72,23 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
         if (isShiftButtonNotPressed(tooltipComponents)) return;
         if (!stack.hasTag()) {
-            Component component = Component.translatable("tooltip.ultimine_addition.skills_record.info").withStyle(ChatFormatting.GRAY);
+            Component component = new TranslatableComponent("tooltip.ultimine_addition.skills_record.info").withStyle(ChatFormatting.GRAY);
             List<Component> components = ScreenUtils.splitComponent(component, getSplitterLength());
             tooltipComponents.addAll(components);
             return;
         }
         if (isConsumeChallengeExists(stack)) {
-            Component state = getData(stack).isConsumeMode() ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
-            tooltipComponents.add(Component.literal("§8• ").append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.GRAY)));
+            Component state = getData(stack).isConsumeMode() ? new TranslatableComponent("options.on").withStyle(ChatFormatting.GREEN) : new TranslatableComponent("options.off").withStyle(ChatFormatting.RED);
+            tooltipComponents.add(new TextComponent("§8• ").append(new TranslatableComponent("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.GRAY)));
         }
         if (!getData(stack).getPenSlot().isEmpty()) {
-            tooltipComponents.add(Component.literal("§8• ").append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber",
+            tooltipComponents.add(new TextComponent("§8• ").append(new TranslatableComponent("tooltip.ultimine_addition.pen.ink_chamber",
                     (getData(stack).getPenSlot().getItem() instanceof PenItem item)
                             ? item.getData(getData(stack).getPenSlot()).getCapacity()
                             : 0
             ).withStyle(ChatFormatting.GRAY)));
         }
-        tooltipComponents.add(Component.literal("§8• ").append(Component.translatable("tooltip.ultimine_addition.skills_record.contents").withStyle(ChatFormatting.GRAY)));
+        tooltipComponents.add(new TextComponent("§8• ").append(new TranslatableComponent("tooltip.ultimine_addition.skills_record.contents").withStyle(ChatFormatting.GRAY)));
     }
 
     @Override

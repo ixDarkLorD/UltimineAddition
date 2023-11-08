@@ -5,7 +5,8 @@ import net.ixdarklord.ultimine_addition.client.event.ScreenEvents;
 
 public class ClientEventHandler {
     public static void register() {
-        ScreenEvents.init();
         KeyInputEvents.init();
+        ScreenEvents.init();
+        CustomClientTooltipComponent.init();
     }
 }

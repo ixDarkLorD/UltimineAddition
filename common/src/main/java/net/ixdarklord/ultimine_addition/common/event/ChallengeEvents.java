@@ -80,7 +80,7 @@ public class ChallengeEvents {
         });
 
         BlockToolModificationEvent.EVENT.register((originalState, finalState, context, toolAction, simulate) -> {
-            if (context.getPlayer() instanceof ServerPlayer player && !FTBUltimine.instance.get(player).isPressed()) {
+            if (context.getPlayer() instanceof ServerPlayer player && !FTBUltimine.instance.get(player).pressed) {
                 return ChallengeEvents.onBlockToolModificationEvent(originalState, finalState, context, toolAction, simulate);
             } return CompoundEventResult.pass();
         });

@@ -47,28 +47,28 @@ public class RecipeGenerator extends RecipeProvider implements IConditionBuilder
 
         MCRecipeBuilder.create(Registration.MINING_SKILL_CARD_PICKAXE.get())
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
-                .requires(Tags.Items.TOOLS_PICKAXES)
+                .requires(ModItemTags.PICKAXES)
                 .group(Constants.MOD_ID)
                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                 .save(consumer);
 
         MCRecipeBuilder.create(Registration.MINING_SKILL_CARD_AXE.get())
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
-                .requires(Tags.Items.TOOLS_AXES)
+                .requires(ModItemTags.AXES)
                 .group(Constants.MOD_ID)
                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                 .save(consumer);
 
         MCRecipeBuilder.create(Registration.MINING_SKILL_CARD_SHOVEL.get())
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
-                .requires(Tags.Items.TOOLS_SHOVELS)
+                .requires(ModItemTags.SHOVELS)
                 .group(Constants.MOD_ID)
                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                 .save(consumer);
 
         MCRecipeBuilder.create(Registration.MINING_SKILL_CARD_HOE.get())
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
-                .requires(Tags.Items.TOOLS_HOES)
+                .requires(ModItemTags.HOES)
                 .group(Constants.MOD_ID)
                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                 .save(consumer);

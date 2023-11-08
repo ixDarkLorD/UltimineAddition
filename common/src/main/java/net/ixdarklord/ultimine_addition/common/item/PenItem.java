@@ -6,6 +6,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.CreativeModeTab;
@@ -33,17 +35,17 @@ public class PenItem extends StorageDataAbstractItem {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
         if (!(Minecraft.getInstance().screen instanceof SkillsRecordScreen) && !stack.hasTag() && isShiftButtonNotPressed(tooltipComponents)) return;
         if (!stack.hasTag()) {
-            Component component = Component.translatable("tooltip.ultimine_addition.pen.info").withStyle(ChatFormatting.GRAY);
+            Component component = new TranslatableComponent("tooltip.ultimine_addition.pen.info").withStyle(ChatFormatting.GRAY);
             List<Component> components = ScreenUtils.splitComponent(component, getSplitterLength());
             tooltipComponents.addAll(components);
             return;
         }
-        tooltipComponents.add(Component.literal("§8\u2022 ").append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber", getData(stack).getCapacity()).withStyle(ChatFormatting.GRAY)));
+        tooltipComponents.add(new TextComponent("§8• ").append(new TranslatableComponent("tooltip.ultimine_addition.pen.ink_chamber", getData(stack).getCapacity()).withStyle(ChatFormatting.GRAY)));
     }
 
     @Override
     public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-        if (this.allowedIn(creativeModeTab)) {
+        if (this.allowdedIn(creativeModeTab)) {
             ItemStack stack = new ItemStack(this);
             getData(stack).fullCapacity().saveData(stack);
 

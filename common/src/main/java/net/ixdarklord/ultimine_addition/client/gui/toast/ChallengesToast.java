@@ -8,6 +8,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
@@ -21,12 +22,12 @@ public class ChallengesToast extends SimpleToast {
     public ChallengesToast(MiningSkillCardData.Identifier identifier, ItemStack stack) {
         this.icon = ItemIcon.getItemIcon(stack);
         if (identifier.id().equals(new ResourceLocation("completed"))) {
-            title = Component.translatable("toast.ultimine_addition.challenge.all_completed");
-            desc = Component.translatable("toast.ultimine_addition.challenge.all_completed.info", stack.getHoverName());
+            title = new TranslatableComponent("toast.ultimine_addition.challenge.all_completed");
+            desc = new TranslatableComponent("toast.ultimine_addition.challenge.all_completed.info", stack.getHoverName());
             sound = SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
         } else {
-            title = Component.translatable("toast.ultimine_addition.challenge.completed");
-            desc = Component.translatable("toast.ultimine_addition.challenge.completed.info", identifier.order(), stack.getHoverName());
+            title = new TranslatableComponent("toast.ultimine_addition.challenge.completed");
+            desc = new TranslatableComponent("toast.ultimine_addition.challenge.completed.info", identifier.order(), stack.getHoverName());
             sound = SimpleSoundInstance.forUI(SoundEvents.PLAYER_LEVELUP, 1.0F, 1.0F);
         }
     }

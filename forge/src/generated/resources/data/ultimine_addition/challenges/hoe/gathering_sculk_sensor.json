@@ -1,15 +1,15 @@
 {
-  "challenge_type": {
-    "consume_block": false,
-    "id": "break_block"
-  },
-  "for_card_tier": 2,
-  "for_card_type": "hoe",
   "required_amount": {
     "max": 16,
     "min": 4
   },
   "targeted_blocks": [
     "minecraft:sculk_sensor"
-  ]
+  ],
+  "for_card_type": "hoe",
+  "for_card_tier": 2,
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  }
 }

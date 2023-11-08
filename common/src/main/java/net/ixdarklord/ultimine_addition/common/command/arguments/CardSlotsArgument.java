@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 public class CardSlotsArgument implements ArgumentType<Integer> {
     private static final Collection<String> EXAMPLES = Arrays.asList("0", "4");
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_SLOT = new DynamicCommandExceptionType((entry) ->
-            Component.translatable("slot.unknown", entry));
+            new TranslatableComponent("slot.unknown", entry));
     private final int slotCount = 4;
 
     public static CardSlotsArgument slots() {

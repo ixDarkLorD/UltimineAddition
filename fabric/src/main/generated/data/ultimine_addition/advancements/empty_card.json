@@ -1,31 +1,12 @@
 {
   "parent": "ultimine_addition:root",
-  "criteria": {
-    "has_empty_card": {
-      "conditions": {
-        "items": [
-          {
-            "items": [
-              "ultimine_addition:mining_skill_card_empty"
-            ]
-          }
-        ]
-      },
-      "trigger": "minecraft:inventory_changed"
-    },
-    "trade_for_empty_card": {
-      "conditions": {
-        "item": {
-          "items": [
-            "ultimine_addition:mining_skill_card_empty"
-          ]
-        }
-      },
-      "trigger": "minecraft:villager_trade"
-    }
-  },
   "display": {
-    "announce_to_chat": true,
+    "icon": {
+      "item": "ultimine_addition:mining_skill_card_empty"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.obtain.card.empty"
+    },
     "description": {
       "translate": "advancement.ultimine_addition.obtain",
       "with": [
@@ -35,13 +16,32 @@
       ]
     },
     "frame": "task",
-    "hidden": false,
-    "icon": {
-      "item": "ultimine_addition:mining_skill_card_empty"
-    },
     "show_toast": true,
-    "title": {
-      "translate": "advancement.ultimine_addition.obtain.card.empty"
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trade_for_empty_card": {
+      "trigger": "minecraft:villager_trade",
+      "conditions": {
+        "item": {
+          "items": [
+            "ultimine_addition:mining_skill_card_empty"
+          ]
+        }
+      }
+    },
+    "has_empty_card": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "ultimine_addition:mining_skill_card_empty"
+            ]
+          }
+        ]
+      }
     }
   },
   "requirements": [

@@ -93,7 +93,7 @@ public abstract class FTBUltimineMixin {
                 playerData.clearCache();
                 playerData.updateBlocks((ServerPlayer) player, context.getClickedPos(), context.getClickedFace(), false, FTBUltimineIntegration.getMaxBlocks((ServerPlayer) player));
                 List<BlockPos> blockPosList = new ArrayList<>();
-                if (playerData.isPressed() && playerData.cachedBlocks != null && !playerData.cachedBlocks.isEmpty()) {
+                if (playerData.pressed && playerData.cachedBlocks != null && !playerData.cachedBlocks.isEmpty()) {
                     blockPosList.addAll(playerData.cachedBlocks.stream().filter(pos -> context.getLevel().getBlockState(pos).is(originalState.getBlock())).toList());
                 }
 

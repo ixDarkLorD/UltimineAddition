@@ -1,22 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
   "group": "ultimine_addition",
-  "key": {
-    "A": {
-      "item": "minecraft:amethyst_shard"
-    },
-    "L": {
-      "tag": "forge:gems/lapis"
-    },
-    "P": {
-      "item": "minecraft:paper"
-    }
-  },
   "pattern": [
     "ALA",
     "LPL",
     "ALA"
   ],
+  "key": {
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "L": {
+      "tag": "forge:gems/lapis"
+    }
+  },
   "result": {
     "item": "ultimine_addition:card_blueprint"
   }

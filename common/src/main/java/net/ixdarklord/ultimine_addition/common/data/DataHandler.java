@@ -16,7 +16,8 @@ import org.slf4j.Logger;
 public abstract class DataHandler<E, T> implements IDataHandler<E, T> {
     protected final String NBTBase;
     protected ServerPlayer player;
-    protected boolean isServerSide;
+    private boolean isS2CPacket;
+    private boolean isC2SPacket;
     protected boolean isDebug;
     protected Logger LOGGER;
 
@@ -31,7 +32,11 @@ public abstract class DataHandler<E, T> implements IDataHandler<E, T> {
 
     @Override
     public void saveData(T data) {
-        if (isServerSide) {
+        if (this.isC2SPacket) {
+            if (this instanceof SkillsRecordData)
+                PacketHandler.sendToServer(new SkillsRecordPacket.Toggle((SkillsRecordData) this));
+        }
+        if (this.isS2CPacket) {
             if (this instanceof SkillsRecordData)
                 PacketHandler.sendToPlayer(new SkillsRecordPacket((SkillsRecordData) this), player);
             if (this instanceof MiningSkillCardData)
@@ -57,15 +62,14 @@ public abstract class DataHandler<E, T> implements IDataHandler<E, T> {
     @Override
     @SuppressWarnings("unchecked")
     public E sendToServer() {
-        if (this instanceof SkillsRecordData)
-            PacketHandler.sendToServer(new SkillsRecordPacket.Toggle((SkillsRecordData) this));
+        isC2SPacket = true;
         return (E) this;
     }
     @Override
     @SuppressWarnings("unchecked")
     public E sendToClient(ServerPlayer player) {
         this.player = player;
-        isServerSide = true;
+        isS2CPacket = true;
         return (E) this;
     }
 

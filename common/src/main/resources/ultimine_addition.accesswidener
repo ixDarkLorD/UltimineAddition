@@ -1,4 +1,7 @@
 accessWidener v2 named
+# Item Model Generators
+accessible field net/minecraft/data/models/ItemModelGenerators output Ljava/util/function/BiConsumer;
+
 # Shovel Item
 accessible field net/minecraft/world/item/ShovelItem FLATTENABLES Ljava/util/Map;
 

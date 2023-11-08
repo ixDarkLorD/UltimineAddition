@@ -6,7 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import net.ixdarklord.coolcat_lib.client.button.CustomImageButton;
-import net.ixdarklord.coolcat_lib.client.components.TextScreen;
+import net.ixdarklord.coolcat_lib.client.gui.component.TextScreen;
 import net.ixdarklord.coolcat_lib.util.ColorUtils;
 import net.ixdarklord.coolcat_lib.util.MathUtils;
 import net.ixdarklord.coolcat_lib.util.MouseHelper;
@@ -42,6 +42,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.NonNullList;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -73,7 +74,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
     private final List<Double> optionsY = new ArrayList<>(List.of(0.0, 0.0));
     private BGColor backgroundColor;
     private float time;
-    private float click;
+    private static float itemCycle;
     private int progressMode;
     private int selectedSlot;
     //    private int selectedZone;
@@ -101,8 +102,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         this.inventoryLabelY = this.imageHeight - 92;
 
         this.time = 0;
-        this.click = 0;
-        this.selectedSlot = -1;
+        this.selectedSlot = container.getData().getViewingCard();
         this.currentProgress = 0;
         this.backgroundColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
         this.isAnimationsEnabled = ConfigHandler.CLIENT.ANIMATIONS_MODE.get();
@@ -122,10 +122,10 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
             this.isOptionsShown ^= true;
             this.resetOptionsWindow();
         }, (button, poseStack, i, j) -> {
-            Component component = Component.translatable("gui.ultimine_addition.skills_record.configuration").withStyle(ChatFormatting.WHITE);
+            Component component = new TranslatableComponent("gui.ultimine_addition.skills_record.configuration").withStyle(ChatFormatting.WHITE);
             if (button.isActive() && !this.isOptionsShown)
-                this.renderTooltip(poseStack, Component.literal("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(component).withStyle(ChatFormatting.ITALIC), i, j);
-        }, CommonComponents.EMPTY));
+                this.renderTooltip(poseStack, new TextComponent("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(component).withStyle(ChatFormatting.ITALIC), i, j);
+        }, new TextComponent("")));
 
         double X = this.optionsX.get(0);
         double Y = this.optionsY.get(0);
@@ -135,20 +135,20 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
             else this.backgroundColor = this.backgroundColor.previous();
             this.configurationButton.setColor(this.backgroundColor.color);
             this.saveValuesToConfig();
-        }, Component.translatable("gui.ultimine_addition.skills_record.option.bg_color")));
+        }, new TranslatableComponent("gui.ultimine_addition.skills_record.option.bg_color")));
 
         this.animationsButton = this.addRenderableWidget(new ImageButton((int) (X+9), (int) (Y+42), 100, 10, 0, 0, 0, TEXTURE, 0, 0,
         button -> {
             this.isAnimationsEnabled ^= true;
             this.saveValuesToConfig();
-        }, Component.translatable("gui.ultimine_addition.skills_record.option.animations")));
+        }, new TranslatableComponent("gui.ultimine_addition.skills_record.option.animations")));
 
         this.progressionBarButton = this.addRenderableWidget(new ImageButton((int) (X+9), (int) (Y+55), 100, 10, 0, 0, 0, TEXTURE, 0, 0,
         button -> {
             this.progressMode = (this.progressMode >= 2) ? 0 : this.progressMode + 1;
             if (this.progressMode == 1) this.isProgressionBarShown = false;
             this.saveValuesToConfig();
-        }, Component.translatable("gui.ultimine_addition.skills_record.option.progression_bar")));
+        }, new TranslatableComponent("gui.ultimine_addition.skills_record.option.progression_bar")));
 
         this.optionsButtonList.clear();
         this.optionsButtonList.addAll(List.of(
@@ -160,7 +160,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
     }
     private void updateButton(int mouseX, int mouseY) {
         AtomicInteger length = new AtomicInteger(this.getButtonsTextLength());
-        length.set(Math.max(this.font.width(Component.translatable("gui.ultimine_addition.skills_record.configuration")), length.get()));
+        length.set(Math.max(this.font.width(new TranslatableComponent("gui.ultimine_addition.skills_record.configuration")), length.get()));
         int spacing = Math.max(length.get() - 100 + 2, 0);
         if (spacing > 0) this.optionsButtonList.forEach(button -> button.setWidth(length.get()));
 
@@ -179,6 +179,8 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
 
         if (this.selectedSlot > -1 && this.container.getCardSlots().get(this.selectedSlot).getItem() == ItemStack.EMPTY) {
             this.selectedSlot = -1;
+            var data = this.container.getData();
+            data.setViewingCard(this.selectedSlot).sendToServer().saveData(data.get());
         }
 
         MiningSkillCardData data = new MiningSkillCardData().loadData(this.selectedSlot > -1 ? this.container.getCardSlots().get(selectedSlot).getItem() : ItemStack.EMPTY);
@@ -337,31 +339,31 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         if (this.container.isCardSlotsEmpty()) {
             textScreen.selectBox(0)
                     .alignPosToCenter(true)
-                    .create(Component.translatable("gui.ultimine_addition.skills_record.no_cards"), ChatFormatting.RED);
+                    .create(new TranslatableComponent("gui.ultimine_addition.skills_record.no_cards"), ChatFormatting.RED);
         } else if (this.selectedSlot == -1) {
             textScreen.selectBox(0)
                     .alignPosToCenter(true)
-                    .create(Component.translatable("gui.ultimine_addition.skills_record.select_card"), ChatFormatting.GRAY);
+                    .create(new TranslatableComponent("gui.ultimine_addition.skills_record.select_card"), ChatFormatting.GRAY);
         } else if (this.selectedSlot > -1 && !data.getChallenges().isEmpty()) {
             textScreen.selectBox(0).alignPosToCenter(false);
             createChallengesText(this.container.getCardSlots());
         } else if (this.selectedSlot > -1 && data.getTier() == MiningSkillCardItem.Tier.Mastered) {
             textScreen.selectBox(0)
                 .alignPosToCenter(true)
-                .create(Component.translatable("gui.ultimine_addition.skills_record.completed_card"), ChatFormatting.GOLD, ChatFormatting.ITALIC);
+                .create(new TranslatableComponent("gui.ultimine_addition.skills_record.completed_card"), ChatFormatting.GOLD, ChatFormatting.ITALIC);
         } else {
             textScreen.selectBox(0)
                 .alignPosToCenter(true)
-                .create(Component.translatable("gui.ultimine_addition.skills_record.no_challenges"), ChatFormatting.GRAY);
+                .create(new TranslatableComponent("gui.ultimine_addition.skills_record.no_challenges"), ChatFormatting.GRAY);
         }
 
         if (this.isOptionsShown) {
             textScreen.selectBox(1)
                     .shouldRender(true).alignPosToCenter(List.of(true, false).get(Mth.floor(this.time / 20.0F) % 2))
-                    .create(Component.translatable("gui.ultimine_addition.skills_record.example"), Component.literal("A: 001"), ChatFormatting.WHITE)
-                    .create(Component.translatable("gui.ultimine_addition.skills_record.example"), Component.literal("B: 002"), ChatFormatting.GRAY)
-                    .create(Component.translatable("gui.ultimine_addition.skills_record.example"), Component.literal("C: 003"), ChatFormatting.DARK_AQUA)
-                    .create(Component.translatable("gui.ultimine_addition.skills_record.example"), Component.literal("C: 004"), ChatFormatting.GOLD);
+                    .create(new TranslatableComponent("gui.ultimine_addition.skills_record.example"), new TextComponent("A: 001"), ChatFormatting.WHITE)
+                    .create(new TranslatableComponent("gui.ultimine_addition.skills_record.example"), new TextComponent("B: 002"), ChatFormatting.GRAY)
+                    .create(new TranslatableComponent("gui.ultimine_addition.skills_record.example"), new TextComponent("C: 003"), ChatFormatting.DARK_AQUA)
+                    .create(new TranslatableComponent("gui.ultimine_addition.skills_record.example"), new TextComponent("C: 004"), ChatFormatting.GOLD);
             if (textScreen.canScroll() && this.optionsX.get(0) == this.leftPos + 178 && this.optionsY.get(0) == this.topPos) {
                 this.moveOptionsWindowTo(this.leftPos + 191, this.topPos);
             }
@@ -370,14 +372,14 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                     .shouldRender(true)
                     .alignPosToCenter(true)
                     .backgroundColor(new Color(75, 24, 24, 218))
-                    .create(Component.translatable("gui.ultimine_addition.skills_record.missing_items").withStyle(ChatFormatting.RED));
+                    .create(new TranslatableComponent("gui.ultimine_addition.skills_record.missing_items").withStyle(ChatFormatting.RED));
 
             List<ItemStack> missingItems = new ArrayList<>();
             if (!this.container.getAllSlots().get(4).hasItem()) missingItems.add(ModItems.PEN.getDefaultInstance());
             if (!this.container.getAllSlots().get(5).hasItem()) missingItems.add(Items.PAPER.getDefaultInstance());
             for (ItemStack item : missingItems) {
-                textScreen.add(Component.literal("§c• ")
-                        .append(Component.empty().append(item.getHoverName())
+                textScreen.add(new TextComponent("§c• ")
+                        .append(new TextComponent("").append(item.getHoverName())
                                 .withStyle(style -> style.withColor(ChatFormatting.GRAY).withItalic(true).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(item)))))
                         .getVisualOrderText());
             }
@@ -387,7 +389,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                     .shouldRender(true)
                     .alignPosToCenter(true)
                     .backgroundColor(new Color(75, 24, 24, 218))
-                    .create(Component.translatable("gui.ultimine_addition.skills_record.not_enough_ink").withStyle(ChatFormatting.RED));
+                    .create(new TranslatableComponent("gui.ultimine_addition.skills_record.not_enough_ink").withStyle(ChatFormatting.RED));
         } else textScreen.selectBox(1)
                 .shouldRender(false);
 
@@ -433,7 +435,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
 
         if (this.isOptionsShown) return;
         if (MouseHelper.isMouseOver(mouseX, mouseY, x, y, 10, 91, 156, 7)) {
-            Component component = Component.translatable("gui.ultimine_addition.skills_record.progress", Component.literal("%" + this.currentProgress).withStyle(Style.EMPTY.withColor(getProgressionBarColor()))).withStyle(ChatFormatting.GRAY);
+            Component component = new TranslatableComponent("gui.ultimine_addition.skills_record.progress", new TextComponent("%" + this.currentProgress).withStyle(Style.EMPTY.withColor(getProgressionBarColor()))).withStyle(ChatFormatting.GRAY);
             this.renderTooltip(poseStack, component, mouseX - 50, mouseY - 5);
         }
     }
@@ -455,8 +457,8 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         if (!this.isOptionsShown && MouseHelper.isMouseOver(mouseX, mouseY, x, y, 86, 106, 9, 18)) {
-            Component state = (this.container.getData().isConsumeMode()) ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
-            Component info = Component.literal("➤ ").withStyle(ChatFormatting.GRAY).append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.WHITE, ChatFormatting.ITALIC));
+            Component state = (this.container.getData().isConsumeMode()) ? new TranslatableComponent("options.on").withStyle(ChatFormatting.GREEN) : new TranslatableComponent("options.off").withStyle(ChatFormatting.RED);
+            Component info = new TextComponent("➤ ").withStyle(ChatFormatting.GRAY).append(new TranslatableComponent("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.WHITE, ChatFormatting.ITALIC));
             this.renderTooltip(poseStack, info, mouseX, mouseY);
         }
     }
@@ -501,7 +503,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         }
 
         AtomicInteger length = new AtomicInteger(this.getButtonsTextLength());
-        length.set(Math.max(this.font.width(Component.translatable("gui.ultimine_addition.skills_record.configuration")), length.get()));
+        length.set(Math.max(this.font.width(new TranslatableComponent("gui.ultimine_addition.skills_record.configuration")), length.get()));
         int spacing = Math.max(length.get() - 100 + 2, 0);
 
         poseStack.pushPose();
@@ -515,7 +517,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
             this.blit(poseStack, 59 + (filling * i), 0, 9, 0, filling, 108);
         this.blit(poseStack, 59+spacing, 0, 60, 0, 58, 108);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        GuiComponent.drawCenteredString(poseStack, this.font, Component.translatable("gui.ultimine_addition.skills_record.configuration"), 59+(spacing/2), 17, Color.WHITE.getRGB());
+        GuiComponent.drawCenteredString(poseStack, this.font, new TranslatableComponent("gui.ultimine_addition.skills_record.configuration"), 59+(spacing/2), 17, Color.WHITE.getRGB());
 
         for (int i = 0; i < this.optionsButtonList.size(); i++) {
             int l = 13 * i;
@@ -533,28 +535,28 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
 
     private void renderOptionsTooltip(PoseStack poseStack, @NotNull Button button, int mouseX, int mouseY) {
         if (!button.isHoveredOrFocused()) return;
-        Component component = Component.empty();
+        Component component = new TextComponent("");
 
         if (button == this.backgroundColorButton) {
             int color = ColorUtils.RGBToRGBA(this.backgroundColor.color.getRGB(), this.backgroundColor.getAlpha());
-            component = Component.translatable(String.format("gui.ultimine_addition.color.%s", this.backgroundColor.name().toLowerCase())).withStyle(Style.EMPTY.withColor(color));
+            component = new TranslatableComponent(String.format("gui.ultimine_addition.color.%s", this.backgroundColor.name().toLowerCase())).withStyle(Style.EMPTY.withColor(color));
         } else if (button == this.animationsButton) {
-            component = this.isAnimationsEnabled ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
+            component = this.isAnimationsEnabled ? new TranslatableComponent("options.on").withStyle(ChatFormatting.GREEN) : new TranslatableComponent("options.off").withStyle(ChatFormatting.RED);
         } else if (button == this.progressionBarButton) {
             switch (this.progressMode) {
-                case 0 -> component = Component.translatable("options.on").withStyle(ChatFormatting.GREEN);
+                case 0 -> component = new TranslatableComponent("options.on").withStyle(ChatFormatting.GREEN);
                 case 1 -> {
                     String[] parts = KeyHandler.KEY_SHOW_PROGRESSION_BAR.saveString().split("\\.");
-                    component = Component.translatable("gui.ultimine_addition.skills_record.option.hold_keybind", parts[parts.length - 1].toUpperCase()).withStyle(ChatFormatting.AQUA);
+                    component = new TranslatableComponent("gui.ultimine_addition.skills_record.option.hold_keybind", parts[parts.length - 1].toUpperCase()).withStyle(ChatFormatting.AQUA);
                     if (I18n.exists(KeyHandler.KEY_SHOW_PROGRESSION_BAR.saveString()))
-                        component = Component.translatable("gui.ultimine_addition.skills_record.option.hold_keybind", I18n.get(KeyHandler.KEY_SHOW_PROGRESSION_BAR.saveString())).withStyle(ChatFormatting.AQUA);
+                        component = new TranslatableComponent("gui.ultimine_addition.skills_record.option.hold_keybind", I18n.get(KeyHandler.KEY_SHOW_PROGRESSION_BAR.saveString())).withStyle(ChatFormatting.AQUA);
                 }
-                case 2 -> component = Component.translatable("options.off").withStyle(ChatFormatting.RED);
+                case 2 -> component = new TranslatableComponent("options.off").withStyle(ChatFormatting.RED);
             }
         }
         poseStack.pushPose();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.renderTooltip(poseStack, Component.literal("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(component).withStyle(ChatFormatting.ITALIC), mouseX, mouseY);
+        this.renderTooltip(poseStack, new TextComponent("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(component).withStyle(ChatFormatting.ITALIC), mouseX, mouseY);
         poseStack.popPose();
     }
 
@@ -565,7 +567,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         tooltipComponents.forEach(component -> length.set(Math.max(length.get(), component.getWidth(this.font))));
 
         if (style.getClickEvent() != null) {
-            Component component = Component.translatable("tooltip.ultimine_addition.skills_record.press.left_click").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+            Component component = new TranslatableComponent("tooltip.ultimine_addition.skills_record.press.left_click").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
             tooltipComponents.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(component, Math.max(length.get(), 150), Style.EMPTY)).stream().map(ClientTooltipComponent::create).toList());
         }
 
@@ -574,6 +576,8 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
 
         poseStack.pushPose();
         poseStack.translate(0.0F, 0.0F, this.itemRenderer.blitOffset + 100.0F);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, TEXTURE);
         RenderSystem.setShaderColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
         this.blit(poseStack, mouseX+alignPosX, mouseY, 0, 227, 26, 26);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -608,13 +612,25 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 this.isScrolling = this.textScreen.canScroll();
                 return true;
             }
-            if (this.textScreen.getComponentStyleAt(mouseX, mouseY) != null && this.textScreen.getComponentStyleAt(mouseX, mouseY).getClickEvent() != null) {
-                this.click++;
-                return true;
+            Style style = this.textScreen.getComponentStyleAt(mouseX, mouseY);
+            if (style != null && style.getClickEvent() != null) {
+                if (style.getClickEvent().getValue().contains("cycle")) {
+                    itemCycle++;
+                    return true;
+                }
+                if (style.getClickEvent().getValue().contains("pin") && this.selectedSlot > -1) {
+                    String[] value = style.getClickEvent().getValue().split(",");
+                    ResourceLocation challengeId = new ResourceLocation(value[1]);
+
+                    var data = this.container.getData();
+                    data.togglePinned(this.selectedSlot, challengeId).sendToServer().saveData(data.get());
+                    return true;
+                }
             }
             if (!isOptionsShown && this.isConsumeChallengeExists() && MouseHelper.isMouseOver(mouseX, mouseY, this.leftPos, this.topPos, 86, 106, 9, 18)) {
                 var data = this.container.getData();
                 data.toggleConsumeMode().sendToServer().saveData(data.get());
+                return true;
             }
         }
         if (button == 1) {
@@ -622,6 +638,9 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 if (selectedSlot == -1 || selectedSlot != this.hoveredSlot.getContainerSlot()) {
                     this.selectedSlot = this.hoveredSlot.getContainerSlot();
                 } else this.selectedSlot = -1;
+
+                var data = this.container.getData();
+                data.setViewingCard(this.selectedSlot).sendToServer().saveData(data.get());
                 return true;
             }
         }
@@ -697,7 +716,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
 
         AtomicInteger currentValues = new AtomicInteger();
         AtomicInteger requiredValues = new AtomicInteger();
-        cardData.getChallenges().forEach((identifier, values) -> {
+        cardData.getChallenges().forEach((identifier, infoData) -> {
             List<ItemStack> itemList = new ArrayList<>(List.of(ItemStack.EMPTY));
             ChallengesData challengesData = manager.getAllChallenges().get(identifier.id());
             String type = "null";
@@ -706,28 +725,26 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 itemList.clear();
                 type = challengesData.getChallengeType().getTypeName();
                 ChallengesManager.INSTANCE.utilizeTargetedBlocks(challengesData).forEach(block -> itemList.add(new ItemStack(block)));
-                currentValues.addAndGet(values.getCurrent());
-                requiredValues.addAndGet(values.getRequired());
+                currentValues.addAndGet(infoData.getCurrentValue());
+                requiredValues.addAndGet(infoData.getRequiredValue());
             }
 
-            ItemStack displayItem = itemList.get(Mth.floor(this.click) % itemList.size());
+            ItemStack displayItem = itemList.get(Mth.floor(itemCycle) % itemList.size());
             var hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(displayItem));
             Style questStyle = Style.EMPTY.withHoverEvent(hoverEvent).withItalic(true).withColor(ChatFormatting.DARK_AQUA);
-            Component info;
             if (itemList.size() > 1) {
-                questStyle = questStyle.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, ""));
-                info = Component.translatable("challenge.ultimine_addition.various_blocks", Component.literal(displayItem.getHoverName().getString()).withStyle(questStyle));
-            } else info = Component.literal(itemList.get(0).getHoverName().getString()).withStyle(questStyle);
+                questStyle = questStyle.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, "cycle"));
+            }
 
             @SuppressWarnings("UnnecessaryUnicodeEscape")
-            Component title = ScreenUtils.limitComponent(Component.literal("\u300E").append(Component.translatable("challenge.ultimine_addition.title", identifier.order())).append("\u300F"), this.textScreen.getWidth());
-            Component consume = Component.literal("✖ ").append(Component.translatable("challenge.ultimine_addition.consume")).withStyle(ChatFormatting.RED);
-            Component description = Component.translatable(String.format("challenge.ultimine_addition.%s", type), info);
+            Component title = ScreenUtils.limitComponent(new TextComponent("\u300E").append(new TranslatableComponent("challenge.ultimine_addition.title", identifier.order())).append("\u300F"), this.textScreen.getWidth());
+            Component consume = new TextComponent("✖ ").append(new TranslatableComponent("challenge.ultimine_addition.consume")).withStyle(ChatFormatting.RED);
+            Component description = createChallengeDescription(type, questStyle, itemList, itemCycle);
             Style descStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GRAY);
             Style counterStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GOLD);
 
             if (challengesData != null && challengesData.getChallengeType().isConsuming() && !this.container.getData().isConsumeMode() && !cardData.isChallengeAccomplished(identifier.id())) {
-                HoverEvent consumeRequired = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("challenge.ultimine_addition.consume.info").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
+                HoverEvent consumeRequired = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("challenge.ultimine_addition.consume.info").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
                 counterStyle = Style.EMPTY.withHoverEvent(consumeRequired).withStrikethrough(true).withColor(ChatFormatting.RED);
 
             } else if (challengesData != null && challengesData.getChallengeType().isConsuming() && this.container.getData().isConsumeMode() && !cardData.isChallengeAccomplished(identifier.id())) {
@@ -742,11 +759,27 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 result.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(consume, this.textScreen.getWidth(), consume.getStyle())));
             result.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(description, this.textScreen.getWidth(), descStyle)));
 
-            result.add(FormattedCharSequence.forward(String.format("➤ %s/%s", values.getCurrent(), values.getRequired()), counterStyle));
+            FormattedCharSequence counter = FormattedCharSequence.forward(("➤ %s/%s".formatted(infoData.getCurrentValue(), infoData.getRequiredValue())), counterStyle);
+
+            HoverEvent pinHover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("gui.ultimine_addition.skills_record.pin").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            FormattedCharSequence pinButton = FormattedCharSequence.forward("◎", Style.EMPTY.withColor(infoData.isPinned() ? ChatFormatting.YELLOW : ChatFormatting.GRAY).withStrikethrough(!infoData.isPinned()).withHoverEvent(pinHover).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, "pin,%s".formatted(identifier.id().toString()))));
+            pinButton = FormattedCharSequence.composite(FormattedCharSequence.forward(" ", Style.EMPTY), pinButton);
+
+            result.add(FormattedCharSequence.composite(counter, pinButton));
             if (!this.textScreen.isEmpty()) this.textScreen.add(FormattedCharSequence.EMPTY).addAll(result); else this.textScreen.addAll(result);
         });
         this.calculateProgression(currentValues.get(), requiredValues.get());
     }
+
+    public static Component createChallengeDescription(String challengeType, Style style, List<ItemStack> items, float cycle) {
+        ItemStack displayItem = items.get(Mth.floor(cycle) % items.size());
+        Component info;
+        if (items.size() > 1) {
+            info = new TranslatableComponent("challenge.ultimine_addition.various_blocks", new TextComponent(displayItem.getHoverName().getString()).withStyle(style));
+        } else info = new TextComponent(items.get(0).getHoverName().getString()).withStyle(style);
+        return new TranslatableComponent("challenge.ultimine_addition.%s".formatted(challengeType), info);
+    }
+
 
     private void calculateProgression(int currentValues, int requiredValues) {
         if (requiredValues == 0) return;
@@ -776,6 +809,10 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 length.set(Math.max(this.font.width(button.getMessage()), length.get()))
         );
         return length.get();
+    }
+
+    public static float getItemCycle() {
+        return itemCycle;
     }
 
     public enum BGColor {

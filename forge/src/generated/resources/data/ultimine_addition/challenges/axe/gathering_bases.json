@@ -1,10 +1,4 @@
 {
-  "challenge_type": {
-    "consume_block": false,
-    "id": "break_block"
-  },
-  "for_card_tier": 1,
-  "for_card_type": "axe",
   "required_amount": {
     "max": 8,
     "min": 4
@@ -14,5 +8,11 @@
     "minecraft:chest",
     "minecraft:barrel",
     "#minecraft:beds"
-  ]
+  ],
+  "for_card_type": "axe",
+  "for_card_tier": 1,
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  }
 }

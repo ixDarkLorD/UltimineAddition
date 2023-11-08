@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "#forge:dyes/black",
     "#forge:dyes/red",

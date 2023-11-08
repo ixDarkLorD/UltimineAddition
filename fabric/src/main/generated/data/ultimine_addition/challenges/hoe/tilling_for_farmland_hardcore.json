@@ -1,10 +1,4 @@
 {
-  "challenge_type": {
-    "consume_block": true,
-    "id": "tilling_block"
-  },
-  "for_card_tier": 3,
-  "for_card_type": "hoe",
   "required_amount": {
     "max": 128,
     "min": 64
@@ -13,5 +7,11 @@
     "minecraft:grass_block",
     "minecraft:dirt",
     "minecraft:dirt_path"
-  ]
+  ],
+  "for_card_type": "hoe",
+  "for_card_tier": 3,
+  "challenge_type": {
+    "consume_block": true,
+    "id": "tilling_block"
+  }
 }

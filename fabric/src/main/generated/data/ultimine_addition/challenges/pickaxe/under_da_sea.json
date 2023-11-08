@@ -1,10 +1,4 @@
 {
-  "challenge_type": {
-    "consume_block": false,
-    "id": "break_block"
-  },
-  "for_card_tier": 2,
-  "for_card_type": "pickaxe",
   "required_amount": {
     "max": 32,
     "min": 16
@@ -13,5 +7,11 @@
     "minecraft:prismarine",
     "minecraft:dark_prismarine",
     "minecraft:sea_lantern"
-  ]
+  ],
+  "for_card_type": "pickaxe",
+  "for_card_tier": 2,
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  }
 }

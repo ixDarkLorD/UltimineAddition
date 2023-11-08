@@ -1,10 +1,4 @@
 {
-  "challenge_type": {
-    "consume_block": false,
-    "id": "break_block"
-  },
-  "for_card_tier": 0,
-  "for_card_type": "pickaxe",
   "required_amount": {
     "max": 128,
     "min": 128
@@ -12,5 +6,11 @@
   "targeted_blocks": [
     "#forge:stone",
     "#c:stone"
-  ]
+  ],
+  "for_card_type": "pickaxe",
+  "for_card_tier": 0,
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  }
 }

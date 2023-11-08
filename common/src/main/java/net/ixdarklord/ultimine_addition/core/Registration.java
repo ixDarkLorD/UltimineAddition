@@ -5,7 +5,6 @@ import dev.architectury.registry.client.particle.ParticleProviderRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
-import net.ixdarklord.coolcat_lib.util.ArgumentTypeHelper;
 import net.ixdarklord.ultimine_addition.api.UAApi;
 import net.ixdarklord.ultimine_addition.client.particle.CelebrateParticle;
 import net.ixdarklord.ultimine_addition.common.advancement.UltimineAbilityTrigger;
@@ -21,8 +20,8 @@ import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.commands.synchronization.ArgumentTypeInfo;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.commands.synchronization.ArgumentTypes;
+import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -45,7 +44,6 @@ public class Registration {
     public static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(MOD_ID, Registry.MENU_REGISTRY);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(MOD_ID, Registry.RECIPE_SERIALIZER_REGISTRY);
     public static final DeferredRegister<ParticleType<?>> PARTICLE_TYPES = DeferredRegister.create(MOD_ID, Registry.PARTICLE_TYPE_REGISTRY);
-    public static final DeferredRegister<ArgumentTypeInfo<?, ?>> ARGUMENT_TYPES = DeferredRegister.create(MOD_ID, Registry.COMMAND_ARGUMENT_TYPE_REGISTRY);
 
     public static void register() {
         registerItems();
@@ -53,8 +51,8 @@ public class Registration {
         POTIONS.register();
         CONTAINERS.register();
         RECIPE_SERIALIZERS.register();
-        ARGUMENT_TYPES.register();
         PARTICLE_TYPES.register();
+        registerArguments();
     }
 
     private static void registerItems() {
@@ -66,6 +64,12 @@ public class Registration {
                     .tab(Registration.ULTIMINE_ADDITION_TAB), type));
         });
         ITEMS.register();
+    }
+
+    private static void registerArguments() {
+        ArgumentTypes.register("card_tier", CardTierArgument.class, new EmptyArgumentSerializer<>(CardTierArgument::tier));
+        ArgumentTypes.register("card_slots", CardSlotsArgument.class, new EmptyArgumentSerializer<>(CardSlotsArgument::slots));
+        ArgumentTypes.register("challenges", ChallengesArgument.class, new EmptyArgumentSerializer<>(ChallengesArgument::data));
     }
 
     public static void registerParticleProviders() {
@@ -113,17 +117,12 @@ public class Registration {
     public static final RegistrySupplier<MenuType<SkillsRecordContainer>> SKILLS_RECORD_CONTAINER = CONTAINERS.register("skills_record", () -> MenuRegistry.ofExtended(SkillsRecordContainer::new));
 
     // Recipe Serializer
-    public static final RegistrySupplier<ItemStorageDataRecipe.Serializer> ITEM_DATA_STORAGE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(ItemStorageDataRecipe.Serializer.NAME.getPath(), ItemStorageDataRecipe.Serializer::new);
-    public static final RegistrySupplier<MCRecipe.Serializer> MC_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(MCRecipe.Serializer.NAME.getPath(), MCRecipe.Serializer::new);
+    public static final RegistrySupplier<? extends RecipeSerializer<?>> ITEM_DATA_STORAGE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(ItemStorageDataRecipe.Serializer.NAME.getPath(), ServicePlatform.getItemStorageDataSerializer());
+    public static final RegistrySupplier<? extends RecipeSerializer<?>> MC_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(MCRecipe.Serializer.NAME.getPath(), ServicePlatform.getMCRecipeSerializer());
 
     // Particles
     public static final RegistrySupplier<SimpleParticleType> CELEBRATE_PARTICLE = PARTICLE_TYPES.register("celebrate", () -> new SimpleParticleType(true));
 
     // Advancements
     public static final UltimineAbilityTrigger OBTAIN_ULTIMINE_TRIGGER = CriteriaTriggers.register(new UltimineAbilityTrigger());
-
-    // Arguments
-    public static final RegistrySupplier<ArgumentTypeInfo<CardTierArgument, ?>> CARD_TIER_ARGUMENT = ARGUMENT_TYPES.register("card_tier", () -> ArgumentTypeHelper.register(CardTierArgument.class, SingletonArgumentInfo.contextFree(CardTierArgument::tier)));
-    public static final RegistrySupplier<ArgumentTypeInfo<CardSlotsArgument, ?>> CARD_SLOTS_ARGUMENT = ARGUMENT_TYPES.register("card_slots", () -> ArgumentTypeHelper.register(CardSlotsArgument.class, SingletonArgumentInfo.contextFree(CardSlotsArgument::slots)));
-    public static final RegistrySupplier<ArgumentTypeInfo<ChallengesArgument, ?>> CHALLENGES_ARGUMENT = ARGUMENT_TYPES.register("challenges", () -> ArgumentTypeHelper.register(ChallengesArgument.class, SingletonArgumentInfo.contextFree(ChallengesArgument::data)));
 }

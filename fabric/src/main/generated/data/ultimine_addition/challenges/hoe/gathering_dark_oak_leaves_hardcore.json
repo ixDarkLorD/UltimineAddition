@@ -1,0 +1,15 @@
+{
+  "required_amount": {
+    "max": 256,
+    "min": 128
+  },
+  "targeted_blocks": [
+    "minecraft:dark_oak_leaves"
+  ],
+  "for_card_type": "hoe",
+  "for_card_tier": 2,
+  "challenge_type": {
+    "consume_block": true,
+    "id": "break_block"
+  }
+}

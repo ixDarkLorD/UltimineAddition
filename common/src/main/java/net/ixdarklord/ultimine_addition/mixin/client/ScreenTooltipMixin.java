@@ -2,6 +2,7 @@ package net.ixdarklord.ultimine_addition.mixin.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.ixdarklord.coolcat_lib.common.item.ComponentItem;
+import net.ixdarklord.ultimine_addition.client.event.impl.ClientTooltipComponentRegister;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -27,6 +28,11 @@ public abstract class ScreenTooltipMixin {
     public void renderTooltip(PoseStack poseStack, List<Component> list, Optional<TooltipComponent> optional, int i, int j) {
         List<ClientTooltipComponent> list2 = list.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Collectors.toList());
         optional.ifPresent((tooltipComponent) -> {
+            ClientTooltipComponent component = ClientTooltipComponentRegister.EVENT.invoker().getComponent(tooltipComponent);
+            if (component == null) {
+                component = ClientTooltipComponent.create(tooltipComponent);
+            }
+
             if (this.minecraft.screen instanceof AbstractContainerScreen<?> screen && screen.hoveredSlot != null && screen.hoveredSlot.getItem().getItem() instanceof ComponentItem) {
                 ItemStack stack = screen.hoveredSlot.getItem();
                 int line = 0;
@@ -34,10 +40,10 @@ public abstract class ScreenTooltipMixin {
                     if (stack.hasTag()) {
                         line = this.getTooltipFromItem(stack).size()-2;
                     } else line = this.getTooltipFromItem(stack).size()-1;
-                    list2.add(line, ClientTooltipComponent.create(tooltipComponent));
+                    list2.add(line, component);
                 }
-                if (line == 0) list2.add(ClientTooltipComponent.create(tooltipComponent));
-            } else list2.add(1, ClientTooltipComponent.create(tooltipComponent));
+                if (line == 0) list2.add(component);
+            } else list2.add(1, component);
         });
         this.renderTooltipInternal(poseStack, list2, i, j);
     }

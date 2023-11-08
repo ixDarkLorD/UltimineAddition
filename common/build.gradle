@@ -18,10 +18,11 @@ dependencies {
     implementation 'com.electronwill.night-config:toml:3.6.6'
     modApi "curse.maven:forge-config-api-port-fabric-547434:${forge_config_api_version_id}"
 
-    modApi "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+//    modApi "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+    modApi "curse.maven:jei-238222:4593546"
 
-    modCompileOnly "curse.maven:ftb-ultimine-forge-386134:4598468"
-    modCompileOnly "curse.maven:ftb-library-forge-404465:4661834"
+    modCompileOnly "curse.maven:ftb-library-forge-404465:4396792"
+    modCompileOnly "curse.maven:ftb-ultimine-forge-386134:4781902"
 }
 
 processResources {

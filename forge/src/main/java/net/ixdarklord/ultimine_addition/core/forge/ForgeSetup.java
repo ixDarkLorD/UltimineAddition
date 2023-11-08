@@ -23,8 +23,8 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.ChunkDataEvent;
+import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -37,8 +37,8 @@ public class ForgeSetup {
     public ForgeSetup() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         EventBuses.registerModEventBus(Constants.MOD_ID, modEventBus);
-        
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ForgeClientSetup::new);
+
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ForgeClientSetup::new);
         CommonSetup.init();
     }
 
@@ -62,7 +62,7 @@ public class ForgeSetup {
                 case SERVER_DATA_LOAD -> DatapackEvents.TagUpdate.Cause.SERVER_DATA_LOAD;
                 case CLIENT_PACKET_RECEIVED -> DatapackEvents.TagUpdate.Cause.CLIENT_PACKET_RECEIVED;
             };
-            DatapackEvents.TAG_UPDATE.invoker().init(event.getRegistryAccess(), REASON, event.shouldUpdateStaticData());
+            DatapackEvents.TAG_UPDATE.invoker().init(event.getTagManager(), REASON, event.shouldUpdateStaticData());
         }
 
         @SubscribeEvent
@@ -73,18 +73,32 @@ public class ForgeSetup {
         }
 
         @SubscribeEvent
+        public static void onPlayerClone(PlayerEvent.Clone event) {
+            if (event.isWasDeath()) {
+                event.getOriginal().reviveCaps();
+                event.getOriginal().getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(oldPlayer ->
+                        event.getEntity().getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(newPlayer ->
+                                newPlayer.copyFrom(oldPlayer)));
+                event.getOriginal().invalidateCaps();
+            }
+        }
+
+        @SubscribeEvent
         public static void onDatapackSync(final OnDatapackSyncEvent event) {
-            DatapackEvents.SYNC.invoker().init(event.getPlayer(), false);
+            if (event.getPlayer() != null) {
+                DatapackEvents.SYNC.invoker().init(event.getPlayer(), false);
+            }
         }
 
         @SubscribeEvent
         public static void onChunkUnload(final ChunkDataEvent.Unload event) {
-            if (event.getLevel() instanceof ServerLevel level)
+            if (event.getWorld() instanceof ServerLevel level)
                 ChunkUnloadEvent.EVENT.invoker().Unload(event.getChunk(), level);
         }
 
         @SubscribeEvent
         public static void onBlockToolModification(final BlockEvent.BlockToolModificationEvent event) {
+            //noinspection DataFlowIssue
             CompoundEventResult<BlockState> result = BlockToolModificationEvent.EVENT.invoker().modify(event.getState(), event.getFinalState(), event.getContext(), ToolAction.get(event.getToolAction().name()), event.isSimulated());
             if (result.isPresent()) {
                 if (result.isFalse()) {

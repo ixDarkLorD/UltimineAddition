@@ -11,7 +11,7 @@ import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +29,8 @@ public class AdvancementGenerator extends AdvancementProvider {
     protected void registerAdvancements(@NotNull Consumer<Advancement> consumer) {
         Advancement root = Advancement.Builder.advancement().display(
                         ModItems.MINER_CERTIFICATE,
-                        Component.translatable(String.format("itemGroup.%s.tab", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.root.desc", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("itemGroup.%s.tab", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.root.desc", Constants.MOD_ID)),
                         Constants.getGuiTexture("adv_background", "png"),
                         FrameType.TASK,
                         false, false, false)
@@ -42,8 +42,8 @@ public class AdvancementGenerator extends AdvancementProvider {
 
         Advancement amethyst = Advancement.Builder.advancement().parent(root).display(
                         Items.AMETHYST_SHARD,
-                        Component.translatable(String.format("advancement.%s.amethyst_gathering", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.obtain", Constants.MOD_ID), Items.AMETHYST_SHARD.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.amethyst_gathering", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.obtain", Constants.MOD_ID), Items.AMETHYST_SHARD.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.TASK,
                         true, true, false)
@@ -53,8 +53,8 @@ public class AdvancementGenerator extends AdvancementProvider {
 
         Advancement cardBlueprint = Advancement.Builder.advancement().parent(amethyst).display(
                         ModItems.CARD_BLUEPRINT,
-                        Component.translatable(String.format("advancement.%s.craft.card.blueprint", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.CARD_BLUEPRINT.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.craft.card.blueprint", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.CARD_BLUEPRINT.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.TASK,
                         true, true, false)
@@ -65,8 +65,8 @@ public class AdvancementGenerator extends AdvancementProvider {
 
         Advancement slime = Advancement.Builder.advancement().parent(root).display(
                         Items.SLIME_BALL,
-                        Component.translatable(String.format("advancement.%s.obtain.slime_balls", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.obtain", Constants.MOD_ID), Items.SLIME_BALL.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.obtain.slime_balls", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.obtain", Constants.MOD_ID), Items.SLIME_BALL.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.TASK,
                         true, true, false)
@@ -76,8 +76,8 @@ public class AdvancementGenerator extends AdvancementProvider {
 
         Advancement pen = Advancement.Builder.advancement().parent(slime).display(
                         ModItems.PEN,
-                        Component.translatable(String.format("advancement.%s.craft.pen", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.PEN.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.craft.pen", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.PEN.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.TASK,
                         true, true, false)
@@ -88,8 +88,8 @@ public class AdvancementGenerator extends AdvancementProvider {
 
         Advancement emptyCard = Advancement.Builder.advancement().parent(root).display(
                         ModItems.MINING_SKILL_CARD_EMPTY,
-                        Component.translatable(String.format("advancement.%s.obtain.card.empty", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.obtain", Constants.MOD_ID), ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.obtain.card.empty", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.obtain", Constants.MOD_ID), ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.TASK,
                         true, true, false)
@@ -100,8 +100,8 @@ public class AdvancementGenerator extends AdvancementProvider {
 
         Advancement skillsRecord = Advancement.Builder.advancement().parent(emptyCard).display(
                         ModItems.SKILLS_RECORD,
-                        Component.translatable(String.format("advancement.%s.craft.skills_record", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.SKILLS_RECORD.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.craft.skills_record", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.SKILLS_RECORD.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.GOAL,
                         true, true, false)
@@ -111,8 +111,8 @@ public class AdvancementGenerator extends AdvancementProvider {
 
         Advancement pickaxeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                         ModItems.MINING_SKILL_CARD_PICKAXE,
-                        Component.translatable(String.format("advancement.%s.craft.card.pickaxe", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.MINING_SKILL_CARD_PICKAXE.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.craft.card.pickaxe", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.MINING_SKILL_CARD_PICKAXE.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.TASK,
                         true, true, false)
@@ -122,8 +122,8 @@ public class AdvancementGenerator extends AdvancementProvider {
 
         Advancement axeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                         ModItems.MINING_SKILL_CARD_AXE,
-                        Component.translatable(String.format("advancement.%s.craft.card.axe", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.MINING_SKILL_CARD_AXE.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.craft.card.axe", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.MINING_SKILL_CARD_AXE.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.TASK,
                         true, true, false)
@@ -133,8 +133,8 @@ public class AdvancementGenerator extends AdvancementProvider {
 
         Advancement shovelCard = Advancement.Builder.advancement().parent(emptyCard).display(
                         ModItems.MINING_SKILL_CARD_SHOVEL,
-                        Component.translatable(String.format("advancement.%s.craft.card.shovel", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.MINING_SKILL_CARD_SHOVEL.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.craft.card.shovel", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.MINING_SKILL_CARD_SHOVEL.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.TASK,
                         true, true, false)
@@ -144,8 +144,8 @@ public class AdvancementGenerator extends AdvancementProvider {
 
         Advancement hoeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                         ModItems.MINING_SKILL_CARD_HOE,
-                        Component.translatable(String.format("advancement.%s.craft.card.hoe", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.MINING_SKILL_CARD_HOE.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.craft.card.hoe", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.craft", Constants.MOD_ID), ModItems.MINING_SKILL_CARD_HOE.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.TASK,
                         true, true, false)
@@ -159,8 +159,8 @@ public class AdvancementGenerator extends AdvancementProvider {
                             new MinerCertificateData().loadData(stack).setAccomplished(true).saveData(stack);
                             return stack;
                         }),
-                        Component.translatable(String.format("advancement.%s.ultimine_ability", Constants.MOD_ID)),
-                        Component.translatable(String.format("advancement.%s.ultimine_ability.desc", Constants.MOD_ID), ModItems.MINER_CERTIFICATE.getDefaultInstance().getHoverName()),
+                        new TranslatableComponent(String.format("advancement.%s.ultimine_ability", Constants.MOD_ID)),
+                        new TranslatableComponent(String.format("advancement.%s.ultimine_ability.desc", Constants.MOD_ID), ModItems.MINER_CERTIFICATE.getDefaultInstance().getHoverName()),
                         null,
                         FrameType.CHALLENGE,
                         true, true, false)

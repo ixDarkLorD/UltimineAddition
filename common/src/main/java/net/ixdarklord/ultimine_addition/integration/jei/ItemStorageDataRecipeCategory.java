@@ -30,6 +30,8 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -56,7 +58,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         this.helper = helper;
         this.background = helper.createDrawable(TEXTURES, 0, 0, 128, 41);
         this.icon = helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(Items.BEDROCK));
-        this.title = Component.literal("Not Assigned!");
+        this.title = new TextComponent("Not Assigned!");
         this.timer = helper.createTickTimer(60, 380, false);
     }
 
@@ -91,6 +93,18 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         return RECIPE_TYPE;
     }
 
+    @SuppressWarnings({"removal", "NullableProblems"})
+    @Override
+    public ResourceLocation getUid() {
+        return null;
+    }
+
+    @SuppressWarnings({"removal", "NullableProblems"})
+    @Override
+    public Class<? extends ItemStorageDataRecipe> getRecipeClass() {
+        return null;
+    }
+
     @Override
     public @NotNull Component getTitle() {
         return this.title;
@@ -110,7 +124,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
     public void setRecipe(@NotNull IRecipeLayoutBuilder builder, @NotNull ItemStorageDataRecipe recipe, @NotNull IFocusGroup focuses) {
         if (this.icon != this.helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, Items.CRAFTING_TABLE.getDefaultInstance())) {
             this.icon = this.helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, Items.CRAFTING_TABLE.getDefaultInstance());
-            this.title = Component.translatable(String.format("jei.ultimine_addition.category.item_storage.%s", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(recipe.getResultItem().getItem())).getPath()));
+            this.title = new TranslatableComponent(String.format("jei.ultimine_addition.category.item_storage.%s", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(recipe.getResultItem().getItem())).getPath()));
         }
         List<ItemStack> items = DataIngredient.toNormal(recipe.getDataIngredients()).stream().map(Ingredient::getItems).flatMap(Arrays::stream).toList();
         builder.addSlot(RecipeIngredientRole.INPUT, 9, 5).addItemStack(recipe.getResultItem());
@@ -120,7 +134,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
     @Override
     public @NotNull List<Component> getTooltipStrings(ItemStorageDataRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
         int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrCreateTag().getInt("amount");
-        Component component = Component.translatable(String.format("jei.ultimine_addition.recipe.item_storage.%s", recipe.getStorageName()), value);
+        Component component = new TranslatableComponent(String.format("jei.ultimine_addition.recipe.item_storage.%s", recipe.getStorageName()), value);
         if (component.getString().length() >= 27 && MouseHelper.isMouseOver(mouseX, mouseY, 3, 28, 121, 12)) {
             return List.of(component);
         }
@@ -160,7 +174,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         poseStack.pushPose();
         Font font = Minecraft.getInstance().font;
         int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrCreateTag().getInt("amount");
-        Component component = ScreenUtils.limitComponent(Component.translatable(String.format("jei.ultimine_addition.recipe.item_storage.%s", recipe.getStorageName()), value), 27);
+        Component component = ScreenUtils.limitComponent(new TranslatableComponent(String.format("jei.ultimine_addition.recipe.item_storage.%s", recipe.getStorageName()), value), 27);
         font.draw(poseStack, component, 5, 30, Color.WHITE.getRGB());
         poseStack.popPose();
     }
