@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.util;
 
+import dev.architectury.platform.Platform;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
@@ -11,6 +12,16 @@ import net.minecraft.world.item.ItemStack;
 
 public class ItemUtils {
     public record ItemSorter(ItemStack item, int slotId, int order){}
+
+    public static ItemStack findItemInHand(Player player, Item item, boolean includeCurios) {
+        ItemStack stack = player.getMainHandItem();
+        if (stack.getItem() != item) stack = player.getOffhandItem();
+        if (includeCurios && stack.getItem() != item && Platform.isModLoaded("curios"))
+            stack = ItemStack.EMPTY;
+
+        if (stack.getItem() == item) return stack;
+        return ItemStack.EMPTY;
+    }
 
     public static boolean isItemInHandNotTools(Player player) {
         ItemStack stack;

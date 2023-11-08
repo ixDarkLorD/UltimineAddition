@@ -59,11 +59,11 @@ public class CardsCommand {
             ItemStack stack = getCard(player, slotIndex);
             if (stack.getItem() instanceof MiningSkillCardItem card && card.getData(stack).isChallengeExists(cData.getFirst())) {
                 MiningSkillCardData data = card.getData(stack).sendToClient(player);
-                int oldValue = data.getChallenge(cData.getFirst()).getCurrent();
+                int oldValue = Objects.requireNonNull(data.getChallenge(cData.getFirst())).getCurrentValue();
                 if (amount > -1) {
                     if (replaceValue) {
                         data.setAmount(cData.getFirst(), amount).saveData(stack);
-                    } else if (data.getChallenge(cData.getFirst()).getCurrent() < data.getChallenge(cData.getFirst()).getRequired()) {
+                    } else if (Objects.requireNonNull(data.getChallenge(cData.getFirst())).getCurrentValue() < Objects.requireNonNull(data.getChallenge(cData.getFirst())).getRequiredValue()) {
                         data.addAmount(cData.getFirst(), amount).saveData(stack);
                     } else {
                         source.sendFailure(Component.translatable("command.ultimine_addition.challenge.accomplished", cData.getFirst().toString()).withStyle(ChatFormatting.RED));
@@ -79,7 +79,7 @@ public class CardsCommand {
                         return i;
                     }
                 }
-                int newValue = data.getChallenge(cData.getFirst()).getCurrent();
+                int newValue = Objects.requireNonNull(data.getChallenge(cData.getFirst())).getCurrentValue();
                 i++;
 
                 if (player == source.getPlayer()) {
@@ -89,7 +89,7 @@ public class CardsCommand {
                     player.displayClientMessage(Component.translatable("command.ultimine_addition.challenge.receiver", cData.getFirst().toString(), oldValue, newValue, Objects.requireNonNull(source.getPlayer()).getName().getString()).withStyle(ChatFormatting.GRAY), false);
                 }
                 if (i > 1) {
-                    source.sendSuccess(() -> Component.translatable("command.ultimine_addition.challenge.sender", cData.getFirst().toString(), oldValue, newValue).withStyle(ChatFormatting.GRAY), true);
+                    source.sendSuccess(() ->Component.translatable("command.ultimine_addition.challenge.sender", cData.getFirst().toString(), oldValue, newValue).withStyle(ChatFormatting.GRAY), true);
                     int x = 1;
                     for (ServerPlayer p : targets) {
                         if (p != source.getPlayer()) {

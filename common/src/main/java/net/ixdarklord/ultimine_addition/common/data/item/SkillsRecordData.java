@@ -2,6 +2,7 @@ package net.ixdarklord.ultimine_addition.common.data.item;
 
 import com.mojang.datafixers.util.Pair;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
@@ -15,6 +16,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -25,16 +27,18 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
-import java.util.ConcurrentModificationException;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     private ItemStack stack;
+    private UUID uuid;
     private Container container;
+    private byte viewingCard;
     private boolean consumeMode;
+    private final Map<Integer, List<ResourceLocation>> pinnedChallenges = new TreeMap<>();
 
     public Pair<Boolean, Boolean> initTaskValidator(BlockState state, BlockPos pos, Player player, ChallengesData.Type challengeType) {
         boolean b1 = false;
@@ -111,6 +115,23 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         return isConsumed.get();
     }
 
+    public SkillsRecordData togglePinned(int slot, ResourceLocation challengeId) {
+        if (this.pinnedChallenges.containsKey(slot)) {
+            if (!this.pinnedChallenges.get(slot).contains(challengeId)) {
+                this.pinnedChallenges.get(slot).add(challengeId);
+            }
+        } else this.pinnedChallenges.put(slot, new ArrayList<>(List.of(challengeId)));
+
+        ItemStack itemStack = getCardSlots().get(slot);
+        MiningSkillCardData data = new MiningSkillCardData().loadData(itemStack);
+        MiningSkillCardData.InfoData infoData = data.getChallenge(challengeId);
+        if (infoData != null) {
+            infoData.togglePinned();
+            data.saveData(itemStack);
+        }
+        return this;
+    }
+
     private void consumeContents(ServerPlayer player) {
         ItemStack pen = getPenSlot();
         ItemStack paper = getPaperSlot();
@@ -156,6 +177,10 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         return consumeMode;
     }
 
+    public byte getViewingCard() {
+        return viewingCard;
+    }
+
     public Container getContainer() {
         return container;
     }
@@ -164,8 +189,17 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         return this.stack;
     }
 
+    public UUID getUUID() {
+        return this.uuid;
+    }
+
     public SkillsRecordData insertContainer(Container container) {
         this.container = container;
+        return this;
+    }
+
+    public SkillsRecordData setViewingCard(int selectedSlot) {
+        this.viewingCard = (byte) selectedSlot;
         return this;
     }
 
@@ -179,10 +213,29 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(this.NBTBase);
         if (NBT == null) NBT = new CompoundTag();
 
+        NBT.putUUID("UUID", this.uuid == null ? UUID.randomUUID() : this.uuid);
         NBT.merge(getNBTFromContainer(this.container));
+        NBT.putByte("ViewingCard", viewingCard);
         NBT.putBoolean("ConsumeMode", this.consumeMode);
         stack.getOrCreateTag().put(this.NBTBase, NBT);
         super.saveData(stack);
+    }
+
+    public SkillsRecordData syncData(ServerPlayer player) {
+        if (player.containerMenu instanceof SkillsRecordContainer skillsRecordContainer) {
+            this.pinnedChallenges.forEach((slot, challengeList) -> {
+                ItemStack cardStack = skillsRecordContainer.getCardSlots().get(slot).getItem();
+                MiningSkillCardData cardData = new MiningSkillCardData().loadData(cardStack);
+                challengeList.forEach(location -> {
+                    MiningSkillCardData.InfoData infoData = cardData.getChallenge(location);
+                    if (infoData != null) {
+                        infoData.togglePinned();
+                        cardData.saveData(cardStack);
+                    }
+                });
+            });
+        }
+        return this;
     }
 
     @Override
@@ -190,7 +243,9 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(this.NBTBase);
         if (NBT == null) NBT = new CompoundTag();
 
+        this.uuid = NBT.contains("UUID") ? NBT.getUUID("UUID") : null;
         this.container = getContainerFromNBT(NBT);
+        this.viewingCard = NBT.contains("ViewingCard") ? NBT.getByte("ViewingCard") : -1;
         this.consumeMode = NBT.getBoolean("ConsumeMode");
         this.stack = stack;
         return this;
@@ -198,12 +253,28 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
 
     @Override
     public void toNetwork(FriendlyByteBuf buf) {
-        buf.writeItem(stack);
-        buf.writeBoolean(consumeMode);
+        buf.writeItem(this.stack);
+        buf.writeByte(this.viewingCard);
+        buf.writeBoolean(this.consumeMode);
+        this.encodePinnedChallenges(buf);
     }
 
     public static SkillsRecordData fromNetwork(FriendlyByteBuf buf) {
-        return new SkillsRecordData().loadData(buf.readItem()).setConsumeMode(buf.readBoolean());
+        return new SkillsRecordData().loadData(buf.readItem())
+                .setViewingCard(buf.readByte())
+                .setConsumeMode(buf.readBoolean())
+                .decodePinnedChallenges(buf);
+    }
+
+    private void encodePinnedChallenges(FriendlyByteBuf buf) {
+        buf.writeMap(this.pinnedChallenges,
+                FriendlyByteBuf::writeInt,
+                (buffer, locationList) -> buffer.writeCollection(locationList, FriendlyByteBuf::writeResourceLocation));
+    }
+
+    private SkillsRecordData decodePinnedChallenges(FriendlyByteBuf buf) {
+        this.pinnedChallenges.putAll(buf.readMap(FriendlyByteBuf::readInt, buffer -> buffer.readList(FriendlyByteBuf::readResourceLocation)));
+        return this;
     }
 
     private SkillsRecordData setConsumeMode(boolean consumeMode) {
@@ -218,10 +289,10 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
             var itemStack = container.getItem(i);
             if (itemStack.isEmpty()) continue;
 
-            var compoundTag = new CompoundTag();
-            compoundTag.putByte("Slot", (byte) i);
-            itemStack.save(compoundTag);
-            listTag.add(compoundTag);
+            var tag = new CompoundTag();
+            tag.putByte("Slot", (byte) i);
+            itemStack.save(tag);
+            listTag.add(tag);
         }
         var tag = new CompoundTag();
         tag.put("Contents", listTag);
@@ -229,17 +300,17 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     }
 
     private static Container getContainerFromNBT(CompoundTag NBT) {
-        Container inv = new SimpleContainer(SkillsRecordItem.CONTAINER_SIZE);
-        ListTag list = new ListTag();
-        if (NBT != null) list = NBT.getList("Contents", 10);
+        Container container = new SimpleContainer(SkillsRecordItem.CONTAINER_SIZE);
+        ListTag listTag = new ListTag();
+        if (NBT != null) listTag = NBT.getList("Contents", 10);
 
-        for (int i = 0; i < list.size(); i++) {
-            CompoundTag compoundTag = list.getCompound(i);
+        for (int i = 0; i < listTag.size(); i++) {
+            CompoundTag compoundTag = listTag.getCompound(i);
             int j = compoundTag.getByte("Slot") & 255;
-            if (j < inv.getContainerSize()) {
-                inv.setItem(j, ItemStack.of(compoundTag));
+            if (j < container.getContainerSize()) {
+                container.setItem(j, ItemStack.of(compoundTag));
             }
         }
-        return inv;
+        return container;
     }
 }

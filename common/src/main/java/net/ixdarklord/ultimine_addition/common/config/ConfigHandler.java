@@ -59,6 +59,10 @@ public class ConfigHandler {
 
         public static final ForgeConfigSpec.IntValue CHALLENGE_VALIDATOR;
         public static final ForgeConfigSpec.BooleanValue TIER_BASED_MAX_BLOCKS;
+        public static final ForgeConfigSpec.IntValue TIER_0_CHALLENGES_AMOUNT;
+        public static final ForgeConfigSpec.IntValue TIER_1_CHALLENGES_AMOUNT;
+        public static final ForgeConfigSpec.IntValue TIER_2_CHALLENGES_AMOUNT;
+        public static final ForgeConfigSpec.IntValue TIER_3_CHALLENGES_AMOUNT;
         public static final ForgeConfigSpec.IntValue TIER_1_MAX_BLOCKS;
         public static final ForgeConfigSpec.IntValue TIER_2_MAX_BLOCKS;
         public static final ForgeConfigSpec.IntValue TIER_3_MAX_BLOCKS;
@@ -95,6 +99,17 @@ public class ConfigHandler {
                     .comment("Here, You can change the time to validate the challenges in the mining skills card for fixing the corrupted data if present.",
                             "It's formatted in seconds.")
                     .defineInRange("challenge_validator", 2, 1, 600);
+            BUILDER.pop();
+
+            BUILDER.push("Challenges");
+            TIER_0_CHALLENGES_AMOUNT = BUILDER
+                    .comment("You can change the values on how many challenges should be given in each tier.",
+                            "But remember that you must have the exact number of challenges in the Datapack.",
+                            "Otherwise, it will make the game crash!")
+                    .defineInRange("tier_0_challenges_amount", 1, 1, 20);
+            TIER_1_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_1_challenges_amount", 2, 1, 20);
+            TIER_2_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_2_challenges_amount", 4, 1, 20);
+            TIER_3_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_3_challenges_amount", 5, 1, 20);
             BUILDER.pop();
 
             BUILDER.push("Ability");

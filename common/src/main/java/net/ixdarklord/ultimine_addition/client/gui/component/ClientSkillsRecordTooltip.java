@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.client.gui.components;
+package net.ixdarklord.ultimine_addition.client.gui.component;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

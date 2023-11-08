@@ -50,9 +50,10 @@ public class SkillsRecordContainer extends DataAbstractContainerMenu<SkillsRecor
     public void clicked(int slotId, int button, @NotNull ClickType clickType, @NotNull Player player) {
         super.clicked(slotId, button, clickType, player);
 
-        if (player.level().isClientSide) return;
-        getData().sendToClient((ServerPlayer) player).saveData(stack);
-        this.slotsChanged(container);
+        if (!player.level().isClientSide) {
+            getData().sendToClient((ServerPlayer) player).saveData(stack);
+            this.slotsChanged(container);
+        }
     }
 
     @Override
@@ -118,10 +119,6 @@ public class SkillsRecordContainer extends DataAbstractContainerMenu<SkillsRecor
         // Hotbar
         topRow += 58;
         addSlotRange(playerInventory, 0, leftCol, topRow, 9, 18);
-    }
-
-    public ItemStack getItem() {
-        return stack;
     }
 
     public NonNullList<Slot> getAllSlots() {

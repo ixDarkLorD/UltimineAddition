@@ -71,7 +71,9 @@ public class SkillsRecordPacket extends BaseS2CMessage {
                     } else if (slotIndex != -1 && inv.getItem(slotIndex).getItem() instanceof SkillsRecordItem)
                         stack = inv.getItem(slotIndex);
 
-                    if (stack != ItemStack.EMPTY) data.saveData(stack);
+                    if (stack != ItemStack.EMPTY) {
+                        data.syncData(player).saveData(stack);
+                    }
                 }
             });
         }

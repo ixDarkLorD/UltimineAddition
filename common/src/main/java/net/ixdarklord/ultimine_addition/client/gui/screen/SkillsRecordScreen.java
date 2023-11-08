@@ -6,7 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.ixdarklord.coolcat_lib.client.button.CustomImageButton;
-import net.ixdarklord.coolcat_lib.client.components.TextScreen;
+import net.ixdarklord.coolcat_lib.client.gui.component.TextScreen;
 import net.ixdarklord.coolcat_lib.util.ColorUtils;
 import net.ixdarklord.coolcat_lib.util.MathUtils;
 import net.ixdarklord.coolcat_lib.util.MouseHelper;
@@ -76,7 +76,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
     private final List<Double> optionsY = new ArrayList<>(List.of(0.0, 0.0));
     private BGColor backgroundColor;
     private float time;
-    private float click;
+    private static float itemCycle;
     private int progressMode;
     private int selectedSlot;
     //    private int selectedZone;
@@ -104,8 +104,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
         this.inventoryLabelY = this.imageHeight - 92;
 
         this.time = 0;
-        this.click = 0;
-        this.selectedSlot = -1;
+        this.selectedSlot = container.getData().getViewingCard();
         this.currentProgress = 0;
         this.backgroundColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
         this.isAnimationsEnabled = ConfigHandler.CLIENT.ANIMATIONS_MODE.get();
@@ -190,6 +189,8 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
 
         if (this.selectedSlot > -1 && this.container.getCardSlots().get(this.selectedSlot).getItem() == ItemStack.EMPTY) {
             this.selectedSlot = -1;
+            var data = this.container.getData();
+            data.setViewingCard(this.selectedSlot).sendToServer().saveData(data.get());
         }
 
         MiningSkillCardData data = new MiningSkillCardData().loadData(this.selectedSlot > -1 ? this.container.getCardSlots().get(selectedSlot).getItem() : ItemStack.EMPTY);
@@ -609,13 +610,25 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 this.isScrolling = this.textScreen.canScroll();
                 return true;
             }
-            if (this.textScreen.getComponentStyleAt(mouseX, mouseY) != null && this.textScreen.getComponentStyleAt(mouseX, mouseY).getClickEvent() != null) {
-                this.click++;
-                return true;
+            Style style = this.textScreen.getComponentStyleAt(mouseX, mouseY);
+            if (style != null && style.getClickEvent() != null) {
+                if (style.getClickEvent().getValue().contains("cycle")) {
+                    itemCycle++;
+                    return true;
+                }
+                if (style.getClickEvent().getValue().contains("pin") && this.selectedSlot > -1) {
+                    String[] value = style.getClickEvent().getValue().split(",");
+                    ResourceLocation challengeId = new ResourceLocation(value[1]);
+
+                    var data = this.container.getData();
+                    data.togglePinned(this.selectedSlot, challengeId).sendToServer().saveData(data.get());
+                    return true;
+                }
             }
             if (!isOptionsShown && this.isConsumeChallengeExists() && MouseHelper.isMouseOver(mouseX, mouseY, this.leftPos, this.topPos, 86, 106, 9, 18)) {
                 var data = this.container.getData();
                 data.toggleConsumeMode().sendToServer().saveData(data.get());
+                return true;
             }
         }
         if (button == 1) {
@@ -623,6 +636,9 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 if (selectedSlot == -1 || selectedSlot != this.hoveredSlot.getContainerSlot()) {
                     this.selectedSlot = this.hoveredSlot.getContainerSlot();
                 } else this.selectedSlot = -1;
+
+                var data = this.container.getData();
+                data.setViewingCard(this.selectedSlot).sendToServer().saveData(data.get());
                 return true;
             }
         }
@@ -698,7 +714,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
 
         AtomicInteger currentValues = new AtomicInteger();
         AtomicInteger requiredValues = new AtomicInteger();
-        cardData.getChallenges().forEach((identifier, values) -> {
+        cardData.getChallenges().forEach((identifier, infoData) -> {
             List<ItemStack> itemList = new ArrayList<>(List.of(ItemStack.EMPTY));
             ChallengesData challengesData = manager.getAllChallenges().get(identifier.id());
             String type = "null";
@@ -707,23 +723,21 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 itemList.clear();
                 type = challengesData.getChallengeType().getTypeName();
                 ChallengesManager.INSTANCE.utilizeTargetedBlocks(challengesData).forEach(block -> itemList.add(new ItemStack(block)));
-                currentValues.addAndGet(values.getCurrent());
-                requiredValues.addAndGet(values.getRequired());
+                currentValues.addAndGet(infoData.getCurrentValue());
+                requiredValues.addAndGet(infoData.getRequiredValue());
             }
 
-            ItemStack displayItem = itemList.get(Mth.floor(this.click) % itemList.size());
+            ItemStack displayItem = itemList.get(Mth.floor(itemCycle) % itemList.size());
             var hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(displayItem));
             Style questStyle = Style.EMPTY.withHoverEvent(hoverEvent).withItalic(true).withColor(ChatFormatting.DARK_AQUA);
-            Component info;
             if (itemList.size() > 1) {
-                questStyle = questStyle.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, ""));
-                info = Component.translatable("challenge.ultimine_addition.various_blocks", Component.literal(displayItem.getHoverName().getString()).withStyle(questStyle));
-            } else info = Component.literal(itemList.get(0).getHoverName().getString()).withStyle(questStyle);
+                questStyle = questStyle.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, "cycle"));
+            }
 
             @SuppressWarnings("UnnecessaryUnicodeEscape")
             Component title = ScreenUtils.limitComponent(Component.literal("\u300E").append(Component.translatable("challenge.ultimine_addition.title", identifier.order())).append("\u300F"), this.textScreen.getWidth());
             Component consume = Component.literal("✖ ").append(Component.translatable("challenge.ultimine_addition.consume")).withStyle(ChatFormatting.RED);
-            Component description = Component.translatable(String.format("challenge.ultimine_addition.%s", type), info);
+            Component description = createChallengeDescription(type, questStyle, itemList, itemCycle);
             Style descStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GRAY);
             Style counterStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GOLD);
 
@@ -743,10 +757,25 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 result.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(consume, this.textScreen.getWidth(), consume.getStyle())));
             result.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(description, this.textScreen.getWidth(), descStyle)));
 
-            result.add(FormattedCharSequence.forward(String.format("➤ %s/%s", values.getCurrent(), values.getRequired()), counterStyle));
+            FormattedCharSequence counter = FormattedCharSequence.forward(("➤ %s/%s".formatted(infoData.getCurrentValue(), infoData.getRequiredValue())), counterStyle);
+
+            HoverEvent pinHover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("gui.ultimine_addition.skills_record.pin").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            FormattedCharSequence pinButton = FormattedCharSequence.forward("◎", Style.EMPTY.withColor(infoData.isPinned() ? ChatFormatting.YELLOW : ChatFormatting.GRAY).withStrikethrough(!infoData.isPinned()).withHoverEvent(pinHover).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, "pin,%s".formatted(identifier.id().toString()))));
+            pinButton = FormattedCharSequence.composite(FormattedCharSequence.forward(" ", Style.EMPTY), pinButton);
+
+            result.add(FormattedCharSequence.composite(counter, pinButton));
             if (!this.textScreen.isEmpty()) this.textScreen.add(FormattedCharSequence.EMPTY).addAll(result); else this.textScreen.addAll(result);
         });
         this.calculateProgression(currentValues.get(), requiredValues.get());
+    }
+
+    public static Component createChallengeDescription(String challengeType, Style style, List<ItemStack> items, float cycle) {
+        ItemStack displayItem = items.get(Mth.floor(cycle) % items.size());
+        Component info;
+        if (items.size() > 1) {
+            info = Component.translatable("challenge.ultimine_addition.various_blocks", Component.literal(displayItem.getHoverName().getString()).withStyle(style));
+        } else info = Component.literal(items.get(0).getHoverName().getString()).withStyle(style);
+        return Component.translatable("challenge.ultimine_addition.%s".formatted(challengeType), info);
     }
 
     private void calculateProgression(int currentValues, int requiredValues) {
@@ -777,6 +806,10 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
                 length.set(Math.max(this.font.width(button.getMessage()), length.get()))
         );
         return length.get();
+    }
+
+    public static float getItemCycle() {
+        return itemCycle;
     }
 
     public enum BGColor {

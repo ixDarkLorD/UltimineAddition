@@ -85,6 +85,8 @@ public class LanguageBuilder {
         add("gui", "skills_record.progress", "Progress: %s");
         add("gui", "skills_record.missing_items", "You can't accomplish any challenge! It would help if you had these items available:");
         add("gui", "skills_record.not_enough_ink", "There is not enough ink in the pen! Please refill it.");
+        add("gui", "skills_record.pin", "Press to pin the challenge.");
+        add("gui", "skills_record.pin.panel", "There is %s+ more panels");
 
         add("toast", "challenge.completed", "Challenge Completed!");
         add("toast", "challenge.completed.info", "You have completed Challenge %s in %s");
@@ -95,7 +97,7 @@ public class LanguageBuilder {
         add("advancement", "obtain", "Obtain a %s");
         add("advancement", "craft", "Craft a %s");
         add("advancement", "amethyst_gathering", "Bring me the crystals!");
-        add("advancement", "obtain.slime_balls", "Huh? oh... Yack!");
+        add("advancement", "obtain.slime_balls", "Huh? oh... Yuck!");
         add("advancement", "obtain.card.empty", "Well... This is Useless!");
         add("advancement", "craft.pen", "Isn't this Exquisite?");
         add("advancement", "craft.skills_record", "It's time to take notes!");
