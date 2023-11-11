@@ -8,7 +8,6 @@ import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.ftb.mods.ftbultimine.FTBUltimine;
-import net.ixdarklord.coolcat_lib.util.InventoryHelper;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
@@ -25,12 +24,17 @@ import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
 import net.ixdarklord.ultimine_addition.common.network.packet.SyncChallengesPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChallengeEvents {
     public static void init() {
@@ -67,13 +71,14 @@ public class ChallengeEvents {
 
         BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
             if (!level.isClientSide()) {
-                int slotId = InventoryHelper.findSlotMatchingItem(player.getInventory(), ModItems.SKILLS_RECORD);
-                if (slotId == -1) return EventResult.pass();
-                ItemStack stack = player.getInventory().getItem(slotId);
-                SkillsRecordData data = new SkillsRecordData().loadData(stack);
-                Pair<Boolean, Boolean> taskProcess = data.initTaskValidator(state, pos, player, ChallengesData.Type.BREAK_BLOCK);
-                if (taskProcess.getFirst()) {
-                    data.sendToClient(player).saveData(stack);
+                List<ItemStack> items = listMatchingItem(player.getInventory(), ModItems.SKILLS_RECORD);
+                if (items.isEmpty()) return EventResult.pass();
+                for (ItemStack stack : items) {
+                    SkillsRecordData data = new SkillsRecordData().loadData(stack);
+                    Pair<Boolean, Boolean> taskProcess = data.initTaskValidator(state, pos, player, ChallengesData.Type.BREAK_BLOCK);
+                    if (taskProcess.getFirst()) {
+                        data.sendToClient(player).saveData(stack);
+                    }
                 }
             }
             return EventResult.pass();
@@ -91,30 +96,39 @@ public class ChallengeEvents {
         if (player == null) return CompoundEventResult.pass();
         if (PlayerHooks.isFake(player)) return CompoundEventResult.pass();
         if (!context.getLevel().isClientSide()) {
-            int slotId = InventoryHelper.findSlotMatchingItem(player.getInventory(), ModItems.SKILLS_RECORD);
-            if (slotId == -1) return CompoundEventResult.pass();
-            ItemStack stack = player.getInventory().getItem(slotId);
-            var data = new SkillsRecordData().loadData(stack);
+            List<ItemStack> items = listMatchingItem(player.getInventory(), ModItems.SKILLS_RECORD);
+            if (items.isEmpty()) return CompoundEventResult.pass();
+            for (ItemStack stack : items) {
+                var data = new SkillsRecordData().loadData(stack);
+                Pair<Boolean, Boolean> taskProcess = Pair.of(false, false);
+                if (toolAction == ToolActions.AXE_STRIP) {
+                    taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengesData.Type.STRIP_BLOCK);
 
-            Pair<Boolean, Boolean> taskProcess = Pair.of(false, false);
-            if (toolAction == ToolActions.AXE_STRIP) {
-                taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengesData.Type.STRIP_BLOCK);
+                } else if (toolAction == ToolActions.SHOVEL_FLATTEN) {
+                    taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengesData.Type.FLATTEN_BLOCK);
 
-            } else if (toolAction == ToolActions.SHOVEL_FLATTEN) {
-                taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengesData.Type.FLATTEN_BLOCK);
-
-            } else if (toolAction == ToolActions.HOE_TILL && context.getLevel().getBlockState(context.getClickedPos().above()).isAir()) {
-                taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengesData.Type.TILLING_BLOCK);
-            }
+                } else if (toolAction == ToolActions.HOE_TILL && context.getLevel().getBlockState(context.getClickedPos().above()).isAir()) {
+                    taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengesData.Type.TILLING_BLOCK);
+                }
 //            Constants.LOGGER.debug("Is Task Succeed: {}, Block: {}", taskProcess.getFirst(), originalState.getBlock().getName().getString());
 
-            if (taskProcess.getFirst()) {
-                data.sendToClient((ServerPlayer) player).saveData(stack);
-                if (taskProcess.getSecond()) {
-                    return CompoundEventResult.interruptTrue(Blocks.AIR.defaultBlockState());
+                if (taskProcess.getFirst()) {
+                    data.sendToClient((ServerPlayer) player).saveData(stack);
+                    if (taskProcess.getSecond()) {
+                        return CompoundEventResult.interruptTrue(Blocks.AIR.defaultBlockState());
+                    }
                 }
             }
         }
         return CompoundEventResult.pass();
+    }
+
+    public static List<ItemStack> listMatchingItem(Container container, Item item) {
+        List<ItemStack> result = new ArrayList<>();
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            ItemStack stack = container.getItem(i);
+            if (!stack.isEmpty() && stack.is(item)) result.add(stack);
+        }
+        return result;
     }
 }

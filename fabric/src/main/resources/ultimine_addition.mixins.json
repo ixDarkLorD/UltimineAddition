@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_17",
   "package": "net.ixdarklord.ultimine_addition.mixin",
   "client": [
-    "fabric.client.ClientTooltipComponentMixin"
+    "fabric.client.ClientTooltipComponentMixin",
+    "fabric.client.GuiMixin"
   ],
   "mixins": [
     "fabric.PlayerDataMixin"

@@ -2,7 +2,6 @@ package net.ixdarklord.ultimine_addition.common.event;
 
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.EntityEvent;
-import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.registry.level.entity.trade.TradeRegistry;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
@@ -21,12 +20,6 @@ public class WorldEvents {
                 PacketHandler.sendToPlayer(new PlayerAbilityPacket(ServicePlatform.Players.isPlayerUltimineCapable(player)), player);
             }
             return EventResult.pass();
-        });
-        PlayerEvent.PLAYER_CLONE.register((oldPlayer, newPlayer, wonGame) -> {
-            if (!wonGame) {
-                boolean state = ServicePlatform.Players.isPlayerUltimineCapable(oldPlayer);
-                ServicePlatform.Players.setPlayerUltimineCapability(newPlayer, state);
-            }
         });
 
         TradeRegistry.registerVillagerTrade(VillagerProfession.TOOLSMITH, 5, (trader, rand) ->

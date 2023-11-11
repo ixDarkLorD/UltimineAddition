@@ -173,7 +173,6 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-
     archiveClassifier.convention(null)
     archiveClassifier.set(null)
 }

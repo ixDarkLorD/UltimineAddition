@@ -14,6 +14,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,37 +24,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemStack> {
     private ItemStack stack;
     private ItemStack displayItem;
-    private Map<Identifier, Values> currentChallenges = new TreeMap<>();
+    private Map<Identifier, InfoData> currentChallenges = new TreeMap<>();
     private final List<Identifier> finishedChallenges = new ArrayList<>();
     private MiningSkillCardItem.Tier tier = MiningSkillCardItem.Tier.Unlearned;
     private int potionPoints;
-
-    public record Identifier(int order, ResourceLocation id) implements Comparable<Identifier> {
-        @Override
-        public int compareTo(@NotNull MiningSkillCardData.Identifier other) {
-            return Integer.compare(this.order, other.order);
-        }
-    }
-    public static class Values {
-        private int current;
-        private final int required;
-        public Values(int current, int required) {
-            this.current = current;
-            this.required = required;
-        }
-
-        public int getCurrent() {
-            return current;
-        }
-
-        public void setCurrent(int current) {
-            this.current = current;
-        }
-
-        public int getRequired() {
-            return required;
-        }
-    }
 
     public MiningSkillCardData initChallenges() {
         if (tier == MiningSkillCardItem.Tier.Mastered) return this;
@@ -61,17 +35,17 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         AtomicInteger quantity = new AtomicInteger();
         MiningSkillCardItem.Type type = ((MiningSkillCardItem)stack.getItem()).getType();
         switch (tier) {
-            case Unlearned -> quantity.set(2);
-            case Novice -> quantity.set(3);
-            case Apprentice -> quantity.set(5);
-            case Adept -> quantity.set(8);
+            case Unlearned -> quantity.set(ConfigHandler.COMMON.TIER_0_CHALLENGES_AMOUNT.get());
+            case Novice -> quantity.set(ConfigHandler.COMMON.TIER_1_CHALLENGES_AMOUNT.get());
+            case Apprentice -> quantity.set(ConfigHandler.COMMON.TIER_2_CHALLENGES_AMOUNT.get());
+            case Adept -> quantity.set(ConfigHandler.COMMON.TIER_3_CHALLENGES_AMOUNT.get());
         }
         if (tier != MiningSkillCardItem.Tier.Unlearned && tier != MiningSkillCardItem.Tier.Mastered)
             setPotionPoints(this.getMaxPotionPoints());
 
         currentChallenges.clear();
         ChallengesManager.INSTANCE.getRandomChallenges(quantity.get(), type, this.tier).forEach((location, data) -> {
-            currentChallenges.put(new Identifier(slotId.get(), location), new Values(0, data.getRequiredAmount()));
+            currentChallenges.put(new Identifier(slotId.get(), location), new InfoData(data.getRequiredAmount()));
             slotId.getAndIncrement();
         });
         return this;
@@ -83,7 +57,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         MiningSkillCardItem.Type type = ((MiningSkillCardItem)stack.getItem()).getType();
         if (!this.currentChallenges.isEmpty()) {
             Collection<Identifier> removedChallenges = new HashSet<>();
-            this.currentChallenges.forEach((identifier, values) -> {
+            this.currentChallenges.forEach((identifier, infoData) -> {
                 if (!ChallengesManager.INSTANCE.getAllChallenges().containsKey(identifier.id)) {
                     removedChallenges.add(identifier);
                 }
@@ -94,7 +68,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
                 do {
                     ChallengesManager.INSTANCE.getRandomChallenges(1, type, this.tier).forEach((location, data) -> {
                         if (this.currentChallenges.keySet().stream().filter(identifier1 -> identifier1.id.equals(location)).toList().isEmpty()) {
-                            this.currentChallenges.put(new Identifier(identifier.order, location), new Values(0, data.getRequiredAmount()));
+                            this.currentChallenges.put(new Identifier(identifier.order, location), new InfoData(data.getRequiredAmount()));
                             if (ConfigHandler.COMMON.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
                                 ChallengesManager.LOGGER.info("Changed the challenge from: id:\"{}\" to: id:\"{}\"", identifier.id, location);
                             }
@@ -113,8 +87,11 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
     }
 
     public MiningSkillCardData setAmount(ResourceLocation challengeId, int value) {
-        int requiredAmount = this.getChallenge(challengeId).required;
-        this.getChallenge(challengeId).setCurrent(Math.min(value, requiredAmount));
+        InfoData infoData = this.getChallenge(challengeId);
+        if (infoData == null) return this;
+
+        int requiredAmount = infoData.requiredValue;
+        infoData.setCurrentValue(Math.min(value, requiredAmount));
         this.checkChallengeAccomplishment(challengeId, this.getChallenge(challengeId));
         if (this.isAllChallengesCompleted()) {
             this.tier = this.tier.next();
@@ -125,11 +102,14 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
     }
 
     public MiningSkillCardData addAmount(ResourceLocation challengeId, int value) {
-        int currentAmount = this.getChallenge(challengeId).current;
-        int requiredAmount = this.getChallenge(challengeId).required;
+        InfoData infoData = this.getChallenge(challengeId);
+        if (infoData == null) return this;
+
+        int currentAmount = infoData.currentValue;
+        int requiredAmount = infoData.requiredValue;
         if (currentAmount >= requiredAmount) return this;
 
-        this.getChallenge(challengeId).setCurrent(Math.min(currentAmount + value, requiredAmount));
+        infoData.setCurrentValue(Math.min(currentAmount + value, requiredAmount));
         if (this.isAllChallengesCompleted()) {
             this.tier = this.tier.next();
             this.initChallenges();
@@ -138,13 +118,21 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return this;
     }
     public MiningSkillCardData accomplishChallenge(ResourceLocation challengeId) {
-        int requiredAmount = this.getChallenge(challengeId).required;
-        this.getChallenge(challengeId).setCurrent(requiredAmount);
+        InfoData infoData = this.getChallenge(challengeId);
+        if (infoData == null) return this;
+
+        int requiredAmount = infoData.requiredValue;
+        infoData.setCurrentValue(requiredAmount);
         if (this.isAllChallengesCompleted()) {
             this.tier = this.tier.next();
             this.initChallenges();
             this.finishedChallenges.add(new Identifier(0, new ResourceLocation("completed")));
         } else this.checkChallengeAccomplishment(challengeId, this.getChallenge(challengeId));
+        return this;
+    }
+
+    public MiningSkillCardData setChallenges(Map<Identifier, InfoData> map) {
+        this.currentChallenges = map;
         return this;
     }
 
@@ -160,15 +148,16 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return this;
     }
     public boolean isChallengeAccomplished(ResourceLocation challengeId) {
-        if (!this.isChallengeExists(challengeId)) return false;
-        return this.getChallenge(challengeId).current >= this.getChallenge(challengeId).required;
+        InfoData infoData = this.getChallenge(challengeId);
+        if (infoData == null || !this.isChallengeExists(challengeId)) return false;
+        return infoData.currentValue >= infoData.requiredValue;
     }
     private boolean isAllChallengesCompleted() {
         AtomicInteger allCurrentValues = new AtomicInteger();
         AtomicInteger allRequiredValues = new AtomicInteger();
-        this.currentChallenges.forEach((identifier, values) -> {
-            allCurrentValues.addAndGet(values.current);
-            allRequiredValues.addAndGet(values.required);
+        this.currentChallenges.forEach((identifier, infoData) -> {
+            allCurrentValues.addAndGet(infoData.currentValue);
+            allRequiredValues.addAndGet(infoData.requiredValue);
         });
         return allCurrentValues.get() >= allRequiredValues.get();
     }
@@ -183,14 +172,15 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         }
         return this.displayItem;
     }
-    public Values getChallenge(ResourceLocation challengeId) {
-        AtomicReference<Values> result = new AtomicReference<>(null);
-        this.currentChallenges.forEach((identifier, values) -> {
-            if (identifier.id.equals(challengeId)) result.set(values);
+    @Nullable
+    public InfoData getChallenge(ResourceLocation challengeId) {
+        AtomicReference<InfoData> result = new AtomicReference<>(null);
+        this.currentChallenges.forEach((identifier, infoData) -> {
+            if (identifier.id.equals(challengeId)) result.set(infoData);
         });
         return result.get();
     }
-    public Map<Identifier, Values> getChallenges() {
+    public Map<Identifier, InfoData> getChallenges() {
         return this.currentChallenges;
     }
     public boolean isChallengeExists(ResourceLocation challengeId) {
@@ -212,9 +202,9 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
 
     public int getMaxPotionPoints() {
         return switch (this.tier) {
-            case Novice -> 3;
-            case Apprentice -> 2;
-            case Adept -> 1;
+            case Novice -> ConfigHandler.COMMON.TIER_1_POTION_POINTS.get();
+            case Apprentice -> ConfigHandler.COMMON.TIER_2_POTION_POINTS.get();
+            case Adept -> ConfigHandler.COMMON.TIER_3_POTION_POINTS.get();
             default -> 0;
         };
     }
@@ -277,14 +267,15 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return MiningSkillCardItem.Tier.fromInt(value);
     }
 
-    private static CompoundTag getNBTFromChallenges(Map<Identifier, Values> value) {
+    private static CompoundTag getNBTFromChallenges(Map<Identifier, InfoData> value) {
         ListTag listTag = new ListTag();
-        value.forEach((identifier, values) -> {
+        value.forEach((identifier, infoData) -> {
             CompoundTag tag = new CompoundTag();
             tag.putInt("Order", identifier.order);
             tag.putString("Id", identifier.id.toString());
-            tag.putInt("CurrentAmount", values.current);
-            tag.putInt("RequiredAmount", values.required);
+            tag.putBoolean("IsPinned", infoData.isPinned);
+            tag.putInt("CurrentAmount", infoData.currentValue);
+            tag.putInt("RequiredAmount", infoData.requiredValue);
             listTag.add(tag);
         });
         var tag = new CompoundTag();
@@ -292,8 +283,8 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return tag;
     }
 
-    private static Map<Identifier, Values> getChallengesFromNBT(CompoundTag NBT) {
-        Map<Identifier, Values> result = new TreeMap<>();
+    private static Map<Identifier, InfoData> getChallengesFromNBT(CompoundTag NBT) {
+        Map<Identifier, InfoData> result = new TreeMap<>();
         ListTag listTag = new ListTag();
         if (NBT != null) listTag = NBT.getList("Challenges", 10);
 
@@ -301,20 +292,68 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
             CompoundTag tag = listTag.getCompound(i);
             int order = tag.getInt("Order");
             ResourceLocation id = new ResourceLocation(tag.getString("Id"));
+            boolean pinned = tag.getBoolean("IsPinned");
             int current = tag.getInt("CurrentAmount");
             int required = tag.getInt("RequiredAmount");
-            result.put(new Identifier(order, id), new Values(current, required));
+            result.put(new Identifier(order, id), new InfoData(pinned, current, required));
         }
         return result;
     }
 
-    private void checkChallengeAccomplishment(ResourceLocation challengeId, Values values) {
+    private void checkChallengeAccomplishment(ResourceLocation challengeId, InfoData infoData) {
         AtomicReference<Identifier> identifier = new AtomicReference<>();
         this.currentChallenges.forEach((i, integers) -> {
             if (i.id.equals(challengeId)) identifier.set(i);
         });
         if (identifier.get() == null) return;
-        if (values.current >= values.required && !this.finishedChallenges.contains(identifier.get()))
+        if (infoData.currentValue >= infoData.requiredValue && !this.finishedChallenges.contains(identifier.get()))
             this.finishedChallenges.add(identifier.get());
+    }
+
+    public record Identifier(int order, ResourceLocation id) implements Comparable<Identifier> {
+        @Override
+        public int compareTo(@NotNull MiningSkillCardData.Identifier other) {
+            return Integer.compare(this.order, other.order);
+        }
+    }
+
+    public static class InfoData {
+        private boolean isPinned;
+        private int currentValue;
+        private final int requiredValue;
+
+        public InfoData(int requiredValue) {
+            this(0, requiredValue);
+        }
+
+        public InfoData(int currentValue, int requiredValue) {
+            this(false, currentValue, requiredValue);
+        }
+
+        public InfoData(boolean isPinned, int currentValue, int requiredValue) {
+            this.isPinned = isPinned;
+            this.currentValue = currentValue;
+            this.requiredValue = requiredValue;
+        }
+
+        public void togglePinned() {
+            isPinned ^= true;
+        }
+
+        public void setCurrentValue(int currentValue) {
+            this.currentValue = currentValue;
+        }
+
+        public boolean isPinned() {
+            return isPinned;
+        }
+
+        public int getCurrentValue() {
+            return currentValue;
+        }
+
+        public int getRequiredValue() {
+            return requiredValue;
+        }
     }
 }

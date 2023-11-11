@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.client.gui.components;
+package net.ixdarklord.ultimine_addition.client.gui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;

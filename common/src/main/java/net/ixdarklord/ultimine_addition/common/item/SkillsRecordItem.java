@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.common.item;
 
 import dev.architectury.registry.menu.MenuRegistry;
 import net.ixdarklord.coolcat_lib.util.ScreenUtils;
-import net.ixdarklord.ultimine_addition.client.gui.components.SkillsRecordTooltip;
+import net.ixdarklord.ultimine_addition.client.gui.component.SkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;

@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class ChallengesArgument implements ArgumentType<Pair<ResourceLocation, ChallengesData>> {
-    private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012");
+    private static final Collection<String> EXAMPLES = Arrays.asList("ultimine_addition:test_id", "ultimine_addition:breaking_block", "ultimine_addition:pickaxe/gathering_stones");
     public static final DynamicCommandExceptionType ERROR_UNKNOWN_CHALLENGE = new DynamicCommandExceptionType((entry) ->
             Component.translatable("argument.ultimine_addition.challenge.unknown", entry));
 

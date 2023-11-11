@@ -85,6 +85,8 @@ public class LanguageBuilder {
         add("gui", "skills_record.progress", "Progress: %s");
         add("gui", "skills_record.missing_items", "You can't accomplish any challenge! It would help if you had these items available:");
         add("gui", "skills_record.not_enough_ink", "There is not enough ink in the pen! Please refill it.");
+        add("gui", "skills_record.pin", "Press to pin the challenge.");
+        add("gui", "skills_record.pin.panel", "There are %s+ more hidden panels");
 
         add("toast", "challenge.completed", "Challenge Completed!");
         add("toast", "challenge.completed.info", "You have completed Challenge %s in %s");
@@ -95,7 +97,7 @@ public class LanguageBuilder {
         add("advancement", "obtain", "Obtain a %s");
         add("advancement", "craft", "Craft a %s");
         add("advancement", "amethyst_gathering", "Bring me the crystals!");
-        add("advancement", "obtain.slime_balls", "Huh? oh... Yack!");
+        add("advancement", "obtain.slime_balls", "Huh? oh... Yuck!");
         add("advancement", "obtain.card.empty", "Well... This is Useless!");
         add("advancement", "craft.pen", "Isn't this Exquisite?");
         add("advancement", "craft.skills_record", "It's time to take notes!");
@@ -103,7 +105,7 @@ public class LanguageBuilder {
         add("advancement", "craft.card.pickaxe", "That's my Geode Gobbler!");
         add("advancement", "craft.card.axe", "Oh, I had an AXEIDENT! Did you get it?");
         add("advancement", "craft.card.shovel", "Gold Rush!");
-        add("advancement", "craft.card.hoe", "You can’t sit with us.");
+        add("advancement", "craft.card.hoe", "You can't sit with us.");
         add("advancement", "ultimine_ability", "Powerful like a machine!");
         add("advancement", "ultimine_ability.desc", "Craft a %s using all four types of mastered mining skill cards and interact with it.");
 
@@ -113,12 +115,13 @@ public class LanguageBuilder {
         add("challenge", "break_block", "Destroy %s.");
         add("challenge", "strip_block", "Strip the %s.");
         add("challenge", "flatten_block", "Flatten the %s.");
-        add("challenge", "tilling_block", "Till the %s.");
+        add("challenge", "tilling_block", "Plow the %s.");
         add("challenge", "interact_with_block", "Interact with %s.");
         add("challenge", "various_blocks", "one of these blocks (%s)");
 
+        add("info", "placed_by_entity", "Invalid block! This block was placed by %s.");
         add("info", "obtain", "Congratulations on learning the excavation skill!");
-        add("info", "obtained_already", "You have already obtained this knowledge! %s");
+        add("info", "obtained_already", "You have already obtained this knowledge!");
         add("info", "incapable", "You need the excavation skill to perform this action! First, Obtain a Miner Certificate or drink a Mine-Go Juice.");
         add("info", "required_skill.pickaxe", "Required Skill for: Pickaxe");
         add("info", "required_skill.axe", "Required Skill for: Axe");

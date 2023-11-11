@@ -38,7 +38,7 @@ public class ForgeSetup {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         EventBuses.registerModEventBus(Constants.MOD_ID, modEventBus);
         
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ForgeClientSetup::new);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ForgeClientSetup::new);
         CommonSetup.init();
     }
 
@@ -73,8 +73,21 @@ public class ForgeSetup {
         }
 
         @SubscribeEvent
+        public static void onPlayerClone(PlayerEvent.Clone event) {
+            if (event.isWasDeath()) {
+                event.getOriginal().reviveCaps();
+                event.getOriginal().getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(oldPlayer ->
+                        event.getEntity().getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(newPlayer ->
+                                newPlayer.copyFrom(oldPlayer)));
+                event.getOriginal().invalidateCaps();
+            }
+        }
+
+        @SubscribeEvent
         public static void onDatapackSync(final OnDatapackSyncEvent event) {
-            DatapackEvents.SYNC.invoker().init(event.getPlayer(), false);
+            if (event.getPlayer() != null) {
+                DatapackEvents.SYNC.invoker().init(event.getPlayer(), false);
+            }
         }
 
         @SubscribeEvent
