@@ -202,9 +202,9 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
 
     public int getMaxPotionPoints() {
         return switch (this.tier) {
-            case Novice -> 3;
-            case Apprentice -> 2;
-            case Adept -> 1;
+            case Novice -> ConfigHandler.COMMON.TIER_1_POTION_POINTS.get();
+            case Apprentice -> ConfigHandler.COMMON.TIER_2_POTION_POINTS.get();
+            case Adept -> ConfigHandler.COMMON.TIER_3_POTION_POINTS.get();
             default -> 0;
         };
     }

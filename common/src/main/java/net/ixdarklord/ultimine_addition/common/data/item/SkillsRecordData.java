@@ -11,11 +11,14 @@ import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.PenItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -78,7 +81,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                     boolean isCorrectAction = challengeData.getChallengeType().equals(challengeType) || challengeData.getChallengeType().equals(challengeType.getConsumeVersion());
                     boolean isValidBlock = blocks.contains(state.getBlock());
                     boolean isCorrectTool = !hasCorrectGamemode || ChallengesManager.INSTANCE.isCorrectTool(player, challengeData);
-                    boolean isBlockPlacedByEntity = hasCorrectGamemode && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY) && ChunkManager.INSTANCE.getChunkData(chunk).isBlockPlacedByEntity(pos);
+                    boolean isBlockPlacedByEntity = ConfigHandler.COMMON.IS_PLACED_BY_ENTITY_CONDITION.get() && hasCorrectGamemode && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY) && ChunkManager.INSTANCE.getChunkData(chunk).isBlockPlacedByEntity(pos);
 
                     if (ConfigHandler.COMMON.CHALLENGE_ACTIONS_LOGGER.get()) {
                         ChallengesManager.LOGGER.debug("/===========================================/");
@@ -94,6 +97,15 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                         ChallengesManager.LOGGER.debug("/===========================================/");
                     }
 
+                    if (isBlockPlacedByEntity) {
+                        ChunkManager.INSTANCE.getChunkData(chunk).getPlacedBlocks().forEach((entityIdentifier, placedBlocks) -> {
+                            var list = placedBlocks.stream().filter(blockInfo -> blockInfo.pos().equals(pos)).toList();
+                            if (!list.isEmpty()) {
+                                MutableComponent component = new TranslatableComponent("info.ultimine_addition.placed_by_entity", new TranslatableComponent("entity.%s.%s".formatted(entityIdentifier.id().getNamespace(), entityIdentifier.id().getPath())));
+                                player.displayClientMessage(component.withStyle(ChatFormatting.RED), true);
+                            }
+                        });
+                    }
                     if (!isMissingRequiredItems && !notEnoughInk && !isChallengeAccomplished && isCorrectAction && isValidBlock && isCorrectTool && !isBlockPlacedByEntity) {
                         if (challengeData.getChallengeType().isConsuming()) {
                             if (consumeMode) {

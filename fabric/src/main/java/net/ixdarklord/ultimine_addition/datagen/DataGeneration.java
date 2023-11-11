@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.ixdarklord.ultimine_addition.datagen.advancement.AdvancementGenerator;
 import net.ixdarklord.ultimine_addition.datagen.challenge.ChallengeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.model.ItemModelGenerator;
-import net.ixdarklord.ultimine_addition.datagen.language.LanguageGenerator;
 import net.ixdarklord.ultimine_addition.datagen.particle.ParticleGenerator;
 import net.ixdarklord.ultimine_addition.datagen.recipe.RecipeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.BlockTagGenerator;
@@ -22,6 +21,6 @@ public class DataGeneration implements DataGeneratorEntrypoint {
         generator.addProvider(RecipeGenerator::new);
         generator.addProvider(ItemModelGenerator::new);
         generator.addProvider(ParticleGenerator::new);
-        generator.addProvider(fabricDataGenerator -> new LanguageGenerator(fabricDataGenerator, "en_us"));
+//        generator.addProvider(fabricDataGenerator -> new LanguageGenerator(fabricDataGenerator, "en_us"));
     }
 }
