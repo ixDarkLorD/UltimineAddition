@@ -57,12 +57,19 @@ public class ConfigHandler {
         public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
         public static final TomlConfigReader CONFIG_READER = new TomlConfigReader(Constants.MOD_NAME, String.format("%s/%s/common-config.toml", Platform.getConfigFolder(), Constants.MOD_ID));
 
+        public static final ForgeConfigSpec.DoubleValue PAPER_CONSUMPTION_RATE;
+        public static final ForgeConfigSpec.BooleanValue IS_PLACED_BY_ENTITY_CONDITION;
         public static final ForgeConfigSpec.IntValue CHALLENGE_VALIDATOR;
         public static final ForgeConfigSpec.BooleanValue TIER_BASED_MAX_BLOCKS;
         public static final ForgeConfigSpec.IntValue TIER_0_CHALLENGES_AMOUNT;
         public static final ForgeConfigSpec.IntValue TIER_1_CHALLENGES_AMOUNT;
         public static final ForgeConfigSpec.IntValue TIER_2_CHALLENGES_AMOUNT;
         public static final ForgeConfigSpec.IntValue TIER_3_CHALLENGES_AMOUNT;
+
+        public static final ForgeConfigSpec.IntValue TIER_1_POTION_POINTS;
+        public static final ForgeConfigSpec.IntValue TIER_2_POTION_POINTS;
+        public static final ForgeConfigSpec.IntValue TIER_3_POTION_POINTS;
+
         public static final ForgeConfigSpec.IntValue TIER_1_MAX_BLOCKS;
         public static final ForgeConfigSpec.IntValue TIER_2_MAX_BLOCKS;
         public static final ForgeConfigSpec.IntValue TIER_3_MAX_BLOCKS;
@@ -88,13 +95,15 @@ public class ConfigHandler {
         public static final ForgeConfigSpec.BooleanValue CHUNK_DATA_LOGGER;
         public static final ForgeConfigSpec.BooleanValue CHALLENGE_MANAGER_LOGGER;
         public static final ForgeConfigSpec.BooleanValue CHALLENGE_ACTIONS_LOGGER;
-        public static final ForgeConfigSpec.DoubleValue PAPER_CONSUMPTION_RATE;
 
         static {
             BUILDER.push("General");
             PAPER_CONSUMPTION_RATE = BUILDER
-                    .comment("Here, you can change the rate of paper consumption in the Skills Record.")
+                    .comment("You can change the rate of paper consumption in the Skills Record.")
                     .defineInRange("paper_consummation_rate", 0.35, 0, 1);
+            IS_PLACED_BY_ENTITY_CONDITION = BUILDER
+                    .comment("This condition is when the block is placed by any entity... It will not count as a point toward the challenges.")
+                    .define("is_placed_by_entity_condition", true);
             CHALLENGE_VALIDATOR = BUILDER
                     .comment("Here, You can change the time to validate the challenges in the mining skills card for fixing the corrupted data if present.",
                             "It's formatted in seconds.")
@@ -104,12 +113,20 @@ public class ConfigHandler {
             BUILDER.push("Challenges");
             TIER_0_CHALLENGES_AMOUNT = BUILDER
                     .comment("You can change the values on how many challenges should be given in each tier.",
-                            "But remember that you must have the exact number of challenges in the Datapack.",
+                            "But remember that you must have the exact number of challenges available in the Datapack.",
                             "Otherwise, it will make the game crash!")
                     .defineInRange("tier_0_challenges_amount", 1, 1, 20);
             TIER_1_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_1_challenges_amount", 2, 1, 20);
             TIER_2_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_2_challenges_amount", 4, 1, 20);
             TIER_3_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_3_challenges_amount", 5, 1, 20);
+            BUILDER.pop();
+
+            BUILDER.push("Potions");
+            TIER_1_POTION_POINTS = BUILDER
+                    .comment("You can change the values on how many potion points should be given in each tier.")
+                    .defineInRange("tier_1_potion_points", 3, 0, 20);
+            TIER_2_POTION_POINTS = BUILDER.defineInRange("tier_2_potion_points", 2, 0, 20);
+            TIER_3_POTION_POINTS = BUILDER.defineInRange("tier_3_potion_points", 1, 0, 20);
             BUILDER.pop();
 
             BUILDER.push("Ability");
@@ -143,9 +160,9 @@ public class ConfigHandler {
             BUILDER.pop();
             SPEC = BUILDER.build();
 
-            TIER_1_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_1_time", TIER_1_TIME.getDefault());
-            TIER_2_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_2_time", TIER_2_TIME.getDefault());
-            TIER_3_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_3_time", TIER_3_TIME.getDefault());
+            TIER_1_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_1_time", 300);
+            TIER_2_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_2_time", 600);
+            TIER_3_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_3_time", 1200);
         }
     }
 }
