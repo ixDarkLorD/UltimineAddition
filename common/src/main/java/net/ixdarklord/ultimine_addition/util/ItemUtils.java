@@ -6,9 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DiggerItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 
 public class ItemUtils {
     public record ItemSorter(ItemStack item, int slotId, int order){}
@@ -36,7 +34,7 @@ public class ItemUtils {
             stack = player.getMainHandItem();
         } else stack = player.getOffhandItem();
 
-        return stack.is(ItemTags.PICKAXES);
+        return stack.is(ItemTags.PICKAXES) || stack.getItem() instanceof PickaxeItem;
     }
     public static boolean isItemInHandAxe(Player player) {
         ItemStack stack;
@@ -44,7 +42,7 @@ public class ItemUtils {
             stack = player.getMainHandItem();
         } else stack = player.getOffhandItem();
 
-        return stack.is(ItemTags.AXES);
+        return stack.is(ItemTags.AXES) || stack.getItem() instanceof AxeItem;
     }
     public static boolean isItemInHandShovel(Player player) {
         ItemStack stack;
@@ -52,7 +50,7 @@ public class ItemUtils {
             stack = player.getMainHandItem();
         } else stack = player.getOffhandItem();
 
-        return stack.is(ItemTags.SHOVELS);
+        return stack.is(ItemTags.SHOVELS) || stack.getItem() instanceof ShovelItem;
     }
     public static boolean isItemInHandHoe(Player player) {
         ItemStack stack;
@@ -60,7 +58,7 @@ public class ItemUtils {
             stack = player.getMainHandItem();
         } else stack = player.getOffhandItem();
 
-        return stack.is(ItemTags.HOES);
+        return stack.is(ItemTags.HOES) || stack.getItem() instanceof HoeItem;
     }
 
     public static TagKey<Item> createTag(String name, String prefix) {

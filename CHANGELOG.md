@@ -1,8 +1,12 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.1.0-Hotfix Release | Nov 12, 2023
+### Fixed
+- [UA9] Fixed the Tools Validator methods to recognize tools that doesn't have the tag.
+
 ## v1.1.0 Release | Nov 11, 2023
-### Adding
+### Added
 - Adding Arabic Translation
 - Progression Display `You can now pin any challenges you want on the screen.`
 - Is Placed By Entity Condition Option `You can Enable/Disable the Is Placed By Entity Condition.`
