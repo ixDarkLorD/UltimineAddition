@@ -4,6 +4,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 import java.util.function.Supplier;
@@ -14,15 +15,24 @@ public class ServicePlatform {
     public static void registerConfig() {
         throw new AssertionError();
     }
-
     @ExpectPlatform
     public static Supplier<? extends RecipeSerializer<?>> getItemStorageDataSerializer() {
         throw new AssertionError();
     }
-
     @ExpectPlatform
     public static Supplier<? extends RecipeSerializer<?>> getMCRecipeSerializer() {
         throw new AssertionError();
+    }
+
+    public static class SlotAPI {
+        @ExpectPlatform
+        public static boolean isModLoaded() {
+            throw new AssertionError();
+        }
+        @ExpectPlatform
+        public static ItemStack getSkillsRecordItem(Player player) {
+            throw new AssertionError();
+        }
     }
 
     public static class Players {

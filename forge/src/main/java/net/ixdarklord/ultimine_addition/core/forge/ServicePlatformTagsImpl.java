@@ -4,6 +4,7 @@ import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
+@SuppressWarnings("unused")
 public class ServicePlatformTagsImpl {
     public static TagKey<Item> getPickaxes() {
         return ModItemTags.PICKAXES;

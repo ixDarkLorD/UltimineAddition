@@ -55,6 +55,90 @@ public class ChallengesInfoPanel {
     private static final List<Panel> PANEL_LIST = new ArrayList<>();
     private static int tickCount;
 
+    public static void render(PoseStack poseStack, float ignored) {
+        Minecraft MC = Minecraft.getInstance();
+        Window window = MC.getWindow();
+        Font font = MC.font;
+        Player player = MC.player;
+        if (player == null) return;
+
+        ItemStack stack = findItemInHand(player, ModItems.SKILLS_RECORD);
+        if (stack == ItemStack.EMPTY) slideOutPanels(PANEL_LIST.stream().filter(Panel::isNotTestPanel));
+        if (!MC.isPaused() && !PANEL_LIST.isEmpty()) tickCount++;
+
+        SkillsRecordData recordData = new SkillsRecordData().loadData(stack);
+        createPanels(recordData);
+        validatePanels(recordData, window, font);
+        if (!MC.isPaused()) PANEL_LIST.forEach(panel -> panel.animatedComponent.updateAnimation());
+
+        int[] yPosAligner = new int[]{0, 0};
+        int textLength = 0;
+        for (Panel panel : PANEL_LIST) {
+            if (panel.isNotActive()) continue;
+            if (panel.isNotMorePanel()) {
+                textLength = Math.max(font.width(panel.getTitle()), textLength);
+            }
+            yPosAligner[0] += Math.max(0, font.lineHeight * (panel.getInfos().size() - 1));
+        }
+        textLength = Math.max(0, textLength - textureWidth);
+
+        poseStack.pushPose();
+        poseStack.translate(0F, 0F, -200F);
+        for (int slot = 0; slot < PANEL_LIST.size(); slot++) {
+            Panel panel = PANEL_LIST.get(slot);
+            AnimatedComponent animatedComponent = panel.getAnimatedComponent();
+            if (panel.isNotActive()) continue;
+
+            int length = textLength > 0 ? textLength + 8 : 0;
+            int[] offsets = animatedComponent.getAnimatedOffsets(window.getGuiScaledWidth(), window.getGuiScaledHeight(), textureWidth + length, textureHeight, edgePadding);
+            int X = offsets[0];
+            int Y = getAlignedYPos(offsets, yPosAligner, slot);
+
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderTexture(0, HUD);
+
+            if (panel.isNotMorePanel()) {
+                // Slots
+                TRANSLUCENT_TRANSPARENCY.setupRenderState();
+                GuiComponent.blit(poseStack, X + 5, Y, 5, 0, 51, 10, 256, 256);
+                int spacing = 13 * Math.min(panel.getSlot(), 3);
+                GuiComponent.fill(poseStack, X+8 + spacing, Y+3, X+14 + spacing, Y+9, ColorUtils.RGBToRGBA(Color.GREEN.getRGB(), 0.50F));
+                TRANSLUCENT_TRANSPARENCY.clearRenderState();
+
+                // Title BG
+                ScreenUtils.blitNineSliced(poseStack, X, Y + 10, textureWidth + length, 11, 20, 4, textureWidth, 11, 0, 10);
+
+                // Info BG
+                TRANSLUCENT_TRANSPARENCY.setupRenderState();
+                ScreenUtils.blitNineSliced(poseStack, X, Y + 18, textureWidth + length, 14 + Math.max(0, font.lineHeight * (panel.getInfos().size() - 1)), 20, 4, textureWidth, 14, 0, 21);
+                TRANSLUCENT_TRANSPARENCY.clearRenderState();
+
+                // Title String
+                GuiComponent.drawCenteredString(poseStack, font, panel.getTitle(), X + ((textureWidth + length) / 2), Y + 11, Color.WHITE.getRGB());
+            } else {
+                ScreenUtils.blitNineSliced(poseStack, X, Y, textureWidth + length, 11, 20, 4, textureWidth, 11, 0, 10);
+                ScreenUtils.drawScrollingString(poseStack, tickCount*2, font, panel.getTitle(), true, X, Y, textureWidth + length, 10, 2, Color.WHITE.getRGB());
+            }
+
+            AtomicInteger i = new AtomicInteger();
+            panel.getInfos().forEach(info -> {
+                int currentProgression;
+                float value = (float) info.getCurrentValue() / info.getRequiredValue() * 100;
+                currentProgression = (int) value;
+
+                Component values = new TextComponent("%" + currentProgression).withStyle(currentProgression >= 100 ? ChatFormatting.GREEN : ChatFormatting.GOLD);
+                int valuesXPos = font.width(values) - font.width("%0");
+
+                ScreenUtils.drawScrollingString(poseStack, tickCount*2, font, info.getMessage().copy().withStyle(ChatFormatting.GRAY), false, X + 2, Y + 22 + (font.lineHeight * i.get()), 94 + length - valuesXPos, 8, 0, Color.WHITE.getRGB());
+                GuiComponent.drawString(poseStack, font, values, X + length + 98 - valuesXPos, Y + 22 + (font.lineHeight * i.get()), Color.WHITE.getRGB());
+                i.getAndIncrement();
+            });
+            yPosAligner[1] += Math.max(0, font.lineHeight * (panel.getInfos().size()-1));
+        }
+        poseStack.popPose();
+    }
+
     private static void createPanels(SkillsRecordData recordData) {
         var trashList = new ArrayList<>(PANEL_LIST.stream().filter(panel -> !panel.getAnimatedComponent().isPlaying()).filter(Panel::isNotMorePanel).filter(Panel::isNotTestPanel).toList());
         for (int i = 0; i < recordData.getCardSlots().size(); i++) {
@@ -62,7 +146,7 @@ public class ChallengesInfoPanel {
             ItemStack cardStack = recordData.getCardSlots().get(cardSlot);
             MiningSkillCardData cardData = new MiningSkillCardData().loadData(cardStack);
             cardData.getChallenges().forEach((identifier, infoData) -> {
-                PANEL_LIST.removeIf(panel -> !panel.getUUID().equals(recordData.getUUID()));
+                PANEL_LIST.removeIf(panel -> panel.getUUID() == null || !panel.getUUID().equals(recordData.getUUID()));
                 var list = PANEL_LIST.stream().filter(panel -> panel.getSlot() == cardSlot).toList();
                 ChallengesManager manager = ChallengesManager.INSTANCE;
                 ChallengesData challengesData = manager.getAllChallenges().get(identifier.id());
@@ -168,90 +252,6 @@ public class ChallengesInfoPanel {
 
         PANEL_LIST.removeIf(Panel::isAssignedToRemove);
         PANEL_LIST.sort(Comparator.comparingInt(Panel::getSlot));
-    }
-
-    public static void render(PoseStack poseStack, float ignored) {
-        Minecraft MC = Minecraft.getInstance();
-        Window window = MC.getWindow();
-        Font font = MC.font;
-        Player player = MC.player;
-        if (player == null) return;
-
-        ItemStack stack = findItemInHand(player, ModItems.SKILLS_RECORD, false);
-        if (stack == ItemStack.EMPTY) slideOutPanels(PANEL_LIST.stream().filter(Panel::isNotTestPanel));
-        if (!MC.isPaused() && !PANEL_LIST.isEmpty()) tickCount++;
-
-        SkillsRecordData recordData = new SkillsRecordData().loadData(stack);
-        createPanels(recordData);
-        validatePanels(recordData, window, font);
-        if (!MC.isPaused()) PANEL_LIST.forEach(panel -> panel.animatedComponent.updateAnimation());
-
-        int[] yPosAligner = new int[]{0, 0};
-        int textLength = 0;
-        for (Panel panel : PANEL_LIST) {
-            if (panel.isNotActive()) continue;
-            if (panel.isNotMorePanel()) {
-                textLength = Math.max(font.width(panel.getTitle()), textLength);
-            }
-            yPosAligner[0] += Math.max(0, font.lineHeight * (panel.getInfos().size() - 1));
-        }
-        textLength = Math.max(0, textLength - textureWidth);
-
-        poseStack.pushPose();
-        poseStack.translate(0F, 0F, -200F);
-        for (int slot = 0; slot < PANEL_LIST.size(); slot++) {
-            Panel panel = PANEL_LIST.get(slot);
-            AnimatedComponent animatedComponent = panel.getAnimatedComponent();
-            if (panel.isNotActive()) continue;
-
-            int length = textLength > 0 ? textLength + 8 : 0;
-            int[] offsets = animatedComponent.getAnimatedOffsets(window.getGuiScaledWidth(), window.getGuiScaledHeight(), textureWidth + length, textureHeight, edgePadding);
-            int X = offsets[0];
-            int Y = getAlignedYPos(offsets, yPosAligner, slot);
-
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, HUD);
-
-            if (panel.isNotMorePanel()) {
-                // Slots
-                TRANSLUCENT_TRANSPARENCY.setupRenderState();
-                GuiComponent.blit(poseStack, X + 5, Y, 5, 0, 51, 10, 256, 256);
-                int spacing = 13 * Math.min(panel.getSlot(), 3);
-                GuiComponent.fill(poseStack, X+8 + spacing, Y+3, X+14 + spacing, Y+9, ColorUtils.RGBToRGBA(Color.GREEN.getRGB(), 0.50F));
-                TRANSLUCENT_TRANSPARENCY.clearRenderState();
-
-                // Title BG
-                ScreenUtils.blitNineSliced(poseStack, X, Y + 10, textureWidth + length, 11, 20, 4, textureWidth, 11, 0, 10);
-
-                // Info BG
-                TRANSLUCENT_TRANSPARENCY.setupRenderState();
-                ScreenUtils.blitNineSliced(poseStack, X, Y + 18, textureWidth + length, 14 + Math.max(0, font.lineHeight * (panel.getInfos().size() - 1)), 20, 4, textureWidth, 14, 0, 21);
-                TRANSLUCENT_TRANSPARENCY.clearRenderState();
-
-                // Title String
-                GuiComponent.drawCenteredString(poseStack, font, panel.getTitle(), X + ((textureWidth + length) / 2), Y + 11, Color.WHITE.getRGB());
-            } else {
-                ScreenUtils.blitNineSliced(poseStack, X, Y, textureWidth + length, 11, 20, 4, textureWidth, 11, 0, 10);
-                ScreenUtils.drawScrollingString(poseStack, tickCount*2, font, panel.getTitle(), true, X, Y, textureWidth + length, 10, 2, Color.WHITE.getRGB());
-            }
-
-            AtomicInteger i = new AtomicInteger();
-            panel.getInfos().forEach(info -> {
-                int currentProgression;
-                float value = (float) info.getCurrentValue() / info.getRequiredValue() * 100;
-                currentProgression = (int) value;
-
-                Component values = new TextComponent("%" + currentProgression).withStyle(currentProgression >= 100 ? ChatFormatting.GREEN : ChatFormatting.GOLD);
-                int valuesXPos = font.width(values) - font.width("%0");
-
-                ScreenUtils.drawScrollingString(poseStack, tickCount*2, font, info.getMessage().copy().withStyle(ChatFormatting.GRAY), false, X + 2, Y + 22 + (font.lineHeight * i.get()), 94 + length - valuesXPos, 8, 0, Color.WHITE.getRGB());
-                GuiComponent.drawString(poseStack, font, values, X + length + 98 - valuesXPos, Y + 22 + (font.lineHeight * i.get()), Color.WHITE.getRGB());
-                i.getAndIncrement();
-            });
-            yPosAligner[1] += Math.max(0, font.lineHeight * (panel.getInfos().size()-1));
-        }
-        poseStack.popPose();
     }
 
     private static int getAlignedYPos(int[] offsets, int[] yPosAligner, int slot) {

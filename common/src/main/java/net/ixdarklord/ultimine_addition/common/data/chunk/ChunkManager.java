@@ -2,8 +2,9 @@ package net.ixdarklord.ultimine_addition.common.data.chunk;
 
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +23,10 @@ public class ChunkManager {
         return chunks.get(chunk);
     }
 
-    public void loadChunk(ChunkAccess chunk, CompoundTag data) {
-        chunks.put(chunk, new ChunkData().loadData(data));
+    public void loadChunk(@Nullable ServerLevel level, ChunkAccess chunk, CompoundTag data) {
+        if (level != null && level.hasChunk(chunk.getPos().x, chunk.getPos().z)) {
+            chunks.put(chunk, new ChunkData().loadData(data));
+        }
     }
 
     public void unloadChunk(ChunkAccess chunk) {
@@ -35,7 +38,7 @@ public class ChunkManager {
         chunks.get(chunk).enableDebug(LOGGER).saveData(data);
     }
 
-    public ChunkManager validateChunkData(LevelAccessor level) {
+    public ChunkManager validateChunkData(ServerLevel level) {
         try {
             chunks.forEach((chunk, data) -> data.getPlacedBlocks().forEach((uuid, blockInfoList) ->
                     blockInfoList.removeIf(blockInfo -> level.getBlockState(blockInfo.pos()).getBlock() != blockInfo.blockState().getBlock())));

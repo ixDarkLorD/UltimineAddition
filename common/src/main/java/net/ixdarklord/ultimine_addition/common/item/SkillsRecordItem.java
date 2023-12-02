@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
-    private static final Component TITLE = new TranslatableComponent("item.ultimine_addition.skills_record");
+    public static final Component TITLE = new TranslatableComponent("item.ultimine_addition.skills_record");
     public static final int CONTAINER_SIZE = 6;
     public SkillsRecordItem(Properties properties) {
         super(properties, ComponentType.TOOLS);

@@ -9,6 +9,7 @@ import net.minecraftforge.fml.config.ModConfig;
 
 import java.util.function.Supplier;
 
+@SuppressWarnings("unused")
 public class ServicePlatformImpl {
     public static void registerConfig() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigHandler.CLIENT.SPEC, Constants.MOD_ID + "/client-config.toml");

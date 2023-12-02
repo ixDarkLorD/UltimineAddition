@@ -7,6 +7,7 @@ import net.ixdarklord.ultimine_addition.common.network.packet.PlayerAbilityPacke
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
+@SuppressWarnings("unused")
 public class ServicePlatformPlayersImpl {
     public static boolean isPlayerUltimineCapable(Player player) {
         return ((IPlayerData) player).getUltimineData().getAbility();

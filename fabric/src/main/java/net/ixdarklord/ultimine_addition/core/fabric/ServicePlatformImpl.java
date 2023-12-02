@@ -10,16 +10,15 @@ import net.minecraftforge.fml.config.ModConfig;
 
 import java.util.function.Supplier;
 
+@SuppressWarnings("unused")
 public class ServicePlatformImpl {
     public static void registerConfig() {
         ModLoadingContext.registerConfig(Constants.MOD_ID, ModConfig.Type.CLIENT, ConfigHandler.CLIENT.SPEC, Constants.MOD_ID + "/client-config.toml");
         ModLoadingContext.registerConfig(Constants.MOD_ID, ModConfig.Type.COMMON, ConfigHandler.COMMON.SPEC, Constants.MOD_ID + "/common-config.toml");
     }
-
     public static Supplier<? extends RecipeSerializer<?>> getItemStorageDataSerializer() {
         return ItemStorageDataRecipe.Serializer::new;
     }
-
     public static Supplier<? extends RecipeSerializer<?>> getMCRecipeSerializer() {
         return MCRecipe.Serializer::new;
     }

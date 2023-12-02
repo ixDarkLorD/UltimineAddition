@@ -22,6 +22,7 @@ import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
 import net.ixdarklord.ultimine_addition.common.network.packet.SyncChallengesPacket;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.Container;
@@ -54,6 +55,14 @@ public class ChallengeEvents {
         TickEvent.PLAYER_POST.register(instance -> {
             if (instance instanceof ServerPlayer player) {
                 if (instance.tickCount % (20 * ConfigHandler.COMMON.CHALLENGE_VALIDATOR.get()) == 0) {
+                    if (ServicePlatform.SlotAPI.isModLoaded()) {
+                        ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
+                        if (stack.getItem() instanceof SkillsRecordItem item) {
+                            item.getData(stack).getCardSlots()
+                                    .stream().filter(stack1 -> stack1.getItem() instanceof MiningSkillCardItem)
+                                    .forEach(stack1 -> new MiningSkillCardData().loadData(stack1).sendToClient(player).validateChallenges().saveData(stack1));
+                        }
+                    }
                     player.getInventory().items.stream()
                             .filter(stack -> stack.hasTag() && (stack.getItem() instanceof MiningSkillCardItem || stack.getItem() instanceof SkillsRecordItem))
                             .forEach(stack -> {
@@ -91,6 +100,7 @@ public class ChallengeEvents {
         });
     }
 
+    @SuppressWarnings("unused")
     public static CompoundEventResult<BlockState> onBlockToolModificationEvent(BlockState originalState, BlockState finalState, @NotNull UseOnContext context, ToolAction toolAction, boolean simulate) {
         Player player = context.getPlayer();
         if (player == null) return CompoundEventResult.pass();

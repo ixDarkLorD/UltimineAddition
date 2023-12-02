@@ -1,8 +1,15 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.1.1 Release | Dec 2, 2023
+### Added
+- Curios and Trinkets Integration `Now... you can insert the Skills Record in the curios/trinkets menu.`
+
+### Fixed
+- The ChunkManager from caching unloaded chunks.
+
 ## v1.1.0 Release | Nov 11, 2023
-### Adding
+### Added
 - Adding Arabic Translation
 - Progression Display `You can now pin any challenges you want on the screen.`
 - Is Placed By Entity Condition Option `You can Enable/Disable the Is Placed By Entity Condition.`

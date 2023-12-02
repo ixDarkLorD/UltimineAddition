@@ -14,6 +14,8 @@ import net.minecraft.world.phys.AABB;
 
 public class PacketHandler {
     public static final SimpleNetworkManager MANAGER = SimpleNetworkManager.create(Constants.MOD_ID);
+
+    public static final MessageType OPEN_SKILLS_RECORD = MANAGER.registerC2S("open_skills_record", SkillsRecordPacket.Open::new);
     public static final MessageType TOGGLE_SKILLS_RECORD = MANAGER.registerC2S("toggle_skills_record", SkillsRecordPacket.Toggle::new);
     public static final MessageType SYNC_SKILLS_RECORD = MANAGER.registerS2C("sync_skills_record", SkillsRecordPacket::new);
     public static final MessageType SYNC_CHALLENGES = MANAGER.registerS2C("sync_challenges", SyncChallengesPacket::new);

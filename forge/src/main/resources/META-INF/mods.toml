@@ -49,6 +49,20 @@ versionRange = "[${ftbUltimineVersion},)"
 ordering = "NONE"
 side = "BOTH"
 
+[[dependencies.${modId}]]
+modId = "jei"
+mandatory = false
+versionRange = "[${jeiVersion},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${modId}]]
+modId = "curios"
+mandatory = false
+versionRange = "[${curiosVersion},)"
+ordering = "NONE"
+side = "BOTH"
+
 [modproperties.${modId}]
 catalogueImageIcon="mod_logo.png"
 configuredBackground="${modId}:textures/gui/adv_background.png"

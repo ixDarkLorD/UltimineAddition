@@ -11,6 +11,8 @@ import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
 import net.ixdarklord.ultimine_addition.common.event.impl.ToolAction;
 import net.ixdarklord.ultimine_addition.core.CommonSetup;
 import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.integration.curios.CuriosIntegration;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,6 +32,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(Constants.MOD_ID)
@@ -115,6 +118,12 @@ public class ForgeSetup {
         @SubscribeEvent
         public static void onCommonSetup(final FMLCommonSetupEvent event) {
             event.enqueueWork(MineGoJuiceRecipe::register);
+        }
+
+        @SubscribeEvent
+        public static void onIMC(final InterModEnqueueEvent event) {
+            if (ServicePlatform.SlotAPI.isModLoaded())
+                CuriosIntegration.sendIMC();
         }
     }
 }

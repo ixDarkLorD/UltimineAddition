@@ -90,6 +90,8 @@ dependencies {
     modCompileOnly "mezz.jei:jei-${mc_version}-forge-api:${jei_version}"
 //    modRuntimeOnly "mezz.jei:jei-${mc_version}-forge:${jei_version}"
     modRuntimeOnly "curse.maven:jei-238222:4593548"
+    modCompileOnly "top.theillusivec4.curios:curios-forge:${curios_version}:api"
+    modRuntimeOnly "top.theillusivec4.curios:curios-forge:${curios_version}"
 
     modRuntimeOnly "curse.maven:catalogue-459701:3803098"
     modRuntimeOnly "curse.maven:configured-457570:4462832"
@@ -123,6 +125,8 @@ processResources {
     inputs.property "archVersion",              "${architectury_version}"
     inputs.property "ccLibVersion",             "${coolcatlib_version}"
     inputs.property "ftbUltimineVersion",       "${ftbultimine_version}"
+    inputs.property "jeiVersion",               "${jei_version}"
+    inputs.property "curiosVersion",            "${curios_version}"
 
     filesMatching ('META-INF/mods.toml') {
         expand (
@@ -142,7 +146,9 @@ processResources {
                 'modForgeDisplayTest':          "${mod_forge_display_test}",
                 'archVersion':                  "${architectury_version}",
                 'ccLibVersion':                 "${coolcatlib_version}",
-                'ftbUltimineVersion':           "${ftbultimine_version}"
+                'ftbUltimineVersion':           "${ftbultimine_version}",
+                'jeiVersion':                   "${jei_version}",
+                'curiosVersion':                "${curios_version}"
         )
     }
 

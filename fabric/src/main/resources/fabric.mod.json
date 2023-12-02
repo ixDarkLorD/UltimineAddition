@@ -42,6 +42,7 @@
     "ftbultimine": ">=${ftbUltimineVersion}"
   },
   "suggests": {
-    "jei": ">=11.4"
+    "jei": ">=${jeiVersion}",
+    "trinkets": ">=${trinketsVersion}"
   }
 }
