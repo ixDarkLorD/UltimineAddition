@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.integration.curios;
 
-import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.Registration;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.InterModComms;
@@ -14,7 +14,7 @@ public class CuriosIntegration {
         InterModComms.sendTo("curios", SlotTypeMessage.REGISTER_TYPE, () ->
                 new SlotTypeMessage.Builder("skills_record")
                         .priority(1).size(1)
-                        .icon(Constants.getLocation("item/skills_record_slot"))
+                        .icon(new ResourceLocation("curios", "slot/skills_record"))
                         .build());
     }
 
