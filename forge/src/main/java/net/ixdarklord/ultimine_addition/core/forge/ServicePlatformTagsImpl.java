@@ -4,6 +4,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.Tags;
 
+@SuppressWarnings("unused")
 public class ServicePlatformTagsImpl {
     public static TagKey<Item> getPickaxes() {
         return Tags.Items.TOOLS_PICKAXES;

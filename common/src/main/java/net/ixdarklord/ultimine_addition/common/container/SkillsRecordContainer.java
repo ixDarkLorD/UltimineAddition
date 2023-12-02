@@ -9,6 +9,7 @@ import net.ixdarklord.ultimine_addition.common.item.PenItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.Registration;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -87,6 +88,15 @@ public class SkillsRecordContainer extends DataAbstractContainerMenu<SkillsRecor
 
     @Override
     public boolean stillValid(@NotNull Player player) {
+        if (ServicePlatform.SlotAPI.isModLoaded()) {
+            ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
+            if (stack != ItemStack.EMPTY) {
+                var data = new SkillsRecordData().loadData(stack);
+                if (data.getUUID() != null && data.getUUID().equals(getData().getUUID())) {
+                    return true;
+                }
+            }
+        }
         return player.getMainHandItem().equals(stack) || player.getOffhandItem().equals(stack);
     }
 

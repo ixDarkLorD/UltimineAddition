@@ -58,30 +58,30 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                      if (ItemUtils.isItemInHandPickaxe(player)) {
                         if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_PICKAXE)) {
                             player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                            player.displayClientMessage(Component.literal("\u2716 ").append(Component.translatable("info.ultimine_addition.required_skill.pickaxe")).withStyle(ChatFormatting.GRAY), false);
+                            player.displayClientMessage(Component.literal("✖ ").append(Component.translatable("info.ultimine_addition.required_skill.pickaxe")).withStyle(ChatFormatting.GRAY), false);
                         }
                     } else if (ItemUtils.isItemInHandAxe(player)) {
                         if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_AXE)) {
                             player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                            player.displayClientMessage(Component.literal("\u2716 ").append(Component.translatable("info.ultimine_addition.required_skill.axe")).withStyle(ChatFormatting.GRAY), false);
+                            player.displayClientMessage(Component.literal("✖ ").append(Component.translatable("info.ultimine_addition.required_skill.axe")).withStyle(ChatFormatting.GRAY), false);
                         }
                     } else if (ItemUtils.isItemInHandShovel(player)) {
                         if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_SHOVEL)) {
                             player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                            player.displayClientMessage(Component.literal("\u2716 ").append(Component.translatable("info.ultimine_addition.required_skill.shovel")).withStyle(ChatFormatting.GRAY), false);
+                            player.displayClientMessage(Component.literal("✖ ").append(Component.translatable("info.ultimine_addition.required_skill.shovel")).withStyle(ChatFormatting.GRAY), false);
                         }
                     } else if (ItemUtils.isItemInHandHoe(player)) {
                         if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_HOE)) {
                             player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                            player.displayClientMessage(Component.literal("\u2716 ").append(Component.translatable("info.ultimine_addition.required_skill.hoe")).withStyle(ChatFormatting.GRAY), false);
+                            player.displayClientMessage(Component.literal("✖ ").append(Component.translatable("info.ultimine_addition.required_skill.hoe")).withStyle(ChatFormatting.GRAY), false);
                         }
                     } else if (ItemUtils.isItemInHandNotTools(player)) {
                          player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                         player.displayClientMessage(Component.literal("\u2716 ").append(Component.translatable("info.ultimine_addition.required_skill.all")).withStyle(ChatFormatting.GRAY), false);
+                         player.displayClientMessage(Component.literal("✖ ").append(Component.translatable("info.ultimine_addition.required_skill.all")).withStyle(ChatFormatting.GRAY), false);
                      }
                 }
+                isButtonPressed = true;
             }
-            isButtonPressed = true;
         } else {
             isButtonPressed = false;
         }

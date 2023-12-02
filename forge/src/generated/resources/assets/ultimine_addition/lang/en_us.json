@@ -39,6 +39,7 @@
   "command.ultimine_addition.set_ability.receiver": "Your ultimine ability has been set to %s! (by %s)",
   "command.ultimine_addition.set_ability.sender": "You have successfully set the ultimine ability to %s for:",
   "command.ultimine_addition.set_ability.success": "You have successfully set the ultimine ability to %s!",
+  "curios.identifier.skills_record": "Skills Record",
   "effect.ultimine_addition.mine_go_juice_axe": "Mine-Go Juice: Lumberjack Limbo",
   "effect.ultimine_addition.mine_go_juice_hoe": "Mine-Go Juice: Soil Serenade",
   "effect.ultimine_addition.mine_go_juice_pickaxe": "Mine-Go Juice: Rock Roulette",
@@ -114,6 +115,7 @@
   "jei.ultimine_addition.recipe.item_storage.ink_chamber": "Ink Amount: %s+",
   "jei.ultimine_addition.tooltip.missing_card": "or Tiered up Card",
   "key.category.ultimine_addition.general": "Ultimine Addition",
+  "key.ultimine_addition:open_skills_record": "Open Skills Record",
   "key.ultimine_addition:show_progression_bar": "Skills Record: Show Progression Bar",
   "toast.ultimine_addition.challenge.all_completed": "Congratulations!",
   "toast.ultimine_addition.challenge.all_completed.info": "You have completed all the challenges for the %s.",
@@ -134,5 +136,6 @@
   "tooltip.ultimine_addition.skill_card.tier.unlearned": "Unlearned",
   "tooltip.ultimine_addition.skills_record.contents": "Contents:",
   "tooltip.ultimine_addition.skills_record.info": "A tool needed for upgrading mining skills card.",
-  "tooltip.ultimine_addition.skills_record.press.left_click": "Press Left Click Mouse to cycle through blocks."
+  "tooltip.ultimine_addition.skills_record.press.left_click": "Press Left Click Mouse to cycle through blocks.",
+  "trinkets.slot.hand.skills_record": "Skills Record"
 }

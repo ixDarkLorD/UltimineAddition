@@ -45,6 +45,9 @@ public class LanguageBuilder {
         add("jei", "category.item_storage.pen", "Refill Pen");
         add("jei", "recipe.item_storage.ink_chamber", "Ink Amount: %s+");
 
+        addCurios("skills_record", "Skills Record");
+        addTrinkets("hand.skills_record", "Skills Record");
+
         add("tooltip", "certificate.info", "Interact with this parchment to obtain the ultimine ability permanently!");
         add("tooltip", "skills_record.info", "A tool needed for upgrading mining skills card.");
         add("tooltip", "skills_record.contents", "Contents:");
@@ -148,6 +151,7 @@ public class LanguageBuilder {
         add("command", "set_ability.already_setted", "The ultimine ability is already set to %s.");
 
         add("key.category", "general", "Ultimine Addition");
+        add(KeyHandler.KEY_OPEN_SKILLS_RECORD, "Open Skills Record");
         add(KeyHandler.KEY_SHOW_PROGRESSION_BAR, "Skills Record: Show Progression Bar");
     }
 
@@ -180,6 +184,16 @@ public class LanguageBuilder {
         add(String.format("item.minecraft.splash_potion.effect.%s", key), String.format("Splash %s of %s", type, potionName));
         add(String.format("item.minecraft.tipped_arrow.effect.%s", key), String.format("Arrow of %s", potion));
         add(String.format("item.minecraft.lingering_potion.effect.%s", key), String.format("Lingering %s of %s", type, potionName));
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void addCurios(String key, String value) {
+        this.translations.put("curios.identifier.%s".formatted(key), value);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void addTrinkets(String key, String value) {
+        this.translations.put("trinkets.slot.%s".formatted(key), value);
     }
 
     public Map<Object, String> getTranslations() {

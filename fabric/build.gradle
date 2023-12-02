@@ -75,6 +75,11 @@ dependencies {
 
     modCompileOnlyApi "mezz.jei:jei-${mc_version}-fabric-api:${jei_version}"
     modRuntimeOnly "mezz.jei:jei-${mc_version}-fabric:${jei_version}"
+    modImplementation "dev.emi:trinkets:${trinkets_version}"
+
+    // FIX Trinkets Dependencies
+    modCompileOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.0.0-beta.1")
+    modCompileOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.0.0-beta.1")
 
     modRuntimeOnly "maven.modrinth:modmenu:4.2.0-beta.2"
 //    modRuntimeOnly "curse.maven:catalogue-fabric-667377:4171029"
@@ -111,8 +116,8 @@ processResources {
     inputs.property "forgeConfigAPIVersion",    "${forge_config_api_version}"
     inputs.property "ccLibVersion",             "${coolcatlib_version}"
     inputs.property "ftbUltimineVersion",       "${ftbultimine_version}"
-
-
+    inputs.property "jeiVersion",               "${jei_version}"
+    inputs.property "trinketsVersion",          "${trinkets_version}"
 
     filesMatching ('fabric.mod.json') {
         expand (
@@ -137,7 +142,9 @@ processResources {
                 'archVersion':              "${architectury_version}",
                 'forgeConfigAPIVersion':    "${forge_config_api_version}",
                 'ccLibVersion':             "${coolcatlib_version}",
-                'ftbUltimineVersion':       "${ftbultimine_version}"
+                'ftbUltimineVersion':       "${ftbultimine_version}",
+                'jeiVersion':               "${jei_version}",
+                'trinketsVersion':          "${trinkets_version}"
         )
     }
 

@@ -31,7 +31,7 @@ public class ChunkEvents {
             return EventResult.pass();
         });
 
-        ChunkEvent.LOAD_DATA.register((chunk, level, nbt) -> ChunkManager.INSTANCE.loadChunk(chunk, nbt));
+        ChunkEvent.LOAD_DATA.register((chunk, level, nbt) -> ChunkManager.INSTANCE.loadChunk(level, chunk, nbt));
         ChunkEvent.SAVE_DATA.register((chunk, level, nbt) -> ChunkManager.INSTANCE.validateChunkData(level).saveChunkData(chunk, nbt));
         ChunkUnloadEvent.EVENT.register((chunk, level) -> ChunkManager.INSTANCE.unloadChunk(chunk));
     }

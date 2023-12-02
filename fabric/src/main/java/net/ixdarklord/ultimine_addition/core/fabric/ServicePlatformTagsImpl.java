@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
+@SuppressWarnings("unused")
 public class ServicePlatformTagsImpl {
     public static TagKey<Item> getPickaxes() {
         return ConventionalItemTags.PICKAXES;

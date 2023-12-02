@@ -6,7 +6,7 @@
   "client": [
     "client.BlockEntityWithoutLevelRendererMixin",
     "client.ModelBakeryMixin",
-    "client.ScreenTooltipMixin"
+    "client.ScreenMixin"
   ],
   "mixins": [
     "BrewingStandBlockEntityMixin",
