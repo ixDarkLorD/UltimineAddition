@@ -1,6 +1,13 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.1.1 Release | Dec 2, 2023
+### Added
+- Curios and Trinkets Integration `Now... you can insert the Skills Record in the curios/trinkets menu.`
+
+### Fixed
+- The ChunkManager from caching unloaded chunks.
+
 ## v1.1.0-Hotfix Release | Nov 12, 2023
 ### Fixed
 - [UA9] Fixed the Tools Validator methods to recognize tools that doesn't have the tag.

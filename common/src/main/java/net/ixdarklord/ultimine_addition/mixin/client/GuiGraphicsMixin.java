@@ -1,7 +1,8 @@
 package net.ixdarklord.ultimine_addition.mixin.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.platform.Platform;
 import net.ixdarklord.coolcat_lib.common.item.ComponentItem;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,23 +25,34 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"MissingUnique", "OptionalUsedAsFieldOrParameterType", "unused"})
 @Mixin(value = GuiGraphics.class)
 public abstract class GuiGraphicsMixin {
-    @Shadow protected abstract void renderTooltipInternal(Font font, List<ClientTooltipComponent> components, int mouseX, int mouseY, ClientTooltipPositioner tooltipPositioner);
+    @Shadow public abstract void renderTooltipInternal(Font font, List<ClientTooltipComponent> components, int mouseX, int mouseY, ClientTooltipPositioner tooltipPositioner);
     @Shadow @Final private Minecraft minecraft;
 
-    @SuppressWarnings("AddedMixinMembersNamePattern")
+    @SuppressWarnings({"ConstantValue"})
     public void renderTooltip(Font font, List<Component> tooltipLines, Optional<TooltipComponent> visualTooltipComponent, int mouseX, int mouseY) {
         List<ClientTooltipComponent> list = tooltipLines.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Collectors.toList());
         visualTooltipComponent.ifPresent((tooltipComponent) -> {
             if (this.minecraft.screen instanceof AbstractContainerScreen<?> screen && screen.hoveredSlot != null && screen.hoveredSlot.getItem().getItem() instanceof ComponentItem) {
                 ItemStack stack = screen.hoveredSlot.getItem();
-                int line = 0;
                 if (this.minecraft.options.advancedItemTooltips) {
+                    int line;
                     if (stack.hasTag()) {
-                        line = Screen.getTooltipFromItem(this.minecraft, stack).size()-2;
-                    } else line = Screen.getTooltipFromItem(this.minecraft, stack).size()-1;
+                        line = Screen.getTooltipFromItem(this.minecraft, stack).size()-2 - ((Platform.isFabric() && ServicePlatform.SlotAPI.isModLoaded()) ? 1 : 0);
+                    } else {
+                        line = Screen.getTooltipFromItem(this.minecraft, stack).size()-1 - ((Platform.isFabric() && ServicePlatform.SlotAPI.isModLoaded()) ? 1 : 0);
+                    }
                     list.add(line, ClientTooltipComponent.create(tooltipComponent));
+                } else {
+                    if (Platform.isFabric() && ServicePlatform.SlotAPI.isModLoaded()) {
+                        int line;
+                        if (stack.hasTag()) {
+                            line = Screen.getTooltipFromItem(this.minecraft, stack).size()-1;
+                        } else {
+                            line = Screen.getTooltipFromItem(this.minecraft, stack).size();
+                        }
+                        list.add(line, ClientTooltipComponent.create(tooltipComponent));
+                    } else list.add(ClientTooltipComponent.create(tooltipComponent));
                 }
-                if (line == 0) list.add(ClientTooltipComponent.create(tooltipComponent));
             } else list.add(1, ClientTooltipComponent.create(tooltipComponent));
         });
         this.renderTooltipInternal(font, list, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);

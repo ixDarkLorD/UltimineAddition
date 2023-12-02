@@ -214,8 +214,20 @@ allprojects {
             url = "https://modmaven.dev"
         }
         maven {
-            name = "Terraformers"
+            name = "TerraformersMC"
             url = "https://maven.terraformersmc.com/"
+        }
+        maven {
+            name = "TheIllusiveC4's Maven"
+            url = "https://maven.theillusivec4.top/"
+        }
+        maven {
+            name = "Ladysnake Libs"
+            url = 'https://dl.bintray.com/ladysnake/libs'
+        }
+        maven {
+            name = "Ladysnake Mods"
+            url = 'https://maven.ladysnake.org/releases'
         }
         maven {
             name = "Curse Maven"

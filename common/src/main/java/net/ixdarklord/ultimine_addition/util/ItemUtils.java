@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.util;
 
-import dev.architectury.platform.Platform;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
@@ -11,11 +11,12 @@ import net.minecraft.world.item.*;
 public class ItemUtils {
     public record ItemSorter(ItemStack item, int slotId, int order){}
 
-    public static ItemStack findItemInHand(Player player, Item item, boolean includeCurios) {
+    @SuppressWarnings("ConstantValue")
+    public static ItemStack findItemInHand(Player player, Item item) {
         ItemStack stack = player.getMainHandItem();
         if (stack.getItem() != item) stack = player.getOffhandItem();
-        if (includeCurios && stack.getItem() != item && Platform.isModLoaded("curios"))
-            stack = ItemStack.EMPTY;
+        if (stack.getItem() != item && ServicePlatform.SlotAPI.isModLoaded())
+            stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
 
         if (stack.getItem() == item) return stack;
         return ItemStack.EMPTY;

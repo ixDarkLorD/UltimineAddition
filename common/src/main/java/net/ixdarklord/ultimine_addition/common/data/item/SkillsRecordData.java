@@ -29,6 +29,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     private ItemStack stack;
-    private UUID uuid;
+    private @Nullable UUID uuid;
     private Container container;
     private byte viewingCard;
     private boolean consumeMode;
@@ -201,6 +202,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         return this.stack;
     }
 
+    @Nullable
     public UUID getUUID() {
         return this.uuid;
     }

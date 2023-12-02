@@ -80,8 +80,8 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                          player.displayClientMessage(Component.literal("✖ ").append(Component.translatable("info.ultimine_addition.required_skill.all")).withStyle(ChatFormatting.GRAY), false);
                      }
                 }
+                isButtonPressed = true;
             }
-            isButtonPressed = true;
         } else {
             isButtonPressed = false;
         }
