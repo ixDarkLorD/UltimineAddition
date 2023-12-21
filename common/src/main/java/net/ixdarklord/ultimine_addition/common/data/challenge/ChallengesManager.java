@@ -8,7 +8,6 @@ import dev.architectury.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Constants;
-import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -60,8 +59,9 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
 
     public Map<ResourceLocation, ChallengesData> getRandomChallenges(int quantity, MiningSkillCardItem.Type type, MiningSkillCardItem.Tier tier) {
         if (quantity > challenges.values().stream().filter(data -> (data.getForCardType().equals(type) && data.getForCardTier().isEligible(tier))).toList().size()) {
-            String error = String.format("There aren't enough %s %s challenges for tier %s to add it to Mining Skill Card.", quantity, type.name().toLowerCase(), tier.name().toLowerCase());
-            throw new RuntimeException(error);
+            String error = String.format("There aren't enough %s %s challenges for tier %s to add it to Mining Skill Card.", quantity, type.getId().toLowerCase(), tier.name().toLowerCase());
+            LOGGER.error(error);
+            return new HashMap<>();
         }
 
         Map<ResourceLocation, ChallengesData> randomValues = new HashMap<>();
@@ -123,8 +123,8 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
     }
 
     public boolean isCorrectTool(Player player, ChallengesData challengesData) {
-        if (MiningSkillCardItem.Type.isCustomType(challengesData.getForCardType())) {
-            return player.getInventory().getSelected().is(ItemUtils.createTag(challengesData.getForCardType().name(), "_card_type"));
+        if (challengesData.getForCardType().isCustomType()) {
+            return challengesData.getForCardType().utilizeRequiredTools().contains(player.getInventory().getSelected().getItem());
         } else if (challengesData.getForCardType().equals(PICKAXE)) {
             return player.getInventory().getSelected().is(ItemTags.PICKAXES);
         } else if (challengesData.getForCardType().equals(AXE)) {

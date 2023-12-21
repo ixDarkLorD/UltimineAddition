@@ -20,7 +20,7 @@ public interface IUAPlugin {
         }
 
         public void registerType(String name, ItemStack defaultDisplayItem) {
-            types.add(new MiningSkillCardItem.Type(this.ID.getNamespace() + ":" + name, defaultDisplayItem));
+//            types.add(new MiningSkillCardItem.Type(this.ID.getNamespace() + ":" + name, defaultDisplayItem));
         }
 
         public Collection<MiningSkillCardItem.Type> getTypes() {

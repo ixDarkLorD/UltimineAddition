@@ -126,11 +126,13 @@ public class LanguageBuilder {
         add("info", "obtain", "Congratulations on learning the excavation skill!");
         add("info", "obtained_already", "You have already obtained this knowledge!");
         add("info", "incapable", "You need the excavation skill to perform this action! First, Obtain a Miner Certificate or drink a Mine-Go Juice.");
-        add("info", "required_skill.pickaxe", "Required Skill for: Pickaxe");
-        add("info", "required_skill.axe", "Required Skill for: Axe");
-        add("info", "required_skill.shovel", "Required Skill for: Shovel");
-        add("info", "required_skill.hoe", "Required Skill for: Hoe");
-        add("info", "required_skill.all", "Required Skill for: All Tools");
+        add("info", "required_skill", "Required Skill for: %s");
+        add("info", "required_skill.many_tools", "List of Tools");
+        add("info", "required_skill.pickaxe", "Pickaxe");
+        add("info", "required_skill.axe", "Axe");
+        add("info", "required_skill.shovel", "Shovel");
+        add("info", "required_skill.hoe", "Hoe");
+        add("info", "required_skill.all", "All Tools");
 
         add("argument", "inventory.unknown", "Unknown inventory '%s'");
         add("argument", "challenge.unknown", "Unknown challenge '%s'");

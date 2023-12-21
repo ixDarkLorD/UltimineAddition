@@ -2,25 +2,32 @@ package net.ixdarklord.ultimine_addition.common.item;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.handler.codec.CodecException;
 import net.ixdarklord.coolcat_lib.util.ScreenUtils;
-import net.ixdarklord.ultimine_addition.api.UAApi;
+import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.client.gui.screen.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.handler.ItemRendererHandler;
 import net.ixdarklord.ultimine_addition.client.renderer.item.IItemRenderer;
 import net.ixdarklord.ultimine_addition.client.renderer.item.UAItemRenderer;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
+import net.ixdarklord.ultimine_addition.util.CodecHelper;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
@@ -28,6 +35,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,45 +125,113 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         return new MiningSkillCardData().loadData(stack).getTier() == tier;
     }
 
-    public record Type(String name, ItemStack defaultDisplayItem) {
-        public static final Type PICKAXE = new Type("pickaxe", Items.NETHERITE_PICKAXE.getDefaultInstance());
-        public static final Type AXE = new Type("axe", Items.NETHERITE_AXE.getDefaultInstance());
-        public static final Type SHOVEL = new Type("shovel", Items.NETHERITE_SHOVEL.getDefaultInstance());
-        public static final Type HOE = new Type("hoe", Items.NETHERITE_HOE.getDefaultInstance());
-        public static final Type EMPTY = new Type("empty", Items.BARRIER.getDefaultInstance());
-        public static final List<Type> TYPES = Util.make(() -> {
-            List<Type> list = new ArrayList<>();
-            list.addAll(List.of(EMPTY,PICKAXE,AXE,SHOVEL,HOE));
-            list.addAll(UAApi.getTypes());
-            return list;
-        });
+    public static class Type {
+        public static final Type EMPTY = new Type(true, "empty", List.of(), Items.BARRIER);
+        public static final Type PICKAXE = new Type(true, "pickaxe", List.of(), Items.NETHERITE_PICKAXE);
+        public static final Type AXE = new Type(true, "axe", List.of(), Items.NETHERITE_AXE);
+        public static final Type SHOVEL = new Type(true, "shovel", List.of(), Items.NETHERITE_SHOVEL);
+        public static final Type HOE = new Type(true, "hoe", List.of(), Items.NETHERITE_HOE);
+        public static List<Type> TYPES = new ArrayList<>();
 
-        public static final Codec<Type> CODEC = Codec.STRING.comapFlatMap(s -> {
+        private final boolean active;
+        private final String id;
+        private final List<String> requiredTools;
+        private final Color potionColor;
+        private final Item defaultDisplayItem;
+
+        public static final Codec<Type> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.BOOL.fieldOf("active").forGetter(Type::isActive),
+                Codec.STRING.fieldOf("card_id").forGetter(Type::getId),
+                Codec.STRING.listOf().fieldOf("required_tools").forGetter(Type::getRequiredTools),
+                CodecHelper.COLOR_CODEC.optionalFieldOf("potion_color", Color.WHITE).forGetter(Type::getPotionColor),
+                CodecHelper.ITEM_CODEC.optionalFieldOf("default_display_item", Items.BARRIER).forGetter(Type::getDefaultDisplayItem)
+        ).apply(instance, Type::new));
+
+        public static final Codec<Type> CHALLENGE_CODEC = Codec.STRING.comapFlatMap(s -> {
             try {
                 return DataResult.success(Type.fromString(s));
             } catch (CodecException e) {
                 return DataResult.error(() -> s + " is not present.");
             }
-        }, Type::name);
+        }, Type::getId);
 
-        public static boolean isCustomType(Type type) {
-            return TYPES.stream()
-                    .filter(t -> !t.equals(EMPTY) && !t.equals(PICKAXE) && !t.equals(AXE) && !t.equals(SHOVEL) && !t.equals(HOE))
-                    .toList().contains(type);
+        public Type(boolean active, String id, List<String> requiredTools) {
+            this(active, id, requiredTools, Color.WHITE, Items.BARRIER);
+        }
+
+        public Type(boolean active, String id, List<String> requiredTools, Item defaultDisplayItem) {
+            this(active, id, requiredTools, Color.WHITE, defaultDisplayItem);
+        }
+
+        public Type(boolean active, String id, List<String> requiredTools, Color potionColor, Item defaultDisplayItem) {
+            this.active = active;
+            this.id = validateId(id);
+            this.requiredTools = requiredTools;
+            this.potionColor = potionColor;
+            this.defaultDisplayItem = defaultDisplayItem;
+        }
+
+        private String validateId(String input) {
+            String pattern = "^[a-z0-9_.-]+$";
+            if (!input.matches(pattern))
+                throw new IllegalArgumentException("Invalid Custom Card Id format! Non [a-z0-9_.-] character exists. (\"%s\")".formatted(input));
+            return input;
+        }
+
+        public static void refreshTypes() {
+            TYPES = new ArrayList<>(List.of(EMPTY, PICKAXE, AXE, SHOVEL, HOE));
+            TYPES.addAll(CustomMSCApi.CUSTOM_TYPES);
+        }
+
+        public boolean isActive() {
+            return active;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public List<String> getRequiredTools() {
+            return requiredTools;
+        }
+
+        public Color getPotionColor() {
+            return potionColor;
+        }
+        public Item getDefaultDisplayItem() {
+            return defaultDisplayItem;
         }
 
         public static Type fromString(String input) {
             for (Type type : TYPES) {
-                if (type.name.equalsIgnoreCase(input) && !input.equalsIgnoreCase(EMPTY.name)) {
+                if (type.getId().equalsIgnoreCase(input) && !input.equalsIgnoreCase(EMPTY.getId())) {
                     return type;
                 }
             }
             throw new IllegalArgumentException("No type with the specified name");
         }
 
-        @Override
-        public String name() {
-            return this.name.toLowerCase();
+        public boolean isCustomType() {
+            return TYPES.stream()
+                    .filter(t -> !t.equals(EMPTY) && !t.equals(PICKAXE) && !t.equals(AXE) && !t.equals(SHOVEL) && !t.equals(HOE))
+                    .toList().contains(this);
+        }
+
+        public List<Item> utilizeRequiredTools() {
+            List<Item> list = new ArrayList<>();
+            if (requiredTools == null) return list;
+            for (String value : requiredTools) {
+                if (value.startsWith("#")) {
+                    List<Item> items = new ArrayList<>();
+                    BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, new ResourceLocation(value.replaceAll("#", "")))).ifPresent(holders ->
+                            items.addAll(holders.stream().map(Holder::value).toList()));
+                    if (!items.isEmpty()) list.addAll(items);
+                } else {
+                    Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(value));
+                    if (item != Items.AIR) list.add(item);
+                }
+            }
+            return list;
         }
     }
 

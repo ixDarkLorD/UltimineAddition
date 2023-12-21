@@ -12,7 +12,6 @@ import java.util.function.Supplier;
 public class ConfigHandler {
     public static void register() {
         ServicePlatform.registerConfig();
-        MSCCustomType.registerConfig();
     }
 
     public static class CLIENT {
