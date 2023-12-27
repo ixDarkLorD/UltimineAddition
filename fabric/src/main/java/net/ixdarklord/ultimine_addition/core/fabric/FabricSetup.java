@@ -9,10 +9,12 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.ixdarklord.coolcat_lib.common.crafting.CraftingHelper;
 import net.ixdarklord.ultimine_addition.common.brewing.MineGoJuiceRecipe;
 import net.ixdarklord.ultimine_addition.common.event.impl.*;
 import net.ixdarklord.ultimine_addition.core.CommonSetup;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -36,6 +38,7 @@ public class FabricSetup implements ModInitializer {
     public void onInitialize() {
         CommonSetup.init();
         MineGoJuiceRecipe.register();
+        CraftingHelper.register(LegacyModeCondition.Serializer.INSTANCE);
         this.initEvents();
     }
 

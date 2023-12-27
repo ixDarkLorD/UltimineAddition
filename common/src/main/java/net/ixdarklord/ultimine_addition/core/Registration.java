@@ -6,7 +6,7 @@ import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.ixdarklord.coolcat_lib.util.ArgumentTypeHelper;
-import net.ixdarklord.ultimine_addition.api.UAApi;
+import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.client.particle.CelebrateParticle;
 import net.ixdarklord.ultimine_addition.common.advancement.UltimineAbilityTrigger;
 import net.ixdarklord.ultimine_addition.common.command.arguments.CardSlotsArgument;
@@ -14,12 +14,13 @@ import net.ixdarklord.ultimine_addition.common.command.arguments.CardTierArgumen
 import net.ixdarklord.ultimine_addition.common.command.arguments.ChallengesArgument;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
-import net.ixdarklord.ultimine_addition.common.data.recipe.ItemStorageDataRecipe;
-import net.ixdarklord.ultimine_addition.common.data.recipe.MCRecipe;
+import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
+import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
+import net.ixdarklord.ultimine_addition.common.recipe.MCRecipe;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -28,6 +29,7 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -35,6 +37,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.ixdarklord.ultimine_addition.core.Constants.MOD_ID;
 
@@ -49,8 +55,8 @@ public class Registration {
 
     public static void register() {
         registerItems();
-        MOB_EFFECTS.register();
-        POTIONS.register();
+        registerMobEffects();
+        registerPotions();
         CONTAINERS.register();
         RECIPE_SERIALIZERS.register();
         ARGUMENT_TYPES.register();
@@ -59,21 +65,47 @@ public class Registration {
 
     private static void registerItems() {
         // Custom Mining Skills Card
-        UAApi.getTypes().forEach(type -> {
-            String name = "mining_skill_card_" + new ResourceLocation(type.name()).getPath();
-            ITEMS.register(Constants.getLocation(name), () -> new MiningSkillCardItem(new Item.Properties()
-                    .stacksTo(1)
-                    .tab(Registration.ULTIMINE_ADDITION_TAB), type));
-        });
+        for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
+            String name = "mining_skill_card_%s".formatted(type.getId());
+            ITEMS.register(name, () -> new MiningSkillCardItem(new Item.Properties()
+                    .stacksTo(1), type));
+        }
         ITEMS.register();
+    }
+
+    private static final Map<String, Supplier<MobEffect>> mineGoJuiceList = new HashMap<>();
+
+    private static void registerMobEffects() {
+        // Custom Mine-Go Juice Effects
+        for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
+            String name = "mine_go_juice_%s".formatted(type.getId());
+            MobEffect mobEffect = new MineGoJuiceEffect(type, MobEffectCategory.BENEFICIAL, type.getPotionColor().getRGB());
+            MOB_EFFECTS.register(name, () -> mobEffect);
+            mineGoJuiceList.put(name, () -> mobEffect);
+        }
+        MOB_EFFECTS.register();
+    }
+
+    private static void registerPotions() {
+        // Custom Mine-Go Juice Potions
+        for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
+            String name = "mine_go_juice_%s".formatted(type.getId());
+            Supplier<MobEffect> mobEffect = mineGoJuiceList.get(name);
+            if (mobEffect == null) continue;
+
+            POTIONS.register(name, () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MobEffectInstance(mobEffect.get(), ConfigHandler.COMMON.TIER_1_TIME_SAFE.get() * 20, 0)));
+            POTIONS.register(name + "_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MobEffectInstance(mobEffect.get(), ConfigHandler.COMMON.TIER_2_TIME_SAFE.get() * 20, 1)));
+            POTIONS.register(name + "_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MobEffectInstance(mobEffect.get(), ConfigHandler.COMMON.TIER_3_TIME_SAFE.get() * 20, 2)));
+        }
+        mineGoJuiceList.clear();
+        POTIONS.register();
     }
 
     public static void registerParticleProviders() {
         ParticleProviderRegistry.register(Registration.CELEBRATE_PARTICLE, CelebrateParticle.Provider::new);
     }
 
-    public static final CreativeModeTab ULTIMINE_ADDITION_TAB = CreativeTabRegistry.create(new ResourceLocation(MOD_ID,"tab"), () ->
-            new ItemStack(Registration.MINER_CERTIFICATE.get()));
+    public static final CreativeModeTab ULTIMINE_ADDITION_TAB = CreativeTabRegistry.create(new ResourceLocation(MOD_ID,"tab"), () -> new ItemStack(Registration.MINER_CERTIFICATE.get()));
 
     // Items
     public static final RegistrySupplier<Item> MINER_CERTIFICATE = ITEMS.register("miner_certificate", () -> ModItems.MINER_CERTIFICATE);

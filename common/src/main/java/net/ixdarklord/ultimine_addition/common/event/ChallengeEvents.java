@@ -8,9 +8,13 @@ import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.ftb.mods.ftbultimine.FTBUltimine;
+import net.ixdarklord.coolcat_lib.util.InventoryHelper;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
+import net.ixdarklord.ultimine_addition.common.data.chunk.ChunkManager;
+import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationEvent;
@@ -22,6 +26,7 @@ import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
 import net.ixdarklord.ultimine_addition.common.network.packet.SyncChallengesPacket;
+import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -39,6 +44,11 @@ import java.util.List;
 
 public class ChallengeEvents {
     public static void init() {
+        if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+            legacyFunctions();
+            return;
+        }
+
         ReloadListenerRegistry.register(PackType.SERVER_DATA, ChallengesManager.INSTANCE);
         DatapackEvents.TAG_UPDATE.register((registryAccess, updateCause, shouldUpdateStaticData) -> {
             if (updateCause == DatapackEvents.TagUpdate.Cause.SERVER_DATA_LOAD) {
@@ -97,6 +107,28 @@ public class ChallengeEvents {
             if (context.getPlayer() instanceof ServerPlayer player && !FTBUltimine.instance.get(player).isPressed()) {
                 return ChallengeEvents.onBlockToolModificationEvent(originalState, finalState, context, toolAction, simulate);
             } return CompoundEventResult.pass();
+        });
+    }
+
+    private static void legacyFunctions() {
+        BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
+            List<ItemStack> stacks = InventoryHelper.listMatchingItem(player.getInventory(), ModItems.MINER_CERTIFICATE);
+            boolean isGamemodeCorrect = !player.isCreative() && !player.isSpectator();
+            if (stacks.isEmpty()
+                    || isGamemodeCorrect && FTBUltimine.instance.canUltimine(player) && FTBUltimine.instance.get(player).isPressed()
+                    || !(state.is(ModBlockTags.FORGE_ORES) || state.is(ModBlockTags.FABRIC_ORES))
+                    || (isGamemodeCorrect && ChunkManager.INSTANCE.getChunkData(level.getChunk(pos)).isBlockPlacedByEntity(pos)))
+                return EventResult.pass();
+
+            for (ItemStack stack : stacks) {
+                MinerCertificateData data = new MinerCertificateData().loadData(stack);
+                MinerCertificateData.Legacy legacy = data.getLegacy();
+                if (legacy != null) {
+                    legacy.addMiningPoint(1);
+                    data.sendToClient(player).saveData(stack);
+                }
+            }
+            return EventResult.pass();
         });
     }
 

@@ -29,7 +29,8 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
-        if (!level.isClientSide() && getData(stack).isAccomplished()) {
+        if (level.isClientSide()) return InteractionResultHolder.pass(stack);
+        if (getData(stack).isAccomplished()) {
             if (!ServicePlatform.Players.isPlayerUltimineCapable(player)) {
                 this.playParticleAndSound(player);
                 Registration.OBTAIN_ULTIMINE_TRIGGER.trigger((ServerPlayer) player);
@@ -47,15 +48,22 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
-        if (!stack.hasTag() && entity instanceof ServerPlayer player) {
-            getData(stack).sendToClient(player).pickUpSound(true).setAccomplished(true).saveData(stack);
-        }
+        if (entity instanceof ServerPlayer player)
+            getData(stack).sendToClient(player).tick();
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
-        super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
+        MinerCertificateData.Legacy legacy = getData(stack).getLegacy();
+        if (legacy != null) legacy.createInfoComponent(tooltipComponents, false);
+
         if (this.isShiftButtonNotPressed(tooltipComponents)) return;
+        if (legacy != null) {
+            legacy.createInfoComponent(tooltipComponents, true);
+            return;
+        }
+
         Component component = Component.translatable("tooltip.ultimine_addition.certificate.info").withStyle(ChatFormatting.GRAY);
         List<Component> components = ScreenUtils.splitComponent(component, getSplitterLength());
         tooltipComponents.addAll(components);
@@ -74,11 +82,11 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
         final int PARTICLE_COUNT = 80;
         if (entity instanceof ServerPlayer serverPlayer) {
             serverPlayer.getLevel().sendParticles(Registration.CELEBRATE_PARTICLE.get(),
-                    serverPlayer.getX(), serverPlayer.getY()+0.15d, serverPlayer.getZ(),
+                    serverPlayer.getX(), serverPlayer.getY() + 0.15d, serverPlayer.getZ(),
                     PARTICLE_COUNT, 1.0d, 1.0d, 1.0d, 0.02d
             );
             serverPlayer.getLevel().sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
-                    serverPlayer.getX(), serverPlayer.getY()+0.15d, serverPlayer.getZ(),
+                    serverPlayer.getX(), serverPlayer.getY() + 0.15d, serverPlayer.getZ(),
                     PARTICLE_COUNT, 1.0d, 1.0d, 1.0d, 0.02d
             );
             serverPlayer.getLevel().playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.TOTEM_USE, serverPlayer.getSoundSource(), 0.25F, 2.5F);

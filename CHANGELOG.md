@@ -1,6 +1,12 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.2.0 Release | Dec 27, 2023
+### Adding
+- New Custom Mining Skill Card API `You can create your Custom Mining Skill Card through configs.` Check out the Wiki!
+- Adding Playstyle Mode option `If you prefer the old style of the mod, Now you can change it back as before.`
+- Adding Villager Trade and Price option for the Mining Skill Card `There will be an option for which villager level should the card appear and change the price.`
+
 ## v1.1.1 Release | Dec 2, 2023
 ### Added
 - Curios and Trinkets Integration `Now... you can insert the Skills Record in the curios/trinkets menu.`

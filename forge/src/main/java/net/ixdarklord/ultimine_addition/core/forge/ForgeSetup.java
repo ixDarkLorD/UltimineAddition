@@ -12,6 +12,7 @@ import net.ixdarklord.ultimine_addition.common.event.impl.ToolAction;
 import net.ixdarklord.ultimine_addition.core.CommonSetup;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
 import net.ixdarklord.ultimine_addition.integration.curios.CuriosIntegration;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
@@ -116,7 +118,10 @@ public class ForgeSetup {
     public static class EventBus {
         @SubscribeEvent
         public static void onCommonSetup(final FMLCommonSetupEvent event) {
-            event.enqueueWork(MineGoJuiceRecipe::register);
+            event.enqueueWork(() -> {
+                MineGoJuiceRecipe.register();
+                CraftingHelper.register(LegacyModeCondition.Serializer.INSTANCE);
+            });
         }
 
         @SubscribeEvent

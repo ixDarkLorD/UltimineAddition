@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.datagen.recipe.builder;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.ixdarklord.ultimine_addition.common.data.recipe.MCIngredient;
+import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.advancements.Advancement;

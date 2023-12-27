@@ -377,7 +377,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
             if (!this.container.getAllSlots().get(4).hasItem()) missingItems.add(ModItems.PEN.getDefaultInstance());
             if (!this.container.getAllSlots().get(5).hasItem()) missingItems.add(Items.PAPER.getDefaultInstance());
             for (ItemStack item : missingItems) {
-                textScreen.add(Component.literal("§c• ")
+                textScreen.add(Component.literal("• ").withStyle(ChatFormatting.RED)
                         .append(Component.empty().append(item.getHoverName())
                                 .withStyle(style -> style.withColor(ChatFormatting.GRAY).withItalic(true).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(item)))))
                         .getVisualOrderText());

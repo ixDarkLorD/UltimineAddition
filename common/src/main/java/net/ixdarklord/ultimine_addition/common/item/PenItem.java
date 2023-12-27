@@ -24,8 +24,9 @@ public class PenItem extends StorageDataAbstractItem {
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
-        if (level.isClientSide()) return;
-        if (!stack.hasTag() && entity instanceof ServerPlayer player) getData(stack).sendToClient(player).saveData(stack);
+        if (this.isLegacyMode() || level.isClientSide()) return;
+        if (!stack.hasTag() && entity instanceof ServerPlayer player)
+            getData(stack).sendToClient(player).saveData(stack);
     }
 
     @Override
@@ -38,11 +39,12 @@ public class PenItem extends StorageDataAbstractItem {
             tooltipComponents.addAll(components);
             return;
         }
-        tooltipComponents.add(Component.literal("§8\u2022 ").append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber", getData(stack).getCapacity()).withStyle(ChatFormatting.GRAY)));
+        tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber", getData(stack).getCapacity()).withStyle(ChatFormatting.GRAY)));
     }
 
     @Override
     public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
+        if (this.isLegacyMode()) return;
         if (this.allowedIn(creativeModeTab)) {
             ItemStack stack = new ItemStack(this);
             getData(stack).fullCapacity().saveData(stack);

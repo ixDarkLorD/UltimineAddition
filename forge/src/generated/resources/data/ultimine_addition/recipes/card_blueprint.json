@@ -1,23 +1,36 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "group": "ultimine_addition",
-  "key": {
-    "A": {
-      "item": "minecraft:amethyst_shard"
-    },
-    "L": {
-      "tag": "forge:gems/lapis"
-    },
-    "P": {
-      "item": "minecraft:paper"
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "ultimine_addition:legacy_mode",
+          "state": false
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "group": "ultimine_addition",
+        "key": {
+          "A": {
+            "item": "minecraft:amethyst_shard"
+          },
+          "L": {
+            "tag": "forge:gems/lapis"
+          },
+          "P": {
+            "item": "minecraft:paper"
+          }
+        },
+        "pattern": [
+          "ALA",
+          "LPL",
+          "ALA"
+        ],
+        "result": {
+          "item": "ultimine_addition:card_blueprint"
+        }
+      }
     }
-  },
-  "pattern": [
-    "ALA",
-    "LPL",
-    "ALA"
-  ],
-  "result": {
-    "item": "ultimine_addition:card_blueprint"
-  }
+  ]
 }

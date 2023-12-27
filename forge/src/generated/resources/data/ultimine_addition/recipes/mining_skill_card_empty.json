@@ -1,16 +1,29 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "group": "ultimine_addition",
-  "ingredients": [
+  "type": "forge:conditional",
+  "recipes": [
     {
-      "item": "ultimine_addition:mining_skill_card_empty"
-    },
-    {
-      "item": "ultimine_addition:card_blueprint"
+      "conditions": [
+        {
+          "type": "ultimine_addition:legacy_mode",
+          "state": false
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shapeless",
+        "group": "ultimine_addition",
+        "ingredients": [
+          {
+            "item": "ultimine_addition:mining_skill_card_empty"
+          },
+          {
+            "item": "ultimine_addition:card_blueprint"
+          }
+        ],
+        "result": {
+          "count": 2,
+          "item": "ultimine_addition:mining_skill_card_empty"
+        }
+      }
     }
-  ],
-  "result": {
-    "count": 2,
-    "item": "ultimine_addition:mining_skill_card_empty"
-  }
+  ]
 }

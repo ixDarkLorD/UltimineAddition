@@ -1,8 +1,12 @@
 package net.ixdarklord.ultimine_addition.common.brewing;
 
+import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
+import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
+import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -34,11 +38,21 @@ public class MineGoJuiceRecipe extends BrewingRecipe {
     }
 
     public static void register() {
+        if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return;
         BrewingRecipeRegistry.addRecipe(new MineGoJuiceRecipe(Potions.WATER, Items.ENCHANTED_BOOK, Registration.KNOWLEDGE_POTION.get()));
         addTiers(Registration.MINING_SKILL_CARD_PICKAXE.get(), Registration.MINE_GO_JUICE_PICKAXE_POTION.getId());
         addTiers(Registration.MINING_SKILL_CARD_AXE.get(), Registration.MINE_GO_JUICE_AXE_POTION.getId());
         addTiers(Registration.MINING_SKILL_CARD_SHOVEL.get(), Registration.MINE_GO_JUICE_SHOVEL_POTION.getId());
         addTiers(Registration.MINING_SKILL_CARD_HOE.get(), Registration.MINE_GO_JUICE_HOE_POTION.getId());
+        for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
+            String cardName = "mining_skill_card_%s".formatted(type.getId());
+            String potionName = "mine_go_juice_%s".formatted(type.getId());
+            Item customCard = Registration.ITEMS.getRegistrar().get(Constants.getLocation(cardName));
+            Potion customPotion = Registration.POTIONS.getRegistrar().get(Constants.getLocation(potionName));
+
+            if (customCard == null || customPotion == null) continue;
+            addTiers(customCard, Constants.getLocation(potionName));
+        }
     }
 
     private static void addTiers(@NotNull Item item, ResourceLocation output) {

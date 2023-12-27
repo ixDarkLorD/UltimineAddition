@@ -1,28 +1,41 @@
 {
-  "type": "ultimine_addition:mc_recipe",
-  "group": "ultimine_addition",
-  "ingredients": [
+  "type": "forge:conditional",
+  "recipes": [
     {
-      "item": "minecraft:paper"
-    },
-    {
-      "item": "ultimine_addition:mining_skill_card_pickaxe",
-      "tier": 4
-    },
-    {
-      "item": "ultimine_addition:mining_skill_card_axe",
-      "tier": 4
-    },
-    {
-      "item": "ultimine_addition:mining_skill_card_shovel",
-      "tier": 4
-    },
-    {
-      "item": "ultimine_addition:mining_skill_card_hoe",
-      "tier": 4
+      "conditions": [
+        {
+          "type": "ultimine_addition:legacy_mode",
+          "state": false
+        }
+      ],
+      "recipe": {
+        "type": "ultimine_addition:mc_recipe",
+        "group": "ultimine_addition",
+        "ingredients": [
+          {
+            "item": "minecraft:paper"
+          },
+          {
+            "item": "ultimine_addition:mining_skill_card_pickaxe",
+            "tier": 4
+          },
+          {
+            "item": "ultimine_addition:mining_skill_card_axe",
+            "tier": 4
+          },
+          {
+            "item": "ultimine_addition:mining_skill_card_shovel",
+            "tier": 4
+          },
+          {
+            "item": "ultimine_addition:mining_skill_card_hoe",
+            "tier": 4
+          }
+        ],
+        "result": {
+          "item": "ultimine_addition:miner_certificate"
+        }
+      }
     }
-  ],
-  "result": {
-    "item": "ultimine_addition:miner_certificate"
-  }
+  ]
 }
