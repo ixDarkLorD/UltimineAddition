@@ -1,6 +1,11 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.2.0a Release | Dec 28, 2023
+### Fixed
+- Crash issue related to mining skill card occurred when playstyle switched into legacy.
+- Not copying player ultimine ability after exiting The End.
+
 ## v1.2.0 Release | Dec 27, 2023
 ### Adding
 - Adding Playstyle Mode option `If you prefer the old style of the mod, Now you can change it back as before.`
