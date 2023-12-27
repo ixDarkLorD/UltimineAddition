@@ -167,7 +167,7 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
         }
 
         private Component createBrackets(Component component) {
-            return Component.literal("『").withStyle(ChatFormatting.DARK_GRAY).append(component).append(Component.literal("』").withStyle(ChatFormatting.DARK_GRAY));
+            return Component.literal("『").withStyle(ChatFormatting.DARK_GRAY).append(component).append(Component.literal("\u300F").withStyle(ChatFormatting.DARK_GRAY));
         }
 
         public CompoundTag save() {
