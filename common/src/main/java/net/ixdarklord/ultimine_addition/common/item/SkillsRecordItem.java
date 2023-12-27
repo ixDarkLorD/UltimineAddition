@@ -120,7 +120,11 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
         AtomicBoolean result = new AtomicBoolean();
         getData(stack).getCardSlots().forEach(itemStack -> {
             MiningSkillCardData cardData = new MiningSkillCardData().loadData(itemStack);
-            if (!cardData.getChallenges().keySet().stream().filter(identifier -> ChallengesManager.INSTANCE.getAllChallenges().get(identifier.id()).getChallengeType().isConsuming()).toList().isEmpty())
+            if (!cardData.getChallenges().keySet().stream().filter(identifier -> {
+                var data = ChallengesManager.INSTANCE.getAllChallenges().get(identifier.id());
+                if (data != null) return data.getChallengeType().isConsuming();
+                else return false;
+            }).toList().isEmpty())
                 result.set(true);
         });
         return result.get();

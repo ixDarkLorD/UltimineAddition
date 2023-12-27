@@ -57,10 +57,8 @@ public class FabricSetup implements ModInitializer {
     }
 
     private void onPlayerClone(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean wonGame) {
-        if (!wonGame) {
-            boolean state = ServicePlatform.Players.isPlayerUltimineCapable(oldPlayer);
-            ServicePlatform.Players.setPlayerUltimineCapability(newPlayer, state);
-        }
+        boolean state = ServicePlatform.Players.isPlayerUltimineCapable(oldPlayer);
+        ServicePlatform.Players.setPlayerUltimineCapability(newPlayer, state);
     }
 
     private InteractionResult onRightClick(Player player, Level level, InteractionHand hand, BlockHitResult hitResult) {
