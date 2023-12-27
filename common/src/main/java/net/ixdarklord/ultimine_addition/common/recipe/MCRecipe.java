@@ -1,9 +1,10 @@
-package net.ixdarklord.ultimine_addition.common.data.recipe;
+package net.ixdarklord.ultimine_addition.common.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.NonNullList;

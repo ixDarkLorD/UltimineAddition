@@ -9,6 +9,8 @@ import net.ixdarklord.coolcat_lib.client.gui.component.animation.SlideAnimation;
 import net.ixdarklord.coolcat_lib.client.gui.screen.ScreenPosition;
 import net.ixdarklord.coolcat_lib.util.ColorUtils;
 import net.ixdarklord.coolcat_lib.util.ScreenUtils;
+import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
@@ -56,6 +58,7 @@ public class ChallengesInfoPanel {
     private static int tickCount;
 
     public static void render(PoseStack poseStack, float ignored) {
+        if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return;
         Minecraft MC = Minecraft.getInstance();
         Window window = MC.getWindow();
         Font font = MC.font;

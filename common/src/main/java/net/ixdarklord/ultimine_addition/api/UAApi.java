@@ -19,7 +19,6 @@ public class UAApi {
     private final static Collection<IUAPlugin> plugins = new HashSet<>();
 
     public static void init() {
-//        UAApi.plugins.add(new CustomTypesPlugin());
         call("Registering plugin", plugins, plugin -> plugin.register(new IUAPlugin.Registration(plugin)));
         if (!plugins.isEmpty()) LOGGER.info("Loaded {} plugins", plugins.size());
     }

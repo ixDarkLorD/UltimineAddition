@@ -17,7 +17,7 @@ public class ItemPropertiesHandler {
         ItemPropertiesRegistry.register(Registration.MINER_CERTIFICATE.get(), new ResourceLocation(Constants.MOD_ID, "opened"), (stack, level, living, id) -> MinerCertificateItem.isAccomplished(stack) ? 1.0F : 0.0F);
 
         for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
-            Item item = Registration.ITEMS.getRegistrar().get(Constants.getLocation(String.format("mining_skill_card_%s", type.name())));
+            Item item = Registration.ITEMS.getRegistrar().get(Constants.getLocation(String.format("mining_skill_card_%s", type.getId())));
             if (item == null) continue;
             ItemPropertiesRegistry.register(item, new ResourceLocation(Constants.MOD_ID, "is_custom_renderer"), (stack, level, living, id) -> ConfigHandler.CLIENT.MSC_RENDERER.get() ? 1.0F : 0.0F);
             ItemPropertiesRegistry.register(item, new ResourceLocation(Constants.MOD_ID, "tier_1"), (stack, level, living, id) -> MiningSkillCardItem.isTierEqual(stack, MiningSkillCardItem.Tier.Novice) ? 1.0F : 0.0F);

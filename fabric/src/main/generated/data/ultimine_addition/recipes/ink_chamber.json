@@ -1,29 +1,42 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "group": "ultimine_addition",
-  "pattern": [
-    "INI",
-    "RGB",
-    "INI"
-  ],
-  "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "N": {
-      "item": "minecraft:iron_nugget"
-    },
-    "R": {
-      "item": "minecraft:red_dye"
-    },
-    "G": {
-      "item": "minecraft:green_dye"
-    },
-    "B": {
-      "item": "minecraft:blue_dye"
+  "type": "fabric:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "state": false,
+          "type": "ultimine_addition:legacy_mode"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "group": "ultimine_addition",
+        "pattern": [
+          "INI",
+          "RGB",
+          "INI"
+        ],
+        "key": {
+          "I": {
+            "item": "minecraft:iron_ingot"
+          },
+          "N": {
+            "item": "minecraft:iron_nugget"
+          },
+          "R": {
+            "item": "minecraft:red_dye"
+          },
+          "G": {
+            "item": "minecraft:green_dye"
+          },
+          "B": {
+            "item": "minecraft:blue_dye"
+          }
+        },
+        "result": {
+          "item": "ultimine_addition:ink_chamber"
+        }
+      }
     }
-  },
-  "result": {
-    "item": "ultimine_addition:ink_chamber"
-  }
+  ]
 }

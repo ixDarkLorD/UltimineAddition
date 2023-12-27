@@ -10,7 +10,6 @@ import net.ixdarklord.ultimine_addition.datagen.recipe.RecipeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.BlockTagGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.ItemTagGenerator;
 
-@SuppressWarnings("unused")
 public class DataGeneration implements DataGeneratorEntrypoint {
     @Override
     public void onInitializeDataGenerator(FabricDataGenerator generator) {

@@ -1,26 +1,39 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "group": "ultimine_addition",
-  "pattern": [
-    "SIS",
-    "YCY",
-    "SYS"
-  ],
-  "key": {
-    "S": {
-      "tag": "minecraft:wooden_slabs"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "Y": {
-      "item": "minecraft:yellow_concrete"
-    },
-    "C": {
-      "item": "ultimine_addition:mining_skill_card_empty"
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "state": false,
+          "type": "ultimine_addition:legacy_mode"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "group": "ultimine_addition",
+        "pattern": [
+          "SIS",
+          "YCY",
+          "SYS"
+        ],
+        "key": {
+          "S": {
+            "tag": "minecraft:wooden_slabs"
+          },
+          "I": {
+            "item": "minecraft:iron_ingot"
+          },
+          "Y": {
+            "item": "minecraft:yellow_concrete"
+          },
+          "C": {
+            "item": "ultimine_addition:mining_skill_card_empty"
+          }
+        },
+        "result": {
+          "item": "ultimine_addition:skills_record"
+        }
+      }
     }
-  },
-  "result": {
-    "item": "ultimine_addition:skills_record"
-  }
+  ]
 }

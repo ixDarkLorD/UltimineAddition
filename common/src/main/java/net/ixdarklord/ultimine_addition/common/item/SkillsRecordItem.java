@@ -20,6 +20,7 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -47,6 +48,11 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
             return new InteractionResultHolder<>(InteractionResult.PASS, stack);
         }
 
+        if (this.isLegacyMode()) {
+            player.displayClientMessage(new TranslatableComponent("info.ultimine_addition.legacy_mode").withStyle(ChatFormatting.RED), false);
+            return new InteractionResultHolder<>(InteractionResult.PASS, stack);
+        }
+
         if (stack.hasTag()) {
             MenuRegistry.openExtendedMenu((ServerPlayer) player,
                     new SimpleMenuProvider((id, inv, p) -> new SkillsRecordContainer(id, inv, p, stack, getData(stack).getContainer()), TITLE),
@@ -58,7 +64,7 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
-        if (level.isClientSide()) return;
+        if (this.isLegacyMode() || level.isClientSide()) return;
         if (entity instanceof ServerPlayer player) {
             if (!stack.hasTag()) getData(stack).sendToClient(player).saveData(stack);
             if (getData(stack).getCardSlots().stream().filter(s -> !s.isEmpty()).toList().isEmpty() && getData(stack).isConsumeMode()) {
@@ -79,16 +85,22 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
         }
         if (isConsumeChallengeExists(stack)) {
             Component state = getData(stack).isConsumeMode() ? new TranslatableComponent("options.on").withStyle(ChatFormatting.GREEN) : new TranslatableComponent("options.off").withStyle(ChatFormatting.RED);
-            tooltipComponents.add(new TextComponent("§8• ").append(new TranslatableComponent("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.GRAY)));
+            tooltipComponents.add(new TextComponent("• ").withStyle(ChatFormatting.DARK_GRAY).append(new TranslatableComponent("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.GRAY)));
         }
         if (!getData(stack).getPenSlot().isEmpty()) {
-            tooltipComponents.add(new TextComponent("§8• ").append(new TranslatableComponent("tooltip.ultimine_addition.pen.ink_chamber",
+            tooltipComponents.add(new TextComponent("• ").withStyle(ChatFormatting.DARK_GRAY).append(new TranslatableComponent("tooltip.ultimine_addition.pen.ink_chamber",
                     (getData(stack).getPenSlot().getItem() instanceof PenItem item)
                             ? item.getData(getData(stack).getPenSlot()).getCapacity()
                             : 0
             ).withStyle(ChatFormatting.GRAY)));
         }
-        tooltipComponents.add(new TextComponent("§8• ").append(new TranslatableComponent("tooltip.ultimine_addition.skills_record.contents").withStyle(ChatFormatting.GRAY)));
+        tooltipComponents.add(new TextComponent("• ").withStyle(ChatFormatting.DARK_GRAY).append(new TranslatableComponent("tooltip.ultimine_addition.skills_record.contents").withStyle(ChatFormatting.GRAY)));
+    }
+
+    @Override
+    public void fillItemCategory(CreativeModeTab category, NonNullList<ItemStack> items) {
+        if (this.isLegacyMode()) return;
+        super.fillItemCategory(category, items);
     }
 
     @Override

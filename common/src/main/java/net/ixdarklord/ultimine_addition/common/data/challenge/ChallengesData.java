@@ -69,7 +69,7 @@ public class ChallengesData {
     }
 
     public static void writeBuffer(FriendlyByteBuf buf, ChallengesData data) {
-        buf.writeUtf(data.getForCardType().name());
+        buf.writeUtf(data.getForCardType().getId());
         buf.writeInt(data.getForCardTier().getValue());
 
         buf.writeUtf(data.getChallengeType().getTypeName());

@@ -1,11 +1,10 @@
-package net.ixdarklord.ultimine_addition.common.data.recipe;
+package net.ixdarklord.ultimine_addition.common.recipe.ingredient;
 
+import com.google.common.collect.Lists;
 import com.google.gson.*;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparators;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
-import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
@@ -27,16 +26,16 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public final class MCIngredient implements Predicate<ItemStack> {
-    public static final MCIngredient EMPTY = new MCIngredient(Stream.empty());
+public final class DataIngredient implements Predicate<ItemStack> {
+    public static final DataIngredient EMPTY = new DataIngredient(Stream.empty());
     private final Value[] values;
     @Nullable
     private ItemStack[] itemStacks;
-    private MiningSkillCardItem.Tier tier;
+    private int amount;
     @Nullable
     private IntList stackingIds;
 
-    private MCIngredient(Stream<? extends Value> stream) {
+    private DataIngredient(Stream<? extends Value> stream) {
         this.values = stream.toArray(Value[]::new);
     }
 
@@ -45,17 +44,18 @@ public final class MCIngredient implements Predicate<ItemStack> {
         return this.itemStacks;
     }
 
-    public MiningSkillCardItem.Tier getTier() {
+    public int getAmount() {
         this.dissolve();
-        return this.tier;
+        return this.amount;
     }
 
     private void dissolve() {
         if (this.itemStacks == null) {
-            this.itemStacks = Arrays.stream(this.values).flatMap(value ->
+            this.itemStacks = Arrays.stream(this.values).flatMap((value) ->
                     value.getItems().stream()).distinct().toArray(ItemStack[]::new);
         }
-        this.tier = Arrays.stream(this.values).map(Value::getTier).toList().get(0);
+        this.amount = Arrays.stream(this.values).map(Value::getAmount).toList().get(0);
+
     }
 
     public boolean test(@Nullable ItemStack stack) {
@@ -66,12 +66,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
         ItemStack[] stacks = this.itemStacks;
         for (ItemStack itemStack : stacks) {
             if (itemStack.is(stack.getItem())) {
-                if (this.tier != null) {
-                    if (itemStack.is(stack.getItem())) {
-                        var cardData = new MiningSkillCardData().loadData(stack);
-                        return this.tier.equals(cardData.getTier());
-                    }
-                } else return true;
+                return true;
             }
         }
         return false;
@@ -95,8 +90,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
 
     public void toNetwork(FriendlyByteBuf buffer) {
         this.dissolve();
-        buffer.writeBoolean(this.tier != null);
-        if (this.tier != null) buffer.writeInt(this.tier.getValue());
+        buffer.writeInt(this.amount);
         buffer.writeCollection(Arrays.asList(this.itemStacks), FriendlyByteBuf::writeItem);
     }
 
@@ -117,44 +111,42 @@ public final class MCIngredient implements Predicate<ItemStack> {
         return this.values.length == 0 && (this.itemStacks == null || this.itemStacks.length == 0) && (this.stackingIds == null || this.stackingIds.isEmpty());
     }
 
-    private static MCIngredient fromValues(Stream<? extends Value> stream) {
-        MCIngredient DataIngredient = new MCIngredient(stream);
+    private static DataIngredient fromValues(Stream<? extends Value> stream) {
+        DataIngredient DataIngredient = new DataIngredient(stream);
         return DataIngredient.values.length == 0 ? EMPTY : DataIngredient;
     }
 
-    public static MCIngredient of() {
+    public static DataIngredient of() {
         return EMPTY;
     }
 
-    public static MCIngredient of(MiningSkillCardItem.Tier tier, ItemLike... items) {
-        return of(tier, Arrays.stream(items).map(ItemStack::new));
+    public static DataIngredient of(int amount, ItemLike... items) {
+        return of(amount, Arrays.stream(items).map(ItemStack::new));
     }
 
-    public static MCIngredient of(MiningSkillCardItem.Tier tier, ItemStack... stacks) {
-        return of(tier, Arrays.stream(stacks));
+    public static DataIngredient of(int amount, ItemStack... stacks) {
+        return of(amount, Arrays.stream(stacks));
     }
 
-    public static MCIngredient of(MiningSkillCardItem.Tier tier, Stream<ItemStack> stacks) {
-        return fromValues(stacks.filter(itemStack -> !itemStack.isEmpty()).map(stack -> new ItemValue(stack, tier)));
+    public static DataIngredient of(int amount, Stream<ItemStack> stacks) {
+        return fromValues(stacks.filter((itemStack) -> !itemStack.isEmpty()).map(stack -> new ItemValue(stack, amount)));
     }
 
-    public static MCIngredient of(MiningSkillCardItem.Tier tier, TagKey<Item> tag) {
-        return fromValues(Stream.of(new TagValue(tag, tier)));
+    public static DataIngredient of(TagKey<Item> tag, int amount) {
+        return fromValues(Stream.of(new TagValue(tag, amount)));
     }
 
-    public static NonNullList<Ingredient> toNormal(NonNullList<MCIngredient> inputs) {
+    public static NonNullList<Ingredient> toNormal(NonNullList<DataIngredient> inputs) {
         NonNullList<Ingredient> result = NonNullList.create();
 
         // Item Values
         result.addAll(inputs.stream()
                 .filter(ingredient -> !Arrays.stream(ingredient.values)
-                        .filter(value -> value instanceof ItemValue).toList().isEmpty())
+                        .filter(value -> value instanceof DataIngredient.ItemValue).toList().isEmpty())
                 .map(ingredient -> {
-                    ItemStack[] items = Arrays.stream(ingredient.getItems()).peek(stack -> {
-                        if (stack.getItem() instanceof MiningSkillCardItem item && ingredient.getTier() != null) {
-                            item.getData(stack).setTier(ingredient.getTier()).saveData(stack);
-                        }
-                    }).toArray(ItemStack[]::new);
+                    ItemStack[] items = Arrays.stream(ingredient.getItems()).peek(stack ->
+                            stack.getOrCreateTag().putInt("amount", ingredient.getAmount()))
+                            .toArray(ItemStack[]::new);
                     return Ingredient.of(items);
                 })
                 .toList()
@@ -162,11 +154,11 @@ public final class MCIngredient implements Predicate<ItemStack> {
 
         // Tag Values
         result.addAll(inputs.stream()
-                .filter(ingredient -> !Arrays.stream(ingredient.values).filter(value -> value instanceof TagValue).toList().isEmpty())
+                .filter(ingredient -> !Arrays.stream(ingredient.values).filter(value -> value instanceof DataIngredient.TagValue).toList().isEmpty())
                 .map(ingredient -> {
                     Stream<Ingredient.TagValue> tagValueStream = Arrays.stream(ingredient.values)
-                            .filter(value -> value instanceof TagValue)
-                            .map(value -> new Ingredient.TagValue(((TagValue) value).tag));
+                            .filter(value -> value instanceof DataIngredient.TagValue)
+                            .map(value -> new Ingredient.TagValue(((DataIngredient.TagValue) value).tag));
                     return Ingredient.fromValues(tagValueStream);
                 })
                 .toList()
@@ -174,12 +166,12 @@ public final class MCIngredient implements Predicate<ItemStack> {
         return result;
     }
 
-    public static MCIngredient fromNetwork(FriendlyByteBuf buffer) {
-        MiningSkillCardItem.Tier tier = buffer.readBoolean() ? MiningSkillCardItem.Tier.fromInt(buffer.readInt()) : null;
-        return fromValues(buffer.readList(FriendlyByteBuf::readItem).stream().map(stack -> new ItemValue(stack, tier)));
+    public static DataIngredient fromNetwork(FriendlyByteBuf buffer) {
+        int amount = buffer.readInt();
+        return fromValues(buffer.readList(FriendlyByteBuf::readItem).stream().map(stack -> new ItemValue(stack, amount)));
     }
 
-    public static MCIngredient fromJson(@Nullable JsonElement json) {
+    public static DataIngredient fromJson(@Nullable JsonElement json) {
         if (json != null && !json.isJsonNull()) {
             if (json.isJsonObject()) {
                 return fromValues(Stream.of(valueFromJson(json.getAsJsonObject())));
@@ -201,80 +193,76 @@ public final class MCIngredient implements Predicate<ItemStack> {
 
     private static Value valueFromJson(JsonObject json) {
         if (json.has("item") && json.has("tag")) {
-            throw new JsonParseException("An MCIngredient entry is either a tag or an item, not both");
+            throw new JsonParseException("An DataIngredient entry is either a tag or an item, not both");
         } else if (json.has("item")) {
             Item item = ShapedRecipe.itemFromJson(json);
-            MiningSkillCardItem.Tier tier = json.has("tier") ? MiningSkillCardItem.Tier.fromInt(GsonHelper.getAsInt(json, "tier")) : null;
-            return new ItemValue(new ItemStack(item), tier);
+            int amount = GsonHelper.getAsInt(json, "amount");
+            return new ItemValue(new ItemStack(item), amount);
         } else if (json.has("tag")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
             TagKey<Item> tagKey = TagKey.create(Registry.ITEM_REGISTRY, resourceLocation);
-            MiningSkillCardItem.Tier tier = json.has("tier") ? MiningSkillCardItem.Tier.fromInt(GsonHelper.getAsInt(json, "tier")) : null;
-            return new TagValue(tagKey, tier);
+            int amount = GsonHelper.getAsInt(json, "amount");
+            return new TagValue(tagKey, amount);
         } else {
-            throw new JsonParseException("An MCIngredient entry needs either a tag or an item");
+            throw new JsonParseException("An DataIngredient entry needs either a tag or an item");
         }
     }
 
     interface Value {
         Collection<ItemStack> getItems();
-        MiningSkillCardItem.Tier getTier();
+        int getAmount();
 
         JsonObject serialize();
     }
     static class TagValue implements Value {
-        protected final TagKey<Item> tag;
-        private final MiningSkillCardItem.Tier tier;
+        private final TagKey<Item> tag;
+        private final int amount;
 
-        TagValue(TagKey<Item> tagKey, @Nullable MiningSkillCardItem.Tier tier) {
+        TagValue(TagKey<Item> tagKey, int amount) {
             this.tag = tagKey;
-            this.tier = tier;
+            this.amount = amount;
         }
 
         public Collection<ItemStack> getItems() {
-            List<ItemStack> list = new ArrayList<>();
+            List<ItemStack> list = Lists.newArrayList();
             for (Holder<Item> holder : Registry.ITEM.getTagOrEmpty(this.tag)) {
-                ItemStack stack = new ItemStack(holder);
-                if (this.tier != null && holder instanceof MiningSkillCardItem item) {
-                    item.getData(stack).setTier(this.tier).saveData(stack);
-                }
-                list.add(stack);
+                list.add(new ItemStack(holder));
             }
             return list;
         }
 
-        public @Nullable MiningSkillCardItem.Tier getTier() {
-            return this.tier;
+        public int getAmount() {
+            return this.amount;
         }
 
         public JsonObject serialize() {
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("tag", this.tag.location().toString());
-            if (getTier() != null) jsonObject.addProperty("tier", getTier().getValue());
+            jsonObject.addProperty("amount", getAmount());
             return jsonObject;
         }
     }
     static class ItemValue implements Value {
         private final ItemStack stack;
-        private final MiningSkillCardItem.Tier tier;
+        private final int amount;
 
-        ItemValue(ItemStack stack, @Nullable MiningSkillCardItem.Tier tier) {
+        ItemValue(ItemStack stack, int amount) {
             this.stack = stack;
-            this.tier = tier;
+            this.amount = amount;
         }
 
         public Collection<ItemStack> getItems() {
             return Collections.singleton(this.stack);
         }
 
-        public @Nullable MiningSkillCardItem.Tier getTier() {
-            return this.tier;
+        public int getAmount() {
+            return this.amount;
         }
 
         public JsonObject serialize() {
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("item", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.stack.getItem())).toString());
-            if (getTier() != null) jsonObject.addProperty("tier", getTier().getValue());
+            jsonObject.addProperty("amount", getAmount());
             return jsonObject;
         }
     }

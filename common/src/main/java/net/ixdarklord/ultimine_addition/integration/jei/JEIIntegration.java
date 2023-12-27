@@ -7,6 +7,8 @@ import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.registration.*;
 import mezz.jei.common.Internal;
 import mezz.jei.common.network.IConnectionToServer;
+import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.core.Constants;
@@ -44,15 +46,16 @@ public class JEIIntegration implements IModPlugin {
     @Override
     public void registerRecipes(@NotNull IRecipeRegistration registration) {
         registration.addRecipes(ItemStorageDataRecipeCategory.RECIPE_TYPE, ItemStorageDataRecipeCategory.getItemStorageDataRecipes());
-
         List<ItemStack> cards = Stream.of(ModItems.MINING_SKILL_CARD_PICKAXE, ModItems.MINING_SKILL_CARD_AXE, ModItems.MINING_SKILL_CARD_SHOVEL, ModItems.MINING_SKILL_CARD_HOE).map(item -> (MiningSkillCardItem)item)
                 .map(item -> {
                     ItemStack stack = item.getDefaultInstance();
                     item.getData(stack).setTier(MiningSkillCardItem.Tier.Mastered).saveData(stack);
                     return stack;
                 }).toList();
+
+        if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return;
         registration.addItemStackInfo(cards, new TranslatableComponent("jei.ultimine_addition.info.cards.grade_up"));
-        registration.addItemStackInfo(ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), new TranslatableComponent("jei.ultimine_addition.info.cards.obtain"));
+        registration.addItemStackInfo(ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), new TranslatableComponent("jei.ultimine_addition.info.cards.obtain", ConfigHandler.COMMON.CARD_TRADE_LEVEL.get()));
     }
 
     @Override

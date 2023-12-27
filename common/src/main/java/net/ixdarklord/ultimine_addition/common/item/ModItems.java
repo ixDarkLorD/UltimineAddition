@@ -13,13 +13,13 @@ public class ModItems {
     public static final Item SKILLS_RECORD = new SkillsRecordItem(new Item.Properties()
             .stacksTo(1)
             .tab(Registration.ULTIMINE_ADDITION_TAB));
-    public static final Item INK_CHAMBER = new ComponentItem(new Item.Properties()
+    public static final Item INK_CHAMBER = new ModernItem(new Item.Properties()
             .stacksTo(64)
             .tab(Registration.ULTIMINE_ADDITION_TAB), ComponentItem.ComponentType.CRAFTING);
     public static final Item PEN = new PenItem(new Item.Properties()
             .stacksTo(1)
             .tab(Registration.ULTIMINE_ADDITION_TAB));
-    public static final Item CARD_BLUEPRINT = new ComponentItem(new Item.Properties()
+    public static final Item CARD_BLUEPRINT = new ModernItem(new Item.Properties()
             .stacksTo(16)
             .tab(Registration.ULTIMINE_ADDITION_TAB), ComponentItem.ComponentType.CRAFTING);
 

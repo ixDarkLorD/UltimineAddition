@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.common.data.recipe.forge;
 
 import com.google.gson.JsonObject;
-import net.ixdarklord.ultimine_addition.common.data.recipe.ItemStorageDataRecipe;
-import net.ixdarklord.ultimine_addition.common.data.recipe.MCRecipe;
+import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
+import net.ixdarklord.ultimine_addition.common.recipe.MCRecipe;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;

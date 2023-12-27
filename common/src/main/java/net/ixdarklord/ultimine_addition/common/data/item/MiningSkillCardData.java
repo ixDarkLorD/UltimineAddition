@@ -168,7 +168,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
     public ItemStack getDisplayItem() {
         if (this.displayItem.isEmpty()) {
             MiningSkillCardItem.Type type = ((MiningSkillCardItem)stack.getItem()).getType();
-            return type.defaultDisplayItem();
+            return type.getDefaultDisplayItem().getDefaultInstance();
         }
         return this.displayItem;
     }

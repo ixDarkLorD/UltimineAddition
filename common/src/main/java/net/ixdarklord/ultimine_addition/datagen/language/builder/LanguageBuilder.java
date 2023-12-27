@@ -39,7 +39,7 @@ public class LanguageBuilder {
         add(Registration.MINE_GO_JUICE_SHOVEL.get(), "Mine-Go Juice: Worm Whispers");
         add(Registration.MINE_GO_JUICE_HOE.get(), "Mine-Go Juice: Soil Serenade");
 
-        add("jei", "info.cards.obtain", "You can obtain this Item from a Level 5 Toolsmith Villager.");
+        add("jei", "info.cards.obtain", "You can obtain this item from a level %s toolsmith villager.");
         add("jei", "info.cards.grade_up", "You can obtain the Mastered tier by accomplishing challenges using the Skills Record.");
         add("jei", "tooltip.missing_card", "or Tiered up Card");
         add("jei", "category.item_storage.pen", "Refill Pen");
@@ -48,7 +48,14 @@ public class LanguageBuilder {
         addCurios("skills_record", "Skills Record");
         addTrinkets("hand.skills_record", "Skills Record");
 
+        add("tooltip", "legacy_mode.disabled_item", "This item has been Disabled by Legacy Mode.");
         add("tooltip", "certificate.info", "Interact with this parchment to obtain the ultimine ability permanently!");
+        add("tooltip", "certificate.legacy.info", "Obtain this knowledge to develop your mining skill!");
+        add("tooltip", "certificate.legacy.sealed", "Sealed");
+        add("tooltip", "certificate.legacy.opened", "Opened");
+        add("tooltip", "certificate.legacy.quest.congrats", "You made it! You've destroyed %s ores.");
+        add("tooltip", "certificate.legacy.quest.info", "To unseal the the scroll, Mine %s Ores!");
+        add("tooltip", "certificate.legacy.quest", "Destroyed Ores: %s");
         add("tooltip", "skills_record.info", "A tool needed for upgrading mining skills card.");
         add("tooltip", "skills_record.contents", "Contents:");
         add("tooltip", "skills_record.press.left_click", "Press Left Click Mouse to cycle through blocks.");
@@ -126,11 +133,14 @@ public class LanguageBuilder {
         add("info", "obtain", "Congratulations on learning the excavation skill!");
         add("info", "obtained_already", "You have already obtained this knowledge!");
         add("info", "incapable", "You need the excavation skill to perform this action! First, Obtain a Miner Certificate or drink a Mine-Go Juice.");
-        add("info", "required_skill.pickaxe", "Required Skill for: Pickaxe");
-        add("info", "required_skill.axe", "Required Skill for: Axe");
-        add("info", "required_skill.shovel", "Required Skill for: Shovel");
-        add("info", "required_skill.hoe", "Required Skill for: Hoe");
-        add("info", "required_skill.all", "Required Skill for: All Tools");
+        add("info", "legacy_mode", "You can't use this! The playstyle mode has been set to Legacy.");
+        add("info", "required_skill", "Required Skill for: %s");
+        add("info", "required_skill.many_tools", "List of Tools");
+        add("info", "required_skill.pickaxe", "Pickaxe");
+        add("info", "required_skill.axe", "Axe");
+        add("info", "required_skill.shovel", "Shovel");
+        add("info", "required_skill.hoe", "Hoe");
+        add("info", "required_skill.all", "All Tools");
 
         add("argument", "inventory.unknown", "Unknown inventory '%s'");
         add("argument", "challenge.unknown", "Unknown challenge '%s'");

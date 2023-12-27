@@ -1,0 +1,41 @@
+{
+  "type": "fabric:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "state": true,
+          "type": "ultimine_addition:legacy_mode"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "pattern": [
+          " 1 ",
+          "2P3",
+          " 4 "
+        ],
+        "key": {
+          "P": {
+            "item": "minecraft:paper"
+          },
+          "1": {
+            "item": "minecraft:diamond_pickaxe"
+          },
+          "2": {
+            "item": "minecraft:iron_axe"
+          },
+          "3": {
+            "item": "minecraft:golden_hoe"
+          },
+          "4": {
+            "item": "minecraft:stone_shovel"
+          }
+        },
+        "result": {
+          "item": "ultimine_addition:miner_certificate"
+        }
+      }
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.core.fabric;
 
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.common.data.recipe.ItemStorageDataRecipe;
-import net.ixdarklord.ultimine_addition.common.data.recipe.MCRecipe;
+import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
+import net.ixdarklord.ultimine_addition.common.recipe.MCRecipe;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.api.ModLoadingContext;

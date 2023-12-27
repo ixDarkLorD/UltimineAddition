@@ -1,26 +1,39 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "group": "ultimine_addition",
-  "pattern": [
-    " GS",
-    "GCG",
-    "IG "
-  ],
-  "key": {
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "S": {
-      "tag": "c:slime_balls"
-    },
-    "C": {
-      "item": "ultimine_addition:ink_chamber"
-    },
-    "I": {
-      "item": "minecraft:iron_nugget"
+  "type": "fabric:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "state": false,
+          "type": "ultimine_addition:legacy_mode"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "group": "ultimine_addition",
+        "pattern": [
+          " GS",
+          "GCG",
+          "IG "
+        ],
+        "key": {
+          "G": {
+            "item": "minecraft:gold_ingot"
+          },
+          "S": {
+            "tag": "c:slime_balls"
+          },
+          "C": {
+            "item": "ultimine_addition:ink_chamber"
+          },
+          "I": {
+            "item": "minecraft:iron_nugget"
+          }
+        },
+        "result": {
+          "item": "ultimine_addition:pen"
+        }
+      }
     }
-  },
-  "result": {
-    "item": "ultimine_addition:pen"
-  }
+  ]
 }
