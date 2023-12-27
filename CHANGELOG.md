@@ -1,16 +1,27 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.2.0 Release | Dec 27, 2023
+### Adding
+- Adding Playstyle Mode option `If you prefer the old style of the mod, Now you can change it back as before.`
+- Adding Villager Trade and Price option for the Mining Skill Card `There will be an option for which villager level should the card appear and change the price.`
+
+## v1.1.2 Release | Dec 21, 2023
+### Added
+- New Custom Mining Skill Card API `You can create your Custom Mining Skill Card through configs.` Check out the Wiki!
+
+
 ## v1.1.1 Release | Dec 2, 2023
 ### Added
 - Curios and Trinkets Integration `Now... you can insert the Skills Record in the curios/trinkets menu.`
-
 ### Fixed
 - The ChunkManager from caching unloaded chunks.
+
 
 ## v1.1.0-Hotfix Release | Nov 12, 2023
 ### Fixed
 - [UA9] Fixed the Tools Validator methods to recognize tools that doesn't have the tag.
+
 
 ## v1.1.0 Release | Nov 11, 2023
 ### Added
@@ -27,8 +38,10 @@ This file is for listing all the changes to this project
 ### Fixed
 - [Forge] issue within OnDatapackSyncEvent method
 
+
 ## v0.1.1 Beta | Oct 11, 2023
 - Fixing issue related to packet
+
 
 ## v0.1.0 Beta | Oct 9, 2023
 ### It's an early release

@@ -1,4 +1,5 @@
 accessWidener v2 named
+
 # Shovel Item
 accessible field net/minecraft/world/item/ShovelItem FLATTENABLES Ljava/util/Map;
 
@@ -6,9 +7,14 @@ accessible field net/minecraft/world/item/ShovelItem FLATTENABLES Ljava/util/Map
 accessible method net/minecraft/world/item/AxeItem getStripped (Lnet/minecraft/world/level/block/state/BlockState;)Ljava/util/Optional;
 
 # Ingredient
+extendable class net/minecraft/world/item/crafting/Ingredient
+accessible method net/minecraft/world/item/crafting/Ingredient <init> (Ljava/util/stream/Stream;)V
 accessible method net/minecraft/world/item/crafting/Ingredient fromValues (Ljava/util/stream/Stream;)Lnet/minecraft/world/item/crafting/Ingredient;
+accessible method net/minecraft/world/item/crafting/Ingredient valueFromJson (Lcom/google/gson/JsonObject;)Lnet/minecraft/world/item/crafting/Ingredient$Value;
+accessible class net/minecraft/world/item/crafting/Ingredient$Value
 accessible class net/minecraft/world/item/crafting/Ingredient$TagValue
 accessible method net/minecraft/world/item/crafting/Ingredient$TagValue <init> (Lnet/minecraft/tags/TagKey;)V
+accessible class net/minecraft/world/item/crafting/Ingredient$ItemValue
 
 # Item Renderer
 accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V

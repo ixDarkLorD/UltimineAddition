@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
 import dev.ftb.mods.ftbultimine.integration.FTBRanksIntegration;
 import dev.ftb.mods.ftbultimine.integration.FTBUltiminePlugin;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -28,6 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig.MAX_BLOCKS;
+import static net.ixdarklord.ultimine_addition.common.config.ConfigHandler.COMMON.PLAYSTYLE_MODE;
 
 public class FTBUltimineIntegration implements FTBUltiminePlugin {
     private static boolean isButtonPressed;
@@ -41,6 +43,8 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
     public boolean canUltimine(Player player) {
         boolean result = ServicePlatform.Players.isPlayerUltimineCapable(player);
         if (result) return true;
+        if (PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return result;
+
         if (isPlayerHasCustomCardValidEffect(player)) {
             if (ItemUtils.isItemInHandCustomCardValid(player)) result = true;
         }
@@ -101,12 +105,14 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                         requiredTool = Component.translatable("info.ultimine_addition.required_skill.all");
                     }
 
-                    if (requiredTool != null) {
-                        player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                        player.displayClientMessage(Component.literal("✖ ")
-                                .append(Component.translatable("info.ultimine_addition.required_skill", requiredTool))
-                                .withStyle(ChatFormatting.GRAY), false);
-                    }
+                    if (PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
+                        if (requiredTool != null) {
+                            player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
+                            player.displayClientMessage(Component.literal("✖ ")
+                                    .append(Component.translatable("info.ultimine_addition.required_skill", requiredTool))
+                                    .withStyle(ChatFormatting.GRAY), false);
+                        }
+                    } else player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
                 }
                 isButtonPressed = true;
             }

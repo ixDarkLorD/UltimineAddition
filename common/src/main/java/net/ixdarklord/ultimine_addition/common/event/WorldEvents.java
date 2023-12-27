@@ -13,6 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 
+import static net.ixdarklord.ultimine_addition.common.config.ConfigHandler.COMMON.*;
+
 public class WorldEvents {
     public static void init() {
         EntityEvent.ADD.register((entity, level) -> {
@@ -22,7 +24,7 @@ public class WorldEvents {
             return EventResult.pass();
         });
 
-        TradeRegistry.registerVillagerTrade(VillagerProfession.TOOLSMITH, 5, (trader, rand) ->
-                new MerchantOffer(new ItemStack(Items.EMERALD, rand.nextInt(24, 48)), ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), 4, 12, 0.09F));
+        TradeRegistry.registerVillagerTrade(VillagerProfession.TOOLSMITH, CARD_TRADE_LEVEL.get(), (trader, rand) ->
+                new MerchantOffer(new ItemStack(Items.EMERALD, rand.nextIntBetweenInclusive(TRADE_LOW_PRICE.get(), TRADE_HIGH_PRICE.get())), ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), 4, 12, 0.09F));
     }
 }

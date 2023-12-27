@@ -1,16 +1,29 @@
 {
-  "type": "ultimine_addition:mc_recipe",
-  "category": "misc",
-  "group": "ultimine_addition",
-  "ingredients": [
+  "type": "forge:conditional",
+  "recipes": [
     {
-      "item": "ultimine_addition:mining_skill_card_empty"
-    },
-    {
-      "tag": "minecraft:shovels"
+      "conditions": [
+        {
+          "type": "ultimine_addition:legacy_mode",
+          "state": false
+        }
+      ],
+      "recipe": {
+        "type": "ultimine_addition:mc_recipe",
+        "category": "misc",
+        "group": "ultimine_addition",
+        "ingredients": [
+          {
+            "item": "ultimine_addition:mining_skill_card_empty"
+          },
+          {
+            "tag": "minecraft:shovels"
+          }
+        ],
+        "result": {
+          "item": "ultimine_addition:mining_skill_card_shovel"
+        }
+      }
     }
-  ],
-  "result": {
-    "item": "ultimine_addition:mining_skill_card_shovel"
-  }
+  ]
 }

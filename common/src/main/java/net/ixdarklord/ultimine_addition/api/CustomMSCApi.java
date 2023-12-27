@@ -51,7 +51,7 @@ public class CustomMSCApi {
 
                 for (File jsonFile : jsonFiles) {
                     try (FileReader reader = new FileReader(jsonFile)) {
-                        MiningSkillCardItem.Type type = MiningSkillCardItem.Type.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(reader)).result()
+                        MiningSkillCardItem.Type type = MiningSkillCardItem.Type.CARD_CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(reader)).result()
                                 .orElseThrow(() -> new RuntimeException("Failed to load custom card: " + jsonFile.getAbsolutePath()));
 
                         if (!type.isActive()) {
@@ -86,7 +86,7 @@ public class CustomMSCApi {
     @SuppressWarnings("unused")
     public static void printJson() {
         var type = new MiningSkillCardItem.Type(true, "test", List.of(), Items.BARRIER);
-        MiningSkillCardItem.Type.CODEC.encodeStart(JsonOps.INSTANCE, type).result().ifPresent(jsonElement ->
+        MiningSkillCardItem.Type.CARD_CODEC.encodeStart(JsonOps.INSTANCE, type).result().ifPresent(jsonElement ->
                 System.out.println(jsonElement.getAsJsonObject().toString()));
     }
 }

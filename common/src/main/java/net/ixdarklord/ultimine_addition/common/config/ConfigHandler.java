@@ -1,17 +1,22 @@
 package net.ixdarklord.ultimine_addition.common.config;
 
-import dev.architectury.platform.Platform;
-import net.ixdarklord.coolcat_lib.util.TomlConfigReader;
 import net.ixdarklord.ultimine_addition.client.gui.screen.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraftforge.common.ForgeConfigSpec;
 
-import java.util.function.Supplier;
-
 public class ConfigHandler {
     public static void register() {
         ServicePlatform.registerConfig();
+    }
+
+    public static void validate() {
+        if (COMMON.TRADE_LOW_PRICE.get() > COMMON.TRADE_HIGH_PRICE.get()) {
+            throw new IllegalArgumentException("The low price has a higher value than high price.");
+        }
+        if (COMMON.LEGACY_REQUIRED_AMOUNT_MIN.get() > COMMON.LEGACY_REQUIRED_AMOUNT_MAX.get()) {
+            throw new IllegalArgumentException("The low required amount has a higher value than max required amount.");
+        }
     }
 
     public static class CLIENT {
@@ -54,12 +59,22 @@ public class ConfigHandler {
     public static class COMMON {
         public static final ForgeConfigSpec SPEC;
         public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-        public static final TomlConfigReader CONFIG_READER = new TomlConfigReader(Constants.MOD_NAME, String.format("%s/%s/common-config.toml", Platform.getConfigFolder(), Constants.MOD_ID));
+        public static final SafeConfig.Builder SAFE_CONFIG_BUILDER = new SafeConfig.Builder(Constants.MOD_ID, "common-config.toml", "%s/SafeConfig".formatted(Constants.MOD_NAME));
 
+        /**
+         * This is a safe version of {@link COMMON#PLAYSTYLE_MODE} to use even if the config wasn't loaded.
+         */
+        public static final SafeConfig<PlaystyleMode> PLAYSTYLE_MODE_SAFE;
+        public static final ForgeConfigSpec.EnumValue<PlaystyleMode> PLAYSTYLE_MODE;
+        public static final ForgeConfigSpec.IntValue CARD_TRADE_LEVEL;
+        public static final ForgeConfigSpec.IntValue TRADE_LOW_PRICE;
+        public static final ForgeConfigSpec.IntValue TRADE_HIGH_PRICE;
         public static final ForgeConfigSpec.DoubleValue PAPER_CONSUMPTION_RATE;
         public static final ForgeConfigSpec.BooleanValue IS_PLACED_BY_ENTITY_CONDITION;
         public static final ForgeConfigSpec.IntValue CHALLENGE_VALIDATOR;
         public static final ForgeConfigSpec.BooleanValue TIER_BASED_MAX_BLOCKS;
+        public static final ForgeConfigSpec.IntValue LEGACY_REQUIRED_AMOUNT_MIN;
+        public static final ForgeConfigSpec.IntValue LEGACY_REQUIRED_AMOUNT_MAX;
         public static final ForgeConfigSpec.IntValue TIER_0_CHALLENGES_AMOUNT;
         public static final ForgeConfigSpec.IntValue TIER_1_CHALLENGES_AMOUNT;
         public static final ForgeConfigSpec.IntValue TIER_2_CHALLENGES_AMOUNT;
@@ -76,17 +91,17 @@ public class ConfigHandler {
         /**
          * This is a safe version of {@link COMMON#TIER_1_TIME} to use even if the config wasn't loaded.
          */
-        public static final Supplier<Integer> TIER_1_TIME_SAFE;
+        public static final SafeConfig<Integer> TIER_1_TIME_SAFE;
 
         /**
          * This is a safe version of {@link COMMON#TIER_2_TIME} to use even if the config wasn't loaded.
          */
-        public static final Supplier<Integer> TIER_2_TIME_SAFE;
+        public static final SafeConfig<Integer> TIER_2_TIME_SAFE;
 
         /**
          * This is a safe version of {@link COMMON#TIER_3_TIME} to use even if the config wasn't loaded.
          */
-        public static final Supplier<Integer> TIER_3_TIME_SAFE;
+        public static final SafeConfig<Integer> TIER_3_TIME_SAFE;
 
         public static final ForgeConfigSpec.IntValue TIER_1_TIME;
         public static final ForgeConfigSpec.IntValue TIER_2_TIME;
@@ -97,6 +112,11 @@ public class ConfigHandler {
 
         static {
             BUILDER.push("General");
+            PLAYSTYLE_MODE = BUILDER
+                    .comment("%s: This is the current modern playstyle of the mod! With new features and exciting challenges.".formatted(PlaystyleMode.MODERN.name()),
+                            "%s [WIP]: There will be one tier for the Mining Skill Card. If you complete all the challenges, it will turn the card to the Mastered tier immediately.".formatted(PlaystyleMode.ONE_TIER_ONLY.name()),
+                            "%s: It will revert the mod mechanics as it was on the original release. (\"v0.1.0\") There will be only the miner certificate with one challenge to complete.".formatted(PlaystyleMode.LEGACY.name()))
+                    .defineEnum("playstyle_mode", PlaystyleMode.MODERN);
             PAPER_CONSUMPTION_RATE = BUILDER
                     .comment("You can change the rate of paper consumption in the Skills Record.")
                     .defineInRange("paper_consummation_rate", 0.35, 0, 1);
@@ -109,7 +129,22 @@ public class ConfigHandler {
                     .defineInRange("challenge_validator", 2, 1, 600);
             BUILDER.pop();
 
+            BUILDER.push("Trades");
+            CARD_TRADE_LEVEL = BUILDER
+                    .comment("Here, you can change which level the Mining Skill Card appears in villager trades.")
+                    .defineInRange("villager_card_trade_level", 2, 1, 5);
+            TRADE_LOW_PRICE = BUILDER
+                    .comment("It will change the Mining Skill Card cost in villager trades.")
+                    .defineInRange("trade_low_price", 8, 1, 64);
+            TRADE_HIGH_PRICE = BUILDER.defineInRange("trade_high_price", 24, 1, 64);
+            BUILDER.pop();
+
             BUILDER.push("Challenges");
+            LEGACY_REQUIRED_AMOUNT_MIN = BUILDER
+                    .comment("Here, you can change the value for the required amount of ores.",
+                            "NOTE: This values only matters if the playstyle is set on Legacy.")
+                    .defineInRange("legacy_required_amount_min", 400, 1, 999999);
+            LEGACY_REQUIRED_AMOUNT_MAX = BUILDER.defineInRange("legacy_required_amount_max", 400, 1, 999999);
             TIER_0_CHALLENGES_AMOUNT = BUILDER
                     .comment("You can change the values on how many challenges should be given in each tier.",
                             "But remember that you must have the exact number of challenges available in the Datapack.",
@@ -159,9 +194,10 @@ public class ConfigHandler {
             BUILDER.pop();
             SPEC = BUILDER.build();
 
-            TIER_1_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_1_time", 300);
-            TIER_2_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_2_time", 600);
-            TIER_3_TIME_SAFE = () -> CONFIG_READER.getIntValue("Ability.tier_3_time", 1200);
+            PLAYSTYLE_MODE_SAFE = SAFE_CONFIG_BUILDER.readEnum("General.playstyle_mode", PlaystyleMode.MODERN);
+            TIER_1_TIME_SAFE = SAFE_CONFIG_BUILDER.readInt("Ability.tier_1_time", 300);
+            TIER_2_TIME_SAFE = SAFE_CONFIG_BUILDER.readInt("Ability.tier_2_time", 600);
+            TIER_3_TIME_SAFE = SAFE_CONFIG_BUILDER.readInt("Ability.tier_3_time", 1200);
         }
     }
 }

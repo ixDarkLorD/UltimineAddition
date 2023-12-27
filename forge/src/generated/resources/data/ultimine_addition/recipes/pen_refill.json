@@ -1,19 +1,32 @@
 {
-  "type": "ultimine_addition:item_storage_data",
-  "category": "misc",
-  "group": "ultimine_addition",
-  "ingredients": [
+  "type": "forge:conditional",
+  "recipes": [
     {
-      "amount": 50,
-      "tag": "ultimine_addition:more_valuable_pigment"
-    },
-    {
-      "amount": 10,
-      "tag": "ultimine_addition:less_valuable_pigment"
+      "conditions": [
+        {
+          "type": "ultimine_addition:legacy_mode",
+          "state": false
+        }
+      ],
+      "recipe": {
+        "type": "ultimine_addition:item_storage_data",
+        "category": "misc",
+        "group": "ultimine_addition",
+        "ingredients": [
+          {
+            "amount": 50,
+            "tag": "ultimine_addition:more_valuable_pigment"
+          },
+          {
+            "amount": 10,
+            "tag": "ultimine_addition:less_valuable_pigment"
+          }
+        ],
+        "result": {
+          "item": "ultimine_addition:pen",
+          "storage_name": "ink_chamber"
+        }
+      }
     }
-  ],
-  "result": {
-    "item": "ultimine_addition:pen",
-    "storage_name": "ink_chamber"
-  }
+  ]
 }

@@ -42,7 +42,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .addCriterion("killed_by_something", KilledTrigger.TriggerInstance.entityKilledPlayer())
                     .addCriterion("killed_something", KilledTrigger.TriggerInstance.playerKilledEntity())
                     .requirements(RequirementsStrategy.OR)
-                    .save(consumer, String.format("%s:root", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("root").toString());
 
             Advancement amethyst = Advancement.Builder.advancement().parent(root).display(
                             Items.AMETHYST_SHARD,
@@ -53,7 +53,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_amethyst", inventoryHas(Items.AMETHYST_SHARD))
                     .requirements(RequirementsStrategy.OR)
-                    .save(consumer, String.format("%s:gathering_amethyst", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("gathering_amethyst").toString());
 
             Advancement cardBlueprint = Advancement.Builder.advancement().parent(amethyst).display(
                             ModItems.CARD_BLUEPRINT,
@@ -65,7 +65,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .addCriterion("amethyst_adv", advancementTrigger(amethyst))
                     .addCriterion("has_card_blueprint", inventoryHas(ModItems.CARD_BLUEPRINT))
                     .requirements(RequirementsStrategy.AND)
-                    .save(consumer, String.format("%s:card_blueprint", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("card_blueprint").toString());
 
             Advancement slime = Advancement.Builder.advancement().parent(root).display(
                             Items.SLIME_BALL,
@@ -76,7 +76,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_slime_balls", inventoryHas(Items.SLIME_BALL))
                     .requirements(RequirementsStrategy.OR)
-                    .save(consumer, String.format("%s:slime_balls", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("slime_balls").toString());
 
             Advancement pen = Advancement.Builder.advancement().parent(slime).display(
                             ModItems.PEN,
@@ -88,7 +88,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .addCriterion("slime_adv", advancementTrigger(slime))
                     .addCriterion("has_pen", inventoryHas(ModItems.PEN))
                     .requirements(RequirementsStrategy.AND)
-                    .save(consumer, String.format("%s:pen", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("pen").toString());
 
             Advancement emptyCard = Advancement.Builder.advancement().parent(root).display(
                             ModItems.MINING_SKILL_CARD_EMPTY,
@@ -100,7 +100,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .addCriterion("trade_for_empty_card", tradedWithVillager(ItemPredicate.Builder.item().of(ModItems.MINING_SKILL_CARD_EMPTY)))
                     .addCriterion("has_empty_card", inventoryHas(ModItems.MINING_SKILL_CARD_EMPTY))
                     .requirements(RequirementsStrategy.OR)
-                    .save(consumer, String.format("%s:empty_card", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("empty_card").toString());
 
             Advancement skillsRecord = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.SKILLS_RECORD,
@@ -111,7 +111,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_skills_record", inventoryHas(ModItems.SKILLS_RECORD))
                     .requirements(RequirementsStrategy.OR)
-                    .save(consumer, String.format("%s:skills_record", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("skills_record").toString());
 
             Advancement pickaxeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_PICKAXE,
@@ -122,7 +122,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_pickaxe_card", inventoryHas(ModItems.MINING_SKILL_CARD_PICKAXE))
                     .requirements(RequirementsStrategy.OR)
-                    .save(consumer, String.format("%s:pickaxe_card", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("pickaxe_card").toString());
 
             Advancement axeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_AXE,
@@ -133,7 +133,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_axe_card", inventoryHas(ModItems.MINING_SKILL_CARD_AXE))
                     .requirements(RequirementsStrategy.OR)
-                    .save(consumer, String.format("%s:axe_card", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("axe_card").toString());
 
             Advancement shovelCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_SHOVEL,
@@ -144,7 +144,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_shovel_card", inventoryHas(ModItems.MINING_SKILL_CARD_SHOVEL))
                     .requirements(RequirementsStrategy.OR)
-                    .save(consumer, String.format("%s:shovel_card", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("shovel_card").toString());
 
             Advancement hoeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_HOE,
@@ -155,7 +155,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_hoe_card", inventoryHas(ModItems.MINING_SKILL_CARD_HOE))
                     .requirements(RequirementsStrategy.OR)
-                    .save(consumer, String.format("%s:hoe_card", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("hoe_card").toString());
 
             Advancement ultiminePower = Advancement.Builder.advancement().parent(skillsRecord).display(
                             Util.make(() -> {
@@ -170,7 +170,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_ultimine_ability", UltimineAbilityTrigger.Instance.obtain())
                     .requirements(RequirementsStrategy.OR)
-                    .save(consumer, String.format("%s:ultimine_ability", Constants.MOD_ID));
+                    .save(consumer, Constants.getLocation("ultimine_ability").toString());
         }
     }
 }

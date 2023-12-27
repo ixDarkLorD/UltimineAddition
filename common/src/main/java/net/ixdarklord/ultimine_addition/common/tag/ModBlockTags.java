@@ -15,6 +15,8 @@ public class ModBlockTags {
     public static final TagKey<Block> FABRIC_OBSIDIAN = createFabric("obsidian");
 
     // Ores
+    public static final TagKey<Block> FORGE_ORES = createForge("ores");
+    public static final TagKey<Block> FABRIC_ORES = createFabric("ores");
     public static final TagKey<Block> FORGE_COAL_ORES = createForge("ores/coal");
     public static final TagKey<Block> FORGE_IRON_ORES = createForge("ores/iron");
     public static final TagKey<Block> FORGE_COPPER_ORES = createForge("ores/copper");

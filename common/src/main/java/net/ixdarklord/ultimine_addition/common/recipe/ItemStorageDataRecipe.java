@@ -1,9 +1,10 @@
-package net.ixdarklord.ultimine_addition.common.data.recipe;
+package net.ixdarklord.ultimine_addition.common.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.ixdarklord.ultimine_addition.common.data.item.ItemStorageData;
+import net.ixdarklord.ultimine_addition.common.recipe.ingredient.DataIngredient;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
@@ -167,7 +168,7 @@ public class ItemStorageDataRecipe extends CustomRecipe {
         public static final ResourceLocation NAME = Constants.getLocation("item_storage_data");
         public @NotNull ItemStorageDataRecipe fromJson(@NotNull ResourceLocation id, @NotNull JsonObject json) {
             String group = GsonHelper.getAsString(json, "group", "");
-            CraftingBookCategory craftingBookCategory = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, "category", (String)null), CraftingBookCategory.MISC);
+            CraftingBookCategory craftingBookCategory = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, "category", null), CraftingBookCategory.MISC);
             NonNullList<DataIngredient> nonnulllist = itemsFromJson(GsonHelper.getAsJsonArray(json, "ingredients"));
             if (nonnulllist.isEmpty()) {
                 throw new JsonParseException("No ingredients for shapeless recipe");

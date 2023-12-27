@@ -25,7 +25,8 @@ public class CodecHelper {
             return Util.fixedSize(intStream, 3).map(intArray ->
                     new Color(intArray[0], intArray[1], intArray[2]));
         } catch (CodecException e) {
-            return DataResult.error(() -> "Invalid Color Format.");
+            int[] values = intStream.toArray();
+            return DataResult.error(() -> "Invalid Color Format. [r: %s, g: %s, b: %s]".formatted(values[0], values[1], values[2]));
         }
     }, color -> IntStream.of(color.getRed(), color.getGreen(), color.getBlue())).stable();
 }

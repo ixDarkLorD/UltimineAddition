@@ -56,8 +56,8 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
-        if (level.isClientSide()) return;
-        if (this.type == EMPTY) return;
+        if (this.isLegacyMode() || level.isClientSide() || this.type == EMPTY) return;
+
         if (entity instanceof ServerPlayer player) {
             if (!stack.hasTag() || getData(stack).getChallenges().isEmpty())
                 getData(stack).sendToClient(player).initChallenges().saveData(stack);
@@ -139,21 +139,21 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         private final Color potionColor;
         private final Item defaultDisplayItem;
 
-        public static final Codec<Type> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.BOOL.fieldOf("active").forGetter(Type::isActive),
-                Codec.STRING.fieldOf("card_id").forGetter(Type::getId),
-                Codec.STRING.listOf().fieldOf("required_tools").forGetter(Type::getRequiredTools),
-                CodecHelper.COLOR_CODEC.optionalFieldOf("potion_color", Color.WHITE).forGetter(Type::getPotionColor),
-                CodecHelper.ITEM_CODEC.optionalFieldOf("default_display_item", Items.BARRIER).forGetter(Type::getDefaultDisplayItem)
-        ).apply(instance, Type::new));
-
-        public static final Codec<Type> CHALLENGE_CODEC = Codec.STRING.comapFlatMap(s -> {
+        public static final Codec<Type> CODEC = Codec.STRING.comapFlatMap(s -> {
             try {
                 return DataResult.success(Type.fromString(s));
             } catch (CodecException e) {
                 return DataResult.error(() -> s + " is not present.");
             }
         }, Type::getId);
+
+        public static final Codec<Type> CARD_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.BOOL.fieldOf("active").forGetter(Type::isActive),
+                Codec.STRING.fieldOf("card_id").forGetter(Type::getId),
+                Codec.STRING.listOf().fieldOf("required_tools").forGetter(Type::getRequiredTools),
+                CodecHelper.COLOR_CODEC.optionalFieldOf("potion_color", Color.WHITE).forGetter(Type::getPotionColor),
+                CodecHelper.ITEM_CODEC.optionalFieldOf("default_display_item", Items.BARRIER).forGetter(Type::getDefaultDisplayItem)
+        ).apply(instance, Type::new));
 
         public Type(boolean active, String id, List<String> requiredTools) {
             this(active, id, requiredTools, Color.WHITE, Items.BARRIER);

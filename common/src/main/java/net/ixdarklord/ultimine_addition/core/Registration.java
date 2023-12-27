@@ -13,11 +13,12 @@ import net.ixdarklord.ultimine_addition.common.command.arguments.CardSlotsArgume
 import net.ixdarklord.ultimine_addition.common.command.arguments.CardTierArgument;
 import net.ixdarklord.ultimine_addition.common.command.arguments.ChallengesArgument;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
+import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
+import net.ixdarklord.ultimine_addition.common.recipe.MCRecipe;
 import net.ixdarklord.ultimine_addition.common.data.item.ItemStorageData;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
-import net.ixdarklord.ultimine_addition.common.data.recipe.ItemStorageDataRecipe;
-import net.ixdarklord.ultimine_addition.common.data.recipe.MCRecipe;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -71,23 +72,24 @@ public class Registration {
 
     private static void registerItems() {
         // Custom Mining Skills Card
-        CustomMSCApi.CUSTOM_TYPES.forEach(type -> {
+        for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
             String name = "mining_skill_card_%s".formatted(type.getId());
             ITEMS.register(name, () -> new MiningSkillCardItem(new Item.Properties()
                     .stacksTo(1), type));
-        });
+        }
         ITEMS.register();
     }
 
     private static final Map<String, Supplier<MobEffect>> mineGoJuiceList = new HashMap<>();
+
     private static void registerMobEffects() {
         // Custom Mine-Go Juice Effects
-        CustomMSCApi.CUSTOM_TYPES.forEach(type -> {
+        for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
             String name = "mine_go_juice_%s".formatted(type.getId());
             MobEffect mobEffect = new MineGoJuiceEffect(type, MobEffectCategory.BENEFICIAL, type.getPotionColor().getRGB());
             MOB_EFFECTS.register(name, () -> mobEffect);
             mineGoJuiceList.put(name, () -> mobEffect);
-        });
+        }
         MOB_EFFECTS.register();
     }
 
@@ -115,25 +117,29 @@ public class Registration {
                 builder.title(Component.translatable("itemGroup.ultimine_addition.tab"));
                 builder.icon(ModItems.MINER_CERTIFICATE::getDefaultInstance);
                 builder.displayItems((itemDisplayParameters, output) -> {
-                    output.accept(ModItems.SKILLS_RECORD);
-                    output.accept(ModItems.INK_CHAMBER);
-                    output.accept(ModItems.PEN);
-                    ItemStack penStack = ModItems.PEN.getDefaultInstance();
-                    ItemStorageData storageData = ((PenItem) penStack.getItem()).getData(ModItems.PEN.getDefaultInstance());
-                    storageData.setCapacity(storageData.getMaxCapacity()).saveData(penStack);
-                    output.accept(penStack);
                     output.accept(ModItems.MINER_CERTIFICATE);
-                    output.accept(ModItems.CARD_BLUEPRINT);
-                    output.accept(ModItems.MINING_SKILL_CARD_EMPTY);
-                    for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
-                        String name = "mining_skill_card_" + type.getId();
-                        Item item = BuiltInRegistries.ITEM.get(Constants.getLocation(name));
-                        if (item instanceof MiningSkillCardItem cardItem && cardItem.getType() != MiningSkillCardItem.Type.EMPTY) {
-                            ItemStack cardStack = cardItem.getDefaultInstance();
-                            MiningSkillCardData cardData = new MiningSkillCardData().loadData(cardStack).setTier(MiningSkillCardItem.Tier.Mastered);
-                            cardData.saveData(cardStack);
-                            output.accept(item);
-                            output.accept(cardStack);
+                    if (ConfigHandler.COMMON.PLAYSTYLE_MODE_SAFE.get() != PlaystyleMode.LEGACY) {
+                        output.accept(ModItems.SKILLS_RECORD);
+                        output.accept(ModItems.INK_CHAMBER);
+                        output.accept(ModItems.PEN);
+
+                        ItemStack penStack = ModItems.PEN.getDefaultInstance();
+                        ItemStorageData storageData = ((PenItem) penStack.getItem()).getData(penStack);
+                        storageData.setCapacity(storageData.getMaxCapacity()).saveData(penStack);
+                        output.accept(penStack);
+
+                        output.accept(ModItems.CARD_BLUEPRINT);
+                        output.accept(ModItems.MINING_SKILL_CARD_EMPTY);
+                        for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
+                            String name = "mining_skill_card_" + type.getId();
+                            Item item = BuiltInRegistries.ITEM.get(Constants.getLocation(name));
+                            if (item instanceof MiningSkillCardItem cardItem && cardItem.getType() != MiningSkillCardItem.Type.EMPTY) {
+                                ItemStack cardStack = cardItem.getDefaultInstance();
+                                MiningSkillCardData cardData = new MiningSkillCardData().loadData(cardStack).setTier(MiningSkillCardItem.Tier.Mastered);
+                                cardData.saveData(cardStack);
+                                output.accept(item);
+                                output.accept(cardStack);
+                            }
                         }
                     }
                 });
@@ -179,8 +185,8 @@ public class Registration {
     public static final RegistrySupplier<MenuType<SkillsRecordContainer>> SKILLS_RECORD_CONTAINER = CONTAINERS.register("skills_record", () -> MenuRegistry.ofExtended(SkillsRecordContainer::new));
 
     // Recipe Serializer
-    public static final RegistrySupplier<ItemStorageDataRecipe.Serializer> ITEM_DATA_STORAGE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(ItemStorageDataRecipe.Serializer.NAME.getPath(), ItemStorageDataRecipe.Serializer::new);
-    public static final RegistrySupplier<MCRecipe.Serializer> MC_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(MCRecipe.Serializer.NAME.getPath(), MCRecipe.Serializer::new);
+    public static final RegistrySupplier<ItemStorageDataRecipe.Serializer> ITEM_DATA_STORAGE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(ItemStorageDataRecipe.Serializer.NAME, ItemStorageDataRecipe.Serializer::new);
+    public static final RegistrySupplier<MCRecipe.Serializer> MC_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(MCRecipe.Serializer.NAME, MCRecipe.Serializer::new);
 
     // Particles
     public static final RegistrySupplier<SimpleParticleType> CELEBRATE_PARTICLE = PARTICLE_TYPES.register("celebrate", () -> new SimpleParticleType(true));

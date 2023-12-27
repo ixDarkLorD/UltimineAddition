@@ -10,11 +10,11 @@ public class ModItems {
             .rarity(Rarity.EPIC));
     public static final Item SKILLS_RECORD = new SkillsRecordItem(new Item.Properties()
             .stacksTo(1));
-    public static final Item INK_CHAMBER = new ComponentItem(new Item.Properties()
+    public static final Item INK_CHAMBER = new ModernItem(new Item.Properties()
             .stacksTo(64), ComponentItem.ComponentType.CRAFTING);
     public static final Item PEN = new PenItem(new Item.Properties()
             .stacksTo(1));
-    public static final Item CARD_BLUEPRINT = new ComponentItem(new Item.Properties()
+    public static final Item CARD_BLUEPRINT = new ModernItem(new Item.Properties()
             .stacksTo(16), ComponentItem.ComponentType.CRAFTING);
 
     public static final Item MINING_SKILL_CARD_EMPTY = new MiningSkillCardItem(new Item.Properties()

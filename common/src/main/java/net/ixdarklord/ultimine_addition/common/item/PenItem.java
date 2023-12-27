@@ -22,8 +22,9 @@ public class PenItem extends StorageDataAbstractItem {
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
-        if (level.isClientSide()) return;
-        if (!stack.hasTag() && entity instanceof ServerPlayer player) getData(stack).sendToClient(player).saveData(stack);
+        if (this.isLegacyMode() || level.isClientSide()) return;
+        if (!stack.hasTag() && entity instanceof ServerPlayer player)
+            getData(stack).sendToClient(player).saveData(stack);
     }
 
     @Override

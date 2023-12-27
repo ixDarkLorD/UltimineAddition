@@ -3,6 +3,8 @@ package net.ixdarklord.ultimine_addition.common.brewing;
 import net.ixdarklord.coolcat_lib.common.brewing.fabric.BrewingRecipe;
 import net.ixdarklord.coolcat_lib.common.brewing.fabric.BrewingRecipeRegistry;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
+import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
@@ -36,6 +38,7 @@ public class MineGoJuiceRecipe extends BrewingRecipe {
     }
 
     public static void register() {
+        if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return;
         BrewingRecipeRegistry.addRecipe(new MineGoJuiceRecipe(Potions.WATER, Items.ENCHANTED_BOOK, Registration.KNOWLEDGE_POTION.get()));
         addTiers(Registration.MINING_SKILL_CARD_PICKAXE.get(), Registration.MINE_GO_JUICE_PICKAXE_POTION.getId());
         addTiers(Registration.MINING_SKILL_CARD_AXE.get(), Registration.MINE_GO_JUICE_AXE_POTION.getId());

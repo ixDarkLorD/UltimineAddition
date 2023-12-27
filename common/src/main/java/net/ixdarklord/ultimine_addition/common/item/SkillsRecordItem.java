@@ -45,6 +45,11 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
             return new InteractionResultHolder<>(InteractionResult.PASS, stack);
         }
 
+        if (this.isLegacyMode()) {
+            player.displayClientMessage(Component.translatable("info.ultimine_addition.legacy_mode").withStyle(ChatFormatting.RED), false);
+            return new InteractionResultHolder<>(InteractionResult.PASS, stack);
+        }
+
         if (stack.hasTag()) {
             MenuRegistry.openExtendedMenu((ServerPlayer) player,
                     new SimpleMenuProvider((id, inv, p) -> new SkillsRecordContainer(id, inv, p, stack, getData(stack).getContainer()), TITLE),
@@ -56,7 +61,7 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
-        if (level.isClientSide()) return;
+        if (this.isLegacyMode() || level.isClientSide()) return;
         if (entity instanceof ServerPlayer player) {
             if (!stack.hasTag()) getData(stack).sendToClient(player).saveData(stack);
             if (getData(stack).getCardSlots().stream().filter(s -> !s.isEmpty()).toList().isEmpty() && getData(stack).isConsumeMode()) {
@@ -77,16 +82,16 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
         }
         if (isConsumeChallengeExists(stack)) {
             Component state = getData(stack).isConsumeMode() ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
-            tooltipComponents.add(Component.literal("§8• ").append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.GRAY)));
+            tooltipComponents.add(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.GRAY)));
         }
         if (!getData(stack).getPenSlot().isEmpty()) {
-            tooltipComponents.add(Component.literal("§8• ").append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber",
+            tooltipComponents.add(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber",
                     (getData(stack).getPenSlot().getItem() instanceof PenItem item)
                             ? item.getData(getData(stack).getPenSlot()).getCapacity()
                             : 0
             ).withStyle(ChatFormatting.GRAY)));
         }
-        tooltipComponents.add(Component.literal("§8• ").append(Component.translatable("tooltip.ultimine_addition.skills_record.contents").withStyle(ChatFormatting.GRAY)));
+        tooltipComponents.add(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.skills_record.contents").withStyle(ChatFormatting.GRAY)));
     }
 
     @Override

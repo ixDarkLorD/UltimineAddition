@@ -22,7 +22,7 @@ public class ChallengesData {
     private final Pair<Integer, Integer> requiredAmount;
 
     public static final Codec<ChallengesData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            MiningSkillCardItem.Type.CHALLENGE_CODEC.fieldOf("for_card_type").forGetter(ChallengesData::getForCardType),
+            MiningSkillCardItem.Type.CODEC.fieldOf("for_card_type").forGetter(ChallengesData::getForCardType),
             MiningSkillCardItem.Tier.CODEC.fieldOf("for_card_tier").forGetter(ChallengesData::getForCardTier),
             Type.CODEC.fieldOf("challenge_type").forGetter(ChallengesData::getChallengeType),
             Codec.pair(Codec.INT.fieldOf("min").codec(), Codec.INT.fieldOf("max").codec()).optionalFieldOf("required_amount", new Pair<>(1, 1)).forGetter(ChallengesData::getRequiredAmountPair),

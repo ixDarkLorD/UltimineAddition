@@ -1,16 +1,29 @@
 {
-  "type": "ultimine_addition:mc_recipe",
-  "category": "misc",
-  "group": "ultimine_addition",
-  "ingredients": [
+  "type": "fabric:conditional",
+  "recipes": [
     {
-      "item": "ultimine_addition:mining_skill_card_empty"
-    },
-    {
-      "tag": "minecraft:hoes"
+      "conditions": [
+        {
+          "type": "ultimine_addition:legacy_mode",
+          "state": false
+        }
+      ],
+      "recipe": {
+        "type": "ultimine_addition:mc_recipe",
+        "category": "misc",
+        "group": "ultimine_addition",
+        "ingredients": [
+          {
+            "item": "ultimine_addition:mining_skill_card_empty"
+          },
+          {
+            "tag": "minecraft:hoes"
+          }
+        ],
+        "result": {
+          "item": "ultimine_addition:mining_skill_card_hoe"
+        }
+      }
     }
-  ],
-  "result": {
-    "item": "ultimine_addition:mining_skill_card_hoe"
-  }
+  ]
 }
