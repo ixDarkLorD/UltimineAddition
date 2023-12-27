@@ -79,13 +79,11 @@ public class ForgeSetup {
 
         @SubscribeEvent
         public static void onPlayerClone(PlayerEvent.Clone event) {
-            if (event.isWasDeath()) {
-                event.getOriginal().reviveCaps();
-                event.getOriginal().getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(oldPlayer ->
-                        event.getEntity().getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(newPlayer ->
-                                newPlayer.copyFrom(oldPlayer)));
-                event.getOriginal().invalidateCaps();
-            }
+            event.getOriginal().reviveCaps();
+            event.getOriginal().getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(oldPlayer ->
+                    event.getEntity().getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent(newPlayer ->
+                            newPlayer.copyFrom(oldPlayer)));
+            event.getOriginal().invalidateCaps();
         }
 
         @SubscribeEvent
