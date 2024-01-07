@@ -19,7 +19,7 @@ dependencies {
     modCompileOnly "curse.maven:forge-config-api-port-fabric-547434:${forge_config_api_version_id}"
 
     modCompileOnly "curse.maven:ftb-library-forge-404465:4720056"
-    modCompileOnly "curse.maven:ftb-ultimine-forge-386134:4597013"
+    modCompileOnly "curse.maven:ftb-ultimine-forge-386134:5005006"
 
     modApi "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
 }

@@ -1,6 +1,10 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.2.0b Release | Jan 7, 2024
+### Fixed
+- [UA-11] Compatibility with the new version (v2001.1.4) of the FTB Ultimine.
+
 ## v1.2.0a Release | Dec 28, 2023
 ### Fixed
 - Crash issue related to mining skill card occurred when playstyle switched into legacy.

@@ -71,7 +71,7 @@ dependencies {
     modImplementation "curse.maven:forge-config-api-port-fabric-547434:${forge_config_api_version_id}"
 
     modImplementation "curse.maven:ftb-library-fabric-438495:4720055"
-    modImplementation "curse.maven:ftb-ultimine-fabric-448231:4597011"
+    modImplementation "curse.maven:ftb-ultimine-fabric-448231:5005004"
 
     modCompileOnlyApi "mezz.jei:jei-${mc_version}-fabric-api:${jei_version}"
     modRuntimeOnly "mezz.jei:jei-${mc_version}-fabric:${jei_version}"

@@ -86,7 +86,7 @@ public abstract class FTBUltimineMixin {
                     toolAction = ToolActions.HOE_TILL;
                 }
 
-                FTBUltiminePlayerData playerData = FTBUltimine.instance.get(player);
+                FTBUltiminePlayerData playerData = FTBUltimine.instance.getOrCreatePlayerData(player);
                 playerData.clearCache();
                 playerData.updateBlocks((ServerPlayer) player, context.getClickedPos(), context.getClickedFace(), false, FTBUltimineIntegration.getMaxBlocks((ServerPlayer) player));
                 List<BlockPos> blockPosList = new ArrayList<>();

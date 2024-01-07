@@ -95,7 +95,7 @@ public class ChallengeEvents {
         });
 
         BlockToolModificationEvent.EVENT.register((originalState, finalState, context, toolAction, simulate) -> {
-            if (context.getPlayer() instanceof ServerPlayer player && !FTBUltimine.instance.get(player).isPressed()) {
+            if (context.getPlayer() instanceof ServerPlayer player && !FTBUltimine.instance.getOrCreatePlayerData(player).isPressed()) {
                 return ChallengeEvents.onBlockToolModificationEvent(originalState, finalState, context, toolAction, simulate);
             }
             return CompoundEventResult.pass();
@@ -107,7 +107,7 @@ public class ChallengeEvents {
             List<ItemStack> stacks = InventoryHelper.listMatchingItem(player.getInventory(), ModItems.MINER_CERTIFICATE);
             boolean isGamemodeCorrect = !player.isCreative() && !player.isSpectator();
             if (stacks.isEmpty()
-                    || isGamemodeCorrect && FTBUltimine.instance.canUltimine(player) && FTBUltimine.instance.get(player).isPressed()
+                    || isGamemodeCorrect && FTBUltimine.instance.canUltimine(player) && FTBUltimine.instance.getOrCreatePlayerData(player).isPressed()
                     || !(state.is(ModBlockTags.FORGE_ORES) || state.is(ModBlockTags.FABRIC_ORES))
                     || (isGamemodeCorrect && ChunkManager.INSTANCE.getChunkData(level.getChunk(pos)).isBlockPlacedByEntity(pos)))
                 return EventResult.pass();

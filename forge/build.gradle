@@ -85,7 +85,7 @@ dependencies {
     modApi "net.ixdarklord.coolcat_lib:forge:${mc_version}-v${coolcatlib_version}-release"
 
     modImplementation "curse.maven:ftb-library-forge-404465:4720056"
-    modImplementation "curse.maven:ftb-ultimine-forge-386134:4597013"
+    modImplementation "curse.maven:ftb-ultimine-forge-386134:5005006"
 
     modCompileOnly "mezz.jei:jei-${mc_version}-forge-api:${jei_version}"
 //    modRuntimeOnly "mezz.jei:jei-${mc_version}-forge:${jei_version}"
