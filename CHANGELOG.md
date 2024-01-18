@@ -1,6 +1,10 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.2.1 Release | Jan 18, 2024
+### Fixed
+- [UA-12] Incompatibility with DefaultSettings.
+
 ## v1.2.0a Release | Dec 28, 2023
 ### Fixed
 - Crash issue related to mining skill card occurred when playstyle switched into legacy.
