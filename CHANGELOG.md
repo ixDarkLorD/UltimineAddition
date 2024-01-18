@@ -1,6 +1,10 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.2.1 Release | Jan 18, 2024
+### Fixed
+- [UA-12] Incompatibility with DefaultSettings.
+
 ## v1.2.0b Release | Jan 7, 2024
 ### Fixed
 - [UA-11] Compatibility with the new version (v2001.1.4) of the FTB Ultimine.

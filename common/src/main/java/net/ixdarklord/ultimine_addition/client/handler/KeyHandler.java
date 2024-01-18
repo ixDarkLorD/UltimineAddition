@@ -14,7 +14,7 @@ public class KeyHandler {
     public static KeyMapping KEY_OPEN_SKILLS_RECORD = create(Constants.getLocation("open_skills_record"), InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, KEY_CATEGORY);
 
     public static KeyMapping create(ResourceLocation id, InputConstants.Type type, int key, String category) {
-        return new KeyMapping(String.format("key.%s", id.toString()), type, key, category);
+        return new KeyMapping("key.%s.%s".formatted(id.getNamespace(), id.getPath()), type, key, category);
     }
 
     public static void register() {
