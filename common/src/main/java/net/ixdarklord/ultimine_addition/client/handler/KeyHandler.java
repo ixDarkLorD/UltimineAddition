@@ -15,7 +15,7 @@ public class KeyHandler {
     public static KeyMapping KEY_SHOW_PROGRESSION_BAR = create(Constants.getLocation("show_progression_bar"), InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, KEY_CATEGORY);
 
     public static KeyMapping create(ResourceLocation id, InputConstants.Type type, int key, String category) {
-        return new KeyMapping(String.format("key.%s", id.toString()),type, key, category);
+        return new KeyMapping("key.%s.%s".formatted(id.getNamespace(), id.getPath()), type, key, category);
     }
 
     public static void register() {
