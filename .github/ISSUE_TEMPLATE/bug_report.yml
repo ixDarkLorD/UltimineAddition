@@ -7,7 +7,7 @@ assignees:
 body:
   - type: markdown
     attributes:
-      value: "**Thank you for introducing the issue! And keep helping us to keep improving. We appreciate your time!**"
+      value: "**Thank you for addressing the issue! And keep helping us to keep improving. We appreciate your time!**"
   -   type: textarea
       attributes:
         label: Describe the Bug
