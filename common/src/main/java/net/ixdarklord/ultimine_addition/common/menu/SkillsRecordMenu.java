@@ -1,12 +1,13 @@
-package net.ixdarklord.ultimine_addition.common.container;
+package net.ixdarklord.ultimine_addition.common.menu;
 
-import net.ixdarklord.ultimine_addition.common.container.slot.CustomSlot;
-import net.ixdarklord.ultimine_addition.common.container.slot.MiningSkillCardSlot;
-import net.ixdarklord.ultimine_addition.common.container.slot.PaperSlot;
-import net.ixdarklord.ultimine_addition.common.container.slot.PenSlot;
+
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.item.PenItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
+import net.ixdarklord.ultimine_addition.common.menu.slot.CustomSlot;
+import net.ixdarklord.ultimine_addition.common.menu.slot.MiningSkillCardSlot;
+import net.ixdarklord.ultimine_addition.common.menu.slot.PaperSlot;
+import net.ixdarklord.ultimine_addition.common.menu.slot.PenSlot;
 import net.ixdarklord.ultimine_addition.core.Constants;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
@@ -14,7 +15,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
@@ -24,22 +24,27 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SkillsRecordContainer extends DataAbstractContainerMenu<SkillsRecordData> {
+public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData> {
     private final ItemStack stack;
     private final Player player;
     private final Inventory playerInventory;
     private final Container container;
+    private final boolean isSlotAPI;
 
-    public SkillsRecordContainer(int id, Inventory inventory, FriendlyByteBuf buf) {
-        this(id, inventory, inventory.player, buf.readItem(), new SimpleContainer(SkillsRecordItem.CONTAINER_SIZE));
+    public SkillsRecordMenu(int id, Inventory inventory, FriendlyByteBuf buf) {
+        this(id, inventory, inventory.player, buf.readItem(), buf.readBoolean());
     }
 
-    public SkillsRecordContainer(int id, Inventory playerInventory, Player player, ItemStack stack, Container container) {
+    public SkillsRecordMenu(int id, Inventory playerInventory, Player player, ItemStack stack, boolean isSlotAPI) {
         super(Registration.SKILLS_RECORD_CONTAINER.get(), id);
+        if (!(stack.getItem() instanceof SkillsRecordItem))
+            throw new IllegalArgumentException("Invalid item! This container only accepts Skills Record.");
+
         this.stack = stack;
         this.player = player;
         this.playerInventory = playerInventory;
-        this.container = container;
+        this.container = createData().getContainer();
+        this.isSlotAPI = isSlotAPI;
 
         addSlotBox(container, 0, 8, 107, 4, 20, 1, 0);
         addSlot(new PenSlot(container, 4, 132, 107));
@@ -48,13 +53,11 @@ public class SkillsRecordContainer extends DataAbstractContainerMenu<SkillsRecor
     }
 
     @Override
-    public void clicked(int slotId, int button, @NotNull ClickType clickType, @NotNull Player player) {
+    public void clicked(int slotId, int button, ClickType clickType, Player player) {
         super.clicked(slotId, button, clickType, player);
 
-        if (!player.level.isClientSide) {
-            getData().sendToClient((ServerPlayer) player).saveData(stack);
-            this.slotsChanged(container);
-        }
+        if (player instanceof ServerPlayer serverPlayer)
+            createData().insertContainer(container).sendToClient(serverPlayer).saveData(stack);
     }
 
     @Override
@@ -88,15 +91,8 @@ public class SkillsRecordContainer extends DataAbstractContainerMenu<SkillsRecor
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        if (ServicePlatform.SlotAPI.isModLoaded()) {
-            ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
-            if (stack != ItemStack.EMPTY) {
-                var data = new SkillsRecordData().loadData(stack);
-                if (data.getUUID() != null && data.getUUID().equals(getData().getUUID())) {
-                    return true;
-                }
-            }
-        }
+        if (isSlotAPI)
+            return ServicePlatform.SlotAPI.getSkillsRecordItem(player).equals(stack);
         return player.getMainHandItem().equals(stack) || player.getOffhandItem().equals(stack);
     }
 
@@ -163,8 +159,12 @@ public class SkillsRecordContainer extends DataAbstractContainerMenu<SkillsRecor
         return 0;
     }
 
-    @Override
     public SkillsRecordData getData() {
-        return new SkillsRecordData().loadData(stack).insertContainer(container);
+        return createData().insertContainer(container);
+    }
+
+    @Override
+    public SkillsRecordData createData() {
+        return new SkillsRecordData().loadData(stack);
     }
 }

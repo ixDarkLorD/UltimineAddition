@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.common.data.item;
 
 import com.mojang.datafixers.util.Pair;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
+import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
@@ -236,9 +236,9 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     }
 
     public SkillsRecordData syncData(ServerPlayer player) {
-        if (player.containerMenu instanceof SkillsRecordContainer skillsRecordContainer) {
+        if (player.containerMenu instanceof SkillsRecordMenu skillsRecordMenu) {
             this.pinnedChallenges.forEach((slot, challengeList) -> {
-                ItemStack cardStack = skillsRecordContainer.getCardSlots().get(slot).getItem();
+                ItemStack cardStack = skillsRecordMenu.getCardSlots().get(slot).getItem();
                 MiningSkillCardData cardData = new MiningSkillCardData().loadData(cardStack);
                 challengeList.forEach(location -> {
                     MiningSkillCardData.InfoData infoData = cardData.getChallenge(location);

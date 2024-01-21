@@ -5,7 +5,7 @@ import dev.architectury.networking.simple.BaseC2SMessage;
 import dev.architectury.networking.simple.BaseS2CMessage;
 import dev.architectury.networking.simple.MessageType;
 import dev.architectury.registry.menu.MenuRegistry;
-import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
+import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
@@ -57,11 +57,14 @@ public class SkillsRecordPacket extends BaseS2CMessage {
             context.queue(() -> {
                 if (context.getPlayer() instanceof ServerPlayer player) {
                     ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
-                    if (stack.getItem() instanceof SkillsRecordItem item) {
+                    if (stack.getItem() instanceof SkillsRecordItem) {
                         if (stack.hasTag()) {
                             MenuRegistry.openExtendedMenu(player,
-                                    new SimpleMenuProvider((id, inv, p) -> new SkillsRecordContainer(id, inv, p, stack, item.getData(stack).getContainer()), SkillsRecordItem.TITLE),
-                                    buf -> buf.writeItem(stack));
+                                    new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, stack, true), SkillsRecordItem.TITLE),
+                                    buf -> {
+                                        buf.writeItem(stack);
+                                        buf.writeBoolean(true);
+                            });
                         }
                     }
                 }
@@ -94,10 +97,10 @@ public class SkillsRecordPacket extends BaseS2CMessage {
             context.queue(() -> {
                 if (context.getPlayer() instanceof ServerPlayer player) {
                     ItemStack stack = ItemStack.EMPTY;
-                    if (player.getMainHandItem().getItem() instanceof SkillsRecordItem) {
-                        stack = player.getMainHandItem();
-                    } else if (player.getOffhandItem().getItem() instanceof SkillsRecordItem) {
+                    if (player.getOffhandItem().getItem() instanceof SkillsRecordItem) {
                         stack = player.getOffhandItem();
+                    } else if (player.getMainHandItem().getItem() instanceof SkillsRecordItem) {
+                        stack = player.getMainHandItem();
                     }
 
                     if (ServicePlatform.SlotAPI.getSkillsRecordItem(player).getItem() instanceof SkillsRecordItem) {

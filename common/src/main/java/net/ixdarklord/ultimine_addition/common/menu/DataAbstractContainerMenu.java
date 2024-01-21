@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.common.container;
+package net.ixdarklord.ultimine_addition.common.menu;
 
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -10,5 +10,5 @@ public abstract class DataAbstractContainerMenu<T extends DataHandler<?, ?>> ext
         super(menuType, windowId);
     }
 
-    public abstract T getData();
+    public abstract T createData();
 }

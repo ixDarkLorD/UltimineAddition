@@ -3,10 +3,11 @@ package net.ixdarklord.ultimine_addition.common.item;
 import dev.architectury.registry.menu.MenuRegistry;
 import net.ixdarklord.coolcat_lib.util.ScreenUtils;
 import net.ixdarklord.ultimine_addition.client.gui.component.SkillsRecordTooltip;
-import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
+import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
+import net.ixdarklord.ultimine_addition.core.Constants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -53,8 +54,11 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
 
         if (stack.hasTag()) {
             MenuRegistry.openExtendedMenu((ServerPlayer) player,
-                    new SimpleMenuProvider((id, inv, p) -> new SkillsRecordContainer(id, inv, p, stack, getData(stack).getContainer()), TITLE),
-                    buf -> buf.writeItem(stack));
+                    new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, stack, false), TITLE),
+                    buf -> {
+                        buf.writeItem(stack);
+                        buf.writeBoolean(false);
+            });
         }
 
         return new InteractionResultHolder<>(InteractionResult.PASS, stack);
@@ -93,6 +97,7 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
             ).withStyle(ChatFormatting.GRAY)));
         }
         tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.skills_record.contents").withStyle(ChatFormatting.GRAY)));
+        tooltipComponents.add(Component.literal(Constants.MOD_ID + ".tooltip_image"));
     }
 
     @Override
