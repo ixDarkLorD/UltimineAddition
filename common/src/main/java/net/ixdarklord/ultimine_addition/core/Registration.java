@@ -12,7 +12,7 @@ import net.ixdarklord.ultimine_addition.common.command.arguments.CardSlotsArgume
 import net.ixdarklord.ultimine_addition.common.command.arguments.CardTierArgument;
 import net.ixdarklord.ultimine_addition.common.command.arguments.ChallengesArgument;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
+import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -147,7 +147,7 @@ public class Registration {
     public static final RegistrySupplier<Potion> MINE_GO_JUICE_HOE_POTION3 = POTIONS.register("mine_go_juice_hoe_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MobEffectInstance(ModMobEffects.MINE_GO_JUICE_HOE, ConfigHandler.COMMON.TIER_3_TIME_SAFE.get() * 20, 2)));
 
     // Containers
-    public static final RegistrySupplier<MenuType<SkillsRecordContainer>> SKILLS_RECORD_CONTAINER = CONTAINERS.register("skills_record", () -> MenuRegistry.ofExtended(SkillsRecordContainer::new));
+    public static final RegistrySupplier<MenuType<SkillsRecordMenu>> SKILLS_RECORD_CONTAINER = CONTAINERS.register("skills_record", () -> MenuRegistry.ofExtended(SkillsRecordMenu::new));
 
     // Recipe Serializer
     public static final RegistrySupplier<? extends RecipeSerializer<?>> ITEM_DATA_STORAGE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(ItemStorageDataRecipe.Serializer.NAME.getPath(), ServicePlatform.getItemStorageDataSerializer());

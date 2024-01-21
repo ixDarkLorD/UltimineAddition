@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.common.container.slot;
+package net.ixdarklord.ultimine_addition.common.menu.slot;
 
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;

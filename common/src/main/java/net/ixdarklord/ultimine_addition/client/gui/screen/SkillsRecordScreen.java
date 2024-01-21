@@ -13,11 +13,11 @@ import net.ixdarklord.coolcat_lib.util.MouseHelper;
 import net.ixdarklord.coolcat_lib.util.ScreenUtils;
 import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.common.container.SkillsRecordContainer;
-import net.ixdarklord.ultimine_addition.common.container.slot.CustomSlot;
-import net.ixdarklord.ultimine_addition.common.container.slot.MiningSkillCardSlot;
-import net.ixdarklord.ultimine_addition.common.container.slot.PaperSlot;
-import net.ixdarklord.ultimine_addition.common.container.slot.PenSlot;
+import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
+import net.ixdarklord.ultimine_addition.common.menu.slot.CustomSlot;
+import net.ixdarklord.ultimine_addition.common.menu.slot.MiningSkillCardSlot;
+import net.ixdarklord.ultimine_addition.common.menu.slot.PaperSlot;
+import net.ixdarklord.ultimine_addition.common.menu.slot.PenSlot;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
@@ -63,10 +63,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordContainer> {
+public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu> {
     private final ResourceLocation OPTIONS_TEXTURE = Constants.getGuiTexture("skills_record_options", "png");
     private final ResourceLocation TEXTURE = Constants.getGuiTexture("skills_record", "png");
-    protected final SkillsRecordContainer container;
+    protected final SkillsRecordMenu container;
     private TextScreen textScreen;
     private final int maxProgress = 100;
     private final List<Button> optionsButtonList = new ArrayList<>();
@@ -92,7 +92,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordCont
     private boolean isAnimationsEnabled;
     private boolean isProgressionBarShown;
 
-    public SkillsRecordScreen(SkillsRecordContainer container, Inventory inv, Component name) {
+    public SkillsRecordScreen(SkillsRecordMenu container, Inventory inv, Component name) {
         super(container, inv, name);
         this.container = container;
         this.imageHeight = 218;
