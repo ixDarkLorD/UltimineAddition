@@ -20,7 +20,7 @@
     "hidden": false,
     "icon": {
       "item": "ultimine_addition:miner_certificate",
-      "nbt": "{UAProperties:{is_accomplished:1b,legacy:{mined_blocks:0,required_amount:0}}}"
+      "nbt": "{UAProperties:{is_accomplished:1b}}"
     },
     "show_toast": true,
     "title": {

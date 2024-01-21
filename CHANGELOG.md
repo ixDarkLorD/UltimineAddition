@@ -1,6 +1,12 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.2.2 Release | Jan 21, 2024
+### Fixed
+- [UA-13] Skills Record inventory randomly getting cleared.
+- [UA-14] Skills Record data gets deleted at Mainhand.
+- [UA-15] Keybindings localization isn't working, Skills Record Inventory display is misplaced.
+
 ## v1.2.1 Release | Jan 18, 2024
 ### Fixed
 - [UA-12] Incompatibility with DefaultSettings.

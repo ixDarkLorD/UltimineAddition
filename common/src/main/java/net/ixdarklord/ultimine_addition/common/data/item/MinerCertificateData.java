@@ -15,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 
 public class MinerCertificateData extends DataHandler<MinerCertificateData, ItemStack> {
     private ItemStack stack;
@@ -154,11 +153,7 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
                     tooltipComponents.add(1, createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.opened").withStyle(ChatFormatting.GOLD)));
             } else {
                 if (!data.isAccomplished) {
-                    ChatFormatting formatting = ChatFormattingUtils.getAssignedResult(minedBlocks, requiredAmount, Map.of(
-                            0, new ChatFormatting[]{ChatFormatting.RED},
-                            50, new ChatFormatting[]{ChatFormatting.YELLOW},
-                            100, new ChatFormatting[]{ChatFormatting.GREEN}
-                    ));
+                    ChatFormatting formatting = ChatFormattingUtils.get3ColorPercentageFormat(minedBlocks, requiredAmount);
                     Component component = Component.literal(String.valueOf(minedBlocks)).withStyle(formatting);
                     tooltipComponents.add(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest.info", requiredAmount).withStyle(ChatFormatting.DARK_AQUA));
                     tooltipComponents.add(Component.literal("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest", component).withStyle(ChatFormatting.GRAY)));
