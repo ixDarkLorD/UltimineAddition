@@ -11,6 +11,7 @@ import net.ixdarklord.ultimine_addition.client.handler.ItemRendererHandler;
 import net.ixdarklord.ultimine_addition.client.renderer.item.IItemRenderer;
 import net.ixdarklord.ultimine_addition.client.renderer.item.UAItemRenderer;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
+import net.ixdarklord.ultimine_addition.util.ChatFormattingUtils;
 import net.ixdarklord.ultimine_addition.util.CodecHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -76,18 +77,21 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         }
 
         component = new TranslatableComponent("tooltip.ultimine_addition.skill_card.tier", !stack.hasTag() ? "§kNawaf" : getData(stack).getTier().getDisplayName());
-        tooltipComponents.add(new TextComponent("• ").withStyle(ChatFormatting.DARK_GRAY).append(component));
+        tooltipComponents.add(new TextComponent("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
         if (stack.hasTag() && type != EMPTY && getData(stack).getTier() != Tier.Unlearned && getData(stack).getTier() != Tier.Mastered) {
-            component = new TranslatableComponent("tooltip.ultimine_addition.skill_card.potion_point", getData(stack).getPotionPoints());
-            tooltipComponents.add(new TextComponent("• ").withStyle(ChatFormatting.DARK_GRAY).append(component));
+            ChatFormatting formatting = ChatFormattingUtils.get3ColorPercentageFormat(getData(stack).getPotionPoints(), getData(stack).getMaxPotionPoints());
+            component = new TranslatableComponent("tooltip.ultimine_addition.skill_card.potion_point", new TextComponent(String.valueOf(getData(stack).getPotionPoints())).withStyle(formatting));
+            tooltipComponents.add(new TextComponent("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
         }
 
         if (Minecraft.getInstance().screen instanceof SkillsRecordScreen screen &&
                 screen.getMenu().getCardSlots().stream().anyMatch(slot -> slot.getItem().equals(stack))) return;
 
-        component = new TranslatableComponent("tooltip.ultimine_addition.skill_card.info").withStyle(ChatFormatting.GRAY);
-        List<Component> components = ScreenUtils.splitComponent(component, getSplitterLength());
-        tooltipComponents.addAll(components);
+        if (getData(stack).getTier() != Tier.Mastered) {
+            component = new TranslatableComponent("tooltip.ultimine_addition.skill_card.info").withStyle(ChatFormatting.WHITE);
+            List<Component> components = ScreenUtils.splitComponent(component, getSplitterLength());
+            tooltipComponents.addAll(components);
+        }
     }
 
     @Override

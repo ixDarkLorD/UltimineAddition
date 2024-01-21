@@ -19,4 +19,12 @@ public class ChatFormattingUtils {
         // Default value for incomplete
         return ChatFormatting.WHITE;
     }
+
+    public static ChatFormatting get3ColorPercentageFormat(int currentValue, int maxValue) {
+        return getAssignedResult(currentValue, maxValue, Map.of(
+                0, new ChatFormatting[]{ChatFormatting.RED},
+                50, new ChatFormatting[]{ChatFormatting.YELLOW},
+                100, new ChatFormatting[]{ChatFormatting.GREEN}
+        ));
+    }
 }
