@@ -64,7 +64,7 @@ public class SkillsRecordPacket extends BaseS2CMessage {
                                     buf -> {
                                         buf.writeItem(stack);
                                         buf.writeBoolean(true);
-                                    });
+                            });
                         }
                     }
                 }

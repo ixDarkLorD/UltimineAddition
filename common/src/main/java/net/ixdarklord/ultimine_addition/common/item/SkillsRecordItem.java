@@ -56,8 +56,11 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
 
         if (stack.hasTag()) {
             MenuRegistry.openExtendedMenu((ServerPlayer) player,
-                    new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, stack, false), TITLE),
-                    buf -> buf.writeItem(stack));
+                    new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, stack, true), SkillsRecordItem.TITLE),
+                    buf -> {
+                        buf.writeItem(stack);
+                        buf.writeBoolean(true);
+            });
         }
 
         return new InteractionResultHolder<>(InteractionResult.PASS, stack);
