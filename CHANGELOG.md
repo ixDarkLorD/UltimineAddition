@@ -1,6 +1,10 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.2.3 Release | Feb 5, 2024
+### Fixed
+- [UA-16] Chunks not loading properly.
+
 ## v1.2.2 Release | Jan 21, 2024
 ### Fixed
 - [UA-13] Skills Record inventory randomly getting cleared.

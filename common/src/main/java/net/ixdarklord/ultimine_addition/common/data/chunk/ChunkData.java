@@ -124,9 +124,13 @@ public class ChunkData extends DataHandler<ChunkData, CompoundTag> {
             ListTag listTag2 = tag.getList("Blocks", 10);
             for (int j = 0; j < listTag2.size(); j++) {
                 CompoundTag tag2 =  listTag2.getCompound(i);
-                BlockState blockState = NbtUtils.readBlockState((CompoundTag) Objects.requireNonNull(tag2.get("State")));
-                BlockPos pos = NbtUtils.readBlockPos((CompoundTag) Objects.requireNonNull(tag2.get("Pos")));
-                blockInfoList.add(new BlockInfo(blockState, pos));
+                CompoundTag stateTag = (CompoundTag) tag2.get("State");
+                CompoundTag posTag = (CompoundTag) tag2.get("Pos");
+
+                if (stateTag == null || posTag == null) continue;
+                BlockState blockState = NbtUtils.readBlockState(stateTag);
+                BlockPos blockPos = NbtUtils.readBlockPos(posTag);
+                blockInfoList.add(new BlockInfo(blockState, blockPos));
             }
 
             if (!listTag2.isEmpty()) result.put(new EntityIdentifier(id, uuid), blockInfoList);
