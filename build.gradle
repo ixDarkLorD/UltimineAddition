@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.3-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.4-SNAPSHOT" apply false
     id 'net.darkhax.curseforgegradle' version '1.0.11'
     id 'com.modrinth.minotaur' version '2.8.4'
 }
@@ -11,15 +11,13 @@ architectury {
     minecraft = mc_version
 }
 
-
-import com.modrinth.minotaur.dependencies.DependencyType
-import com.modrinth.minotaur.dependencies.ModDependency
+import java.util.regex.Pattern
 import groovy.json.JsonBuilder
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import net.darkhax.curseforgegradle.TaskPublishCurseForge
-
-import java.util.regex.Pattern
+import com.modrinth.minotaur.dependencies.DependencyType
+import com.modrinth.minotaur.dependencies.ModDependency
 
 tasks.register('incrementBuildNumber') {
     onlyIf { project.hasProperty('copy_build_jar') && project.hasProperty('unique_build_number') }

@@ -1,6 +1,6 @@
 {
     "pack": {
-        "description": "Ultimine Addition Resources",
+        "description": "${modName} Resources",
         "pack_format": ${packFormat}
     }
 }

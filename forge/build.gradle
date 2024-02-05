@@ -105,65 +105,33 @@ processResources {
     from project(":common").file('src/main/resources/mod_logo.png')
 
     duplicatesStrategy DuplicatesStrategy.INCLUDE
-    inputs.property "modId",                    "${modid}"
-    inputs.property "modName",                  "${mod_name}"
-    inputs.property "modVersion",               "${mod_version}"
-    inputs.property "modDescription",           "${mod_description}"
-    inputs.property "modGroup",                 project.group
-    inputs.property "modPageUrl",               "${mod_page_url}"
-    inputs.property "modUpdateUrl",             "${mod_update_url}"
-    inputs.property "modIssueUrl",              "${mod_issue_url}"
-    inputs.property "modAuthor",                "${mod_author}"
-    inputs.property "modLicense",               "${mod_license}"
-    inputs.property "minFMLVersion",            "${min_forge_version}".replaceAll("\\..*", "")
-    inputs.property "minForgeVersion",          "${min_forge_version}"
-    inputs.property "minMinecraftVersion",      "${min_mc_version}"
-    inputs.property "nextMinecraftVersion",     rootProject.getNextVersion("${min_mc_version}")
-    inputs.property "packFormat",               "${pack_format}"
-    inputs.property "mixinPackagePath", 		"${project.group}.forge.mixin"
-    inputs.property "modForgeDisplayTest",      "${mod_forge_display_test}"
-    inputs.property "archVersion",              "${architectury_version}"
-    inputs.property "ccLibVersion",             "${coolcatlib_version}"
-    inputs.property "ftbUltimineVersion",       "${ftbultimine_version}"
-    inputs.property "jeiVersion",               "${jei_version}"
-    inputs.property "curiosVersion",            "${curios_version}"
+    var replaceProperties = [
+            modId:                    modid,
+            modName:                  mod_name,
+            modVersion:               mod_version,
+            modDescription:           mod_description,
+            modGroup:                 project.group,
+            modPageUrl:               mod_page_url,
+            modUpdateUrl:             mod_update_url,
+            modIssueUrl:              mod_issue_url,
+            modAuthor:                mod_author,
+            modLicense:               mod_license,
+            minFMLVersion:            min_forge_version.replaceAll("\\..*", ""),
+            minForgeVersion:          min_forge_version,
+            minMinecraftVersion:      min_mc_version,
+            nextMinecraftVersion:     rootProject.getNextVersion("${min_mc_version}"),
+            packFormat:               pack_format,
+            modForgeDisplayTest:      mod_forge_display_test,
+            archVersion:              architectury_version,
+            ccLibVersion:             coolcatlib_version,
+            ftbUltimineVersion:       ftbultimine_version,
+            jeiVersion:               jei_version,
+            curiosVersion:            curios_version,
 
-    filesMatching ('META-INF/mods.toml') {
-        expand (
-                'modId':                        "${modid}",
-                'modName':                      "${mod_name}",
-                'modVersion':                   "${mod_version}",
-                'modDescription':               "${mod_description}",
-                'modPageUrl':                   "${mod_page_url}",
-                'modUpdateUrl':                 "${mod_update_url}",
-                'modIssueUrl':                  "${mod_issue_url}",
-                'modAuthor':                    "${mod_author}",
-                'modLicense':                   "${mod_license}",
-                'minFMLVersion':                "${min_forge_version}".replaceAll("\\..*", ""),
-                'minForgeVersion':              "${min_forge_version}",
-                'minMinecraftVersion':          "${min_mc_version}",
-                'nextMinecraftVersion':         rootProject.getNextVersion("${min_mc_version}"),
-                'modForgeDisplayTest':          "${mod_forge_display_test}",
-                'archVersion':                  "${architectury_version}",
-                'ccLibVersion':                 "${coolcatlib_version}",
-                'ftbUltimineVersion':           "${ftbultimine_version}",
-                'jeiVersion':                   "${jei_version}",
-                'curiosVersion':                "${curios_version}"
-        )
-    }
-
-    filesMatching ("${modid}.mixins.json") {
-        expand (
-                'modId':                	"${modid}",
-                'mixinPackagePath':         "${project.group}.forge.mixin"
-        )
-    }
-
-    filesMatching ('pack.mcmeta') {
-        expand (
-                'modDescription':       "${mod_description}",
-                "packFormat":           "${pack_format}"
-        )
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
     }
 }
 
