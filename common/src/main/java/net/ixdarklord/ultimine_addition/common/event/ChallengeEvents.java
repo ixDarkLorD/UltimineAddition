@@ -30,13 +30,16 @@ import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ChallengeEvents {
@@ -104,7 +107,7 @@ public class ChallengeEvents {
 
     private static void legacyFunctions() {
         BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
-            List<ItemStack> stacks = InventoryHelper.listMatchingItem(player.getInventory(), ModItems.MINER_CERTIFICATE);
+            List<ItemStack> stacks = listMatchingItem(player, ModItems.MINER_CERTIFICATE);
             boolean isGamemodeCorrect = !player.isCreative() && !player.isSpectator();
             if (stacks.isEmpty()
                     || isGamemodeCorrect && FTBUltimine.instance.canUltimine(player) && FTBUltimine.instance.getOrCreatePlayerData(player).isPressed()
@@ -130,7 +133,7 @@ public class ChallengeEvents {
         if (player == null) return CompoundEventResult.pass();
         if (PlayerHooks.isFake(player)) return CompoundEventResult.pass();
         if (!context.getLevel().isClientSide()) {
-            List<ItemStack> stacks = InventoryHelper.listMatchingItem(player.getInventory(), ModItems.SKILLS_RECORD);
+            List<ItemStack> stacks = listMatchingItem(player, ModItems.SKILLS_RECORD);
             if (stacks.isEmpty()) return CompoundEventResult.pass();
             for (ItemStack stack : stacks) {
                 var data = new SkillsRecordData().loadData(stack);
@@ -155,5 +158,21 @@ public class ChallengeEvents {
             }
         }
         return CompoundEventResult.pass();
+    }
+
+    public static List<ItemStack> listMatchingItem(Player player, Item item) {
+        List<ItemStack> result = new ArrayList<>();
+
+        if (ServicePlatform.SlotAPI.isModLoaded()) {
+            ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
+            if (!stack.isEmpty() && stack.is(item)) result.add(stack);
+        }
+
+        Container inv = player.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack stack = inv.getItem(i);
+            if (!stack.isEmpty() && stack.is(item)) result.add(stack);
+        }
+        return result;
     }
 }
