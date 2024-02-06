@@ -90,7 +90,7 @@ public class ChallengeEvents {
 
         BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
             if (!level.isClientSide()) {
-                List<ItemStack> items = listMatchingItem(player.getInventory(), ModItems.SKILLS_RECORD);
+                List<ItemStack> items = listMatchingItem(player, ModItems.SKILLS_RECORD);
                 if (items.isEmpty()) return EventResult.pass();
                 for (ItemStack stack : items) {
                     SkillsRecordData data = new SkillsRecordData().loadData(stack);
@@ -138,7 +138,7 @@ public class ChallengeEvents {
         if (player == null) return CompoundEventResult.pass();
         if (PlayerHooks.isFake(player)) return CompoundEventResult.pass();
         if (!context.getLevel().isClientSide()) {
-            List<ItemStack> items = listMatchingItem(player.getInventory(), ModItems.SKILLS_RECORD);
+            List<ItemStack> items = listMatchingItem(player, ModItems.SKILLS_RECORD);
             if (items.isEmpty()) return CompoundEventResult.pass();
             for (ItemStack stack : items) {
                 var data = new SkillsRecordData().loadData(stack);
@@ -165,10 +165,17 @@ public class ChallengeEvents {
         return CompoundEventResult.pass();
     }
 
-    public static List<ItemStack> listMatchingItem(Container container, Item item) {
+    public static List<ItemStack> listMatchingItem(Player player, Item item) {
         List<ItemStack> result = new ArrayList<>();
-        for (int i = 0; i < container.getContainerSize(); i++) {
-            ItemStack stack = container.getItem(i);
+
+        if (ServicePlatform.SlotAPI.isModLoaded()) {
+            ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
+            if (!stack.isEmpty() && stack.is(item)) result.add(stack);
+        }
+
+        Container inv = player.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack stack = inv.getItem(i);
             if (!stack.isEmpty() && stack.is(item)) result.add(stack);
         }
         return result;

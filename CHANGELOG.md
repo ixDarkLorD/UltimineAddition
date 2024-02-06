@@ -1,6 +1,10 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.2.4 Release | Feb 6, 2024
+### Fixed
+- [UA-17] The Skills Record doesn't register any point toward mined blocks if it's in th Curios slot.
+
 ## v1.2.3 Release | Feb 5, 2024
 ### Fixed
 - [UA-16] Chunks not loading properly.
