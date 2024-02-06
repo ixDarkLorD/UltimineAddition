@@ -30,7 +30,6 @@ import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -110,28 +109,6 @@ public class ChallengeEvents {
         });
     }
 
-    private static void legacyFunctions() {
-        BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
-            List<ItemStack> stacks = InventoryHelper.listMatchingItem(player.getInventory(), ModItems.MINER_CERTIFICATE);
-            boolean isGamemodeCorrect = !player.isCreative() && !player.isSpectator();
-            if (stacks.isEmpty()
-                    || isGamemodeCorrect && FTBUltimine.instance.canUltimine(player) && FTBUltimine.instance.get(player).isPressed()
-                    || !(state.is(ModBlockTags.FORGE_ORES) || state.is(ModBlockTags.FABRIC_ORES))
-                    || (isGamemodeCorrect && ChunkManager.INSTANCE.getChunkData(level.getChunk(pos)).isBlockPlacedByEntity(pos)))
-                return EventResult.pass();
-
-            for (ItemStack stack : stacks) {
-                MinerCertificateData data = new MinerCertificateData().loadData(stack);
-                MinerCertificateData.Legacy legacy = data.getLegacy();
-                if (legacy != null) {
-                    legacy.addMiningPoint(1);
-                    data.sendToClient(player).saveData(stack);
-                }
-            }
-            return EventResult.pass();
-        });
-    }
-
     @SuppressWarnings("unused")
     public static CompoundEventResult<BlockState> onBlockToolModificationEvent(BlockState originalState, BlockState finalState, @NotNull UseOnContext context, ToolAction toolAction, boolean simulate) {
         Player player = context.getPlayer();
@@ -165,19 +142,35 @@ public class ChallengeEvents {
         return CompoundEventResult.pass();
     }
 
-    public static List<ItemStack> listMatchingItem(Player player, Item item) {
-        List<ItemStack> result = new ArrayList<>();
+    private static void legacyFunctions() {
+        BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
+            List<ItemStack> stacks = listMatchingItem(player, ModItems.MINER_CERTIFICATE);
+            boolean isGamemodeCorrect = !player.isCreative() && !player.isSpectator();
+            if (stacks.isEmpty()
+                    || isGamemodeCorrect && FTBUltimine.instance.canUltimine(player) && FTBUltimine.instance.get(player).isPressed()
+                    || !(state.is(ModBlockTags.FORGE_ORES) || state.is(ModBlockTags.FABRIC_ORES))
+                    || (isGamemodeCorrect && ChunkManager.INSTANCE.getChunkData(level.getChunk(pos)).isBlockPlacedByEntity(pos)))
+                return EventResult.pass();
 
+            for (ItemStack stack : stacks) {
+                MinerCertificateData data = new MinerCertificateData().loadData(stack);
+                MinerCertificateData.Legacy legacy = data.getLegacy();
+                if (legacy != null) {
+                    legacy.addMiningPoint(1);
+                    data.sendToClient(player).saveData(stack);
+                }
+            }
+            return EventResult.pass();
+        });
+    }
+
+    private static List<ItemStack> listMatchingItem(Player player, Item item) {
+        List<ItemStack> result = new ArrayList<>();
         if (ServicePlatform.SlotAPI.isModLoaded()) {
             ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
             if (!stack.isEmpty() && stack.is(item)) result.add(stack);
         }
-
-        Container inv = player.getInventory();
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack stack = inv.getItem(i);
-            if (!stack.isEmpty() && stack.is(item)) result.add(stack);
-        }
+        result.addAll(InventoryHelper.listMatchingItem(player.getInventory(), item));
         return result;
     }
 }
