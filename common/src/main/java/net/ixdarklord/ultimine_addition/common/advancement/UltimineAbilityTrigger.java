@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.advancement;
 
 import com.google.gson.JsonObject;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
 import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.EntityPredicate;
@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 public class UltimineAbilityTrigger extends SimpleCriterionTrigger<UltimineAbilityTrigger.Instance> {
-    public static final ResourceLocation ID = Constants.getLocation("obtain_ultimine");
+    public static final ResourceLocation ID = UltimineAddition.getLocation("obtain_ultimine");
 
     @Override
     public @NotNull ResourceLocation getId() {

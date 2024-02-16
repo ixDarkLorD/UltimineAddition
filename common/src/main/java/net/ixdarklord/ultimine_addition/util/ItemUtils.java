@@ -1,11 +1,14 @@
 package net.ixdarklord.ultimine_addition.util;
 
+import net.ixdarklord.coolcat_lib.util.InventoryHelper;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class ItemUtils {
     public record ItemSorter(ItemStack item, int slotId, int order){}
@@ -21,15 +24,24 @@ public class ItemUtils {
         return ItemStack.EMPTY;
     }
 
-    @SuppressWarnings("ConstantValue")
     public static ItemStack findItemInHand(Player player, Item item) {
         ItemStack stack = player.getMainHandItem();
         if (stack.getItem() != item) stack = player.getOffhandItem();
-        if (stack.getItem() != item && ServicePlatform.SlotAPI.isModLoaded())
+        if (ServicePlatform.SlotAPI.isModLoaded() && stack.getItem() != item)
             stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
 
         if (stack.getItem() == item) return stack;
         return ItemStack.EMPTY;
+    }
+
+    public static List<ItemStack> listMatchingItem(Player player, Item item) {
+        List<ItemStack> result = new ArrayList<>();
+        if (ServicePlatform.SlotAPI.isModLoaded()) {
+            ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
+            if (!stack.isEmpty() && stack.is(item)) result.add(stack);
+        }
+        result.addAll(InventoryHelper.listMatchingItem(player.getInventory(), item));
+        return result;
     }
 
     public static boolean isItemInHandNotTools(Player player) {

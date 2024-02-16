@@ -6,7 +6,7 @@ import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -30,7 +30,11 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
     private int potionPoints;
 
     public MiningSkillCardData initChallenges() {
-        if (tier == MiningSkillCardItem.Tier.Mastered) return this;
+        if (tier == MiningSkillCardItem.Tier.Mastered) {
+            currentChallenges.clear();
+            return this;
+        }
+
         AtomicInteger slotId = new AtomicInteger(1);
         AtomicInteger quantity = new AtomicInteger();
         MiningSkillCardItem.Type type = ((MiningSkillCardItem)stack.getItem()).getType();
@@ -220,7 +224,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         if (NBT == null) NBT = new CompoundTag();
 
         if (this.displayItem != null)
-            NBT.putString("DisplayItem", Constants.getIdAsString(Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.displayItem.getItem()))));
+            NBT.putString("DisplayItem", UltimineAddition.getIdAsString(Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.displayItem.getItem()))));
         NBT.putInt("Tier", this.tier.getValue());
         NBT.putInt("PotionPoint", this.potionPoints);
         NBT.merge(getNBTFromChallenges(this.currentChallenges));

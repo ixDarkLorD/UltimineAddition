@@ -9,7 +9,7 @@ import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
@@ -36,7 +36,7 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
 
     @Override
     public void init() {
-        Constants.LOGGER.info("Registering plugin to FTBUltimine!");
+        UltimineAddition.LOGGER.info("Registering plugin to FTBUltimine!");
     }
 
     @Override
@@ -124,7 +124,7 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
     private static boolean isPlayerHasCustomCardValidEffect(Player player) {
         String[] toolNames = getCustomCardToolName(player);
         for (String toolName : toolNames) {
-            MobEffect mobEffect = Registration.MOB_EFFECTS.getRegistrar().get(Constants.getLocation("mine_go_juice_%s".formatted(toolName)));
+            MobEffect mobEffect = Registration.MOB_EFFECTS.getRegistrar().get(UltimineAddition.getLocation("mine_go_juice_%s".formatted(toolName)));
             if (mobEffect == null) continue;
             if (player.hasEffect(mobEffect))
                 return true;
@@ -150,7 +150,14 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
         if (!ServicePlatform.Players.isPlayerUltimineCapable(player) && !instances.isEmpty()) {
             instances.sort(Comparator.comparingInt(MobEffectInstance::getAmplifier).reversed());
 
-            if (ItemUtils.isItemInHandPickaxe(player)) {
+            if (ItemUtils.isItemInHandCustomCardValid(player)) {
+                instances.removeIf(instance -> {
+                    ItemStack stack = ItemUtils.getItemInHand(player, true);
+                    if (stack.getItem() instanceof MiningSkillCardItem cardItem)
+                        return ((MineGoJuiceEffect) instance.getEffect()).getType() != cardItem.getType();
+                    return false;
+                });
+            } else if (ItemUtils.isItemInHandPickaxe(player)) {
                 instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.PICKAXE);
             } else if (ItemUtils.isItemInHandAxe(player)) {
                 instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.AXE);
@@ -164,7 +171,8 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                 return switch (instances.get(0).getAmplifier()) {
                     case 0 -> ConfigHandler.COMMON.TIER_1_MAX_BLOCKS.get();
                     case 1 -> ConfigHandler.COMMON.TIER_2_MAX_BLOCKS.get();
-                    default -> ConfigHandler.COMMON.TIER_3_MAX_BLOCKS.get();
+                    case 2 -> ConfigHandler.COMMON.TIER_3_MAX_BLOCKS.get();
+                    default -> MAX_BLOCKS.get();
                 };
             }
         }

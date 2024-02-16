@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.datagen.language;
 
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.language.builder.LanguageBuilder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.world.effect.MobEffect;
@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class LanguageGenerator extends LanguageProvider {
     public LanguageGenerator(DataGenerator generator, String locale) {
-        super(generator, Constants.MOD_ID, locale);
+        super(generator, UltimineAddition.MOD_ID, locale);
     }
 
     @Override
@@ -28,6 +28,6 @@ public class LanguageGenerator extends LanguageProvider {
 
     @Override
     public @NotNull String getName() {
-        return String.format("%s %s", Constants.MOD_NAME, super.getName());
+        return String.format("%s %s", UltimineAddition.MOD_NAME, super.getName());
     }
 }

@@ -9,13 +9,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 
-public class Constants {
+public class UltimineAddition {
 	public static final String MOD_ID = "ultimine_addition";
 	public static final String MOD_NAME = "Ultimine Addition";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 	private static final String GUI_DIR = "textures/gui/";
 	public static Path getConfigDir(String fileName) {
-		return Paths.get(String.format("%s/%s/%s", Platform.getConfigFolder().toString(), Constants.MOD_ID, fileName));
+		return Paths.get(String.format("%s/%s/%s", Platform.getConfigFolder().toString(), UltimineAddition.MOD_ID, fileName));
 	}
 
 	public static ResourceLocation getLocation(String name) {

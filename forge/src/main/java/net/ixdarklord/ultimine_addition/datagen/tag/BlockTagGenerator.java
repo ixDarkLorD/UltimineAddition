@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.datagen.tag;
 
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.tags.BlockTags;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlockTagGenerator extends BlockTagsProvider {
     public BlockTagGenerator(DataGenerator generator, @Nullable ExistingFileHelper existingFileHelper) {
-        super(generator, Constants.MOD_ID, existingFileHelper);
+        super(generator, UltimineAddition.MOD_ID, existingFileHelper);
     }
 
     @Override

@@ -7,7 +7,7 @@ import net.ixdarklord.ultimine_addition.client.gui.component.SkillsRecordTooltip
 import net.ixdarklord.ultimine_addition.client.gui.screen.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.handler.ItemPropertiesHandler;
 import net.ixdarklord.ultimine_addition.core.ClientSetup;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
@@ -23,7 +23,7 @@ public class ForgeClientSetup {
         ClientSetup.init();
     }
 
-    @Mod.EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
+    @Mod.EventBusSubscriber(modid = UltimineAddition.MOD_ID, value = Dist.CLIENT)
     public static class Event {
         @SubscribeEvent
         public static void onRenderGameOverlayEvent(final RenderGuiOverlayEvent.Pre event) {
@@ -33,7 +33,7 @@ public class ForgeClientSetup {
         }
     }
 
-    @Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @Mod.EventBusSubscriber(modid = UltimineAddition.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class EventBus {
         @SubscribeEvent
         public static void onClientSetup(final FMLClientSetupEvent event) {

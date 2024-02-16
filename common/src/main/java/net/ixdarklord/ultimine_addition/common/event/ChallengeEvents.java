@@ -8,12 +8,11 @@ import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.ftb.mods.ftbultimine.FTBUltimine;
-import net.ixdarklord.coolcat_lib.util.InventoryHelper;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
-import net.ixdarklord.ultimine_addition.common.data.chunk.ChunkManager;
+import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSavedData;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
@@ -28,18 +27,19 @@ import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
 import net.ixdarklord.ultimine_addition.common.network.packet.SyncChallengesPacket;
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static net.ixdarklord.ultimine_addition.util.ItemUtils.listMatchingItem;
 
 public class ChallengeEvents {
     public static void init() {
@@ -144,12 +144,14 @@ public class ChallengeEvents {
 
     private static void legacyFunctions() {
         BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
+            if (level.isClientSide) return EventResult.pass();
+
             List<ItemStack> stacks = listMatchingItem(player, ModItems.MINER_CERTIFICATE);
             boolean isGamemodeCorrect = !player.isCreative() && !player.isSpectator();
             if (stacks.isEmpty()
                     || isGamemodeCorrect && FTBUltimine.instance.canUltimine(player) && FTBUltimine.instance.get(player).isPressed()
                     || !(state.is(ModBlockTags.FORGE_ORES) || state.is(ModBlockTags.FABRIC_ORES))
-                    || (isGamemodeCorrect && ChunkManager.INSTANCE.getChunkData(level.getChunk(pos)).isBlockPlacedByEntity(pos)))
+                    || (isGamemodeCorrect && IneligibleBlocksSavedData.getOrCreate((ServerLevel) level).isBlockPlacedByEntity(pos)))
                 return EventResult.pass();
 
             for (ItemStack stack : stacks) {
@@ -162,15 +164,5 @@ public class ChallengeEvents {
             }
             return EventResult.pass();
         });
-    }
-
-    private static List<ItemStack> listMatchingItem(Player player, Item item) {
-        List<ItemStack> result = new ArrayList<>();
-        if (ServicePlatform.SlotAPI.isModLoaded()) {
-            ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
-            if (!stack.isEmpty() && stack.is(item)) result.add(stack);
-        }
-        result.addAll(InventoryHelper.listMatchingItem(player.getInventory(), item));
-        return result;
     }
 }

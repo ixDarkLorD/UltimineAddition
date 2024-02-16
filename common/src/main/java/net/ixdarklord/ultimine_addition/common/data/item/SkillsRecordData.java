@@ -2,14 +2,14 @@ package net.ixdarklord.ultimine_addition.common.data.item;
 
 import com.mojang.datafixers.util.Pair;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
-import net.ixdarklord.ultimine_addition.common.data.chunk.ChunkManager;
+import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSavedData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.PenItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
+import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -20,6 +20,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -28,7 +29,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -68,9 +68,9 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
             MiningSkillCardData cardData = new MiningSkillCardData().loadData(stack).sendToClient((ServerPlayer) player);
             cardData.getChallenges().forEach((identifier, values) -> {
                 if (i.get() == 0) {
+                    var savedData = IneligibleBlocksSavedData.getOrCreate((ServerLevel) player.getLevel());
                     var challengeData = ChallengesManager.INSTANCE.getAllChallenges().get(identifier.id());
                     List<Block> blocks = ChallengesManager.INSTANCE.utilizeTargetedBlocks(challengeData);
-                    ChunkAccess chunk = player.getLevel().getChunk(pos);
                     int inkChamber = getPenSlot().getItem() instanceof PenItem
                             ? ((PenItem)getAllSlots().get(4).getItem()).getData(getAllSlots().get(4)).getCapacity()
                             : 0;
@@ -82,7 +82,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                     boolean isCorrectAction = challengeData.getChallengeType().equals(challengeType) || challengeData.getChallengeType().equals(challengeType.getConsumeVersion());
                     boolean isValidBlock = blocks.contains(state.getBlock());
                     boolean isCorrectTool = !hasCorrectGamemode || ChallengesManager.INSTANCE.isCorrectTool(player, challengeData);
-                    boolean isBlockPlacedByEntity = ConfigHandler.COMMON.IS_PLACED_BY_ENTITY_CONDITION.get() && hasCorrectGamemode && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY) && ChunkManager.INSTANCE.getChunkData(chunk).isBlockPlacedByEntity(pos);
+                    boolean isBlockPlacedByEntity = ConfigHandler.COMMON.IS_PLACED_BY_ENTITY_CONDITION.get() && hasCorrectGamemode && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY) && savedData.isBlockPlacedByEntity(pos);
 
                     if (ConfigHandler.COMMON.CHALLENGE_ACTIONS_LOGGER.get()) {
                         ChallengesManager.LOGGER.debug("/===========================================/");
@@ -98,12 +98,17 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                         ChallengesManager.LOGGER.debug("/===========================================/");
                     }
 
-                    if (isBlockPlacedByEntity) {
-                        ChunkManager.INSTANCE.getChunkData(chunk).getPlacedBlocks().forEach((entityIdentifier, placedBlocks) -> {
-                            var list = placedBlocks.stream().filter(blockInfo -> blockInfo.pos().equals(pos)).toList();
+                    if (!isMissingRequiredItems && !notEnoughInk && !isChallengeAccomplished && isCorrectAction && isValidBlock && isCorrectTool && isBlockPlacedByEntity) {
+                        savedData.getChunkEntries().forEach((chunkPos, chunkEntries) -> {
+                            var list = chunkEntries.stream()
+                                    .filter(blockEntry -> !blockEntry.placedBlocks().stream().filter(blockInfo -> blockInfo.pos.equals(pos)).toList().isEmpty())
+                                    .toList();
+
                             if (!list.isEmpty()) {
-                                MutableComponent component = Component.translatable("info.ultimine_addition.placed_by_entity", Component.translatable("entity.%s.%s".formatted(entityIdentifier.id().getNamespace(), entityIdentifier.id().getPath())));
-                                player.displayClientMessage(component.withStyle(ChatFormatting.RED), true);
+                                IneligibleBlocksSavedData.BlockEntry blockEntry = list.get(0);
+                                MutableComponent component = Component.literal("[").append(SkillsRecordItem.TITLE.copy().withStyle(ChatFormatting.YELLOW)).append("] ").withStyle(ChatFormatting.GRAY);
+                                MutableComponent info = Component.translatable("info.ultimine_addition.placed_by_entity", Component.translatable("entity.%s.%s".formatted(blockEntry.entityId().getNamespace(), blockEntry.entityId().getPath()))).withStyle(ChatFormatting.RED);
+                                player.displayClientMessage(component.append(info), true);
                             }
                         });
                     }

@@ -16,7 +16,7 @@ import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static net.ixdarklord.ultimine_addition.util.ItemUtils.findItemInHand;
 
 public class ChallengesInfoPanel {
-    private static final ResourceLocation HUD = new ResourceLocation(Constants.MOD_ID, "textures/gui/challenge_panel.png");
+    private static final ResourceLocation HUD = new ResourceLocation(UltimineAddition.MOD_ID, "textures/gui/challenge_panel.png");
     public static final RenderStateShard.TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("translucent_transparency", () -> {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -99,20 +99,28 @@ public class ChallengesInfoPanel {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, HUD);
 
+            SkillsRecordScreen.BGColor bgColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
             if (panel.isNotMorePanel()) {
                 // Slots
                 TRANSLUCENT_TRANSPARENCY.setupRenderState();
+                RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
                 GuiComponent.blit(poseStack, X + 5, Y, 5, 0, 51, 10, 256, 256);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
                 int spacing = 13 * Math.min(panel.getSlot(), 3);
                 GuiComponent.fill(poseStack, X+8 + spacing, Y+3, X+14 + spacing, Y+9, ColorUtils.RGBToRGBA(Color.GREEN.getRGB(), 0.50F));
                 TRANSLUCENT_TRANSPARENCY.clearRenderState();
 
                 // Title BG
+                RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
                 ScreenUtils.blitNineSliced(poseStack, X, Y + 10, textureWidth + length, 11, 20, 4, textureWidth, 11, 0, 10);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
                 // Info BG
                 TRANSLUCENT_TRANSPARENCY.setupRenderState();
+                RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
                 ScreenUtils.blitNineSliced(poseStack, X, Y + 18, textureWidth + length, 14 + Math.max(0, font.lineHeight * (panel.getInfos().size() - 1)), 20, 4, textureWidth, 14, 0, 21);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 TRANSLUCENT_TRANSPARENCY.clearRenderState();
 
                 // Title String

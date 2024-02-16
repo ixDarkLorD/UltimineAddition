@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.datagen.particle;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
@@ -41,7 +41,7 @@ public abstract class ParticleProvider implements DataProvider {
             }
 
             JSONProperties.add("textures", array);
-            DataProvider.saveStable(cache, JSONProperties, pathProvider.file(Constants.getLocation(particle.getKey()), "json"));
+            DataProvider.saveStable(cache, JSONProperties, pathProvider.file(UltimineAddition.getLocation(particle.getKey()), "json"));
         }
     }
 

@@ -1,6 +1,17 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.3.0 Release | Feb 16, 2024
+### Adding
+- Mining Skill Card Now can activate the ultimine ability upon leveling to mastered. "With the option to turn it off"
+- Now, the challenges panel has its color synced to the Skills Record screen.
+### Changed
+- The Skills Record info is clarified when the player tries to register points toward the challenges through non-eligible blocks.
+- Changing the Skills Record Info translation from "Invalid Block" to "Ineligible Block"
+- Changing from storing the Ineligible Blocks in Chunk data to World Saved Data
+### Fixed
+- [UA-19] Challenges doesn't get cleared after reaching the mastered tier in the Mining Skill Card.
+
 ## v1.2.4 Release | Feb 6, 2024
 ### Fixed
 - [UA-17] The Skills Record doesn't register any point toward mined blocks if it's in th Curios slot.

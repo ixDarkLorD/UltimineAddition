@@ -5,7 +5,7 @@ import net.ixdarklord.coolcat_lib.common.crafting.ICondition;
 import net.ixdarklord.coolcat_lib.common.crafting.IConditionSerializer;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 
@@ -28,7 +28,7 @@ public class LegacyModeCondition implements ICondition {
     }
 
     public static class Serializer implements IConditionSerializer<LegacyModeCondition> {
-        private static final ResourceLocation NAME = Constants.getLocation("legacy_mode");
+        private static final ResourceLocation NAME = UltimineAddition.getLocation("legacy_mode");
         public static final Serializer INSTANCE = new Serializer();
 
         @Override

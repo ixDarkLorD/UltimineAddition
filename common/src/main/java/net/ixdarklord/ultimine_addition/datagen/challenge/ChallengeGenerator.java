@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.datagen.challenge;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.challenge.builder.ChallengesBuilder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.tags.BlockTags;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
-import static net.ixdarklord.ultimine_addition.core.Constants.getLocation;
+import static net.ixdarklord.ultimine_addition.core.UltimineAddition.getLocation;
 
 public class ChallengeGenerator extends ChallengeProvider {
     public ChallengeGenerator(DataGenerator generator) {
@@ -576,6 +576,6 @@ public class ChallengeGenerator extends ChallengeProvider {
 
     @Override
     public @NotNull String getName() {
-        return String.format("%s %s", Constants.MOD_NAME, super.getName());
+        return String.format("%s %s", UltimineAddition.MOD_NAME, super.getName());
     }
 }

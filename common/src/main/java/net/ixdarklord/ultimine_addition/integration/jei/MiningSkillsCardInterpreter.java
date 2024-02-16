@@ -7,7 +7,7 @@ import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -23,7 +23,7 @@ public class MiningSkillsCardInterpreter implements IIngredientSubtypeInterprete
         registration.registerSubtypeInterpreter(ModItems.MINING_SKILL_CARD_HOE, new MiningSkillsCardInterpreter());
 
         for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
-            ResourceLocation location = new ResourceLocation(Constants.MOD_ID + ":mining_skill_card_" + type.getId());
+            ResourceLocation location = new ResourceLocation(UltimineAddition.MOD_ID + ":mining_skill_card_" + type.getId());
             Item item = Registry.ITEM.get(location);
             if (item == Items.AIR) continue;
             registration.registerSubtypeInterpreter(item, new MiningSkillsCardInterpreter());

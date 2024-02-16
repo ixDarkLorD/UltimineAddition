@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.datagen.tag;
 
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraftforge.common.Tags;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ItemTagGenerator extends ItemTagsProvider {
     public ItemTagGenerator(DataGenerator generator, @Nullable ExistingFileHelper existingFileHelper) {
-        super(generator, new BlockTagGenerator(generator, existingFileHelper), Constants.MOD_ID, existingFileHelper);
+        super(generator, new BlockTagGenerator(generator, existingFileHelper), UltimineAddition.MOD_ID, existingFileHelper);
     }
 
     @SuppressWarnings("unchecked")

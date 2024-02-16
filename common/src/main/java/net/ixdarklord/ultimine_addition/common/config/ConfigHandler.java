@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.config;
 
 import net.ixdarklord.ultimine_addition.client.gui.screen.SkillsRecordScreen;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraftforge.common.ForgeConfigSpec;
 
@@ -59,7 +59,7 @@ public class ConfigHandler {
     public static class COMMON {
         public static final ForgeConfigSpec SPEC;
         public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-        public static final SafeConfig.Builder SAFE_CONFIG_BUILDER = new SafeConfig.Builder(Constants.MOD_ID, "common-config.toml", "%s/SafeConfig".formatted(Constants.MOD_NAME));
+        public static final SafeConfig.Builder SAFE_CONFIG_BUILDER = new SafeConfig.Builder(UltimineAddition.MOD_ID, "common-config.toml", "%s/SafeConfig".formatted(UltimineAddition.MOD_NAME));
 
         /**
          * This is a safe version of {@link COMMON#PLAYSTYLE_MODE} to use even if the config wasn't loaded.
@@ -84,6 +84,7 @@ public class ConfigHandler {
         public static final ForgeConfigSpec.IntValue TIER_2_POTION_POINTS;
         public static final ForgeConfigSpec.IntValue TIER_3_POTION_POINTS;
 
+        public static final ForgeConfigSpec.BooleanValue MASTERED_CARD_EFFECT;
         public static final ForgeConfigSpec.IntValue TIER_1_MAX_BLOCKS;
         public static final ForgeConfigSpec.IntValue TIER_2_MAX_BLOCKS;
         public static final ForgeConfigSpec.IntValue TIER_3_MAX_BLOCKS;
@@ -106,7 +107,7 @@ public class ConfigHandler {
         public static final ForgeConfigSpec.IntValue TIER_1_TIME;
         public static final ForgeConfigSpec.IntValue TIER_2_TIME;
         public static final ForgeConfigSpec.IntValue TIER_3_TIME;
-        public static final ForgeConfigSpec.BooleanValue CHUNK_DATA_LOGGER;
+        public static final ForgeConfigSpec.BooleanValue INELIGIBLE_BLOCKS_LOGGER;
         public static final ForgeConfigSpec.BooleanValue CHALLENGE_MANAGER_LOGGER;
         public static final ForgeConfigSpec.BooleanValue CHALLENGE_ACTIONS_LOGGER;
 
@@ -117,6 +118,7 @@ public class ConfigHandler {
                             "%s [WIP]: There will be one tier for the Mining Skill Card. If you complete all the challenges, it will turn the card to the Mastered tier immediately.".formatted(PlaystyleMode.ONE_TIER_ONLY.name()),
                             "%s: It will revert the mod mechanics as it was on the original release. (\"v0.1.0\") There will be only the miner certificate with one challenge to complete.".formatted(PlaystyleMode.LEGACY.name()))
                     .defineEnum("playstyle_mode", PlaystyleMode.MODERN);
+
             PAPER_CONSUMPTION_RATE = BUILDER
                     .comment("You can change the rate of paper consumption in the Skills Record.")
                     .defineInRange("paper_consummation_rate", 0.35, 0, 1);
@@ -164,6 +166,9 @@ public class ConfigHandler {
             BUILDER.pop();
 
             BUILDER.push("Ability");
+            MASTERED_CARD_EFFECT = BUILDER
+                    .comment("If a Mining Skill Card reaches the \"mastered\" tier, it will give the player the ultimine ability for the exact tool the card has on.")
+                    .define("mastered_card_effect", true);
             TIER_BASED_MAX_BLOCKS = BUILDER
                     .comment("This makes the ultimine max blocks value different for every tier.")
                     .define("tier_based_max_blocks", true);
@@ -183,9 +188,9 @@ public class ConfigHandler {
             BUILDER.pop();
 
             BUILDER.push("Debug");
-            CHUNK_DATA_LOGGER = BUILDER
-                    .comment("Enable or disable the ChunkData logger.")
-                    .define("chunk_data_logger", false);
+            INELIGIBLE_BLOCKS_LOGGER = BUILDER
+                    .comment("Enable or disable the IneligibleBlocks logger.")
+                    .define("ineligible_blocks_logger", false);
             CHALLENGE_MANAGER_LOGGER = BUILDER
                     .comment("Enable or disable the ChallengeManager logger.")
                     .define("challenge_manager_logger", false);
