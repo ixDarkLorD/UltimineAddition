@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.datagen.recipe;
 
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.datagen.recipe.builder.ItemStorageDataRecipeBuilder;
 import net.ixdarklord.ultimine_addition.datagen.recipe.builder.MCRecipeBuilder;
@@ -38,7 +38,7 @@ public class RecipeGenerator extends RecipeProvider {
                                 .pattern("ALA")
                                 .pattern("LPL")
                                 .pattern("ALA")
-                                .group(Constants.MOD_ID)
+                                .group(UltimineAddition.MOD_ID)
                                 .unlockedBy("has_amethyst_shard", inventoryTrigger(ItemPredicate.Builder.item().of(Items.AMETHYST_SHARD).build()))
                                 .save(finishedRecipeConsumer))
                 .build(consumer, Registration.CARD_BLUEPRINT.getId());
@@ -49,7 +49,7 @@ public class RecipeGenerator extends RecipeProvider {
                         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_EMPTY.get(), 2)
                                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
                                 .requires(Registration.CARD_BLUEPRINT.get())
-                                .group(Constants.MOD_ID)
+                                .group(UltimineAddition.MOD_ID)
                                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                                 .save(finishedRecipeConsumer))
                 .build(consumer, Registration.MINING_SKILL_CARD_EMPTY.getId());
@@ -60,7 +60,7 @@ public class RecipeGenerator extends RecipeProvider {
                         MCRecipeBuilder.create(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_PICKAXE.get())
                                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
                                 .requires(ItemTags.PICKAXES)
-                                .group(Constants.MOD_ID)
+                                .group(UltimineAddition.MOD_ID)
                                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                                 .save(finishedRecipeConsumer))
                 .build(consumer, Registration.MINING_SKILL_CARD_PICKAXE.getId());
@@ -72,7 +72,7 @@ public class RecipeGenerator extends RecipeProvider {
                         MCRecipeBuilder.create(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_AXE.get())
                                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
                                 .requires(ItemTags.AXES)
-                                .group(Constants.MOD_ID)
+                                .group(UltimineAddition.MOD_ID)
                                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                                 .save(finishedRecipeConsumer))
                 .build(consumer, Registration.MINING_SKILL_CARD_AXE.getId());
@@ -83,7 +83,7 @@ public class RecipeGenerator extends RecipeProvider {
                         MCRecipeBuilder.create(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_SHOVEL.get())
                                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
                                 .requires(ItemTags.SHOVELS)
-                                .group(Constants.MOD_ID)
+                                .group(UltimineAddition.MOD_ID)
                                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                                 .save(finishedRecipeConsumer))
                 .build(consumer, Registration.MINING_SKILL_CARD_SHOVEL.getId());
@@ -94,7 +94,7 @@ public class RecipeGenerator extends RecipeProvider {
                         MCRecipeBuilder.create(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_HOE.get())
                                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
                                 .requires(ItemTags.HOES)
-                                .group(Constants.MOD_ID)
+                                .group(UltimineAddition.MOD_ID)
                                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                                 .save(finishedRecipeConsumer))
                 .build(consumer, Registration.MINING_SKILL_CARD_HOE.getId());
@@ -110,7 +110,7 @@ public class RecipeGenerator extends RecipeProvider {
                         .pattern("SIS")
                         .pattern("YCY")
                         .pattern("SYS")
-                        .group(Constants.MOD_ID)
+                        .group(UltimineAddition.MOD_ID)
                         .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                         .save(finishedRecipeConsumer))
                 .build(consumer, Registration.SKILLS_RECORD.getId());
@@ -126,7 +126,7 @@ public class RecipeGenerator extends RecipeProvider {
                         .pattern("INI")
                         .pattern("RGB")
                         .pattern("INI")
-                        .group(Constants.MOD_ID)
+                        .group(UltimineAddition.MOD_ID)
                         .unlockedBy("has_skills_record", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.SKILLS_RECORD.get()).build()))
                         .save(finishedRecipeConsumer))
                 .build(consumer, Registration.INK_CHAMBER.getId());
@@ -141,7 +141,7 @@ public class RecipeGenerator extends RecipeProvider {
                         .pattern(" GS")
                         .pattern("GCG")
                         .pattern("IG ")
-                        .group(Constants.MOD_ID)
+                        .group(UltimineAddition.MOD_ID)
                         .unlockedBy("has_ink_chamber", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.INK_CHAMBER.get()).build()))
                         .save(finishedRecipeConsumer))
                 .build(consumer, Registration.PEN.getId());
@@ -152,10 +152,10 @@ public class RecipeGenerator extends RecipeProvider {
                         .storage("ink_chamber", 1)
                         .requires(ModItemTags.MORE_VALUABLE_PIGMENT, 50)
                         .requires(ModItemTags.LESS_VALUABLE_PIGMENT, 10)
-                        .group(Constants.MOD_ID)
+                        .group(UltimineAddition.MOD_ID)
                         .unlockedBy("has_pen", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.PEN.get()).build()))
-                        .save(finishedRecipeConsumer, Constants.getLocation("refill")))
-                .build(consumer, Constants.getLocation("%s_refill".formatted(Registration.PEN.getId().getPath())));
+                        .save(finishedRecipeConsumer, UltimineAddition.getLocation("refill")))
+                .build(consumer, UltimineAddition.getLocation("%s_refill".formatted(Registration.PEN.getId().getPath())));
 
         ConditionalRecipe.builder()
                 .addCondition(new LegacyModeCondition(false))
@@ -165,7 +165,7 @@ public class RecipeGenerator extends RecipeProvider {
                         .requires(Registration.MINING_SKILL_CARD_AXE.get(), MiningSkillCardItem.Tier.Mastered)
                         .requires(Registration.MINING_SKILL_CARD_SHOVEL.get(), MiningSkillCardItem.Tier.Mastered)
                         .requires(Registration.MINING_SKILL_CARD_HOE.get(), MiningSkillCardItem.Tier.Mastered)
-                        .group(Constants.MOD_ID)
+                        .group(UltimineAddition.MOD_ID)
                         .unlockedBy("has_skills_record", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.SKILLS_RECORD.get()).build()))
                         .save(finishedRecipeConsumer))
                 .build(consumer, Registration.MINER_CERTIFICATE.getId());
@@ -181,6 +181,6 @@ public class RecipeGenerator extends RecipeProvider {
                         .pattern(" 4 ")
                         .unlockedBy("has_miner_certificate", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINER_CERTIFICATE.get()).build()))
                         .save(finishedRecipeConsumer))
-                .build(consumer, Constants.getLocation("%s_legacy".formatted(Registration.MINER_CERTIFICATE.getId().getPath())));
+                .build(consumer, UltimineAddition.getLocation("%s_legacy".formatted(Registration.MINER_CERTIFICATE.getId().getPath())));
     }
 }

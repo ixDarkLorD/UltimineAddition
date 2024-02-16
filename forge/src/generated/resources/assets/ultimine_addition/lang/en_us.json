@@ -73,7 +73,7 @@
   "info.ultimine_addition.legacy_mode": "You can't use this! The playstyle mode has been set to Legacy.",
   "info.ultimine_addition.obtain": "Congratulations on learning the excavation skill!",
   "info.ultimine_addition.obtained_already": "You have already obtained this knowledge!",
-  "info.ultimine_addition.placed_by_entity": "Invalid block! This block was placed by %s.",
+  "info.ultimine_addition.placed_by_entity": "Ineligible block! This block was placed by %s.",
   "info.ultimine_addition.required_skill": "Required Skill for: %s",
   "info.ultimine_addition.required_skill.all": "All Tools",
   "info.ultimine_addition.required_skill.axe": "Axe",

@@ -7,7 +7,7 @@ import com.mojang.serialization.JsonOps;
 import dev.architectury.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -34,7 +34,7 @@ import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.T
 public class ChallengesManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     public static ChallengesManager INSTANCE = new ChallengesManager();
-    public static final Logger LOGGER = LoggerFactory.getLogger(Constants.MOD_NAME + "/ChallengesManager");
+    public static final Logger LOGGER = LoggerFactory.getLogger(UltimineAddition.MOD_NAME + "/ChallengesManager");
     private Map<ResourceLocation, ChallengesData> challenges = new TreeMap<>();
 
     public ChallengesManager() {

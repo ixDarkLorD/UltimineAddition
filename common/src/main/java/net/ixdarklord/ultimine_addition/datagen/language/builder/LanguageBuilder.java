@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.datagen.language.builder;
 
 import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.effect.MobEffect;
@@ -129,7 +129,7 @@ public class LanguageBuilder {
         add("challenge", "interact_with_block", "Interact with %s.");
         add("challenge", "various_blocks", "one of these blocks (%s)");
 
-        add("info", "placed_by_entity", "Invalid block! This block was placed by %s.");
+        add("info", "placed_by_entity", "Ineligible block! This block was placed by %s.");
         add("info", "obtain", "Congratulations on learning the excavation skill!");
         add("info", "obtained_already", "You have already obtained this knowledge!");
         add("info", "incapable", "You need the excavation skill to perform this action! First, Obtain a Miner Certificate or drink a Mine-Go Juice.");
@@ -183,7 +183,7 @@ public class LanguageBuilder {
     }
 
     private void add(String category, String key, @NotNull String value) {
-        add(String.format("%s.%s.%s", category, Constants.MOD_ID, key), value);
+        add(String.format("%s.%s.%s", category, UltimineAddition.MOD_ID, key), value);
     }
 
     private void addPotion(String key, String value, @Nullable String potionType) {

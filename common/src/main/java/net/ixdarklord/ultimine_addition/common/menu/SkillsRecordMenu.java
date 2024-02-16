@@ -8,7 +8,7 @@ import net.ixdarklord.ultimine_addition.common.menu.slot.PenSlot;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.item.PenItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.core.NonNullList;
@@ -76,7 +76,7 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
                 return ItemStack.EMPTY;
             }
         } else {
-            Constants.LOGGER.error("Invalid slotIndex:" + index);
+            UltimineAddition.LOGGER.error("Invalid slotIndex:" + index);
             return ItemStack.EMPTY;
         }
 

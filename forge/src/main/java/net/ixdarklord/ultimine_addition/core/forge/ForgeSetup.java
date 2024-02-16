@@ -10,7 +10,7 @@ import net.ixdarklord.ultimine_addition.common.event.impl.ChunkUnloadEvent;
 import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
 import net.ixdarklord.ultimine_addition.common.event.impl.ToolAction;
 import net.ixdarklord.ultimine_addition.core.CommonSetup;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -34,17 +34,17 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod(Constants.MOD_ID)
+@Mod(UltimineAddition.MOD_ID)
 public class ForgeSetup {
     public ForgeSetup() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        EventBuses.registerModEventBus(Constants.MOD_ID, modEventBus);
+        EventBuses.registerModEventBus(UltimineAddition.MOD_ID, modEventBus);
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ForgeClientSetup::new);
         CommonSetup.init();
     }
 
-    @Mod.EventBusSubscriber(modid = Constants.MOD_ID)
+    @Mod.EventBusSubscriber(modid = UltimineAddition.MOD_ID)
     public static class Event {
         @SubscribeEvent
         public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
@@ -54,7 +54,7 @@ public class ForgeSetup {
         public static void onAttachCapabilitiesPlayer(AttachCapabilitiesEvent<Entity> event) {
             if (event.getObject() instanceof Player) {
                 if (!event.getObject().getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).isPresent()) {
-                    event.addCapability(new ResourceLocation(Constants.MOD_ID, "properties"), new PlayerUltimineCapabilityProvider());
+                    event.addCapability(new ResourceLocation(UltimineAddition.MOD_ID, "properties"), new PlayerUltimineCapabilityProvider());
                 }
             }
         }
@@ -109,7 +109,7 @@ public class ForgeSetup {
             }
         }
     }
-    @Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    @Mod.EventBusSubscriber(modid = UltimineAddition.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class EventBus {
         @SubscribeEvent
         public static void onCommonSetup(final FMLCommonSetupEvent event) {

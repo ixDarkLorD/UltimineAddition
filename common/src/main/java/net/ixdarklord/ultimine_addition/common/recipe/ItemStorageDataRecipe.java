@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.ixdarklord.ultimine_addition.common.data.item.ItemStorageData;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.DataIngredient;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.core.NonNullList;
@@ -165,7 +165,7 @@ public class ItemStorageDataRecipe extends CustomRecipe {
     }
 
     public static class Serializer implements RecipeSerializer<ItemStorageDataRecipe> {
-        public static final ResourceLocation NAME = Constants.getLocation("item_storage_data");
+        public static final ResourceLocation NAME = UltimineAddition.getLocation("item_storage_data");
         public @NotNull ItemStorageDataRecipe fromJson(@NotNull ResourceLocation id, @NotNull JsonObject json) {
             String group = GsonHelper.getAsString(json, "group", "");
             CraftingBookCategory craftingBookCategory = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, "category", null), CraftingBookCategory.MISC);

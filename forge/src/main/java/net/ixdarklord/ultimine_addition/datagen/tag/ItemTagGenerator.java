@@ -2,9 +2,8 @@ package net.ixdarklord.ultimine_addition.datagen.tag;
 
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.world.level.block.Block;
@@ -18,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 public class ItemTagGenerator extends ItemTagsProvider {
 
     public ItemTagGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> completableFuture, CompletableFuture<TagLookup<Block>> completableFuture2, @Nullable ExistingFileHelper existingFileHelper) {
-        super(output, completableFuture, completableFuture2, Constants.MOD_ID, existingFileHelper);
+        super(output, completableFuture, completableFuture2, UltimineAddition.MOD_ID, existingFileHelper);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.advancement;
 
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.critereon.*;
@@ -24,7 +24,7 @@ public class AdvancementTriggers {
     public static PlayerTrigger.TriggerInstance advancementTrigger(String name) {
         return new PlayerTrigger.TriggerInstance(CriteriaTriggers.TICK.getId(),
                 ContextAwarePredicate.create(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS,
-                        EntityPredicate.Builder.entity().subPredicate(PlayerPredicate.Builder.player().checkAdvancementDone(Constants.getLocation(name), true).build())).build()));
+                        EntityPredicate.Builder.entity().subPredicate(PlayerPredicate.Builder.player().checkAdvancementDone(UltimineAddition.getLocation(name), true).build())).build()));
     }
 
     public static TradeTrigger.TriggerInstance tradedWithVillager(ItemPredicate.Builder itemPredicate) {

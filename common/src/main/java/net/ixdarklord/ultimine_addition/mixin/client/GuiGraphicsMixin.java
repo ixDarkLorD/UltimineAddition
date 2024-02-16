@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.mixin.client;
 
 import net.ixdarklord.coolcat_lib.common.item.ComponentItem;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,7 +35,7 @@ public abstract class GuiGraphicsMixin {
             TooltipComponent tooltipComponent = visualTooltipComponent.get();
             if (this.minecraft.screen instanceof AbstractContainerScreen<?> screen && screen.hoveredSlot != null && screen.hoveredSlot.getItem().getItem() instanceof ComponentItem) {
                 for (int i = 0; i < tooltipLines.size(); i++) {
-                    if (tooltipLines.get(i).getString().equalsIgnoreCase(Constants.MOD_ID + ".tooltip_image"))
+                    if (tooltipLines.get(i).getString().equalsIgnoreCase(UltimineAddition.MOD_ID + ".tooltip_image"))
                         list.set(i, ClientTooltipComponent.create(tooltipComponent));
                 }
 

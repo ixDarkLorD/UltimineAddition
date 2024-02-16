@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import dev.architectury.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.world.item.Items;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Set;
 
 public class CustomMSCApi {
-    private final static Logger LOGGER = LogManager.getLogger(Constants.MOD_NAME + "/API/CustomMSC");
-    public static final String dir = String.format("%s/%s/custom_cards", Platform.getConfigFolder(), Constants.MOD_ID);
+    private final static Logger LOGGER = LogManager.getLogger(UltimineAddition.MOD_NAME + "/API/CustomMSC");
+    public static final String dir = String.format("%s/%s/custom_cards", Platform.getConfigFolder(), UltimineAddition.MOD_ID);
     public static List<MiningSkillCardItem.Type> CUSTOM_TYPES = new ArrayList<>();
 
     public static void init() {

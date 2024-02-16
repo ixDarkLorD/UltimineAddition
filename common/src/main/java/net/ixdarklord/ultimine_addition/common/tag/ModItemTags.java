@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.tag;
 
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -13,7 +13,7 @@ public class ModItemTags {
     public static final TagKey<Item> SLIMEBALLS_FABRIC = createFabric("slime_balls");
 
     private static TagKey<Item> create(String name) {
-        return TagKey.create(Registries.ITEM, Constants.getLocation(name));
+        return TagKey.create(Registries.ITEM, UltimineAddition.getLocation(name));
     }
     private static TagKey<Item> createFabric(String name) {
         return TagKey.create(Registries.ITEM, new ResourceLocation("c", name));

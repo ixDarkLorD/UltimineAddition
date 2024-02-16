@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.tag;
 
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -37,7 +37,7 @@ public class ModBlockTags {
     public static final TagKey<Block> FABRIC_QUARTZ_ORES = createFabric("quartz_ores");
 
     private static TagKey<Block> create(String name) {
-        return TagKey.create(Registries.BLOCK, Constants.getLocation(name));
+        return TagKey.create(Registries.BLOCK, UltimineAddition.getLocation(name));
     }
 
     private static TagKey<Block> createForge(String name) {

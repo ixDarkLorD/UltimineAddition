@@ -18,7 +18,7 @@ import net.ixdarklord.coolcat_lib.util.MouseHelper;
 import net.ixdarklord.coolcat_lib.util.ScreenUtils;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.DataIngredient;
 import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -43,9 +43,9 @@ import java.util.List;
 import java.util.*;
 
 public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorageDataRecipe> {
-    public static final ResourceLocation TEXTURES = Constants.getGuiTexture("item_storage_data_recipe_jei", "png");
+    public static final ResourceLocation TEXTURES = UltimineAddition.getGuiTexture("item_storage_data_recipe_jei", "png");
     public static final RecipeType<ItemStorageDataRecipe> RECIPE_TYPE =
-            RecipeType.create(Constants.MOD_ID, ItemStorageDataRecipe.Serializer.NAME.getPath(), ItemStorageDataRecipe.class);
+            RecipeType.create(UltimineAddition.MOD_ID, ItemStorageDataRecipe.Serializer.NAME.getPath(), ItemStorageDataRecipe.class);
     private final IGuiHelper helper;
     private final IDrawable background;
     private final ITickTimer timer;

@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static net.ixdarklord.ultimine_addition.core.Constants.MOD_ID;
+import static net.ixdarklord.ultimine_addition.core.UltimineAddition.MOD_ID;
 
 public class Registration {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(MOD_ID, Registries.CREATIVE_MODE_TAB);
@@ -85,10 +85,10 @@ public class Registration {
     private static void registerMobEffects() {
         // Custom Mine-Go Juice Effects
         for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
-            String name = "mine_go_juice_%s".formatted(type.getId());
+            String id = MineGoJuiceEffect.getId(type).getPath();
             MobEffect mobEffect = new MineGoJuiceEffect(type, MobEffectCategory.BENEFICIAL, type.getPotionColor().getRGB());
-            MOB_EFFECTS.register(name, () -> mobEffect);
-            mineGoJuiceList.put(name, () -> mobEffect);
+            MOB_EFFECTS.register(id, () -> mobEffect);
+            mineGoJuiceList.put(id, () -> mobEffect);
         }
         MOB_EFFECTS.register();
     }
@@ -96,13 +96,13 @@ public class Registration {
     private static void registerPotions() {
         // Custom Mine-Go Juice Potions
         for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
-            String name = "mine_go_juice_%s".formatted(type.getId());
-            Supplier<MobEffect> mobEffect = mineGoJuiceList.get(name);
+            String id = MineGoJuiceEffect.getId(type).getPath();
+            Supplier<MobEffect> mobEffect = mineGoJuiceList.get(id);
             if (mobEffect == null) continue;
 
-            POTIONS.register(name, () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MobEffectInstance(mobEffect.get(), ConfigHandler.COMMON.TIER_1_TIME_SAFE.get() * 20, 0)));
-            POTIONS.register(name + "_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MobEffectInstance(mobEffect.get(), ConfigHandler.COMMON.TIER_2_TIME_SAFE.get() * 20, 1)));
-            POTIONS.register(name + "_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MobEffectInstance(mobEffect.get(), ConfigHandler.COMMON.TIER_3_TIME_SAFE.get() * 20, 2)));
+            POTIONS.register(id, () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MobEffectInstance(mobEffect.get(), ConfigHandler.COMMON.TIER_1_TIME_SAFE.get() * 20, 0)));
+            POTIONS.register(id + "_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MobEffectInstance(mobEffect.get(), ConfigHandler.COMMON.TIER_2_TIME_SAFE.get() * 20, 1)));
+            POTIONS.register(id + "_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MobEffectInstance(mobEffect.get(), ConfigHandler.COMMON.TIER_3_TIME_SAFE.get() * 20, 2)));
         }
         mineGoJuiceList.clear();
         POTIONS.register();
@@ -132,7 +132,7 @@ public class Registration {
                         output.accept(ModItems.MINING_SKILL_CARD_EMPTY);
                         for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
                             String name = "mining_skill_card_" + type.getId();
-                            Item item = BuiltInRegistries.ITEM.get(Constants.getLocation(name));
+                            Item item = BuiltInRegistries.ITEM.get(UltimineAddition.getLocation(name));
                             if (item instanceof MiningSkillCardItem cardItem && cardItem.getType() != MiningSkillCardItem.Type.EMPTY) {
                                 ItemStack cardStack = cardItem.getDefaultInstance();
                                 MiningSkillCardData cardData = new MiningSkillCardData().loadData(cardStack).setTier(MiningSkillCardItem.Tier.Mastered);

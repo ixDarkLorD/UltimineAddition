@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
@@ -117,7 +117,7 @@ public class MCRecipe extends ShapelessRecipe {
     }
 
     public static class Serializer implements RecipeSerializer<MCRecipe> {
-        public static final ResourceLocation NAME = Constants.getLocation("mc_recipe");
+        public static final ResourceLocation NAME = UltimineAddition.getLocation("mc_recipe");
         public @NotNull MCRecipe fromJson(@NotNull ResourceLocation recipeId, @NotNull JsonObject json) {
             String group = GsonHelper.getAsString(json, "group", "");
             CraftingBookCategory craftingBookCategory = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, "category", null), CraftingBookCategory.MISC);
