@@ -7,7 +7,7 @@ import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -99,7 +99,7 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
             ).withStyle(ChatFormatting.GRAY)));
         }
         tooltipComponents.add(new TextComponent("• ").withStyle(ChatFormatting.DARK_GRAY).append(new TranslatableComponent("tooltip.ultimine_addition.skills_record.contents").withStyle(ChatFormatting.GRAY)));
-        tooltipComponents.add(new TextComponent(Constants.MOD_ID + ".tooltip_image"));
+        tooltipComponents.add(new TextComponent(UltimineAddition.MOD_ID + ".tooltip_image"));
     }
 
     @Override

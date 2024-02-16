@@ -5,7 +5,7 @@ import dev.architectury.networking.simple.BaseS2CMessage;
 import dev.architectury.networking.simple.MessageType;
 import dev.architectury.networking.simple.SimpleNetworkManager;
 import net.ixdarklord.ultimine_addition.common.network.packet.*;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,7 +13,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 
 public class PacketHandler {
-    public static final SimpleNetworkManager MANAGER = SimpleNetworkManager.create(Constants.MOD_ID);
+    public static final SimpleNetworkManager MANAGER = SimpleNetworkManager.create(UltimineAddition.MOD_ID);
 
     public static final MessageType OPEN_SKILLS_RECORD = MANAGER.registerC2S("open_skills_record", SkillsRecordPacket.Open::new);
     public static final MessageType TOGGLE_SKILLS_RECORD = MANAGER.registerC2S("toggle_skills_record", SkillsRecordPacket.Toggle::new);

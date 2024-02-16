@@ -5,7 +5,7 @@ import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
@@ -23,7 +23,7 @@ public class ItemTooltipEvents {
     public static void init(ItemStack stack, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         if (stack.getItem() instanceof ComponentItem
                 && stack.getItem() != ModItems.MINER_CERTIFICATE
-                && Registry.ITEM.getKey(stack.getItem()).getNamespace().equalsIgnoreCase(Constants.MOD_ID)) {
+                && Registry.ITEM.getKey(stack.getItem()).getNamespace().equalsIgnoreCase(UltimineAddition.MOD_ID)) {
             if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
                 tooltipComponents.add(1, new TranslatableComponent("tooltip.ultimine_addition.legacy_mode.disabled_item").withStyle(ChatFormatting.RED));
             }

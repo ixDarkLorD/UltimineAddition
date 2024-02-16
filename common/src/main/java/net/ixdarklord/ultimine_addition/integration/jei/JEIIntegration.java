@@ -11,7 +11,7 @@ import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class JEIIntegration implements IModPlugin {
     @Override
     public @NotNull ResourceLocation getPluginUid() {
-        return Constants.getLocation("jei_integration");
+        return UltimineAddition.getLocation("jei_integration");
     }
 
     @Override

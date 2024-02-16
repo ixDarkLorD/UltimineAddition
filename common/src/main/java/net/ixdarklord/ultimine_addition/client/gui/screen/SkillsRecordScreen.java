@@ -23,7 +23,7 @@ import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -64,8 +64,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu> {
-    private final ResourceLocation OPTIONS_TEXTURE = Constants.getGuiTexture("skills_record_options", "png");
-    private final ResourceLocation TEXTURE = Constants.getGuiTexture("skills_record", "png");
+    private final ResourceLocation OPTIONS_TEXTURE = UltimineAddition.getGuiTexture("skills_record_options", "png");
+    private final ResourceLocation TEXTURE = UltimineAddition.getGuiTexture("skills_record", "png");
     protected final SkillsRecordMenu container;
     private TextScreen textScreen;
     private final int maxProgress = 100;

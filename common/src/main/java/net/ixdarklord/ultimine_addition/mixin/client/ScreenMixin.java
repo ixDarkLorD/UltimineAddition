@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.mixin.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.ixdarklord.coolcat_lib.common.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.client.event.impl.ClientTooltipComponentRegister;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -40,7 +40,7 @@ public abstract class ScreenMixin {
 
             if (this.minecraft.screen instanceof AbstractContainerScreen<?> screen && screen.hoveredSlot != null && screen.hoveredSlot.getItem().getItem() instanceof ComponentItem) {
                 for (int i = 0; i < tooltips.size(); i++) {
-                    if (tooltips.get(i).getString().equalsIgnoreCase(Constants.MOD_ID + ".tooltip_image"))
+                    if (tooltips.get(i).getString().equalsIgnoreCase(UltimineAddition.MOD_ID + ".tooltip_image"))
                         list.set(i, component);
                 }
 

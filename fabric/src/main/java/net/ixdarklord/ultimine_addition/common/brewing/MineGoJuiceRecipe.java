@@ -8,7 +8,7 @@ import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -47,11 +47,11 @@ public class MineGoJuiceRecipe extends BrewingRecipe {
         for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
             String cardName = "mining_skill_card_%s".formatted(type.getId());
             String potionName = "mine_go_juice_%s".formatted(type.getId());
-            Item customCard = Registration.ITEMS.getRegistrar().get(Constants.getLocation(cardName));
-            Potion customPotion = Registration.POTIONS.getRegistrar().get(Constants.getLocation(potionName));
+            Item customCard = Registration.ITEMS.getRegistrar().get(UltimineAddition.getLocation(cardName));
+            Potion customPotion = Registration.POTIONS.getRegistrar().get(UltimineAddition.getLocation(potionName));
 
             if (customCard == null || customPotion == null) continue;
-            addTiers(customCard, Constants.getLocation(potionName));
+            addTiers(customCard, UltimineAddition.getLocation(potionName));
         }
     }
 

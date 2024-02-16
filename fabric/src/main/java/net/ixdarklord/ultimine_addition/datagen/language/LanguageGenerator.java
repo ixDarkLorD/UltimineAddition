@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.datagen.language;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
-import net.ixdarklord.ultimine_addition.core.Constants;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.language.builder.LanguageBuilder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.Item;
@@ -28,6 +28,6 @@ public class LanguageGenerator extends FabricLanguageProvider {
 
     @Override
     public @NotNull String getName() {
-        return String.format("%s %s", Constants.MOD_NAME, super.getName());
+        return String.format("%s %s", UltimineAddition.MOD_NAME, super.getName());
     }
 }
