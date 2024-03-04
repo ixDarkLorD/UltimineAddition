@@ -76,6 +76,7 @@ dependencies {
     modCompileOnlyApi "mezz.jei:jei-${mc_version}-fabric-api:${jei_version}"
     modRuntimeOnly "mezz.jei:jei-${mc_version}-fabric:${jei_version}"
     modImplementation "dev.emi:trinkets:${trinkets_version}"
+    modImplementation("com.jamieswhiteshirt:reach-entity-attributes:${rea_version}")
 
     // FIX Trinkets Dependencies
     modCompileOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.0.0-beta.1")
@@ -93,72 +94,38 @@ processResources {
     from project(":common").file('src/main/resources/mod_logo.png')
 
     duplicatesStrategy DuplicatesStrategy.INCLUDE
-    inputs.property "modId", 					"${modid}"
-    inputs.property "modName", 					"${mod_name}"
-    inputs.property "modVersion", 				"${mod_version}"
-    inputs.property "modDescription", 			"${mod_description}"
-    inputs.property "modGroup", 				project.group
-    inputs.property "modPageUrl", 				"${mod_page_url}"
-    inputs.property "modIssueUrl", 				"${mod_issue_url}"
-    inputs.property "modSourceUrl", 		    "${mod_source_url}"
-    inputs.property "modAuthor", 				"${mod_author}"
-    inputs.property "modLicense", 				"${mod_license}"
-    inputs.property "minFabricVersion", 		"${min_fabric_version}"
-    inputs.property "minFabricApiVersion", 		"${min_fabric_api_version}"
-    inputs.property "minMinecraftVersion", 		"${min_mc_version}"
-    inputs.property "nextMinecraftVersion", 	rootProject.getNextVersion("${min_mc_version}")
-    inputs.property "packFormat", 				"${pack_format}"
-    inputs.property "mainEntryPoint", 			"${project.group}.core.fabric.FabricSetup"
-    inputs.property "clientEntryPoint", 		"${project.group}.core.fabric.FabricClientSetup"
-    inputs.property "datagenEntryPoint", 		"${project.group}.datagen.DataGeneration"
-    inputs.property "mixinPackagePath", 		"${project.group}.fabric.mixin"
-    inputs.property "archVersion",              "${architectury_version}"
-    inputs.property "forgeConfigAPIVersion",    "${forge_config_api_version}"
-    inputs.property "ccLibVersion",             "${coolcatlib_version}"
-    inputs.property "ftbUltimineVersion",       "${ftbultimine_version}"
-    inputs.property "jeiVersion",               "${jei_version}"
-    inputs.property "trinketsVersion",          "${trinkets_version}"
+    var replaceProperties = [
+            "modId": 					modid,
+            "modName": 					mod_name,
+            "modVersion": 				mod_version,
+            "modDescription": 			mod_description,
+            "modGroup": 				project.group,
+            "modPageUrl": 				mod_page_url,
+            "modIssueUrl": 				mod_issue_url,
+            "modSourceUrl": 		    mod_source_url,
+            "modAuthor": 				mod_author,
+            "modLicense": 				mod_license,
+            "minFabricVersion": 		min_fabric_version,
+            "minFabricApiVersion": 		min_fabric_api_version,
+            "modFabricEnvironment": 	mod_fabric_environment,
+            "minMinecraftVersion": 		min_mc_version,
+            "nextMinecraftVersion": 	rootProject.getNextVersion("${min_mc_version}"),
+            "packFormat": 				pack_format,
+            "mainEntryPoint": 			"${project.group}.core.fabric.FabricSetup",
+            "clientEntryPoint": 		"${project.group}.core.fabric.FabricClientSetup",
+            "datagenEntryPoint": 		"${project.group}.datagen.DataGeneration",
+            "mixinPackagePath": 		"${project.group}.fabric.mixin",
+            "archVersion":              architectury_version,
+            "forgeConfigAPIVersion":    forge_config_api_version,
+            "ccLibVersion":             coolcatlib_version,
+            "ftbUltimineVersion":       ftbultimine_version,
+            "jeiVersion":               jei_version,
+            "trinketsVersion":          trinkets_version
+    ]
 
-    filesMatching ('fabric.mod.json') {
-        expand (
-                'modId':                	"${modid}",
-                'modName':              	"${mod_name}",
-                'modVersion':           	"${mod_version}",
-                'modDescription':       	"${mod_description}",
-                'modGroup':             	project.group,
-                'modPageUrl':           	"${mod_page_url}",
-                'modIssueUrl':          	"${mod_issue_url}",
-                'modSourceUrl':          	"${mod_source_url}",
-                'modAuthor':            	"${mod_author}",
-                'modLicense':            	"${mod_license}",
-                'minFabricVersion':     	"${min_fabric_version}",
-                'minFabricApiVersion':  	"${min_fabric_api_version}",
-                'minMinecraftVersion':  	"${min_mc_version}",
-                "nextMinecraftVersion": 	rootProject.getNextVersion("${min_mc_version}"),
-                "mainEntryPoint": 			"${project.group}.core.fabric.FabricSetup",
-                "clientEntryPoint": 		"${project.group}.core.fabric.FabricClientSetup",
-                "datagenEntryPoint": 		"${project.group}.datagen.DataGeneration",
-                "modFabricEnvironment":		"${mod_fabric_environment}",
-                'archVersion':              "${architectury_version}",
-                'forgeConfigAPIVersion':    "${forge_config_api_version}",
-                'ccLibVersion':             "${coolcatlib_version}",
-                'ftbUltimineVersion':       "${ftbultimine_version}",
-                'jeiVersion':               "${jei_version}",
-                'trinketsVersion':          "${trinkets_version}"
-        )
-    }
-
-    filesMatching ('architectury.common.json') {
-        expand (
-                'modId':       "${modid}"
-        )
-    }
-
-    filesMatching ('pack.mcmeta') {
-        expand (
-                'modDescription':       "${mod_description}",
-                "packFormat":           "${pack_format}"
-        )
+    inputs.properties replaceProperties
+    filesMatching(['fabric.mod.json', 'pack.mcmeta']) {
+        expand replaceProperties
     }
 }
 
@@ -172,7 +139,7 @@ shadowJar {
 
 remapJar {
     injectAccessWidener = true
-    input.set shadowJar.archiveFile
+    getInputFile().set shadowJar.archiveFile
     dependsOn shadowJar
     archiveClassifier.convention(null)
     archiveClassifier.set(null)
@@ -184,7 +151,7 @@ jar {
 }
 
 sourcesJar {
-    def commonSources = project(":common").sourcesJar
+    Jar commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 }

@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.core.plugin;
+package net.ixdarklord.ultimine_addition.core;
 
 import dev.ftb.mods.ftbultimine.FTBUltimine;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
@@ -9,9 +9,6 @@ import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
-import net.ixdarklord.ultimine_addition.core.Registration;
-import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -48,6 +45,8 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
         if (isPlayerHasCustomCardValidEffect(player)) {
             if (ItemUtils.isItemInHandCustomCardValid(player)) result = true;
         }
+
+        if (!ItemUtils.checkTargetedBlock(player)) return false;
         if (player.hasEffect(ModMobEffects.MINE_GO_JUICE_PICKAXE)) {
             if (ItemUtils.isItemInHandPickaxe(player)) result = true;
         }
@@ -72,7 +71,9 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                 if (!ServicePlatform.Players.isPlayerUltimineCapable(player)) {
                     if (ItemUtils.isItemInHandCustomCardValid(player)) {
                         if (!isPlayerHasCustomCardValidEffect(player)) {
-                            String[] toolNames = getCustomCardToolName(player);
+                            String[] toolNames = getCustomCardTypes(player).stream()
+                                    .map(MiningSkillCardItem.Type::getId)
+                                    .toArray(String[]::new);
                             String toolPrefix = toolNames.length > 1 ? "many_tools" : toolNames[0];
 
                             MutableComponent toolsList = Component.empty();
@@ -121,25 +122,23 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
         }
     }
 
+    public static List<MiningSkillCardItem.Type> getCustomCardTypes(Player player) {
+        ItemStack stack = ItemUtils.getItemInHand(player, true);
+        return MiningSkillCardItem.Type.TYPES.stream()
+                .filter(MiningSkillCardItem.Type::isCustomType)
+                .filter(type -> type.utilizeRequiredTools().contains(stack.getItem()))
+                .toList();
+    }
+
     private static boolean isPlayerHasCustomCardValidEffect(Player player) {
-        String[] toolNames = getCustomCardToolName(player);
-        for (String toolName : toolNames) {
-            MobEffect mobEffect = Registration.MOB_EFFECTS.getRegistrar().get(UltimineAddition.getLocation("mine_go_juice_%s".formatted(toolName)));
+        List<MiningSkillCardItem.Type> types = getCustomCardTypes(player);
+        for (MiningSkillCardItem.Type type : types) {
+            MobEffect mobEffect = Registration.MOB_EFFECTS.getRegistrar().get(UltimineAddition.getLocation("mine_go_juice_%s".formatted(type.getId())));
             if (mobEffect == null) continue;
             if (player.hasEffect(mobEffect))
                 return true;
         }
         return false;
-    }
-
-    private static String[] getCustomCardToolName(Player player) {
-        ItemStack stack = ItemUtils.getItemInHand(player, true);
-        String[] values = MiningSkillCardItem.Type.TYPES.stream()
-                .filter(MiningSkillCardItem.Type::isCustomType)
-                .filter(type -> type.utilizeRequiredTools().contains(stack.getItem()))
-                .map(MiningSkillCardItem.Type::getId)
-                .toArray(String[]::new);
-        return values.length >= 1 ? values : new String[]{"null"};
     }
 
     public static int getMaxBlocks(ServerPlayer player) {

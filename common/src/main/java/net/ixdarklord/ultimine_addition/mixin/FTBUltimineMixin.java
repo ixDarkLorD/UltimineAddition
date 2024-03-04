@@ -7,7 +7,7 @@ import dev.ftb.mods.ftbultimine.FTBUltiminePlayerData;
 import net.ixdarklord.ultimine_addition.common.event.ChallengeEvents;
 import net.ixdarklord.ultimine_addition.common.event.impl.ToolAction;
 import net.ixdarklord.ultimine_addition.common.event.impl.ToolActions;
-import net.ixdarklord.ultimine_addition.core.plugin.FTBUltimineIntegration;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
