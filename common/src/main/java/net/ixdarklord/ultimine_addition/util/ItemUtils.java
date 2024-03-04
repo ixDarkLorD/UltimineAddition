@@ -2,10 +2,14 @@ package net.ixdarklord.ultimine_addition.util;
 
 import net.ixdarklord.coolcat_lib.util.InventoryHelper;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,12 +49,20 @@ public class ItemUtils {
         return result;
     }
 
+    public static boolean checkTargetedBlock(Player player) {
+        HitResult hit = player.pick(ServicePlatform.Players.getReachAttribute(player), 1.0F, false);
+        if (!(hit instanceof BlockHitResult hitResult)) return false;
+
+        BlockState blockState = player.level().getBlockState(hitResult.getBlockPos());
+        ItemStack tool = player.getItemInHand(player.getUsedItemHand());
+        return ServicePlatform.Players.isCorrectToolForBlock(tool, blockState);
+    }
+
     public static boolean isItemInHandNotTools(Player player) {
         return !(getItemInHand(player, true).getItem() instanceof DiggerItem);
     }
     public static boolean isItemInHandCustomCardValid(Player player) {
-        return MiningSkillCardItem.Type.TYPES.stream()
-                .filter(MiningSkillCardItem.Type::isCustomType)
+        return FTBUltimineIntegration.getCustomCardTypes(player).stream()
                 .map(MiningSkillCardItem.Type::utilizeRequiredTools)
                 .flatMap(Collection::stream)
                 .toList()

@@ -5,7 +5,7 @@ import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
 import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
 import net.ixdarklord.ultimine_addition.common.network.packet.SkillsRecordPacket;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
-import net.ixdarklord.ultimine_addition.core.plugin.FTBUltimineIntegration;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 
 public class KeyInputEvents {
     public static void init() {

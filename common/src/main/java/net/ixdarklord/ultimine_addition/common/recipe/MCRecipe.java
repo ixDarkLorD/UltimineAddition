@@ -3,15 +3,16 @@ package net.ixdarklord.ultimine_addition.common.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
 import net.ixdarklord.ultimine_addition.core.Registration;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -21,8 +22,7 @@ import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class MCRecipe extends ShapelessRecipe {
     private final ResourceLocation id;
@@ -47,22 +47,21 @@ public class MCRecipe extends ShapelessRecipe {
 
     @Override
     public boolean matches(@NotNull CraftingContainer container, @NotNull Level level) {
-        NonNullList<ItemStack> inputs = NonNullList.create();
-        for (int i = 0; i < container.getContainerSize(); i++) {
-            if (!container.getItem(i).isEmpty()) inputs.add(container.getItem(i));
-        }
-
+        StackedContents stackedContents = new StackedContents();
         int matchedValue = 0;
-        List<ItemStack> existedInputs = new ArrayList<>();
-        for (ItemStack input : inputs) {
-            for (MCIngredient ingredient : this.ingredients) {
-                if (!existedInputs.contains(input) && ingredient.test(input) && !input.isDamaged()) {
-                    existedInputs.add(input);
-                    matchedValue++;
-                }
+
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            ItemStack itemStack = container.getItem(i);
+            if (!itemStack.isEmpty() && !itemStack.isDamaged() && !this.ingredients.stream()
+                    .filter(ingredient -> ingredient.test(itemStack))
+                    .toList()
+                    .isEmpty()) {
+                matchedValue++;
+                stackedContents.accountStack(itemStack, 1);
             }
         }
-        return matchedValue == this.ingredients.size();
+
+        return matchedValue == this.ingredients.size() && stackedContents.canCraft(this, null);
     }
 
     @Override
@@ -74,7 +73,9 @@ public class MCRecipe extends ShapelessRecipe {
                 if (!container.getItem(i).isEmpty() && !(container.getItem(i).getItem() instanceof MiningSkillCardItem))
                     inputs.add(container.getItem(i));
             }
-            item.getData(stack).setDisplayTool(inputs.get(0)).saveData(stack);
+
+            if (!inputs.isEmpty())
+                item.getData(stack).setDisplayTool(inputs.get(0)).saveData(stack);
         }
         return stack;
     }
@@ -86,10 +87,6 @@ public class MCRecipe extends ShapelessRecipe {
 
     public CraftingBookCategory getCategory() {
         return category;
-    }
-
-    public ItemStack getResultItem() {
-        return result;
     }
 
     @Override

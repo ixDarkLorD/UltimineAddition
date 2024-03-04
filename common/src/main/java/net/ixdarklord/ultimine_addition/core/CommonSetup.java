@@ -6,7 +6,6 @@ import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.event.EventHandler;
 import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.core.plugin.FTBUltimineIntegration;
 
 public class CommonSetup {
     public static void init() {

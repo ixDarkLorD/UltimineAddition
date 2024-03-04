@@ -7,6 +7,8 @@ import net.ixdarklord.ultimine_addition.common.network.packet.PlayerAbilityPacke
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 @SuppressWarnings("unused")
 public class ServicePlatformPlayersImpl {
@@ -18,5 +20,11 @@ public class ServicePlatformPlayersImpl {
         if (player instanceof ServerPlayer serverPlayer) {
             PacketHandler.sendToPlayer(new PlayerAbilityPacket(ServicePlatform.Players.isPlayerUltimineCapable(serverPlayer)), serverPlayer);
         }
+    }
+    public static double getReachAttribute(Player player) {
+        return player.getBlockReach();
+    }
+    public static boolean isCorrectToolForBlock(ItemStack stack, BlockState blockState) {
+        return stack.isCorrectToolForDrops(blockState);
     }
 }

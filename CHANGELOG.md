@@ -1,6 +1,12 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.3.1 Release | Mar 4, 2024
+### Changed
+- Now, the Mine-GO Juice effect has a strict behavior! `Previously, if you had at least one of the Mine-GO Juice effects, you could use any tool with ultimine ability regardless of whether it was the perfect tool for the block.`
+### Fixed
+- [UA-21] Miner Certificate and Mining Skill Card recipes don't function properly.
+
 ## v1.3.0 Release | Feb 16, 2024
 ### Adding
 - Mining Skill Card Now can activate the ultimine ability upon leveling to mastered. "With the option to turn it off"

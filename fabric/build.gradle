@@ -76,6 +76,7 @@ dependencies {
     modCompileOnlyApi "mezz.jei:jei-${mc_version}-fabric-api:${jei_version}"
     modRuntimeOnly "mezz.jei:jei-${mc_version}-fabric:${jei_version}"
     modImplementation "dev.emi:trinkets:${trinkets_version}"
+    modImplementation("com.jamieswhiteshirt:reach-entity-attributes:${rea_version}")
 
     modRuntimeOnly "maven.modrinth:modmenu:7.2.2"
 //    modRuntimeOnly "curse.maven:catalogue-fabric-667377:4171029"
@@ -120,7 +121,7 @@ processResources {
 
     inputs.properties replaceProperties
     filesMatching(['fabric.mod.json', 'pack.mcmeta']) {
-        expand replaceProperties + [project: project]
+        expand replaceProperties
     }
 }
 
