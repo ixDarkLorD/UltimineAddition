@@ -27,30 +27,15 @@ dependencies {
 
 processResources {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
+    var replaceProperties = [
+            modName: 			        mod_name,
+            modDescription: 			mod_description,
+            packFormat: 				pack_format
+    ]
 
-    inputs.property "modId", 			        "${modid}"
-    inputs.property "modDescription", 			"${mod_description}"
-    inputs.property "packFormat", 				"${pack_format}"
-    inputs.property "mixinPackagePath", 		"${project.group}.common.mixin"
-
-    filesMatching ('architectury.common.json') {
-        expand (
-                'modId':       "${modid}"
-        )
-    }
-
-    filesMatching ("${modid}.common.mixins.json") {
-        expand (
-                'modId':                	"${modid}",
-                'mixinPackagePath':         "${project.group}.common.mixin"
-        )
-    }
-
+    inputs.properties replaceProperties
     filesMatching ('pack.mcmeta') {
-        expand (
-                'modDescription':       "${mod_description}",
-                "packFormat":           "${pack_format}"
-        )
+        expand replaceProperties
     }
 }
 

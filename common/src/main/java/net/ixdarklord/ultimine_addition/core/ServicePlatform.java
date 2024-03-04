@@ -6,6 +6,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Supplier;
 
@@ -42,6 +43,14 @@ public class ServicePlatform {
         }
         @ExpectPlatform
         public static void setPlayerUltimineCapability(Player player, boolean state) {
+            throw new AssertionError();
+        }
+        @ExpectPlatform
+        public static double getReachAttribute(Player player) {
+            throw new AssertionError();
+        }
+        @ExpectPlatform
+        public static boolean isCorrectToolForBlock(ItemStack stack, BlockState blockState) {
             throw new AssertionError();
         }
     }
