@@ -92,6 +92,7 @@ dependencies {
     modRuntimeOnly "curse.maven:jei-238222:4712868"
     modCompileOnly "top.theillusivec4.curios:curios-forge:${curios_version}:api"
     modRuntimeOnly "top.theillusivec4.curios:curios-forge:${curios_version}"
+//    modImplementation "curse.maven:stalwart-dungeons-474817:4703671"
 
     modRuntimeOnly "curse.maven:catalogue-459701:4766090"
 //    modRuntimeOnly "curse.maven:configured-457570:4462837"
