@@ -8,7 +8,7 @@ import dev.architectury.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
-import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +17,6 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
@@ -122,17 +121,15 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
 
     public boolean isCorrectTool(Player player, ChallengesData challengesData) {
         if (challengesData.getForCardType().isCustomType()) {
-            return challengesData.getForCardType().utilizeRequiredTools().contains(player.getInventory().getSelected().getItem());
+            return ItemUtils.isItemInHandCustomCardValid(player);
         } else if (challengesData.getForCardType().equals(PICKAXE)) {
-            return player.getInventory().getSelected().is(ServicePlatform.Tags.getPickaxes());
+            return ItemUtils.isItemInHandPickaxe(player);
         } else if (challengesData.getForCardType().equals(AXE)) {
-            return player.getInventory().getSelected().is(ServicePlatform.Tags.getAxes());
+            return ItemUtils.isItemInHandAxe(player);
         } else if (challengesData.getForCardType().equals(SHOVEL)) {
-            return player.getInventory().getSelected().is(ServicePlatform.Tags.getShovels());
+            return ItemUtils.isItemInHandShovel(player);
         } else if (challengesData.getForCardType().equals(HOE)) {
-            return player.getInventory().getSelected().is(ServicePlatform.Tags.getHoes());
-        } else if (challengesData.getForCardType().equals(EMPTY)) {
-            return !(player.getInventory().getSelected().getItem() instanceof DiggerItem);
+            return ItemUtils.isItemInHandHoe(player);
         }
         return false;
     }
