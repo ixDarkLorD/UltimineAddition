@@ -5,9 +5,8 @@ import net.ixdarklord.ultimine_addition.client.event.impl.ClientHudEvent;
 import net.ixdarklord.ultimine_addition.client.gui.screen.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.handler.ItemPropertiesHandler;
 import net.ixdarklord.ultimine_addition.core.ClientSetup;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.minecraft.client.Minecraft;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -23,9 +22,8 @@ public class ForgeClientSetup {
     public static class Event {
         @SubscribeEvent
         public static void onRenderGameOverlayEvent(final RenderGameOverlayEvent.Pre event) {
-            if (event.getType() == RenderGameOverlayEvent.ElementType.CHAT) {
-                if (!Minecraft.getInstance().options.renderDebug)
-                    ClientHudEvent.RENDER_PRE.invoker().renderHud(event.getMatrixStack(), event.getPartialTicks());
+            if (event.getType() == RenderGameOverlayEvent.ElementType.DEBUG) {
+                ClientHudEvent.RENDER_PRE.invoker().renderHud(event.getMatrixStack(), event.getPartialTicks());
             }
         }
     }

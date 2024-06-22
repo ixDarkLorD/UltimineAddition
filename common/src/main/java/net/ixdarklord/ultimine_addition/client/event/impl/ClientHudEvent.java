@@ -11,6 +11,6 @@ public interface ClientHudEvent {
 
     @Environment(EnvType.CLIENT)
     interface RenderHud {
-        void renderHud(PoseStack matrices, float tickDelta);
+        void renderHud(PoseStack poseStack, float tickDelta);
     }
 }

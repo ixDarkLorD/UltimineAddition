@@ -10,6 +10,9 @@ public class CustomClientTooltipComponent {
             if (tooltipComponent instanceof SkillsRecordTooltip skillsRecordTooltip) {
                 return new ClientSkillsRecordTooltip(skillsRecordTooltip);
             }
+            if (tooltipComponent instanceof SkillsRecordTooltip.Option option) {
+                return new ClientSkillsRecordTooltip.Option(option);
+            }
             return null;
         });
     }

@@ -1,7 +1,6 @@
 package net.ixdarklord.ultimine_addition.mixin.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.ixdarklord.coolcat_lib.common.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.client.event.impl.ClientTooltipComponentRegister;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.client.Minecraft;
@@ -10,7 +9,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,8 +24,6 @@ import java.util.stream.Collectors;
 public abstract class ScreenMixin {
     @Shadow protected Minecraft minecraft;
     @Shadow public abstract void renderTooltipInternal(PoseStack poseStack, List<ClientTooltipComponent> list, int i, int j);
-    @Shadow public abstract List<Component> getTooltipFromItem(ItemStack itemStack);
-
 
     @Inject(method = "renderTooltip(Lcom/mojang/blaze3d/vertex/PoseStack;Ljava/util/List;Ljava/util/Optional;II)V", at = @At("HEAD"), cancellable = true)
     private void onRenderTooltip(PoseStack poseStack, List<Component> tooltips, Optional<TooltipComponent> visualTooltipComponent, int mouseX, int mouseY, CallbackInfo ci) {
@@ -35,15 +31,16 @@ public abstract class ScreenMixin {
         if (visualTooltipComponent.isPresent()) {
             TooltipComponent tooltipComponent = visualTooltipComponent.get();
             ClientTooltipComponent component = ClientTooltipComponentRegister.EVENT.invoker().getComponent(tooltipComponent);
-            if (component == null)
-                component = ClientTooltipComponent.create(tooltipComponent);
 
-            if (this.minecraft.screen instanceof AbstractContainerScreen<?> screen && screen.hoveredSlot != null && screen.hoveredSlot.getItem().getItem() instanceof ComponentItem) {
+            if (component != null && this.minecraft.screen instanceof AbstractContainerScreen<?> screen) {
+                boolean b = false;
                 for (int i = 0; i < tooltips.size(); i++) {
-                    if (tooltips.get(i).getString().equalsIgnoreCase(UltimineAddition.MOD_ID + ".tooltip_image"))
+                    if (tooltips.get(i).getString().equalsIgnoreCase(UltimineAddition.MOD_ID + ".tooltip_image")) {
                         list.set(i, component);
+                        b = true;
+                    }
                 }
-
+                if (!b) list.add(component);
                 this.renderTooltipInternal(poseStack, list, mouseX, mouseY);
                 ci.cancel();
             }

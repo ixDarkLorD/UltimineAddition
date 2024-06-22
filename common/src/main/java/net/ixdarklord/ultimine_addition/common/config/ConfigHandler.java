@@ -1,8 +1,9 @@
 package net.ixdarklord.ultimine_addition.common.config;
 
+import net.ixdarklord.ultimine_addition.client.gui.screen.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screen.SkillsRecordScreen;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ConfigHandler {
@@ -22,10 +23,10 @@ public class ConfigHandler {
     public static class CLIENT {
         public static final ForgeConfigSpec SPEC;
         public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-
         public static final ForgeConfigSpec.EnumValue<SkillsRecordScreen.BGColor> BACKGROUND_COLOR;
         public static final ForgeConfigSpec.ConfigValue<Boolean> ANIMATIONS_MODE;
         public static final ForgeConfigSpec.IntValue PROGRESS_BAR;
+        public static final ForgeConfigSpec.EnumValue<ChallengesInfoPanel.Panel.Position> CHALLENGES_PANEL_POSITION;
         public static final ForgeConfigSpec.BooleanValue MSC_RENDERER;
         public static final ForgeConfigSpec.BooleanValue TEXT_SCREEN_SHADOW;
 
@@ -47,6 +48,9 @@ public class ConfigHandler {
                             "1: On holding its keybind. \"Default Keybind: Shift\"",
                             "2: Disabled.")
                     .defineInRange("progress_bar_mode", 0, 0, 2);
+            CHALLENGES_PANEL_POSITION = BUILDER
+                    .comment("You can choose when will the challenges panel appears on the screen.")
+                    .defineEnum("challenges_panel_pos", ChallengesInfoPanel.Panel.Position.LEFT);
             MSC_RENDERER = BUILDER
                     .comment("Here you can enable or disable the Mining Skill Card Renderer",
                             "It's not recommended for now! [WIP]")
