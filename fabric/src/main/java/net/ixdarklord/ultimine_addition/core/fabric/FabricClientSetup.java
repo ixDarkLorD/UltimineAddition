@@ -20,9 +20,12 @@ public class FabricClientSetup implements ClientModInitializer {
     }
 
     private void initEvents() {
-        TooltipComponentCallback.EVENT.register(data -> {
-            if (data instanceof SkillsRecordTooltip skillsRecordTooltip) {
+        TooltipComponentCallback.EVENT.register(tooltipComponent -> {
+            if (tooltipComponent instanceof SkillsRecordTooltip skillsRecordTooltip) {
                 return new ClientSkillsRecordTooltip(skillsRecordTooltip);
+            }
+            if (tooltipComponent instanceof SkillsRecordTooltip.Option option) {
+                return new ClientSkillsRecordTooltip.Option(option);
             }
             return null;
         });

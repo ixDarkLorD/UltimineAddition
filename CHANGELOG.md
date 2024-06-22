@@ -2,6 +2,12 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v1.4.0 Release | Jun 22, 2024
+### Added
+- Two New Buttons in Skills Record Configuration.
+  <br></br>
+<hr>
+
 ## v1.3.2 Release | Mar 5, 2024
 ### Fixed
 - [UA-22] The tool-checking method of Challenges is not functioning correctly.

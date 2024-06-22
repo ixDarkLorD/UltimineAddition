@@ -8,6 +8,6 @@ import net.ixdarklord.ultimine_addition.client.gui.screen.ItemTooltipEvents;
 public class ScreenEvents {
     public static void init() {
         ClientTooltipEvent.ITEM.register(ItemTooltipEvents::init);
-        ClientHudEvent.RENDER_PRE.register(ChallengesInfoPanel::render);
+        ClientHudEvent.RENDER_PRE.register(ChallengesInfoPanel.INSTANCE::render);
     }
 }

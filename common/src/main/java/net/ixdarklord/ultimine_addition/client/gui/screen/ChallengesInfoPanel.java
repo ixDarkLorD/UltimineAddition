@@ -8,6 +8,7 @@ import net.ixdarklord.coolcat_lib.client.gui.component.animation.AnimatedCompone
 import net.ixdarklord.coolcat_lib.client.gui.component.animation.SlideAnimation;
 import net.ixdarklord.coolcat_lib.client.gui.screen.ScreenPosition;
 import net.ixdarklord.coolcat_lib.util.ColorUtils;
+import net.ixdarklord.coolcat_lib.util.MathUtils;
 import net.ixdarklord.coolcat_lib.util.ScreenUtils;
 import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
@@ -26,13 +27,15 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static net.ixdarklord.ultimine_addition.util.ItemUtils.findItemInHand;
@@ -46,18 +49,39 @@ public class ChallengesInfoPanel {
         RenderSystem.disableBlend();
         RenderSystem.defaultBlendFunc();
     });
+    public static final ChallengesInfoPanel INSTANCE = new ChallengesInfoPanel();
 
-    private static final int textureWidth = 112;
-    private static final int textureHeight = 32;
-    private static final int edgePadding = 4;
-    private static final int panelPadding = 2;
-    private static final ScreenPosition PANEL_POS = ScreenPosition.LEFT;
-    private static final List<Panel> PANEL_LIST = new ArrayList<>();
-    private static int tickCount;
+    private final int textureWidth = 112;
+    private final int textureHeight = 32;
+    private final List<Panel> PANEL_LIST = new ArrayList<>();
+    private Panel.Position panelPos = Panel.Position.LEFT;
+    private float time;
+    private float lastStamp;
 
-    public static void render(PoseStack poseStack, float ignored) {
+    private void tick(float partialTicks) {
+        if (partialTicks < this.lastStamp) {
+            this.time += 1.0F - this.lastStamp;
+            this.time += partialTicks;
+        } else {
+            this.time += partialTicks - this.lastStamp;
+        }
+
+        this.lastStamp = partialTicks;
+        this.updatePos();
+    }
+
+    private void updatePos() {
+        this.panelPos = ConfigHandler.CLIENT.CHALLENGES_PANEL_POSITION.get();
+        for (Panel panel : PANEL_LIST) {
+            panel.getAnimatedComponent().setScreenPosition(this.panelPos.toScreenPos());
+        }
+    }
+
+    public void render(PoseStack poseStack, float partialTicks) {
         if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return;
         Minecraft MC = Minecraft.getInstance();
+        if (MC.options.renderDebug) return;
+
         Window window = MC.getWindow();
         Font font = MC.font;
         Player player = MC.player;
@@ -65,73 +89,70 @@ public class ChallengesInfoPanel {
 
         ItemStack stack = findItemInHand(player, ModItems.SKILLS_RECORD);
         if (stack == ItemStack.EMPTY) slideOutPanels(PANEL_LIST.stream().filter(Panel::isNotTestPanel));
-        if (!MC.isPaused() && !PANEL_LIST.isEmpty()) tickCount++;
+        if (!MC.isPaused() && !PANEL_LIST.isEmpty()) tick(partialTicks);
 
-        SkillsRecordData recordData = new SkillsRecordData().loadData(stack);
-        createPanels(recordData);
-        validatePanels(recordData, window, font);
-        if (!MC.isPaused()) PANEL_LIST.forEach(panel -> panel.animatedComponent.updateAnimation());
-
-        int[] yPosAligner = new int[]{0, 0};
-        int textLength = 0;
-        for (Panel panel : PANEL_LIST) {
-            if (panel.isNotActive()) continue;
-            if (panel.isNotMorePanel()) {
-                textLength = Math.max(font.width(panel.getTitle()), textLength);
-            }
-            yPosAligner[0] += Math.max(0, font.lineHeight * (panel.getInfos().size() - 1));
+        if (!MC.isPaused()) {
+            SkillsRecordData recordData = new SkillsRecordData().loadData(stack);
+            createPanels(recordData);
+            validatePanels(recordData, window);
+            PANEL_LIST.forEach(panel -> panel.animatedComponent.updateAnimation());
         }
-        textLength = Math.max(0, textLength - textureWidth);
 
         poseStack.pushPose();
-        poseStack.translate(0F, 0F, -200F);
+        int textLength = getTextLength(font);
         for (int slot = 0; slot < PANEL_LIST.size(); slot++) {
             Panel panel = PANEL_LIST.get(slot);
-            AnimatedComponent animatedComponent = panel.getAnimatedComponent();
             if (panel.isNotActive()) continue;
 
-            int length = textLength > 0 ? textLength + 8 : 0;
-            int[] offsets = animatedComponent.getAnimatedOffsets(window.getGuiScaledWidth(), window.getGuiScaledHeight(), textureWidth + length, textureHeight, edgePadding);
-            int X = offsets[0];
-            int Y = getAlignedYPos(offsets, yPosAligner, slot);
+            AnimatedComponent animatedComponent = panel.getAnimatedComponent();
+            if (animatedComponent.getScreenPosition() == null) break;
 
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, HUD);
+            int[] offsets = animatedComponent.getAnimatedOffsets(window.getGuiScaledWidth(), window.getGuiScaledHeight(), panel.getWidth() + textLength, panel.getHeight(), 4);
+            int X = offsets[0];
+            int Y = getAlignedYPos(offsets[1], slot, 4);
 
             SkillsRecordScreen.BGColor bgColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
             if (panel.isNotMorePanel()) {
+                RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                RenderSystem.setShaderTexture(0, HUD);
+
                 // Slots
-                TRANSLUCENT_TRANSPARENCY.setupRenderState();
                 RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
                 GuiComponent.blit(poseStack, X + 5, Y, 5, 0, 51, 10, 256, 256);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
                 int spacing = 13 * Math.min(panel.getSlot(), 3);
-                GuiComponent.fill(poseStack, X+8 + spacing, Y+3, X+14 + spacing, Y+9, ColorUtils.RGBToRGBA(Color.GREEN.getRGB(), 0.50F));
-                TRANSLUCENT_TRANSPARENCY.clearRenderState();
+                double value = MathUtils.cycledBetweenValues(0.0F, 1.0F, 0.8F, this.time/20.0F, false);
+                Color color = ColorUtils.blendColors(new Color(0x6AB020), new Color(0x89E229), ConfigHandler.CLIENT.ANIMATIONS_MODE.get() ? value : 0.0F);
+                GuiComponent.fill(poseStack, X+8 + spacing, Y+3, X+14 + spacing, Y+9, color.getRGB());
 
                 // Title BG
                 RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
-                ScreenUtils.blitNineSliced(poseStack, X, Y + 10, textureWidth + length, 11, 20, 4, textureWidth, 11, 0, 10);
+                ScreenUtils.blitNineSliced(poseStack, X, Y + 10, panel.getWidth() + textLength, 11, 20, 4, panel.getWidth(), 11, 0, 10);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
                 // Info BG
                 TRANSLUCENT_TRANSPARENCY.setupRenderState();
                 RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
-                ScreenUtils.blitNineSliced(poseStack, X, Y + 18, textureWidth + length, 14 + Math.max(0, font.lineHeight * (panel.getInfos().size() - 1)), 20, 4, textureWidth, 14, 0, 21);
+                ScreenUtils.blitNineSliced(poseStack, X, Y + 18, panel.getWidth() + textLength, 14 + Math.max(0, font.lineHeight * (panel.getInfos().size() - 1)), 20, 4, panel.getWidth(), 14, 0, 21);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 TRANSLUCENT_TRANSPARENCY.clearRenderState();
 
                 // Title String
-                GuiComponent.drawCenteredString(poseStack, font, panel.getTitle(), X + ((textureWidth + length) / 2), Y + 11, Color.WHITE.getRGB());
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                GuiComponent.drawCenteredString(poseStack, font, panel.getTitle(), X + ((panel.getWidth() + textLength) / 2), Y + 11, Color.WHITE.getRGB());
             } else {
-                ScreenUtils.blitNineSliced(poseStack, X, Y, textureWidth + length, 11, 20, 4, textureWidth, 11, 0, 10);
-                ScreenUtils.drawScrollingString(poseStack, tickCount*2, font, panel.getTitle(), true, X, Y, textureWidth + length, 10, 2, Color.WHITE.getRGB());
+                RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                RenderSystem.setShaderTexture(0, HUD);
+
+                RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
+                ScreenUtils.blitNineSliced(poseStack, X, Y, panel.getWidth() + textLength, 11, 20, 4, panel.getWidth(), 11, 0, 10);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                ScreenUtils.drawScrollingString(poseStack, (int) time * 8, font, panel.getTitle(), true, X, Y, panel.getWidth() + textLength, 10, 4, Color.WHITE.getRGB());
             }
 
-            AtomicInteger i = new AtomicInteger();
-            panel.getInfos().forEach(info -> {
+            for (int i = 0; i < panel.getInfos().size(); i++) {
+                Panel.Info info = panel.getInfos().get(i);
                 int currentProgression;
                 float value = (float) info.getCurrentValue() / info.getRequiredValue() * 100;
                 currentProgression = (int) value;
@@ -139,16 +160,15 @@ public class ChallengesInfoPanel {
                 Component values = Component.literal("%" + currentProgression).withStyle(currentProgression >= 100 ? ChatFormatting.GREEN : ChatFormatting.GOLD);
                 int valuesXPos = font.width(values) - font.width("%0");
 
-                ScreenUtils.drawScrollingString(poseStack, tickCount*2, font, info.getMessage().copy().withStyle(ChatFormatting.GRAY), false, X + 2, Y + 22 + (font.lineHeight * i.get()), 94 + length - valuesXPos, 8, 0, Color.WHITE.getRGB());
-                GuiComponent.drawString(poseStack, font, values, X + length + 98 - valuesXPos, Y + 22 + (font.lineHeight * i.get()), Color.WHITE.getRGB());
-                i.getAndIncrement();
-            });
-            yPosAligner[1] += Math.max(0, font.lineHeight * (panel.getInfos().size()-1));
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                ScreenUtils.drawScrollingString(poseStack, (int) time * 8, font, info.getMessage().copy().withStyle(ChatFormatting.GRAY), false, X + 2, Y + 22 + (font.lineHeight * i), 94 + textLength - valuesXPos, 8, 0, Color.WHITE.getRGB());
+                GuiComponent.drawString(poseStack, font, values, X + textLength + 98 - valuesXPos, Y + 22 + (font.lineHeight * i), Color.WHITE.getRGB());
+            }
         }
         poseStack.popPose();
     }
 
-    private static void createPanels(SkillsRecordData recordData) {
+    private void createPanels(SkillsRecordData recordData) {
         var trashList = new ArrayList<>(PANEL_LIST.stream().filter(panel -> !panel.getAnimatedComponent().isPlaying()).filter(Panel::isNotMorePanel).filter(Panel::isNotTestPanel).toList());
         for (int i = 0; i < recordData.getCardSlots().size(); i++) {
             int cardSlot = i;
@@ -169,9 +189,8 @@ public class ChallengesInfoPanel {
                         PANEL_LIST.add(new Panel(
                                 recordData.getUUID(),
                                 cardSlot,
-                                Component.literal(recordData.getCardSlots().get(cardSlot).getHoverName().getString()),
-                                List.of(new Panel.Info(identifier.order(), identifier.id(), message, infoData.getCurrentValue(), infoData.getRequiredValue())),
-                                new SlideAnimation(PANEL_POS, 60))
+                                new Panel.TextureDimension(textureWidth, textureHeight),
+                                Component.literal(recordData.getCardSlots().get(cardSlot).getHoverName().getString()), List.of(new Panel.Info(identifier.order(), identifier.id(), message, infoData.getCurrentValue(), infoData.getRequiredValue())), new SlideAnimation(this.panelPos.toScreenPos(), 60))
                         );
                     } else {
                         Panel panel = list.get(0);
@@ -206,32 +225,33 @@ public class ChallengesInfoPanel {
         slideOutPanels(trashList.stream());
     }
 
-    private static void validatePanels(SkillsRecordData recordData, Window window, Font font) {
-        int count = 0;
+    private void validatePanels(SkillsRecordData recordData, Window window) {
         PANEL_LIST.forEach(panel -> panel.setActive(true));
         for (int slot = PANEL_LIST.size(); slot-- > 0;) {
-            int currentPos = 0;
-            for (int i = 0; i < PANEL_LIST.size()-count; i++) {
-                Panel panel = PANEL_LIST.get(i);
-                currentPos += Math.max(0, font.lineHeight * (panel.getInfos().size() - 1));
-                if (i > 0) currentPos += textureHeight + panelPadding;
-            }
             Panel panel = PANEL_LIST.get(slot);
-            if (panel.isMorePanel) {
-                panel = PANEL_LIST.get(Math.max(0, slot-1));
+            if (panel.isNotActive() || panel.isMorePanel) continue;
+
+            AnimatedComponent animatedComponent = panel.getAnimatedComponent();
+            if (animatedComponent.getScreenPosition() == null) break;
+
+            int offsetY = animatedComponent.getAnimatedOffsets(0, window.getGuiScaledHeight(), 0, panel.getHeight(), 4)[1];
+            int Y = getAlignedYPos(offsetY, slot, 4);
+            if (this.panelPos != Panel.Position.BOTTOM_LEFT && this.panelPos != Panel.Position.BOTTOM_RIGHT) {
+                Y += panel.getHeight();
             }
-            float yPos = PANEL_POS.getY(window.getGuiScaledHeight(), textureHeight, edgePadding);
-            yPos -= (float) currentPos / 2;
-            if (yPos < 0 || yPos > window.getGuiScaledWidth()) {
-                count++;
-                panel.setActive(false);
+
+            if (Y < 0 || Y > window.getGuiScaledHeight()-4) {
+                if (this.panelPos == Panel.Position.BOTTOM_LEFT || this.panelPos == Panel.Position.BOTTOM_RIGHT) {
+                    PANEL_LIST.get((PANEL_LIST.size()-1) - (slot+1)).setActive(false);
+                } else panel.setActive(false);
             }
         }
+
         int inactiveSlots = PANEL_LIST.stream().filter(Panel::isNotActive).toList().size();
         for (int slot = PANEL_LIST.size(); slot-- > 0;) {
             Panel panel = PANEL_LIST.get(slot);
             AnimatedComponent component = panel.getAnimatedComponent();
-            if (!component.isPlaying() && !component.isEnteringScene()) {
+            if ((!component.isPlaying() || panel.isNotActive()) && !component.isEnteringScene()) {
                 panel.setRemoved();
             }
         }
@@ -242,9 +262,10 @@ public class ChallengesInfoPanel {
                 PANEL_LIST.add(new Panel(
                         recordData.getUUID(),
                         999,
+                        new Panel.TextureDimension(textureWidth, 12),
                         Component.translatable("gui.ultimine_addition.skills_record.pin.panel", inactiveSlots),
                         null,
-                        new SlideAnimation(PANEL_POS, 60),
+                        new SlideAnimation(this.panelPos.toScreenPos(), 60),
                         true, false));
             } else {
                 Panel panel = list.get(0);
@@ -256,40 +277,78 @@ public class ChallengesInfoPanel {
                 }
             }
         } else if (!list.isEmpty()) {
-            list.forEach(Panel::setRemoved);
+            slideOutPanels(list.stream());
         }
 
         PANEL_LIST.removeIf(Panel::isAssignedToRemove);
         PANEL_LIST.sort(Comparator.comparingInt(Panel::getSlot));
     }
 
-    private static int getAlignedYPos(int[] offsets, int[] yPosAligner, int slot) {
-        int Y = offsets[1];
-        for (int i = 0; i < PANEL_LIST.size(); i++) {
-            Panel panel1 = PANEL_LIST.get(i);
-            if (i == 0 || panel1.isNotActive()) continue;
-            Y += (textureHeight / 2) + (panelPadding / 2);
+    private int getTextLength(Font font) {
+        int textLength = 0;
+        for (Panel panel : PANEL_LIST) {
+            if (panel.isNotActive()) continue;
+            if (panel.isNotMorePanel()) {
+                textLength = Math.max(font.width(panel.getTitle()), textLength);
+                textLength = Math.max(0, textLength - panel.getWidth());
+            }
         }
-        Y -= yPosAligner[0] / 2;
-        Y += yPosAligner[1];
-        for (int i = slot +1; i < PANEL_LIST.size(); i++) {
-            Panel panel1 = PANEL_LIST.get(i);
-            if (panel1.isNotActive()) continue;
-            Y -= (textureHeight + panelPadding);
+        return textLength > 0 ? textLength + 8 : 0;
+    }
+
+    private int getAlignedYPos(int yOffset, int slot, @SuppressWarnings("SameParameterValue") int padding) {
+        int Y = yOffset;
+        switch (this.panelPos) {
+            case TOP_LEFT, TOP_RIGHT -> {
+                for (int i = 0; i < slot; i++) {
+                    Panel panel = PANEL_LIST.get(i);
+                    if (panel.isNotActive()) continue;
+                    Y += (panel.getHeight() + padding);
+                }
+            }
+            case LEFT, RIGHT -> {
+                Y += Math.max(0, (PANEL_LIST.get(slot).getHeight()/2));
+                for (Panel panel : PANEL_LIST) {
+                    if (panel.isNotActive()) continue;
+                    Y -= ((panel.getHeight() / 2) + (padding / 2));
+                }
+                for (int i = 0; i < slot; i++) {
+                    Panel panel = PANEL_LIST.get(i);
+                    if (panel.isNotActive()) continue;
+                    Y += (panel.getHeight() + padding);
+                }
+            }
+            case BOTTOM_LEFT, BOTTOM_RIGHT -> {
+                for (int i = slot+1; i < PANEL_LIST.size(); i++) {
+                    Panel panel = PANEL_LIST.get(i);
+                    if (panel.isNotActive()) continue;
+                    Y -= (panel.getHeight() + padding);
+                }
+            }
         }
         return Y;
     }
 
-    private static void slideOutPanels(Stream<Panel> pinnedStream) {
-        pinnedStream.map(Panel::getAnimatedComponent)
+    private void slideOutPanels(Stream<Panel> panelStream) {
+        panelStream.map(Panel::getAnimatedComponent)
                 .filter(AnimatedComponent::isEnteringScene)
                 .forEach(component -> component.startAnimation(false));
     }
 
-    private static class Panel {
+    public void setPanelPos(Panel.Position panelPos) {
+        this.panelPos = panelPos;
+    }
+
+    public Panel.Position getPanelPos() {
+        return panelPos;
+    }
+
+    public static class Panel {
+        private boolean active;
+
         private final UUID uuid;
 
-        private boolean active;
+        private final TextureDimension textureDimension;
 
         private final int slot;
 
@@ -305,18 +364,19 @@ public class ChallengesInfoPanel {
 
         private final boolean isTestPanel;
 
-        Panel(UUID uuid, int slot, Component title, List<Info> infos, AnimatedComponent animatedComponent) {
-            this(uuid, slot, title, infos, animatedComponent, false, false, false);
+        Panel(UUID uuid, int slot, TextureDimension textureDimension, Component title, List<Info> infos, AnimatedComponent animatedComponent) {
+            this(uuid, slot, textureDimension, title, infos, animatedComponent, false, false, false);
         }
 
-        Panel(UUID uuid, int slot, Component title, List<Info> infos, AnimatedComponent animatedComponent, boolean isMorePanel, boolean isTestPanel) {
-            this(uuid, slot, title, infos, animatedComponent, false, isMorePanel, isTestPanel);
+        Panel(UUID uuid, int slot, TextureDimension textureDimension, Component title, List<Info> infos, AnimatedComponent animatedComponent, boolean isMorePanel, boolean isTestPanel) {
+            this(uuid, slot, textureDimension, title, infos, animatedComponent, false, isMorePanel, isTestPanel);
         }
 
-        Panel(UUID uuid, int slot, Component title, List<Info> infos, AnimatedComponent animatedComponent, boolean assignedToRemove, boolean isMorePanel, boolean isTestPanel) {
-            this.uuid = uuid;
+        Panel(UUID uuid, int slot, TextureDimension textureDimension, Component title, List<Info> infos, AnimatedComponent animatedComponent, boolean assignedToRemove, boolean isMorePanel, boolean isTestPanel) {
             this.active = true;
+            this.uuid = uuid;
             this.slot = slot;
+            this.textureDimension = textureDimension;
             this.title = title;
             this.infos = infos == null ? new ArrayList<>() : new ArrayList<>(infos);
             this.animatedComponent = animatedComponent;
@@ -349,6 +409,18 @@ public class ChallengesInfoPanel {
             return this.slot;
         }
 
+        public int getWidth() {
+            return textureDimension.width();
+        }
+
+        public int getHeight() {
+            return textureDimension.height() + Math.max(0, Minecraft.getInstance().font.lineHeight * (infos.size() - 1));
+        }
+
+        public TextureDimension getTextureDimension() {
+            return textureDimension;
+        }
+
         public Component getTitle() {
             return this.title;
         }
@@ -376,40 +448,19 @@ public class ChallengesInfoPanel {
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (Panel) obj;
-            return Objects.equals(this.uuid, that.uuid) &&
-                    this.active == that.active &&
-                    this.slot == that.slot &&
-                    Objects.equals(this.title, that.title) &&
-                    Objects.equals(this.infos, that.infos) &&
-                    Objects.equals(this.animatedComponent, that.animatedComponent) &&
-                    this.assignedToRemove == that.assignedToRemove &&
-                    this.isMorePanel == that.isMorePanel &&
-                    this.isTestPanel == that.isTestPanel;
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Panel panel = (Panel) o;
+            return active == panel.active && slot == panel.slot && assignedToRemove == panel.assignedToRemove && isMorePanel == panel.isMorePanel && isTestPanel == panel.isTestPanel && Objects.equals(uuid, panel.uuid) && Objects.equals(textureDimension, panel.textureDimension) && Objects.equals(title, panel.title) && Objects.equals(infos, panel.infos) && Objects.equals(animatedComponent, panel.animatedComponent);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(active, slot, title, infos, animatedComponent, assignedToRemove, isMorePanel, isTestPanel);
+            return Objects.hash(active, uuid, textureDimension, slot, title, infos, animatedComponent, assignedToRemove, isMorePanel, isTestPanel);
         }
 
-        @Override
-        public String toString() {
-            return "Pinned[" +
-                    "active=" + active + ", " +
-                    "cardSlot=" + slot + ", " +
-                    "title=" + title + ", " +
-                    "infos=" + infos + ", " +
-                    "animatedComponent=" + animatedComponent + ", " +
-                    "assignedToRemove=" + assignedToRemove + ", " +
-                    "isMorePanel=" + isMorePanel + ", " +
-                    "isTestPanel=" + isTestPanel + ']';
-        }
-
-        private static class Info {
+        public static class Info {
             private final int order;
             private final ResourceLocation challengeId;
             private Component message;
@@ -450,6 +501,50 @@ public class ChallengesInfoPanel {
 
             public void setRequiredValue(int requiredValue) {
                 this.requiredValue = requiredValue;
+            }
+        }
+
+        public record TextureDimension(int width, int height) {}
+
+        public enum Position implements StringRepresentable {
+            DISABLED(-1, null),
+            TOP_LEFT(0, ScreenPosition.TOP_LEFT),
+            TOP_RIGHT(2, ScreenPosition.TOP_RIGHT),
+            LEFT(3, ScreenPosition.LEFT),
+            RIGHT(5, ScreenPosition.RIGHT),
+            BOTTOM_LEFT(6, ScreenPosition.BOTTOM_LEFT),
+            BOTTOM_RIGHT(8, ScreenPosition.BOTTOM_RIGHT);
+
+            private final int posIndex;
+            private final @Nullable ScreenPosition screenPos;
+
+            Position(int posIndex, @Nullable ScreenPosition screenPos) {
+                this.posIndex = posIndex;
+                this.screenPos = screenPos;
+            }
+
+            @Nullable
+            public ScreenPosition toScreenPos() {
+                return screenPos;
+            }
+
+            public Position next() {
+                int nextOrdinal = (this.ordinal() + 1) % values().length;
+                return values()[nextOrdinal];
+            }
+
+            public Position previous() {
+                int previousOrdinal = (this.ordinal() - 1 + values().length) % values().length;
+                return values()[previousOrdinal];
+            }
+
+            @Override
+            public @NotNull String getSerializedName() {
+                return name().toLowerCase();
+            }
+
+            public int getPosIndex() {
+                return posIndex;
             }
         }
     }

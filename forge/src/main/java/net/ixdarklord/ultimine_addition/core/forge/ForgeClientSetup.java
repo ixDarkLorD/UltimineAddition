@@ -46,6 +46,7 @@ public class ForgeClientSetup {
         @SubscribeEvent
         public static void onClientTooltipComponentRegister(final RegisterClientTooltipComponentFactoriesEvent event) {
             event.register(SkillsRecordTooltip.class, ClientSkillsRecordTooltip::new);
+            event.register(SkillsRecordTooltip.Option.class, ClientSkillsRecordTooltip.Option::new);
         }
     }
 }
