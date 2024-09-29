@@ -65,6 +65,7 @@ body:
         options:
           - "Forge"
           - "Fabric"
+          - "NeoForge"
       validations:
         required: true
   -   type: input
