@@ -33,6 +33,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -58,6 +59,18 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
         return InteractionResultHolder.fail(stack);
+    }
+
+    @Override
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
+        if (this.isLegacyMode() || level.isClientSide() || this.type == EMPTY) return;
+
+        if (entity instanceof ServerPlayer) {
+            if (!stack.has(MiningSkillCardData.DATA_COMPONENT)) {
+                if (getData(stack).getChallenges().isEmpty())
+                    getData(stack).initChallenges().saveData(stack);
+            }
+        }
     }
 
     public static void giveMineGoJuice(ServerPlayer player, Type type) {

@@ -30,7 +30,6 @@ import static dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig.MAX_BLOCKS
 import static net.ixdarklord.ultimine_addition.config.ConfigHandler.COMMON.PLAYSTYLE_MODE;
 
 public class FTBUltimineIntegration implements FTBUltiminePlugin {
-    private static List<Shape> SHAPES = null;
     private static boolean isButtonPressed;
 
     @Override
@@ -181,14 +180,8 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
         return FTBUltimine.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
     }
 
-    public static List<Shape> getShapes() {
-        if (SHAPES == null)
-            SHAPES = ShapeRegistryAccessor.getShapesList();
-        return SHAPES;
-    }
-
     public static List<Shape> getEnabledShapes() {
-        return getShapes().stream()
+        return ShapeRegistryAccessor.getShapesList().stream()
                 .filter(shape -> !ConfigHandler.COMMON.BLACKLISTED_SHAPES.get().contains(shape.getName()))
                 .toList();
     }

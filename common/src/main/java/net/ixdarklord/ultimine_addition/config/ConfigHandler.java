@@ -3,9 +3,9 @@ package net.ixdarklord.ultimine_addition.config;
 import dev.ftb.mods.ftbultimine.shape.Shape;
 import net.ixdarklord.ultimine_addition.client.gui.screens.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.mixin.ShapeRegistryAccessor;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Collections;
@@ -136,11 +136,11 @@ public class ConfigHandler {
 
             BLACKLISTED_SHAPES = BUILDER
                     .comment("Specifies the types of shapes that players are not allowed to use.",
-                            "Shapes IDs: %s".formatted(FTBUltimineIntegration.getShapes().stream().map(Shape::getName).toList()))
+                            "Shapes IDs: %s".formatted(ShapeRegistryAccessor.getShapesList().stream().map(Shape::getName).toList()))
                     .defineList("blacklisted_shapes",
                             Collections.emptyList(),
                             String::new,
-                            o -> o instanceof String s && FTBUltimineIntegration.getShapes().stream().map(Shape::getName).anyMatch(s1 -> s1.equals(s)));
+                            o -> o instanceof String s && ShapeRegistryAccessor.getShapesList().stream().map(Shape::getName).anyMatch(s1 -> s1.equals(s)));
 
             PAPER_CONSUMPTION_RATE = BUILDER
                     .comment("You can change the rate of paper consumption in the Skills Record.")

@@ -44,7 +44,7 @@ side = "BOTH"
 modId = "ftbultimine"
 type = "required"
 versionRange = "[${ftbultimine_version},)"
-ordering = "NONE"
+ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.${modid}]]
