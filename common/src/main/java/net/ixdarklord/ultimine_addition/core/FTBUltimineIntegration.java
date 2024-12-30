@@ -4,10 +4,12 @@ import dev.ftb.mods.ftbultimine.FTBUltimine;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
 import dev.ftb.mods.ftbultimine.integration.FTBRanksIntegration;
 import dev.ftb.mods.ftbultimine.integration.FTBUltiminePlugin;
+import dev.ftb.mods.ftbultimine.shape.Shape;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
+import net.ixdarklord.ultimine_addition.mixin.ShapeRegistryAccessor;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -22,15 +24,13 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig.MAX_BLOCKS;
 import static net.ixdarklord.ultimine_addition.config.ConfigHandler.COMMON.PLAYSTYLE_MODE;
 
 public class FTBUltimineIntegration implements FTBUltiminePlugin {
+    private static List<Shape> SHAPES = null;
     private static boolean isButtonPressed;
 
     @Override
@@ -179,5 +179,26 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
             }
         }
         return FTBUltimine.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
+    }
+
+    public static List<Shape> getShapes() {
+        if (SHAPES == null)
+            SHAPES = ShapeRegistryAccessor.getShapesList();
+        return SHAPES;
+    }
+
+    public static List<Shape> getEnabledShapes() {
+        return getShapes().stream()
+                .filter(shape -> !ConfigHandler.COMMON.BLACKLISTED_SHAPES.get().contains(shape.getName()))
+                .toList();
+    }
+
+    public static Shape getEnabledShapes(int idx) {
+        if (idx < 0) {
+            idx += getEnabledShapes().size();
+        } else if (idx >= getEnabledShapes().size()) {
+            idx -= getEnabledShapes().size();
+        }
+        return idx >= 0 && idx < getEnabledShapes().size() ? getEnabledShapes().get(idx) : ShapeRegistryAccessor.getDefaultShape();
     }
 }

@@ -1,11 +1,15 @@
 package net.ixdarklord.ultimine_addition.config;
 
+import dev.ftb.mods.ftbultimine.shape.Shape;
 import net.ixdarklord.ultimine_addition.client.gui.screens.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
-import net.ixdarklord.ultimine_addition.common.config.SafeConfig;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.neoforged.neoforge.common.ModConfigSpec;
+
+import java.util.Collections;
+import java.util.List;
 
 public class ConfigHandler {
     public static void register() {
@@ -76,6 +80,7 @@ public class ConfigHandler {
          */
         public static final SafeConfig<PlaystyleMode> PLAYSTYLE_MODE_SAFE;
         public static final ModConfigSpec.EnumValue<PlaystyleMode> PLAYSTYLE_MODE;
+        public static final ModConfigSpec.ConfigValue<List<? extends String>> BLACKLISTED_SHAPES;
         public static final ModConfigSpec.IntValue CARD_TRADE_LEVEL;
         public static final ModConfigSpec.IntValue TRADE_LOW_PRICE;
         public static final ModConfigSpec.IntValue TRADE_HIGH_PRICE;
@@ -128,6 +133,14 @@ public class ConfigHandler {
                             "%s [WIP]: There will be one tier for the Mining Skill Card. If you complete all the challenges, it will turn the card to the Mastered tier immediately.".formatted(PlaystyleMode.ONE_TIER_ONLY.name()),
                             "%s: It will revert the mod mechanics as it was on the original release. (\"v0.1.0\") There will be only the miner certificate with one challenge to complete.".formatted(PlaystyleMode.LEGACY.name()))
                     .defineEnum("playstyle_mode", PlaystyleMode.MODERN);
+
+            BLACKLISTED_SHAPES = BUILDER
+                    .comment("Specifies the types of shapes that players are not allowed to use.",
+                            "Shapes IDs: %s".formatted(FTBUltimineIntegration.getShapes().stream().map(Shape::getName).toList()))
+                    .defineList("blacklisted_shapes",
+                            Collections.emptyList(),
+                            String::new,
+                            o -> o instanceof String s && FTBUltimineIntegration.getShapes().stream().map(Shape::getName).anyMatch(s1 -> s1.equals(s)));
 
             PAPER_CONSUMPTION_RATE = BUILDER
                     .comment("You can change the rate of paper consumption in the Skills Record.")

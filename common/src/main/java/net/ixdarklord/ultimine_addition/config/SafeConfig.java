@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.common.config;
+package net.ixdarklord.ultimine_addition.config;
 
 import dev.architectury.platform.Platform;
 import net.ixdarklord.coolcatlib.api.config.TomlConfigReader;

@@ -5,11 +5,14 @@
   "package": "net.ixdarklord.ultimine_addition.mixin",
   "client": [
     "client.BlockEntityWithoutLevelRendererMixin",
-    "client.GuiGraphicsMixin"
+    "client.GuiGraphicsMixin",
+    "client.FTBUltimineClientMixin"
   ],
   "mixins": [
     "BrewingStandBlockEntityMixin",
-    "FTBUltimineMixin"
+    "FTBUltimineMixin",
+    "FTBUltiminePlayerDataMixin",
+    "ShapeRegistryAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

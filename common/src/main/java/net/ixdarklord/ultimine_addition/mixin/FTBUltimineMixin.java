@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(value = FTBUltimine.class)
-public abstract class FTBUltimineMixin {
+abstract class FTBUltimineMixin {
 
     @Redirect(method = "blockBroken", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/config/FTBUltimineServerConfig;getMaxBlocks(Lnet/minecraft/server/level/ServerPlayer;)I"))
     private int redirect$MaxBlocks$1(ServerPlayer player) {
