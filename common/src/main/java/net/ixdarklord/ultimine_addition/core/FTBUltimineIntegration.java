@@ -4,13 +4,14 @@ import dev.ftb.mods.ftbultimine.FTBUltimine;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
 import dev.ftb.mods.ftbultimine.integration.FTBRanksIntegration;
 import dev.ftb.mods.ftbultimine.integration.FTBUltiminePlugin;
-import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
-import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
@@ -24,9 +25,10 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig.MAX_BLOCKS;
-import static net.ixdarklord.ultimine_addition.common.config.ConfigHandler.COMMON.PLAYSTYLE_MODE;
+import static net.ixdarklord.ultimine_addition.config.ConfigHandler.COMMON.PLAYSTYLE_MODE;
 
 public class FTBUltimineIntegration implements FTBUltiminePlugin {
     private static boolean isButtonPressed;
@@ -47,16 +49,17 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
         }
 
         if (!ItemUtils.checkTargetedBlock(player)) return false;
-        if (player.hasEffect(ModMobEffects.MINE_GO_JUICE_PICKAXE)) {
+
+        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_PICKAXE.getId()).orElseThrow())) {
             if (ItemUtils.isItemInHandPickaxe(player)) result = true;
         }
-        if (player.hasEffect(ModMobEffects.MINE_GO_JUICE_AXE)) {
+        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_AXE.getId()).orElseThrow())) {
             if (ItemUtils.isItemInHandAxe(player)) result = true;
         }
-        if (player.hasEffect(ModMobEffects.MINE_GO_JUICE_SHOVEL)) {
+        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_SHOVEL.getId()).orElseThrow())) {
             if (ItemUtils.isItemInHandShovel(player)) result = true;
         }
-        if (player.hasEffect(ModMobEffects.MINE_GO_JUICE_HOE)) {
+        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_HOE.getId()).orElseThrow())) {
             if (ItemUtils.isItemInHandHoe(player)) result = true;
         }
         return result;
@@ -87,19 +90,19 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.%s".formatted(toolPrefix)).withStyle(style);
                         }
                     } else if (ItemUtils.isItemInHandPickaxe(player)) {
-                        if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_PICKAXE)) {
+                        if (!player.hasEffect(Registration.MINE_GO_JUICE_PICKAXE)) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.pickaxe");
                         }
                     } else if (ItemUtils.isItemInHandAxe(player)) {
-                        if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_AXE)) {
+                        if (!player.hasEffect(Registration.MINE_GO_JUICE_AXE)) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.axe");
                         }
                     } else if (ItemUtils.isItemInHandShovel(player)) {
-                        if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_SHOVEL)) {
+                        if (!player.hasEffect(Registration.MINE_GO_JUICE_SHOVEL)) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.shovel");
                         }
                     } else if (ItemUtils.isItemInHandHoe(player)) {
-                        if (!player.hasEffect(ModMobEffects.MINE_GO_JUICE_HOE)) {
+                        if (!player.hasEffect(Registration.MINE_GO_JUICE_HOE)) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.hoe");
                         }
                     } else if (ItemUtils.isItemInHandNotTools(player)) {
@@ -133,9 +136,9 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
     private static boolean isPlayerHasCustomCardValidEffect(Player player) {
         List<MiningSkillCardItem.Type> types = getCustomCardTypes(player);
         for (MiningSkillCardItem.Type type : types) {
-            MobEffect mobEffect = Registration.MOB_EFFECTS.getRegistrar().get(UltimineAddition.getLocation("mine_go_juice_%s".formatted(type.getId())));
-            if (mobEffect == null) continue;
-            if (player.hasEffect(mobEffect))
+            Optional<Holder.Reference<MobEffect>> mobEffect = BuiltInRegistries.MOB_EFFECT.getHolder(MineGoJuiceEffect.getId(type));
+            if (mobEffect.isEmpty()) continue;
+            if (player.hasEffect(mobEffect.get()))
                 return true;
         }
         return false;
@@ -167,7 +170,7 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
             }
 
             if (!instances.isEmpty()) {
-                return switch (instances.get(0).getAmplifier()) {
+                return switch (instances.getFirst().getAmplifier()) {
                     case 0 -> ConfigHandler.COMMON.TIER_1_MAX_BLOCKS.get();
                     case 1 -> ConfigHandler.COMMON.TIER_2_MAX_BLOCKS.get();
                     case 2 -> ConfigHandler.COMMON.TIER_3_MAX_BLOCKS.get();

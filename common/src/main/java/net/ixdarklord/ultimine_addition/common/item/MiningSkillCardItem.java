@@ -4,24 +4,27 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.handler.codec.CodecException;
-import net.ixdarklord.coolcat_lib.util.ScreenUtils;
+import net.ixdarklord.coolcatlib.api.util.ChatFormattingUtils;
+import net.ixdarklord.coolcatlib.api.util.CodecUtils;
+import net.ixdarklord.coolcatlib.api.util.ComponentHelper;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
-import net.ixdarklord.ultimine_addition.client.gui.screen.SkillsRecordScreen;
+import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.handler.ItemRendererHandler;
 import net.ixdarklord.ultimine_addition.client.renderer.item.IItemRenderer;
 import net.ixdarklord.ultimine_addition.client.renderer.item.UAItemRenderer;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.ixdarklord.ultimine_addition.util.ChatFormattingUtils;
-import net.ixdarklord.ultimine_addition.util.CodecHelper;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
@@ -30,7 +33,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -38,7 +40,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.T
 
 public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> implements IItemRenderer {
     private final Type type;
-    public MiningSkillCardItem(Properties properties, Type type) {
+    public MiningSkillCardItem(Type type, Item.Properties properties) {
         super(properties, ComponentType.CRAFTING);
         this.type = type;
     }
@@ -59,20 +60,8 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         return InteractionResultHolder.fail(stack);
     }
 
-    @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
-        if (this.isLegacyMode() || level.isClientSide() || this.type == EMPTY) return;
-
-        if (entity instanceof ServerPlayer player) {
-            if (!stack.hasTag()) {
-                if (getData(stack).getChallenges().isEmpty())
-                    getData(stack).sendToClient(player).initChallenges().saveData(stack);
-            }
-        }
-    }
-
     public static void giveMineGoJuice(ServerPlayer player, Type type) {
-        MobEffect effect = Registration.MOB_EFFECTS.getRegistrar().get(MineGoJuiceEffect.getId(type));
+        Holder<MobEffect> effect = Registration.MOB_EFFECTS.getRegistrar().getHolder(MineGoJuiceEffect.getId(type));
         if (effect == null) return;
 
         MobEffectInstance instance = new MobEffectInstance(effect, 20, 2, false, false, false);
@@ -86,20 +75,20 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
-        super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
         if (!(Minecraft.getInstance().screen instanceof SkillsRecordScreen) && this.isShiftButtonNotPressed(tooltipComponents)) return;
         MutableComponent component;
         if (getType() == EMPTY) {
             component = Component.translatable("tooltip.ultimine_addition.skill_card.info.empty").withStyle(ChatFormatting.GRAY);
-            List<Component> components = ScreenUtils.splitComponent(component, getSplitterLength());
+            List<Component> components = ComponentHelper.splitComponent(component, getSplitterLength());
             tooltipComponents.addAll(components);
             return;
         }
 
-        component = Component.translatable("tooltip.ultimine_addition.skill_card.tier", !stack.hasTag() ? Component.literal("§kNawaf") : getData(stack).getTier().getDisplayName());
+        component = Component.translatable("tooltip.ultimine_addition.skill_card.tier", !stack.has(MiningSkillCardData.DATA_COMPONENT) ? Component.literal("§kNawaf") : getData(stack).getTier().getDisplayName());
         tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
-        if (stack.hasTag() && type != EMPTY && getData(stack).getTier() != Tier.Unlearned && getData(stack).getTier() != Tier.Mastered) {
+        if (stack.has(MiningSkillCardData.DATA_COMPONENT) && type != EMPTY && getData(stack).getTier() != Tier.Unlearned && getData(stack).getTier() != Tier.Mastered) {
             ChatFormatting formatting = ChatFormattingUtils.get3ColorPercentageFormat(getData(stack).getPotionPoints(), getData(stack).getMaxPotionPoints());
             component = Component.translatable("tooltip.ultimine_addition.skill_card.potion_point", Component.literal(String.valueOf(getData(stack).getPotionPoints())).withStyle(formatting));
             tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
@@ -110,7 +99,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
 
         if (getData(stack).getTier() != Tier.Mastered) {
             component = Component.translatable("tooltip.ultimine_addition.skill_card.info").withStyle(ChatFormatting.WHITE);
-            List<Component> components = ScreenUtils.splitComponent(component, getSplitterLength());
+            List<Component> components = ComponentHelper.splitComponent(component, getSplitterLength());
             tooltipComponents.addAll(components);
         }
     }
@@ -118,7 +107,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     @Override
     public boolean isBarVisible(ItemStack itemStack) {
         var data = getData(itemStack);
-        if (!itemStack.hasTag() || type == EMPTY || data.getTier() == Tier.Unlearned || data.getTier() == Tier.Mastered) return false;
+        if (!itemStack.has(MiningSkillCardData.DATA_COMPONENT) || type == EMPTY || data.getTier() == Tier.Unlearned || data.getTier() == Tier.Mastered) return false;
         return !data.isPotionPointsFull();
     }
     @Override
@@ -138,7 +127,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
 
     @Override
     public MiningSkillCardData getData(ItemStack stack) {
-        return new MiningSkillCardData().loadData(stack);
+        return MiningSkillCardData.loadData(stack);
     }
 
     public Type getType() {
@@ -146,7 +135,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     }
 
     public static boolean isTierEqual(ItemStack stack, Tier tier) {
-        return new MiningSkillCardData().loadData(stack).getTier() == tier;
+        return MiningSkillCardData.loadData(stack).getTier() == tier;
     }
 
     public static class Type {
@@ -160,8 +149,8 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         private final boolean active;
         private final String id;
         private final List<String> requiredTools;
-        private final Color potionColor;
         private final Item defaultDisplayItem;
+        private final Color potionColor;
 
         public static final Codec<Type> CODEC = Codec.STRING.comapFlatMap(s -> {
             try {
@@ -175,8 +164,8 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
                 Codec.BOOL.fieldOf("active").forGetter(Type::isActive),
                 Codec.STRING.fieldOf("card_id").forGetter(Type::getId),
                 Codec.STRING.listOf().fieldOf("required_tools").forGetter(Type::getRequiredTools),
-                CodecHelper.COLOR_CODEC.optionalFieldOf("potion_color", Color.WHITE).forGetter(Type::getPotionColor),
-                CodecHelper.ITEM_CODEC.optionalFieldOf("default_display_item", Items.BARRIER).forGetter(Type::getDefaultDisplayItem)
+                CodecUtils.COLOR_CODEC.optionalFieldOf("potion_color", Color.WHITE).forGetter(Type::getPotionColor),
+                CodecUtils.ITEM_CODEC.optionalFieldOf("default_display_item", Items.BARRIER).forGetter(Type::getDefaultDisplayItem)
         ).apply(instance, Type::new));
 
         public Type(boolean active, String id, List<String> requiredTools) {
@@ -215,6 +204,10 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
             return id;
         }
 
+        public ResourceLocation getRegistryId() {
+            return UltimineAddition.getLocation("mining_skill_card_%s".formatted(id));
+        }
+
         public List<String> getRequiredTools() {
             return requiredTools;
         }
@@ -247,11 +240,11 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
             for (String value : requiredTools) {
                 if (value.startsWith("#")) {
                     List<Item> items = new ArrayList<>();
-                    BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, new ResourceLocation(value.replaceAll("#", "")))).ifPresent(holders ->
+                    BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, ResourceLocation.parse(value.replaceAll("#", "")))).ifPresent(holders ->
                             items.addAll(holders.stream().map(Holder::value).toList()));
                     if (!items.isEmpty()) list.addAll(items);
                 } else {
-                    Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(value));
+                    Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(value));
                     if (item != Items.AIR) list.add(item);
                 }
             }
@@ -267,9 +260,11 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         Mastered(4);
 
         private final int tier;
+
         Tier(int tier) {
             this.tier = tier;
         }
+
         public static final Codec<Tier> CODEC = Codec.INT.comapFlatMap(i -> {
             try {
                 return DataResult.success(Tier.fromInt(i));
@@ -277,6 +272,18 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
                 return DataResult.success(Tier.Unlearned);
             }
         }, Tier::getValue);
+
+        public static StreamCodec<FriendlyByteBuf, Tier> STREAM_CODEC = new StreamCodec<>() {
+            @Override
+            public @NotNull Tier decode(FriendlyByteBuf buf) {
+                return buf.readEnum(Tier.class);
+            }
+
+            @Override
+            public void encode(FriendlyByteBuf buf, Tier tier) {
+                buf.writeEnum(tier);
+            }
+        };
 
         public boolean isEligible(Tier tier) {
             return tier.getValue() >= this.tier;

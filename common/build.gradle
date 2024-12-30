@@ -1,57 +1,13 @@
-architectury {
-    common(enabled_platforms.split(","))
-}
-
-loom {
-    if (file("src/main/resources/${modid}.accesswidener").exists()) {
-        accessWidenerPath = file("src/main/resources/${modid}.accesswidener")
-        logger.info('Access Widener are enabled for this project.')
-    }
-}
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/common.gradle"
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:${fabric_version}"
-    modApi "dev.architectury:architectury:${architectury_version}"
-    modApi "net.ixdarklord.coolcat_lib:common:${mc_version}-v${coolcatlib_version}-release"
+    modApi libs.architectury.common.get()
+    modApi "net.ixdarklord.coolcatlib:common:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    modApi libs.forgeconfigapiport.common.get()
+    modApi libs.jei.api.common.get()
 
-    implementation 'com.electronwill.night-config:core:3.6.6'
-    implementation 'com.electronwill.night-config:toml:3.6.6'
-    modCompileOnly "curse.maven:forge-config-api-port-fabric-547434:${forge_config_api_version_id}"
-
-    modCompileOnly "curse.maven:ftb-library-forge-404465:4720056"
-    modCompileOnly "curse.maven:ftb-ultimine-forge-386134:5005006"
-
-    modApi "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+    modCompileOnly "curse.maven:ftb-library-forge-404465:$ftblibrary_neoforge_version_id"
+    modCompileOnly "curse.maven:ftb-ultimine-forge-386134:$ftbultimine_neoforge_version_id"
 }
 
-processResources {
-    duplicatesStrategy DuplicatesStrategy.INCLUDE
-    var replaceProperties = [
-            modName: 			        mod_name,
-            modDescription: 			mod_description,
-            packFormat: 				pack_format
-    ]
-
-    inputs.properties replaceProperties
-    filesMatching ('pack.mcmeta') {
-        expand replaceProperties
-    }
-}
-
-publishing {
-    publications {
-        mavenCommon(MavenPublication) {
-            groupId rootProject.group
-            artifactId rootProject.archivesBaseName
-            version rootProject.version
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        maven {
-            url "file://" + System.getenv("local_maven")
-        }
-    }
-}
+sourceSets.main.resources { srcDir 'src/main/generated' }

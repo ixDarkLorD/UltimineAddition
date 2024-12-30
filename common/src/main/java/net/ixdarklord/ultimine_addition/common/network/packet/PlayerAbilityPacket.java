@@ -1,34 +1,27 @@
 package net.ixdarklord.ultimine_addition.common.network.packet;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
-import net.ixdarklord.ultimine_addition.client.handler.ClientPlayerUltimineHandler;
-import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.minecraft.network.FriendlyByteBuf;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import org.jetbrains.annotations.NotNull;
 
-public class PlayerAbilityPacket extends BaseS2CMessage {
-    private final boolean state;
+public record PlayerAbilityPacket(boolean state) implements CustomPacketPayload {
+    public static final Type<PlayerAbilityPacket> TYPE = new Type<>(UltimineAddition.getLocation("sync_player_ability"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, PlayerAbilityPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.BOOL, PlayerAbilityPacket::state,
+            PlayerAbilityPacket::new
+    );
 
-    public PlayerAbilityPacket(FriendlyByteBuf buf) {
-        this(buf.readBoolean());
-    }
-    public PlayerAbilityPacket(boolean state) {
-        this.state = state;
-    }
-
-    @Override
-    public MessageType getType() {
-        return PacketHandler.SYNC_PLAYER_ABILITY;
+    public static void handle(PlayerAbilityPacket message, NetworkManager.PacketContext context) {
+        context.queue(() -> ServicePlatform.Players.setPlayerUltimineCapability(context.getPlayer(), message.state));
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
-        buf.writeBoolean(this.state);
-    }
-
-    @Override
-    public void handle(NetworkManager.PacketContext context) {
-        context.queue(() -> ClientPlayerUltimineHandler.setCapability(state));
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

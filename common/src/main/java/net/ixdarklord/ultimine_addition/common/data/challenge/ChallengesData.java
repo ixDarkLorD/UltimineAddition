@@ -7,6 +7,8 @@ import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -29,6 +31,8 @@ public class ChallengesData {
             ItemStack.CODEC.optionalFieldOf("required_specific_tool", ItemStack.EMPTY, Lifecycle.experimental()).forGetter(ChallengesData::getRequiredSpecificTool),
             Codec.STRING.listOf().fieldOf("targeted_blocks").forGetter(ChallengesData::getTargetedBlocks)
     ).apply(instance, ChallengesData::new));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, ChallengesData> STREAM_CODEC = StreamCodec.of(ChallengesData::writeBuffer, ChallengesData::readBuffer);
 
     public ChallengesData(MiningSkillCardItem.Type forCardType, MiningSkillCardItem.Tier forCardTier, Type challengeType, Pair<Integer, Integer> requiredAmount, ItemStack requiredSpecificTool, List<String> targetedBlocks) {
         this.forCardType = forCardType;
@@ -68,7 +72,7 @@ public class ChallengesData {
         return targetedBlocks;
     }
 
-    public static void writeBuffer(FriendlyByteBuf buf, ChallengesData data) {
+    public static void writeBuffer(RegistryFriendlyByteBuf buf, ChallengesData data) {
         buf.writeUtf(data.getForCardType().getId());
         buf.writeInt(data.getForCardTier().getValue());
 
@@ -78,16 +82,16 @@ public class ChallengesData {
         buf.writeInt(data.getRequiredAmountPair().getFirst());
         buf.writeInt(data.getRequiredAmountPair().getSecond());
 
-        buf.writeItem(data.getRequiredSpecificTool());
+        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, data.getRequiredSpecificTool());
         buf.writeCollection(data.getTargetedBlocks(), FriendlyByteBuf::writeUtf);
     }
 
-    public static ChallengesData readBuffer(FriendlyByteBuf buf) {
+    public static ChallengesData readBuffer(RegistryFriendlyByteBuf buf) {
         MiningSkillCardItem.Type cardType = MiningSkillCardItem.Type.fromString(buf.readUtf());
         MiningSkillCardItem.Tier cardTier = MiningSkillCardItem.Tier.fromInt(buf.readInt());
         Type type = Type.fromValues(buf.readUtf(), buf.readBoolean());
         Pair<Integer, Integer> requiredAmounts = Pair.of(buf.readInt(), buf.readInt());
-        ItemStack requiredSpecificTool = buf.readItem();
+        ItemStack requiredSpecificTool = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
         List<String> targetedBlocks = buf.readList(FriendlyByteBuf::readUtf);
         return new ChallengesData(cardType, cardTier, type, requiredAmounts, requiredSpecificTool, targetedBlocks);
     }

@@ -7,6 +7,7 @@ import com.mojang.math.Axis;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.ITickTimer;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -14,12 +15,12 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.ixdarklord.coolcat_lib.util.MouseHelper;
-import net.ixdarklord.coolcat_lib.util.ScreenUtils;
-import net.ixdarklord.ultimine_addition.common.recipe.ingredient.DataIngredient;
+import net.ixdarklord.coolcatlib.api.util.ComponentHelper;
+import net.ixdarklord.coolcatlib.api.util.MouseHelper;
 import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.common.recipe.ingredient.DataIngredient;
 import net.ixdarklord.ultimine_addition.core.Registration;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -29,23 +30,27 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
+import java.util.Objects;
 
 public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorageDataRecipe> {
-    public static final ResourceLocation TEXTURES = UltimineAddition.getGuiTexture("item_storage_data_recipe_jei", "png");
+    public static final ResourceLocation TEXTURES = UltimineAddition.getGuiTexture("jei/item_storage_data_recipe", "png");
     public static final RecipeType<ItemStorageDataRecipe> RECIPE_TYPE =
-            RecipeType.create(UltimineAddition.MOD_ID, ItemStorageDataRecipe.Serializer.NAME.getPath(), ItemStorageDataRecipe.class);
+            RecipeType.create(UltimineAddition.MOD_ID, "item_storage_data", ItemStorageDataRecipe.class);
     private final IGuiHelper helper;
     private final IDrawable background;
     private final ITickTimer timer;
@@ -64,24 +69,24 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
     public static List<ItemStack> getCatalysts() {
         RecipeManager rm = Objects.requireNonNull(Minecraft.getInstance().level).getRecipeManager();
         List<ItemStorageDataRecipe> recipes = new ArrayList<>(rm.getAllRecipesFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING).stream()
-                .filter(recipe -> recipe instanceof ItemStorageDataRecipe)
-                .map(recipe -> (ItemStorageDataRecipe) recipe)
+                .filter(recipe -> recipe.value() instanceof ItemStorageDataRecipe)
+                .map(recipe -> (ItemStorageDataRecipe) recipe.value())
                 .toList());
         return recipes.stream().map(ItemStorageDataRecipe::getResultItem).toList();
     }
 
     public static List<ItemStorageDataRecipe> getItemStorageDataRecipes() {
         RecipeManager rm = Objects.requireNonNull(Minecraft.getInstance().level).getRecipeManager();
-        List<ItemStorageDataRecipe> storageDataRecipes = rm.getAllRecipesFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING).stream()
-                .filter(recipe -> recipe instanceof ItemStorageDataRecipe)
-                .map(recipe -> (ItemStorageDataRecipe) recipe)
+        List<ItemStorageDataRecipe> recipes = rm.getAllRecipesFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING).stream()
+                .filter(recipe -> recipe.value() instanceof ItemStorageDataRecipe)
+                .map(recipe -> (ItemStorageDataRecipe) recipe.value())
                 .toList();
 
         List<ItemStorageDataRecipe> result = new ArrayList<>();
-        storageDataRecipes.forEach(recipe -> recipe.getDataIngredients().forEach(i -> {
+        recipes.forEach(recipe -> recipe.getDataIngredients().forEach(i -> {
             NonNullList<DataIngredient> items = NonNullList.create();
             items.add(DataIngredient.of(i.getAmount(), i.getItems()));
-            result.add(new ItemStorageDataRecipe(recipe.getId(), recipe.getGroup(), recipe.getCategory(), recipe.getResultItem(), recipe.getStorageName(), items));
+            result.add(new ItemStorageDataRecipe(recipe.getGroup(), recipe.getCategory(), recipe.getResultItem(), recipe.getStorageName(), items));
         }));
         return result;
     }
@@ -96,6 +101,8 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         return this.title;
     }
 
+
+    @SuppressWarnings("removal")
     @Override
     public @NotNull IDrawable getBackground() {
         return this.background;
@@ -118,13 +125,12 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
     }
 
     @Override
-    public @NotNull List<Component> getTooltipStrings(ItemStorageDataRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
-        int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrCreateTag().getInt("amount");
+    public void getTooltip(ITooltipBuilder tooltip, ItemStorageDataRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
+        int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt("amount");
         Component component = Component.translatable(String.format("jei.ultimine_addition.recipe.item_storage.%s", recipe.getStorageName()), value);
         if (component.getString().length() >= 27 && MouseHelper.isMouseOver(mouseX, mouseY, 3, 28, 121, 12)) {
-            return List.of(component);
+            tooltip.add(component);
         }
-        return Collections.emptyList();
     }
 
     @Override
@@ -162,8 +168,8 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         // TEXT
         poseStack.pushPose();
         Font font = Minecraft.getInstance().font;
-        int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrCreateTag().getInt("amount");
-        Component component = ScreenUtils.limitComponent(Component.translatable(String.format("jei.ultimine_addition.recipe.item_storage.%s", recipe.getStorageName()), value), 27);
+        int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt("amount");
+        Component component = ComponentHelper.limitComponent(Component.translatable(String.format("jei.ultimine_addition.recipe.item_storage.%s", recipe.getStorageName()), value), 27);
         guiGraphics.drawString(font, component, 5, 30, Color.WHITE.getRGB());
         poseStack.popPose();
     }

@@ -1,33 +1,44 @@
 package net.ixdarklord.ultimine_addition.common.data.player;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 
 public class PlayerAbilityData extends DataHandler<PlayerAbilityData, CompoundTag> {
-    private boolean isCapable;
+    public static final Codec<PlayerAbilityData> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+            Codec.BOOL.fieldOf("is_capable").forGetter(PlayerAbilityData::getAbility)
+    ).apply(inst, PlayerAbilityData::new));
+
+    private PlayerAbilityData(boolean capable) {
+        this.capable = capable;
+    }
+
+    public static PlayerAbilityData create() {
+        return new PlayerAbilityData(false);
+    }
+
+    private boolean capable;
 
     public boolean getAbility() {
-        return isCapable;
+        return capable;
     }
+
     public PlayerAbilityData setAbility(boolean state) {
-        isCapable = state;
+        capable = state;
         return this;
     }
+
     public void copyFrom(PlayerAbilityData source) {
-        this.isCapable = source.isCapable;
+        this.capable = source.capable;
     }
 
     @Override
-    public void saveData(CompoundTag data) {
-        data.putBoolean("can_ultimine", isCapable);
-    }
-    @Override
-    public PlayerAbilityData loadData(CompoundTag data) {
-        isCapable = data.getBoolean("can_ultimine");
-        return this;
+    public void saveData(CompoundTag tag) {
+        tag.putBoolean("is_capable", capable);
     }
 
-    @Override
-    public void toNetwork(FriendlyByteBuf buf) {}
+    public void loadData(CompoundTag tag) {
+        this.capable = tag.getBoolean("is_capable");
+    }
 }

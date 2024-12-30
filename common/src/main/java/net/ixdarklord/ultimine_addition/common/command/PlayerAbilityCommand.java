@@ -3,6 +3,7 @@ package net.ixdarklord.ultimine_addition.common.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -17,7 +18,7 @@ import java.util.Objects;
 public class PlayerAbilityCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored1, Commands.CommandSelection ignored2) {
-        dispatcher.register(Commands.literal("ultimine_addition").requires(p -> p.hasPermission(Commands.LEVEL_GAMEMASTERS))
+        dispatcher.register(UltimineAddition.getCommandPrompt(Commands.LEVEL_GAMEMASTERS)
                 .then(Commands.literal("player_ability")
                 .then(Commands.argument("targets", EntityArgument.players())
                 .then(Commands.literal("set")

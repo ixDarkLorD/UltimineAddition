@@ -1,0 +1,37 @@
+{
+  "parent": "ultimine_addition:skills_record",
+  "criteria": {
+    "has_ultimine_ability": {
+      "trigger": "ultimine_addition:ultimine_obtain"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.ultimine_ability.desc",
+      "with": [
+        {
+          "translate": "item.ultimine_addition.miner_certificate"
+        }
+      ]
+    },
+    "frame": "challenge",
+    "icon": {
+      "components": {
+        "ultimine_addition:miner_certificate_data": {
+          "IsAccomplished": true
+        }
+      },
+      "count": 1,
+      "id": "ultimine_addition:miner_certificate"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.ultimine_ability"
+    }
+  },
+  "requirements": [
+    [
+      "has_ultimine_ability"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,0 +1,38 @@
+{
+  "parent": "ultimine_addition:root",
+  "criteria": {
+    "has_slime_balls": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:slime_ball"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.obtain",
+      "with": [
+        {
+          "translate": "item.minecraft.slime_ball"
+        }
+      ]
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:slime_ball"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.obtain.slime_balls"
+    }
+  },
+  "requirements": [
+    [
+      "has_slime_balls"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

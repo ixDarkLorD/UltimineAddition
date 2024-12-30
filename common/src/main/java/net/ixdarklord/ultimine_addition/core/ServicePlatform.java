@@ -5,7 +5,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
-@SuppressWarnings("unused")
 public class ServicePlatform {
     @ExpectPlatform
     public static void registerConfig() {
@@ -17,9 +16,10 @@ public class ServicePlatform {
         public static boolean isModLoaded() {
             throw new AssertionError();
         }
+
         @ExpectPlatform
         public static ItemStack getSkillsRecordItem(Player player) {
-            throw new AssertionError();
+            return ItemStack.EMPTY;
         }
     }
 
@@ -28,16 +28,24 @@ public class ServicePlatform {
         public static boolean isPlayerUltimineCapable(Player player) {
             throw new AssertionError();
         }
+
         @ExpectPlatform
         public static void setPlayerUltimineCapability(Player player, boolean state) {
             throw new AssertionError();
         }
+
         @ExpectPlatform
         public static double getReachAttribute(Player player) {
             throw new AssertionError();
         }
+
         @ExpectPlatform
         public static boolean isCorrectToolForBlock(ItemStack stack, BlockState blockState) {
+            throw new AssertionError();
+        }
+
+        @ExpectPlatform
+        public static boolean isToolPaxel(ItemStack stack) {
             throw new AssertionError();
         }
     }

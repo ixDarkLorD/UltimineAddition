@@ -15,29 +15,28 @@ public abstract class PlayerDataMixin implements IPlayerData {
     @Unique
     private PlayerAbilityData ultimineData;
 
-    @SuppressWarnings("AddedMixinMembersNamePattern")
     @Override
-    public PlayerAbilityData getUltimineData() {
+    public PlayerAbilityData ua$getUltimineData() {
         if (this.ultimineData == null) {
-            this.ultimineData = new PlayerAbilityData();
+            this.ultimineData = PlayerAbilityData.create();
         }
         return ultimineData;
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At(value = "HEAD"))
     public void writeUltimineData(CompoundTag compound, CallbackInfo ci) {
-        if (getUltimineData() != null) {
+        if (ua$getUltimineData() != null) {
             CompoundTag NBT = new CompoundTag();
-            getUltimineData().saveData(NBT);
-            if (!NBT.isEmpty()) compound.put(getUltimineData().getNBTBase(), NBT);
+            ua$getUltimineData().saveData(NBT);
+            if (!NBT.isEmpty()) compound.put(ua$getUltimineData().getNBTBase(), NBT);
         }
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At(value = "HEAD"))
     public void readUltimineData(CompoundTag compound, CallbackInfo ci) {
-        if (compound.contains(getUltimineData().getNBTBase(), 10)) {
-            CompoundTag NBT = compound.getCompound(getUltimineData().getNBTBase());
-            getUltimineData().loadData(NBT);
+        if (compound.contains(ua$getUltimineData().getNBTBase(), 10)) {
+            CompoundTag NBT = compound.getCompound(ua$getUltimineData().getNBTBase());
+            ua$getUltimineData().loadData(NBT);
         }
     }
 }

@@ -46,7 +46,7 @@ public class LanguageBuilder {
         add("jei", "recipe.item_storage.ink_chamber", "Ink Amount: %s+");
 
         addCurios("skills_record", "Skills Record");
-        addTrinkets("hand.skills_record", "Skills Record");
+        addTrinkets("interactionHand.skills_record", "Skills Record");
 
         add("tooltip", "legacy_mode.disabled_item", "This item has been Disabled by Legacy Mode.");
         add("tooltip", "certificate.info", "Interact with this parchment to obtain the ultimine ability permanently!");
@@ -81,10 +81,21 @@ public class LanguageBuilder {
         add("gui", "color.indigo", "Indigo");
         add("gui", "color.violet", "Violet");
         add("gui", "skills_record.configuration", "Configuration");
+        add("gui", "skills_record.option.soon", "Coming Soon...");
         add("gui", "skills_record.option.bg_color", "Background Color");
         add("gui", "skills_record.option.animations", "Animations");
         add("gui", "skills_record.option.progression_bar", "Progression Bar");
         add("gui", "skills_record.option.hold_keybind", "Hold %s");
+        add("gui", "skills_record.option.panel_pos", "Challenges Panel Position");
+        add("gui", "skills_record.option.panel_pos.disabled", "Disabled");
+        add("gui", "skills_record.option.panel_pos.top_left", "Top Left");
+        add("gui", "skills_record.option.panel_pos.top", "Top");
+        add("gui", "skills_record.option.panel_pos.top_right", "Top Right");
+        add("gui", "skills_record.option.panel_pos.left", "Left");
+        add("gui", "skills_record.option.panel_pos.right", "Right");
+        add("gui", "skills_record.option.panel_pos.bottom_left", "Bottom Left");
+        add("gui", "skills_record.option.panel_pos.bottom_right", "Bottom Right");
+        add("gui", "skills_record.option.panel_size", "Challenges Panel Size");
         add("gui", "skills_record.consume", "Consume Mode: %s");
         add("gui", "skills_record.consume.no_cards", "No cards need this mode to be toggled.");
         add("gui", "skills_record.example", "This is an example!");
@@ -146,7 +157,10 @@ public class LanguageBuilder {
         add("argument", "challenge.unknown", "Unknown challenge '%s'");
         add("argument", "cards.tier.unknown", "Unknown card tier '%s'");
 
+        add("command", "skills_record.edit_mode.success", "You have successfully set the Skills Record's edit mode to %s!");
+        add("command", "skills_record.edit_mode.already_setted", "The Skills Record's edit mode is already set to %s.");
         add("command", "cards.not_found", "There is no card in the selected slot!");
+        add("command", "challenge.not_found", "There is no challenge exists in the card with this id: %s");
         add("command", "challenge.success", "You have successfully changed the '%s' challenge current point from %s to %s!");
         add("command", "challenge.sender", "You have successfully changed the '%s' challenge current point from %s to %s for:");
         add("command", "challenge.receiver", "Your '%s' challenge current point has been changed from %s to %s! (by %s)");

@@ -18,6 +18,7 @@ import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,9 +27,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class MCRecipeTransferHandler implements IRecipeTransferHandler<CraftingMenu, CraftingRecipe> {
+public class MCRecipeTransferHandler implements IRecipeTransferHandler<CraftingMenu, RecipeHolder<CraftingRecipe>> {
     private final IRecipeTransferHandlerHelper handlerHelper;
-    private final IRecipeTransferHandler<CraftingMenu, CraftingRecipe> handler;
+    private final IRecipeTransferHandler<CraftingMenu, RecipeHolder<CraftingRecipe>> handler;
 
     public MCRecipeTransferHandler(IRecipeTransferHandlerHelper handlerHelper) {
         this.handlerHelper = handlerHelper;
@@ -47,20 +48,20 @@ public class MCRecipeTransferHandler implements IRecipeTransferHandler<CraftingM
     }
 
     @Override
-    public @NotNull RecipeType<CraftingRecipe> getRecipeType() {
+    public @NotNull RecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
         return RecipeTypes.CRAFTING;
     }
 
     @Nullable
     @Override
-    public IRecipeTransferError transferRecipe(@NotNull CraftingMenu container, @NotNull CraftingRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull Player player, boolean maxTransfer, boolean doTransfer) {
+    public IRecipeTransferError transferRecipe(@NotNull CraftingMenu container, @NotNull RecipeHolder<CraftingRecipe> recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull Player player, boolean maxTransfer, boolean doTransfer) {
         if (!handlerHelper.recipeTransferHasServerSupport()) {
             Component tooltipMessage = Component.translatable("jei.tooltip.error.recipe.transfer.no.server");
             return this.handlerHelper.createUserErrorWithTooltip(tooltipMessage);
         }
 
         List<IRecipeSlotView> missingItems = this.getMissingItems(container, recipeSlotsView.getSlotViews(RecipeIngredientRole.INPUT));
-        if (recipe instanceof MCRecipe) {
+        if (recipe.value() instanceof MCRecipe) {
             if (!missingItems.isEmpty()) {
                 MutableComponent tooltipMessage = Component.translatable("jei.tooltip.error.recipe.transfer.missing");
                 if (!missingTieredUpMiningCard(container, missingItems).isEmpty())
@@ -93,8 +94,8 @@ public class MCRecipeTransferHandler implements IRecipeTransferHandler<CraftingM
                 .filter(slotView -> {
                     List<ItemStack> list = new ArrayList<>(slotView.getItemStacks().toList());
                     list.removeIf(stack -> {
-                        MiningSkillCardData data = new MiningSkillCardData().loadData(stack);
-                        var inv = container.getItems().stream().filter(stack1 -> stack1.is(stack.getItem()) && !new MiningSkillCardData().loadData(stack1).getTier().equals(data.getTier())).toList();
+                        MiningSkillCardData data = MiningSkillCardData.loadData(stack);
+                        var inv = container.getItems().stream().filter(stack1 -> stack1.is(stack.getItem()) && !MiningSkillCardData.loadData(stack1).getTier().equals(data.getTier())).toList();
                         return inv.isEmpty();
                     });
                     return !list.isEmpty();

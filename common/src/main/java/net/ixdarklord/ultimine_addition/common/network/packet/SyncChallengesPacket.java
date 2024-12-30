@@ -1,38 +1,34 @@
 package net.ixdarklord.ultimine_addition.common.network.packet;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
-import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.minecraft.network.FriendlyByteBuf;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class SyncChallengesPacket extends BaseS2CMessage {
-    private final Map<ResourceLocation, ChallengesData> dataMap;
+public record SyncChallengesPacket(Map<ResourceLocation, ChallengesData> dataMap) implements CustomPacketPayload {
+    public static final Type<SyncChallengesPacket> TYPE = new Type<>(UltimineAddition.getLocation("sync_challenges"));
+    private static final StreamCodec<RegistryFriendlyByteBuf, Map<ResourceLocation, ChallengesData>> CHALLENGES_STREAM_CODEC =
+            ByteBufCodecs.map(i -> new HashMap<>(), ResourceLocation.STREAM_CODEC, ChallengesData.STREAM_CODEC);
 
-    public SyncChallengesPacket(FriendlyByteBuf buffer) {
-        this(buffer.readMap(FriendlyByteBuf::readResourceLocation, ChallengesData::readBuffer));
-    }
-    public SyncChallengesPacket(Map<ResourceLocation, ChallengesData> dataMap) {
-        this.dataMap = dataMap;
-    }
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncChallengesPacket> STREAM_CODEC = StreamCodec.composite(
+            CHALLENGES_STREAM_CODEC, SyncChallengesPacket::dataMap,
+            SyncChallengesPacket::new);
 
-    @Override
-    public MessageType getType() {
-        return PacketHandler.SYNC_CHALLENGES;
+    public static void handle(SyncChallengesPacket message, NetworkManager.PacketContext context) {
+        context.queue(() -> ChallengesManager.INSTANCE.setChallenges(message.dataMap));
     }
 
     @Override
-    public void write(FriendlyByteBuf buffer) {
-        buffer.writeMap(dataMap, FriendlyByteBuf::writeResourceLocation, ChallengesData::writeBuffer);
-    }
-
-    @Override
-    public void handle(NetworkManager.PacketContext context) {
-        context.queue(() -> ChallengesManager.INSTANCE.setChallenges(dataMap));
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

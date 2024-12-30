@@ -1,22 +1,68 @@
 package net.ixdarklord.ultimine_addition.common.data.item;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Objects;
+
 public class ItemStorageData extends DataHandler<ItemStorageData, ItemStack> {
+    public static final Codec<ItemStorageData> CODEC;
+    public static final StreamCodec<RegistryFriendlyByteBuf, ItemStorageData> STREAM_CODEC;
+    public static final DataComponentType<ItemStorageData> DATA_COMPONENT;
+
     private final String storageName;
-    private ItemStack stack;
-    private int maxCapacity;
     private int capacity;
-    public ItemStorageData(String storageName, int maxCapacity) {
+    private final int maxCapacity;
+
+    private ItemStorageData(String storageName, int maxCapacity) {
+        this(storageName, 0, maxCapacity);
+    }
+
+    private ItemStorageData(String storageName, int capacity, int maxCapacity) {
         this.storageName = storageName;
+        this.capacity = capacity;
         this.maxCapacity = maxCapacity;
     }
 
-    public ItemStorageData(String storageName) {
-        this.storageName = storageName;
+    public static ItemStorageData create(String storageName, int maxCapacity) {
+        return new ItemStorageData(storageName, maxCapacity);
+    }
+
+    public static ItemStorageData loadData(String storageName, int maxCapacity, ItemStack stack) {
+        return stack.getOrDefault(DATA_COMPONENT, create(storageName, maxCapacity)).setDataHolder(stack);
+    }
+
+    @Override
+    public void saveData(ItemStack stack) {
+        stack.set(DATA_COMPONENT, this);
+        super.saveData(stack);
+    }
+
+    static {
+        CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.STRING.fieldOf("StorageName").forGetter(ItemStorageData::getStorageName),
+                Codec.INT.fieldOf("Capacity").forGetter(ItemStorageData::getCapacity),
+                Codec.INT.fieldOf("MaxCapacity").forGetter(ItemStorageData::getMaxCapacity)
+        ).apply(instance, ItemStorageData::new));
+
+        STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8, ItemStorageData::getStorageName,
+                ByteBufCodecs.INT, ItemStorageData::getCapacity,
+                ByteBufCodecs.INT, ItemStorageData::getMaxCapacity,
+                ItemStorageData::new
+        );
+
+        DATA_COMPONENT = DataComponentType.<ItemStorageData>builder().persistent(CODEC).networkSynchronized(STREAM_CODEC).build();
+    }
+
+    public String getStorageName() {
+        return storageName;
     }
 
     public int getMaxCapacity() {
@@ -42,45 +88,19 @@ public class ItemStorageData extends DataHandler<ItemStorageData, ItemStack> {
         return this;
     }
 
-    @Override
-    public ItemStack get() {
-        return stack;
-    }
-
     public boolean isFull() {
         return this.capacity >= this.maxCapacity;
     }
 
     @Override
-    public void saveData(ItemStack stack) {
-        CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(this.NBTBase);
-        if (NBT == null) NBT = new CompoundTag();
-
-        NBT.putInt("max_" + this.storageName, this.maxCapacity);
-        NBT.putInt(this.storageName, this.capacity);
-        stack.getOrCreateTag().put(this.NBTBase, NBT);
-        super.saveData(stack);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ItemStorageData data)) return false;
+        return capacity == data.capacity && maxCapacity == data.maxCapacity && Objects.equals(storageName, data.storageName);
     }
 
     @Override
-    public ItemStorageData loadData(ItemStack stack) {
-        CompoundTag NBT = (CompoundTag) stack.getOrCreateTag().get(this.NBTBase);
-        if (NBT == null) NBT = new CompoundTag();
-
-        this.maxCapacity = this.maxCapacity == 0 ? NBT.getInt("max_" + this.storageName) == 0 ? 500 : NBT.getInt("max_" + this.storageName) : this.maxCapacity;
-        this.capacity = NBT.getInt(this.storageName);
-        this.stack = stack;
-        return this;
-    }
-
-    @Override
-    public void toNetwork(FriendlyByteBuf buf) {
-        buf.writeUtf(this.storageName);
-        buf.writeInt(this.maxCapacity);
-        buf.writeItem(this.stack);
-    }
-
-    public static ItemStorageData fromNetwork(FriendlyByteBuf buf) {
-        return new ItemStorageData(buf.readUtf(), buf.readInt()).loadData(buf.readItem());
+    public int hashCode() {
+        return Objects.hash(storageName, capacity, maxCapacity);
     }
 }

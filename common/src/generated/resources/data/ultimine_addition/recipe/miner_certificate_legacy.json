@@ -1,0 +1,36 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "ultimine_addition:legacy_mode",
+      "value": true
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "1": {
+      "item": "minecraft:diamond_pickaxe"
+    },
+    "2": {
+      "item": "minecraft:iron_axe"
+    },
+    "3": {
+      "item": "minecraft:golden_hoe"
+    },
+    "4": {
+      "item": "minecraft:stone_shovel"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    }
+  },
+  "pattern": [
+    " 1 ",
+    "2P3",
+    " 4 "
+  ],
+  "result": {
+    "count": 1,
+    "id": "ultimine_addition:miner_certificate"
+  }
+}

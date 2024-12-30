@@ -1,0 +1,38 @@
+{
+  "parent": "ultimine_addition:empty_card",
+  "criteria": {
+    "has_pickaxe_card": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ultimine_addition:mining_skill_card_pickaxe"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.craft",
+      "with": [
+        {
+          "translate": "item.ultimine_addition.mining_skill_card_pickaxe"
+        }
+      ]
+    },
+    "icon": {
+      "count": 1,
+      "id": "ultimine_addition:mining_skill_card_pickaxe"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.craft.card.pickaxe"
+    }
+  },
+  "requirements": [
+    [
+      "has_pickaxe_card"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

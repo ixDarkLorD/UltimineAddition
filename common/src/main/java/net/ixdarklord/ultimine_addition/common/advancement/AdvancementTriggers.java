@@ -1,33 +1,27 @@
 package net.ixdarklord.ultimine_addition.common.advancement;
 
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.*;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 
+import java.util.Optional;
+
 public class AdvancementTriggers {
-    public static InventoryChangeTrigger.TriggerInstance inventoryHas(ItemLike arg) {
-        return inventoryTrigger(net.minecraft.advancements.critereon.ItemPredicate.Builder.item().of(new ItemLike[]{arg}).build());
+    public static Criterion<PlayerTrigger.TriggerInstance> advancementTrigger(AdvancementHolder advancementHolder) {
+        return advancementTrigger(advancementHolder.id());
     }
 
-    public static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... args) {
-        return new InventoryChangeTrigger.TriggerInstance(ContextAwarePredicate.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, args);
+    public static Criterion<PlayerTrigger.TriggerInstance> advancementTrigger(ResourceLocation name) {
+        ContextAwarePredicate predicate = ContextAwarePredicate.create(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS,
+                EntityPredicate.Builder.entity().subPredicate(PlayerPredicate.Builder.player().checkAdvancementDone(name, true).build())).build());
+        return CriteriaTriggers.TICK.createCriterion(new PlayerTrigger.TriggerInstance(Optional.of(predicate)));
     }
 
-    public static PlayerTrigger.TriggerInstance advancementTrigger(Advancement advancement) {
-        return advancementTrigger(advancement.getId().getPath());
-    }
-
-    public static PlayerTrigger.TriggerInstance advancementTrigger(String name) {
-        return new PlayerTrigger.TriggerInstance(CriteriaTriggers.TICK.getId(),
-                ContextAwarePredicate.create(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS,
-                        EntityPredicate.Builder.entity().subPredicate(PlayerPredicate.Builder.player().checkAdvancementDone(UltimineAddition.getLocation(name), true).build())).build()));
-    }
-
-    public static TradeTrigger.TriggerInstance tradedWithVillager(ItemPredicate.Builder itemPredicate) {
-        return new TradeTrigger.TriggerInstance(ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, itemPredicate.build());
+    public static Criterion<TradeTrigger.TriggerInstance> tradedWithVillager(ItemPredicate itemPredicate) {
+        return CriteriaTriggers.TRADE.createCriterion(new TradeTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.of(itemPredicate)));
     }
 }

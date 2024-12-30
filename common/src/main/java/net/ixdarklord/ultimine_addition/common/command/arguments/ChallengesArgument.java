@@ -10,6 +10,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.datafixers.util.Pair;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
@@ -28,16 +30,31 @@ public class ChallengesArgument implements ArgumentType<Pair<ResourceLocation, C
         return new ChallengesArgument();
     }
 
-    @SuppressWarnings("unchecked")
     public static Pair<ResourceLocation, ChallengesData> getData(CommandContext<CommandSourceStack> pContext, String pName) {
         return pContext.getArgument(pName, Pair.class);
     }
 
     @Override
     public Pair<ResourceLocation, ChallengesData> parse(StringReader reader) throws CommandSyntaxException {
-        var id = ResourceLocation.read(reader);
-        if (ChallengesManager.INSTANCE.getAllChallenges().containsKey(id)) return Pair.of(id, ChallengesManager.INSTANCE.getAllChallenges().get(id));
+        var id = read(reader);
+        if (ChallengesManager.INSTANCE.getAllChallenges().containsKey(id))
+            return Pair.of(id, ChallengesManager.INSTANCE.getAllChallenges().get(id));
         throw ERROR_UNKNOWN_CHALLENGE.create(id.toString());
+    }
+
+    public static ResourceLocation read(StringReader reader) throws CommandSyntaxException {
+        int i = reader.getCursor();
+        while(reader.canRead() && ResourceLocation.isAllowedInResourceLocation(reader.peek())) {
+            reader.skip();
+        }
+        String string = reader.getString().substring(i, reader.getCursor());
+
+        try {
+            return string.contains(":") ? ResourceLocation.parse(string) : UltimineAddition.getLocation(string);
+        } catch (ResourceLocationException var4) {
+            reader.setCursor(i);
+            throw ResourceLocation.ERROR_INVALID.createWithContext(reader);
+        }
     }
 
     @Override

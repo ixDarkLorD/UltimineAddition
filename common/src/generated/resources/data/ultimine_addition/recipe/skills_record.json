@@ -1,0 +1,34 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "ultimine_addition:legacy_mode",
+      "value": false
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "ultimine_addition",
+  "key": {
+    "C": {
+      "item": "ultimine_addition:mining_skill_card_empty"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "S": {
+      "tag": "minecraft:wooden_slabs"
+    },
+    "Y": {
+      "item": "minecraft:yellow_concrete"
+    }
+  },
+  "pattern": [
+    "SIS",
+    "YCY",
+    "SYS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ultimine_addition:skills_record"
+  }
+}

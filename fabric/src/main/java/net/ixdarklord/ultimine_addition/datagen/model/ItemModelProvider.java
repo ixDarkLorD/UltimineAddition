@@ -6,7 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
-import net.ixdarklord.coolcat_lib.util.JsonUtils;
+import net.ixdarklord.coolcatlib.api.util.JsonUtils;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.data.models.BlockModelGenerators;
@@ -97,7 +97,7 @@ public abstract class ItemModelProvider extends FabricModelProvider {
 
     @SuppressWarnings("SameParameterValue")
     protected ModelBuilder specialRendererItem(ResourceLocation location, String string) {
-        ModelTemplate template = new ModelTemplate(Optional.of(new ResourceLocation("minecraft", "builtin/entity")), Optional.empty(), TextureSlot.LAYER0);
+        ModelTemplate template = new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("builtin/entity")), Optional.empty(), TextureSlot.LAYER0);
         ModelBuilder builder = new ModelBuilder(location, string, template);
         this.builders.add(builder);
         return builder;
@@ -122,11 +122,11 @@ public abstract class ItemModelProvider extends FabricModelProvider {
         }
 
         public ResourceLocation getItemModelLocation() {
-            return new ResourceLocation(id.getNamespace(), "item/" + id.getPath() + (string != null ? isAddingStringToFileName ? string : "" : ""));
+            return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "item/" + id.getPath() + (string != null ? isAddingStringToFileName ? string : "" : ""));
         }
 
         public ResourceLocation getItemTextureLocation() {
-            return new ResourceLocation(id.getNamespace(), "item/" + id.getPath() + (string != null ? string : ""));
+            return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "item/" + id.getPath() + (string != null ? string : ""));
         }
 
         @SuppressWarnings("UnusedReturnValue")

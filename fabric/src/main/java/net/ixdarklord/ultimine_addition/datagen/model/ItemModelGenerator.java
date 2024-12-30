@@ -2,8 +2,13 @@ package net.ixdarklord.ultimine_addition.datagen.model;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
+import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+
+import java.util.Objects;
 
 public class ItemModelGenerator extends ItemModelProvider {
     public ItemModelGenerator(FabricDataOutput output) {
@@ -17,7 +22,7 @@ public class ItemModelGenerator extends ItemModelProvider {
         simpleItem(ModItems.MINER_CERTIFICATE)
                 .override()
                 .predicate(UltimineAddition.getLocation("opened"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINER_CERTIFICATE + "_opened"))
+                .model(getItemModelName(ModItems.MINER_CERTIFICATE, "_opened"))
                 .end();
         simpleItem(ModItems.MINER_CERTIFICATE, "_opened").addStringToFileName();
 
@@ -31,19 +36,19 @@ public class ItemModelGenerator extends ItemModelProvider {
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_1"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_PICKAXE + "_1"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_PICKAXE, "_1"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_2"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_PICKAXE + "_2"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_PICKAXE, "_2"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_3"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_PICKAXE + "_3"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_PICKAXE, "_3"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_maxed"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_PICKAXE + "_mastered"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_PICKAXE, "_mastered"))
                 .end();
         simpleItem(ModItems.MINING_SKILL_CARD_PICKAXE, "_1").addStringToFileName();
         simpleItem(ModItems.MINING_SKILL_CARD_PICKAXE, "_2").addStringToFileName();
@@ -57,19 +62,19 @@ public class ItemModelGenerator extends ItemModelProvider {
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_1"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_AXE + "_1"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_AXE, "_1"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_2"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_AXE + "_2"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_AXE, "_2"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_3"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_AXE + "_3"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_AXE, "_3"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_maxed"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_AXE + "_mastered"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_AXE, "_mastered"))
                 .end();
         simpleItem(ModItems.MINING_SKILL_CARD_AXE, "_1").addStringToFileName();
         simpleItem(ModItems.MINING_SKILL_CARD_AXE, "_2").addStringToFileName();
@@ -83,19 +88,19 @@ public class ItemModelGenerator extends ItemModelProvider {
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_1"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_SHOVEL + "_1"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_SHOVEL, "_1"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_2"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_SHOVEL + "_2"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_SHOVEL, "_2"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_3"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_SHOVEL + "_3"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_SHOVEL, "_3"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_maxed"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_SHOVEL + "_mastered"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_SHOVEL, "_mastered"))
                 .end();
         simpleItem(ModItems.MINING_SKILL_CARD_SHOVEL, "_1").addStringToFileName();
         simpleItem(ModItems.MINING_SKILL_CARD_SHOVEL, "_2").addStringToFileName();
@@ -109,19 +114,19 @@ public class ItemModelGenerator extends ItemModelProvider {
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_1"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_HOE + "_1"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_HOE, "_1"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_2"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_HOE + "_2"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_HOE, "_2"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_3"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_HOE + "_3"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_HOE, "_3"))
                 .end()
                 .override()
                 .predicate(UltimineAddition.getLocation("tier_maxed"), 1.0f)
-                .model(UltimineAddition.getLocation("item/" + ModItems.MINING_SKILL_CARD_HOE + "_mastered"))
+                .model(getItemModelName(ModItems.MINING_SKILL_CARD_HOE, "_mastered"))
                 .end();
         simpleItem(ModItems.MINING_SKILL_CARD_HOE, "_1").addStringToFileName();
         simpleItem(ModItems.MINING_SKILL_CARD_HOE, "_2").addStringToFileName();
@@ -134,5 +139,9 @@ public class ItemModelGenerator extends ItemModelProvider {
         simpleItem(UltimineAddition.getLocation("custom_renderer/mining_skill_card"), "_2").addStringToFileName();
         simpleItem(UltimineAddition.getLocation("custom_renderer/mining_skill_card"), "_3").addStringToFileName();
         simpleItem(UltimineAddition.getLocation("custom_renderer/mining_skill_card"), "_mastered").addStringToFileName();
+    }
+
+    private ResourceLocation getItemModelName(Item item, String suffix) {
+        return UltimineAddition.getLocation("item/" + Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(item)).getPath() + suffix);
     }
 }

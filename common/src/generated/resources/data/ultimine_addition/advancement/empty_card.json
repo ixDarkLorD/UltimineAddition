@@ -1,0 +1,47 @@
+{
+  "parent": "ultimine_addition:root",
+  "criteria": {
+    "has_empty_card": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ultimine_addition:mining_skill_card_empty"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "trade_for_empty_card": {
+      "conditions": {
+        "item": {
+          "items": "ultimine_addition:mining_skill_card_empty"
+        }
+      },
+      "trigger": "minecraft:villager_trade"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.obtain",
+      "with": [
+        {
+          "translate": "item.ultimine_addition.mining_skill_card_empty"
+        }
+      ]
+    },
+    "icon": {
+      "count": 1,
+      "id": "ultimine_addition:mining_skill_card_empty"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.obtain.card.empty"
+    }
+  },
+  "requirements": [
+    [
+      "trade_for_empty_card",
+      "has_empty_card"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,15 +1,17 @@
 package net.ixdarklord.ultimine_addition.common.data.challenge;
 
 import dev.architectury.platform.Platform;
-import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
@@ -112,7 +114,7 @@ public class IneligibleBlocksSavedData extends SavedData {
     }
 
     public static IneligibleBlocksSavedData getOrCreate(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(NBT -> load(level, NBT), () -> create(level), DATA_KEY);
+        return level.getDataStorage().computeIfAbsent(new Factory<>(() -> create(level), (NBT, provider) -> load(level, NBT), DataFixTypes.LEVEL), DATA_KEY);
     }
 
     private static IneligibleBlocksSavedData create(ServerLevel level) {
@@ -124,7 +126,7 @@ public class IneligibleBlocksSavedData extends SavedData {
     }
 
     @Override
-    public @NotNull CompoundTag save(CompoundTag NBT) {
+    public @NotNull CompoundTag save(CompoundTag NBT, HolderLookup.Provider registries) {
         NBT.merge(serializeIneligibleBlocks());
         return NBT;
     }
@@ -209,7 +211,7 @@ public class IneligibleBlocksSavedData extends SavedData {
 
         public static BlockEntry deserialize(CompoundTag tag) {
             CompoundTag entity = tag.getCompound("Entity");
-            ResourceLocation id = new ResourceLocation(entity.getString("Id"));
+            ResourceLocation id = ResourceLocation.parse(entity.getString("Id"));
             UUID uuid = entity.getUUID("UUID");
 
             List<BlockInfo> blockInfoList = new ArrayList<>();
@@ -217,11 +219,10 @@ public class IneligibleBlocksSavedData extends SavedData {
             for (int i = 0; i < blocksListTag.size(); i++) {
                 CompoundTag tag2 =  blocksListTag.getCompound(i);
                 CompoundTag stateTag = tag2.getCompound("State");
-                CompoundTag posTag = tag2.getCompound("Pos");
 
                 BlockState blockState = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), stateTag);
-                BlockPos blockPos = NbtUtils.readBlockPos(posTag);
-                blockInfoList.add(new BlockInfo(blockState, blockPos));
+                Optional<BlockPos> blockPos = NbtUtils.readBlockPos(tag2, "Pos");
+                blockPos.ifPresent(pos -> blockInfoList.add(new BlockInfo(blockState, pos)));
             }
 
             return new BlockEntry(id, uuid, blockInfoList);

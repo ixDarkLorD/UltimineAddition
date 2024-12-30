@@ -5,8 +5,7 @@ import net.ixdarklord.ultimine_addition.integration.trinkets.TrinketsIntegration
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-@SuppressWarnings("unused")
-public class ServicePlatformSlotAPIImpl {
+public final class ServicePlatformSlotAPIImpl {
     public static boolean isModLoaded() {
         return Platform.isModLoaded("trinkets");
     }

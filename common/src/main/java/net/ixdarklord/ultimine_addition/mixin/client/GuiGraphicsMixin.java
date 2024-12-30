@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.mixin.client;
 
-import net.ixdarklord.coolcat_lib.common.item.ComponentItem;
+import net.ixdarklord.coolcatlib.api.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

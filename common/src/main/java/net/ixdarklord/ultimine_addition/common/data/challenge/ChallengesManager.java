@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import dev.architectury.platform.Platform;
-import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
@@ -45,9 +45,9 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
         challenges.clear();
         object.forEach((location, json) -> {
             AtomicReference<ChallengesData> challenge = new AtomicReference<>();
-            challenge.set(ChallengesData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, err -> {
+            challenge.set(ChallengesData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(err -> {
                 LOGGER.error("There is an issue with ({}) challenge JSON file.", location.toString());
-                LOGGER.error(err);
+                return new IllegalStateException(err);
             }));
             if (challenge.get().getChallengeType() == ChallengesData.Type.INTERACT_WITH_BLOCK || challenge.get().getChallengeType() == ChallengesData.Type.INTERACT_WITH_BLOCK_CONSUME) {
                 LOGGER.warn("This challenge type ({}) you choose in ({}) isn't stable! You may have to change the type until a new update comes to fix it.", challenge.get().getChallengeType().getTypeName(), location.toString());
@@ -110,11 +110,11 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
         for (String value : data.getTargetedBlocks()) {
             if (value.startsWith("#")) {
                 List<Block> blocks = new ArrayList<>();
-                BuiltInRegistries.BLOCK.getTag(TagKey.create(Registries.BLOCK, new ResourceLocation(value.replaceAll("#", "")))).ifPresent(holders ->
+                BuiltInRegistries.BLOCK.getTag(TagKey.create(Registries.BLOCK, ResourceLocation.parse(value.replaceAll("#", "")))).ifPresent(holders ->
                         blocks.addAll(holders.stream().map(Holder::value).toList()));
                 if (!blocks.isEmpty()) list.addAll(blocks);
             } else {
-                Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(value));
+                Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(value));
                 if (block != Blocks.AIR) list.add(block);
             }
         }

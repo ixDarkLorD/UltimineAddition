@@ -1,41 +1,43 @@
 package net.ixdarklord.ultimine_addition.common.menu;
 
 
+import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
+import net.ixdarklord.ultimine_addition.common.item.PenItem;
+import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.menu.slot.CustomSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.MiningSkillCardSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.PaperSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.PenSlot;
-import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
-import net.ixdarklord.ultimine_addition.common.item.PenItem;
-import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData> {
     private final ItemStack stack;
     private final Player player;
     private final Inventory playerInventory;
-    private final Container container;
-    private final boolean isSlotAPI;
+    private final SimpleContainer container;
+    public final Optional<InteractionHand> interactionHand;
 
-    public SkillsRecordMenu(int id, Inventory inventory, FriendlyByteBuf buf) {
-        this(id, inventory, inventory.player, buf.readItem(), buf.readBoolean());
+    public SkillsRecordMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buf) {
+        this(id, inventory, inventory.player, ItemStack.STREAM_CODEC.decode(buf), buf.readOptional(buffer -> buf.readEnum(InteractionHand.class)));
     }
 
-    public SkillsRecordMenu(int id, Inventory playerInventory, Player player, ItemStack stack, boolean isSlotAPI) {
+    public SkillsRecordMenu(int id, Inventory playerInventory, Player player, ItemStack stack, Optional<InteractionHand> interactionHand) {
         super(Registration.SKILLS_RECORD_CONTAINER.get(), id);
         if (!(stack.getItem() instanceof SkillsRecordItem))
             throw new IllegalArgumentException("Invalid item! This container only accepts Skills Record.");
@@ -44,20 +46,21 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
         this.player = player;
         this.playerInventory = playerInventory;
         this.container = createData().getContainer();
-        this.isSlotAPI = isSlotAPI;
+        this.container.addListener(SkillsRecordMenu.this::slotsChanged);
+        this.interactionHand = interactionHand;
 
-        addSlotBox(container, 0, 8, 107, 4, 20, 1, 0);
-        addSlot(new PenSlot(container, 4, 132, 107));
-        addSlot(new PaperSlot(container, 5, 152, 107));
-        layoutPlayerInventorySlots(8, 136);
+        addSlotBox(container, 0, 8, 107, 4, 22, 1, 0);
+        addSlot(new PenSlot(container, 4, 129, 107));
+        addSlot(new PaperSlot(container, 5, 151, 107));
+        layoutPlayerInventorySlots(16, 140);
     }
 
     @Override
-    public void clicked(int slotId, int button, ClickType clickType, Player player) {
-        super.clicked(slotId, button, clickType, player);
-
-        if (player instanceof ServerPlayer serverPlayer)
-            createData().insertContainer(container).sendToClient(serverPlayer).saveData(stack);
+    public void slotsChanged(Container container) {
+        super.slotsChanged(container);
+        if (player instanceof ServerPlayer sPlayer) {
+            getData().sendToClient(sPlayer).saveData(stack);
+        }
     }
 
     @Override
@@ -76,7 +79,7 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
                 return ItemStack.EMPTY;
             }
         } else {
-            UltimineAddition.LOGGER.error("Invalid slotIndex:" + index);
+            UltimineAddition.LOGGER.error("Invalid slotIndex:{}", index);
             return ItemStack.EMPTY;
         }
 
@@ -91,9 +94,8 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        if (isSlotAPI)
-            return ServicePlatform.SlotAPI.getSkillsRecordItem(player).equals(stack);
-        return player.getMainHandItem().equals(stack) || player.getOffhandItem().equals(stack);
+        return this.interactionHand.map(interactionHand -> player.getItemInHand(interactionHand).equals(stack))
+                .orElseGet(() -> ServicePlatform.SlotAPI.getSkillsRecordItem(player).equals(stack));
     }
 
     public Player getPlayer() {
@@ -165,6 +167,6 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
 
     @Override
     public SkillsRecordData createData() {
-        return new SkillsRecordData().loadData(stack);
+        return SkillsRecordData.loadData(stack);
     }
 }

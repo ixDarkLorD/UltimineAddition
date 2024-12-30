@@ -1,47 +1,42 @@
 package net.ixdarklord.ultimine_addition.common.network;
 
-import dev.architectury.networking.simple.BaseC2SMessage;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
-import dev.architectury.networking.simple.SimpleNetworkManager;
+import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import net.ixdarklord.ultimine_addition.common.network.packet.*;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 
 public class PacketHandler {
-    public static final SimpleNetworkManager MANAGER = SimpleNetworkManager.create(UltimineAddition.MOD_ID);
-    public static final MessageType OPEN_SKILLS_RECORD = MANAGER.registerC2S("open_skills_record", SkillsRecordPacket.Open::new);
-    public static final MessageType TOGGLE_SKILLS_RECORD = MANAGER.registerC2S("toggle_skills_record", SkillsRecordPacket.Toggle::new);
-    public static final MessageType SYNC_SKILLS_RECORD = MANAGER.registerS2C("sync_skills_record", SkillsRecordPacket::new);
-    public static final MessageType SYNC_CHALLENGES = MANAGER.registerS2C("sync_challenges", SyncChallengesPacket::new);
-    public static final MessageType SYNC_PLAYER_ABILITY = MANAGER.registerS2C("sync_player_ability", PlayerAbilityPacket::new);
-    public static final MessageType SYNC_ITEM_STORAGE_DATA = MANAGER.registerS2C("sync_item_storage_data", ItemStorageDataPacket::new);
-    public static final MessageType SYNC_MINING_SKILL_CARD = MANAGER.registerS2C("sync_mining_skill_card", MiningSkillCardPacket::new);
-    public static final MessageType SYNC_MINER_CERTIFICATE = MANAGER.registerS2C("sync_miner_certificate", MinerCertificatePacket::new);
-
-    public static void register() {}
-
-    public static <MSG extends BaseC2SMessage> void sendToServer(MSG message) {
-        message.sendToServer();
+    public static void init() {
+        NetworkHelper.registerC2S(SkillsRecordPacket.Open.TYPE, SkillsRecordPacket.Open.STREAM_CODEC, SkillsRecordPacket.Open::handle);
+        NetworkHelper.registerC2S(SkillsRecordPacket.SyncData.C2S_TYPE, SkillsRecordPacket.SyncData.STREAM_CODEC, SkillsRecordPacket.SyncData::handle);
+        NetworkHelper.registerS2C(SkillsRecordPacket.SyncData.S2C_TYPE, SkillsRecordPacket.SyncData.STREAM_CODEC, SkillsRecordPacket.SyncData::handle);
+        NetworkHelper.registerS2C(MinerCertificatePacket.TYPE, MinerCertificatePacket.STREAM_CODEC, MinerCertificatePacket::handle);
+        NetworkHelper.registerS2C(MiningSkillCardPacket.TYPE, MiningSkillCardPacket.STREAM_CODEC, MiningSkillCardPacket::handle);
+        NetworkHelper.registerS2C(SyncChallengesPacket.TYPE, SyncChallengesPacket.STREAM_CODEC, SyncChallengesPacket::handle);
+        NetworkHelper.registerS2C(PlayerAbilityPacket.TYPE, PlayerAbilityPacket.STREAM_CODEC, PlayerAbilityPacket::handle);
     }
 
-    public static <MSG extends BaseS2CMessage> void sendToPlayer(MSG message, ServerPlayer player) {
-        message.sendTo(player);
+    public static <T extends CustomPacketPayload> void sendToServer(T payload) {
+        NetworkManager.sendToServer(payload);
     }
 
-    public static <MSG extends BaseS2CMessage> void sendToTarget(MSG message, ServerLevel level, BlockPos pos, int range) {
-        message.sendTo(level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(range > 0 ? range : 64)));
+    public static <T extends CustomPacketPayload> void sendToPlayer(T payload, ServerPlayer player) {
+        NetworkManager.sendToPlayer(player, payload);
     }
 
-    public static <MSG extends BaseS2CMessage> void sendToLevel(MSG message, ServerLevel level) {
-        message.sendToLevel(level);
+    public static <T extends CustomPacketPayload> void sendToPlayers(T payload, Iterable<ServerPlayer> players) {
+        NetworkManager.sendToPlayers(players, payload);
     }
 
-    public static <MSG extends BaseS2CMessage> void sendToChunk(MSG message, LevelChunk chunk) {
-        message.sendToChunkListeners(chunk);
+    public static <T extends CustomPacketPayload> void sendToTarget(T payload, ServerLevel level, BlockPos pos, int range) {
+        sendToPlayers(payload, level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(range > 0 ? range : 64)));
+    }
+
+    public static <T extends CustomPacketPayload> void sendToLevel(T payload, ServerLevel level) {
+        sendToPlayers(payload, level.players());
     }
 }

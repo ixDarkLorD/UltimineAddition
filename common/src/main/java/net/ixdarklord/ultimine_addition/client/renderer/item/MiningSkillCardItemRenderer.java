@@ -1,11 +1,11 @@
 package net.ixdarklord.ultimine_addition.client.renderer.item;
 
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.ixdarklord.coolcat_lib.util.MathUtils;
+import net.ixdarklord.coolcatlib.api.util.MathUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.minecraft.client.Minecraft;
@@ -25,9 +25,9 @@ import static net.ixdarklord.ultimine_addition.client.handler.ModelHandler.*;
 public class MiningSkillCardItemRenderer extends UAItemRenderer {
     @Override
     public void render(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource multiBufferSource, int light, int overlay) {
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(256));
         ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
-        var data = new MiningSkillCardData().loadData(stack);
+        var data = MiningSkillCardData.loadData(stack);
         ModelResourceLocation modelLocation = switch (data.getTier()) {
             case Unlearned -> UNLEARNED_ID;
             case Novice -> TIER_1_ID;
@@ -72,7 +72,7 @@ public class MiningSkillCardItemRenderer extends UAItemRenderer {
     private void renderDisplayItem(ItemStack stack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, int light, int overlay) {
         int tickCount = Objects.requireNonNull(Minecraft.getInstance().player).tickCount;
         ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
-        var data = new MiningSkillCardData().loadData(stack);
+        var data = MiningSkillCardData.loadData(stack);
         
         poseStack.pushPose();
         if (transformType == ItemDisplayContext.FIXED) {

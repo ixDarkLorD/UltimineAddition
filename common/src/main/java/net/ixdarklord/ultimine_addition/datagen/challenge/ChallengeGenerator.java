@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.datagen.challenge;
 
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
+import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.ixdarklord.ultimine_addition.datagen.challenge.builder.ChallengesBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -16,7 +16,7 @@ import static net.ixdarklord.ultimine_addition.core.UltimineAddition.getLocation
 
 public class ChallengeGenerator extends ChallengeProvider {
 
-    public ChallengeGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+    public ChallengeGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> ignored) {
         super(output);
     }
 
@@ -33,7 +33,7 @@ public class ChallengeGenerator extends ChallengeProvider {
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Unlearned)
                 .requiredAmount(128)
-                .targetedBlocks(ModBlockTags.FORGE_STONE, ModBlockTags.FABRIC_STONE)
+                .targetedBlocks(PlatformTags.get().STONES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("it_looks_dripping"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
@@ -45,31 +45,31 @@ public class ChallengeGenerator extends ChallengeProvider {
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Unlearned)
                 .requiredAmount(64, 128)
-                .targetedBlocks(ModBlockTags.FORGE_COAL_ORES, ModBlockTags.FABRIC_COAL_ORES)
+                .targetedBlocks(PlatformTags.get().COAL_ORES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("digging_for_iron"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Novice)
                 .requiredAmount(64, 128)
-                .targetedBlocks(ModBlockTags.FORGE_IRON_ORES, ModBlockTags.FABRIC_IRON_ORES)
+                .targetedBlocks(PlatformTags.get().IRON_ORES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("digging_for_copper"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Novice)
                 .requiredAmount(64, 128)
-                .targetedBlocks(ModBlockTags.FORGE_COPPER_ORES, ModBlockTags.FABRIC_COPPER_ORES)
+                .targetedBlocks(PlatformTags.get().COPPER_ORES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("digging_for_gold"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Novice)
                 .requiredAmount(32, 64)
-                .targetedBlocks(ModBlockTags.FORGE_GOLD_ORES, ModBlockTags.FABRIC_GOLD_ORES)
+                .targetedBlocks(PlatformTags.get().GOLD_ORES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("digging_for_lapis"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Novice)
                 .requiredAmount(64, 128)
-                .targetedBlocks(ModBlockTags.FORGE_LAPIS_ORES, ModBlockTags.FABRIC_LAPIS_ORES)
+                .targetedBlocks(PlatformTags.get().LAPIS_ORES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("ugly_quartz"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
@@ -87,19 +87,19 @@ public class ChallengeGenerator extends ChallengeProvider {
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Apprentice)
                 .requiredAmount(32, 64)
-                .targetedBlocks(ModBlockTags.FORGE_REDSTONE_ORES, ModBlockTags.FABRIC_REDSTONE_ORES)
+                .targetedBlocks(PlatformTags.get().REDSTONE_ORES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("digging_for_diamond"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Apprentice)
                 .requiredAmount(32, 64)
-                .targetedBlocks(ModBlockTags.FORGE_DIAMOND_ORES, ModBlockTags.FABRIC_DIAMOND_ORES)
+                .targetedBlocks(PlatformTags.get().DIAMOND_ORES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("digging_for_emerald"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Apprentice)
                 .requiredAmount(16, 32)
-                .targetedBlocks(ModBlockTags.FORGE_EMERALD_ORES, ModBlockTags.FABRIC_EMERALD_ORES)
+                .targetedBlocks(PlatformTags.get().EMERALD_ORES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("under_da_sea"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
@@ -123,7 +123,7 @@ public class ChallengeGenerator extends ChallengeProvider {
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Apprentice)
                 .requiredAmount(64, 128)
-                .targetedBlocks(ModBlockTags.FORGE_QUARTZ_ORES, ModBlockTags.FABRIC_QUARTZ_ORES)
+                .targetedBlocks(PlatformTags.get().QUARTZ_ORES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("glowstone"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)
@@ -171,13 +171,13 @@ public class ChallengeGenerator extends ChallengeProvider {
                 .forType(ChallengesData.Type.BREAK_BLOCK_CONSUME)
                 .forTier(MiningSkillCardItem.Tier.Adept)
                 .requiredAmount(256, 512)
-                .targetedBlocks(ModBlockTags.FORGE_STONE, ModBlockTags.FABRIC_STONE)
+                .targetedBlocks(PlatformTags.get().COBBLESTONES())
                 .save(consumer);
         ChallengesBuilder.create(getLocation("gathering_obsidian_hardmode"), MiningSkillCardItem.Type.PICKAXE)
                 .forType(ChallengesData.Type.BREAK_BLOCK_CONSUME)
                 .forTier(MiningSkillCardItem.Tier.Adept)
                 .requiredAmount(128, 180)
-                .targetedBlocks(ModBlockTags.FORGE_OBSIDIAN, ModBlockTags.FABRIC_OBSIDIAN)
+                .targetedBlocks(Blocks.OBSIDIAN)
                 .save(consumer);
     }
 
@@ -463,7 +463,7 @@ public class ChallengeGenerator extends ChallengeProvider {
                 .forType(ChallengesData.Type.BREAK_BLOCK)
                 .forTier(MiningSkillCardItem.Tier.Novice)
                 .requiredAmount(64, 128)
-                .targetedBlocks(Blocks.GRASS, Blocks.TALL_GRASS)
+                .targetedBlocks(Blocks.SHORT_GRASS, Blocks.TALL_GRASS)
                 .save(consumer);
         ChallengesBuilder.create(getLocation("break_birch_leaves"), MiningSkillCardItem.Type.HOE)
                 .forType(ChallengesData.Type.BREAK_BLOCK)

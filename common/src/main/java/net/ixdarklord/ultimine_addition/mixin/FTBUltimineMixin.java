@@ -4,6 +4,8 @@ import dev.architectury.event.CompoundEventResult;
 import dev.architectury.event.EventResult;
 import dev.ftb.mods.ftbultimine.FTBUltimine;
 import dev.ftb.mods.ftbultimine.FTBUltiminePlayerData;
+import dev.ftb.mods.ftbultimine.mixin.AxeItemAccess;
+import dev.ftb.mods.ftbultimine.mixin.ShovelItemAccess;
 import net.ixdarklord.ultimine_addition.common.event.ChallengeEvents;
 import net.ixdarklord.ultimine_addition.common.event.impl.ToolAction;
 import net.ixdarklord.ultimine_addition.common.event.impl.ToolActions;
@@ -49,28 +51,24 @@ public abstract class FTBUltimineMixin {
         return FTBUltimineIntegration.getMaxBlocks(player);
     }
 
-    @Redirect(method = "blockRightClick", at = @At(value = "INVOKE", target = "Ldev/architectury/event/EventResult;interruptFalse()Ldev/architectury/event/EventResult;"))
-    private EventResult redirect$EventResult() {
-        return EventResult.pass();
-    }
-
     @Inject(method = "blockRightClick", at = @At(value = "HEAD"))
-    private void redirect$RightClickEvent(Player player, InteractionHand hand, BlockPos clickPos, Direction face, CallbackInfoReturnable<EventResult> cir) {
-        if (player instanceof ServerPlayer serverPlayer) {
+    private void redirect$RightClickEvent(Player pl, InteractionHand hand, BlockPos clickPos, Direction face, CallbackInfoReturnable<EventResult> cir) {
+        if (pl instanceof ServerPlayer player) {
             ItemStack stack = player.getItemInHand(hand);
-            Level level = serverPlayer.serverLevel();
+            Level level = player.level();
             BlockState originalState = level.getBlockState(clickPos);
             BlockState finalState = originalState;
-            HitResult result = FTBUltiminePlayerData.rayTrace(serverPlayer);
+            HitResult result = FTBUltiminePlayerData.rayTrace(player);
             if (result instanceof BlockHitResult hitResult) {
                 UseOnContext context = new UseOnContext(player, hand, hitResult);
                 ToolAction toolAction = null;
-                if (stack.getItem() instanceof AxeItem item && item.getStripped(originalState).isPresent()) {
-                    finalState = item.getStripped(originalState).get();
+                if (stack.getItem() instanceof AxeItem item && ((AxeItemAccess) item).invokeGetStripped(originalState).isPresent()) {
+                    finalState = ((AxeItemAccess) item).invokeGetStripped(originalState).get();
                     toolAction = ToolActions.AXE_STRIP;
                 }
-                if (stack.getItem() instanceof ShovelItem && ShovelItem.FLATTENABLES.get(originalState.getBlock()) != null) {
-                    finalState = ShovelItem.FLATTENABLES.get(originalState.getBlock());
+                //noinspection ConstantValue
+                if (stack.getItem() instanceof ShovelItem && ShovelItemAccess.getFlattenables().get(originalState.getBlock()) != null) {
+                    finalState = ShovelItemAccess.getFlattenables().get(originalState.getBlock());
                     toolAction = ToolActions.SHOVEL_FLATTEN;
                 }
                 if (stack.getItem() instanceof HoeItem) {
@@ -88,7 +86,7 @@ public abstract class FTBUltimineMixin {
 
                 FTBUltiminePlayerData playerData = FTBUltimine.instance.getOrCreatePlayerData(player);
                 playerData.clearCache();
-                playerData.updateBlocks((ServerPlayer) player, context.getClickedPos(), context.getClickedFace(), false, FTBUltimineIntegration.getMaxBlocks((ServerPlayer) player));
+                playerData.updateBlocks(player, context.getClickedPos(), context.getClickedFace(), false, FTBUltimineIntegration.getMaxBlocks((ServerPlayer) player));
                 List<BlockPos> blockPosList = new ArrayList<>();
                 if (playerData.isPressed() && playerData.cachedPositions() != null && !playerData.cachedPositions().isEmpty()) {
                     blockPosList.addAll(playerData.cachedPositions().stream().filter(pos -> context.getLevel().getBlockState(pos).is(originalState.getBlock())).toList());

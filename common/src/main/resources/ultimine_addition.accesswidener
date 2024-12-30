@@ -1,31 +1,11 @@
-accessWidener v2 named
-
-# Shovel Item
-accessible field net/minecraft/world/item/ShovelItem FLATTENABLES Ljava/util/Map;
-
-# Axe Item
-accessible method net/minecraft/world/item/AxeItem getStripped (Lnet/minecraft/world/level/block/state/BlockState;)Ljava/util/Optional;
-
-# Ingredient
-extendable class net/minecraft/world/item/crafting/Ingredient
-accessible method net/minecraft/world/item/crafting/Ingredient <init> (Ljava/util/stream/Stream;)V
-accessible method net/minecraft/world/item/crafting/Ingredient fromValues (Ljava/util/stream/Stream;)Lnet/minecraft/world/item/crafting/Ingredient;
-accessible method net/minecraft/world/item/crafting/Ingredient valueFromJson (Lcom/google/gson/JsonObject;)Lnet/minecraft/world/item/crafting/Ingredient$Value;
-accessible class net/minecraft/world/item/crafting/Ingredient$Value
-accessible class net/minecraft/world/item/crafting/Ingredient$TagValue
-accessible method net/minecraft/world/item/crafting/Ingredient$TagValue <init> (Lnet/minecraft/tags/TagKey;)V
-accessible class net/minecraft/world/item/crafting/Ingredient$ItemValue
-
+accessWidener v1 named
 # Item Renderer
 accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V
-
-# Screen
-accessible method net/minecraft/client/gui/GuiGraphics renderTooltipInternal (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;)V
-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
 
 # Model Template
 accessible field net/minecraft/data/models/model/ModelTemplate model Ljava/util/Optional;
 accessible method net/minecraft/data/models/model/ModelTemplate createMap (Lnet/minecraft/data/models/model/TextureMapping;)Ljava/util/Map;
 
-# Particles
-accessible method net/minecraft/core/particles/SimpleParticleType <init> (Z)V
+# Screen
+accessible method net/minecraft/client/gui/GuiGraphics renderTooltipInternal (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;)V
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;

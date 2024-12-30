@@ -8,8 +8,6 @@ import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.ftb.mods.ftbultimine.FTBUltimine;
-import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSavedData;
@@ -25,13 +23,13 @@ import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
 import net.ixdarklord.ultimine_addition.common.network.packet.SyncChallengesPacket;
-import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
+import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
+import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Blocks;
@@ -39,6 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static net.ixdarklord.ultimine_addition.util.ItemUtils.listMatchingItem;
 
@@ -68,26 +67,26 @@ public class ChallengeEvents {
                     if (ServicePlatform.SlotAPI.isModLoaded()) {
                         ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
                         if (stack.getItem() instanceof SkillsRecordItem item) {
-                            item.getData(stack).getCardSlots().stream().filter(stack1 -> stack1.getItem() instanceof MiningSkillCardItem).forEach(stack1 -> new MiningSkillCardData().loadData(stack1).sendToClient(player).validateChallenges().saveData(stack1));
+                            item.getData(stack).getCardSlots().stream().filter(stack1 -> stack1.getItem() instanceof MiningSkillCardItem).forEach(stack1 -> MiningSkillCardData.loadData(stack1).validateChallenges().saveData(stack1));
                         }
                     }
-                    player.getInventory().items.stream().filter(stack -> stack.hasTag() && (stack.getItem() instanceof MiningSkillCardItem || stack.getItem() instanceof SkillsRecordItem)).forEach(stack -> {
+                    player.getInventory().items.stream().filter(stack -> stack.has(MiningSkillCardData.DATA_COMPONENT) && (stack.getItem() instanceof MiningSkillCardItem || stack.getItem() instanceof SkillsRecordItem)).forEach(stack -> {
                         if (stack.getItem() instanceof SkillsRecordItem item) {
-                            item.getData(stack).getCardSlots().stream().filter(stack1 -> stack1.getItem() instanceof MiningSkillCardItem).forEach(stack1 -> new MiningSkillCardData().loadData(stack1).sendToClient(player).validateChallenges().saveData(stack1));
+                            item.getData(stack).getCardSlots().stream().filter(stack1 -> stack1.getItem() instanceof MiningSkillCardItem).forEach(stack1 -> MiningSkillCardData.loadData(stack1).validateChallenges().saveData(stack1));
                         } else {
-                            new MiningSkillCardData().loadData(stack).sendToClient(player).validateChallenges().saveData(stack);
+                            MiningSkillCardData.loadData(stack).validateChallenges().saveData(stack);
                         }
                     });
                 }
             }
         });
 
-        BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
-            if (!level.isClientSide()) {
+        BlockEvent.BREAK.register((level, pos, state, pl, xp) -> {
+            if (pl instanceof ServerPlayer player) {
                 List<ItemStack> stacks = listMatchingItem(player, ModItems.SKILLS_RECORD);
                 if (stacks.isEmpty()) return EventResult.pass();
                 for (ItemStack stack : stacks) {
-                    SkillsRecordData data = new SkillsRecordData().loadData(stack);
+                    SkillsRecordData data = SkillsRecordData.loadData(stack);
                     Pair<Boolean, Boolean> taskProcess = data.initTaskValidator(state, pos, player, ChallengesData.Type.BREAK_BLOCK);
                     if (taskProcess.getFirst()) {
                         data.sendToClient(player).saveData(stack);
@@ -105,16 +104,15 @@ public class ChallengeEvents {
         });
     }
 
-    @SuppressWarnings("unused")
     public static CompoundEventResult<BlockState> onBlockToolModificationEvent(BlockState originalState, BlockState finalState, @NotNull UseOnContext context, ToolAction toolAction, boolean simulate) {
-        Player player = context.getPlayer();
+        ServerPlayer player = (ServerPlayer) context.getPlayer();
         if (player == null) return CompoundEventResult.pass();
         if (PlayerHooks.isFake(player)) return CompoundEventResult.pass();
         if (!context.getLevel().isClientSide()) {
             List<ItemStack> stacks = listMatchingItem(player, ModItems.SKILLS_RECORD);
             if (stacks.isEmpty()) return CompoundEventResult.pass();
             for (ItemStack stack : stacks) {
-                var data = new SkillsRecordData().loadData(stack);
+                var data = SkillsRecordData.loadData(stack);
                 Pair<Boolean, Boolean> taskProcess = Pair.of(false, false);
                 if (toolAction == ToolActions.AXE_STRIP) {
                     taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengesData.Type.STRIP_BLOCK);
@@ -131,7 +129,7 @@ public class ChallengeEvents {
                 }
 
                 if (taskProcess.getFirst()) {
-                    data.sendToClient((ServerPlayer) player).saveData(stack);
+                    data.saveData(stack);
                     if (taskProcess.getSecond()) {
                         return CompoundEventResult.interruptTrue(Blocks.AIR.defaultBlockState());
                     }
@@ -142,22 +140,21 @@ public class ChallengeEvents {
     }
 
     private static void legacyFunctions() {
-        BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
-            if (level.isClientSide) return EventResult.pass();
+        BlockEvent.BREAK.register((level, pos, state, pl, xp) -> {
+            if (!(pl instanceof ServerPlayer player)) return EventResult.pass();
 
             List<ItemStack> stacks = listMatchingItem(player, ModItems.MINER_CERTIFICATE);
-            boolean isGamemodeCorrect = !player.isCreative() && !player.isSpectator();
             if (stacks.isEmpty()
-                    || isGamemodeCorrect && FTBUltimine.instance.canUltimine(player) && FTBUltimine.instance.getOrCreatePlayerData(player).isPressed()
-                    || !(state.is(ModBlockTags.FORGE_ORES) || state.is(ModBlockTags.FABRIC_ORES))
-                    || (isGamemodeCorrect && IneligibleBlocksSavedData.getOrCreate((ServerLevel) level).isBlockPlacedByEntity(pos)))
-                return EventResult.pass();
+                    || !(state.is(PlatformTags.get().ORES()))
+                    || (FTBUltimine.instance.canUltimine(player) && FTBUltimine.instance.getOrCreatePlayerData(player).isPressed())
+                    || IneligibleBlocksSavedData.getOrCreate(player.serverLevel()).isBlockPlacedByEntity(pos)
+            ) return EventResult.pass();
 
             for (ItemStack stack : stacks) {
-                MinerCertificateData data = new MinerCertificateData().loadData(stack);
-                MinerCertificateData.Legacy legacy = data.getLegacy();
-                if (legacy != null) {
-                    legacy.addMiningPoint(1);
+                MinerCertificateData data = MinerCertificateData.loadData(stack);
+                Optional<MinerCertificateData.Legacy> legacy = data.getLegacy();
+                if (legacy.isPresent()) {
+                    legacy.get().addPoint(1);
                     data.sendToClient(player).saveData(stack);
                 }
             }

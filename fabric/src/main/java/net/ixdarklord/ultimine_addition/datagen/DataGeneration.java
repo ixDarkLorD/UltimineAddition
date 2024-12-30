@@ -11,7 +11,6 @@ import net.ixdarklord.ultimine_addition.datagen.recipe.RecipeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.BlockTagGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.ItemTagGenerator;
 
-@SuppressWarnings("unused")
 public class DataGeneration implements DataGeneratorEntrypoint {
     @Override
     public void onInitializeDataGenerator(FabricDataGenerator generator) {
@@ -22,7 +21,7 @@ public class DataGeneration implements DataGeneratorEntrypoint {
         pack.addProvider(ChallengeGenerator::new);
         pack.addProvider(RecipeGenerator::new);
         pack.addProvider(ItemModelGenerator::new);
+        pack.addProvider(LanguageGenerator::new);
         pack.addProvider((output, registriesFuture) -> new ParticleGenerator(output));
-        pack.addProvider((output, registriesFuture) -> new LanguageGenerator(output, "en_us"));
     }
 }

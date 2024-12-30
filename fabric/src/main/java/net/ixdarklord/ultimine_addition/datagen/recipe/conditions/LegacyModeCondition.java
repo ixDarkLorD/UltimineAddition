@@ -1,49 +1,30 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe.conditions;
 
-import com.google.gson.JsonObject;
-import net.ixdarklord.coolcat_lib.common.crafting.ICondition;
-import net.ixdarklord.coolcat_lib.common.crafting.IConditionSerializer;
-import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
+import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.core.HolderLookup;
+import org.jetbrains.annotations.Nullable;
 
-public class LegacyModeCondition implements ICondition {
-    private final boolean state;
+public record LegacyModeCondition(boolean value) implements ResourceCondition {
+    public static final MapCodec<LegacyModeCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Codec.BOOL.fieldOf("value").forGetter(LegacyModeCondition::value)
+    ).apply(instance, LegacyModeCondition::new));
+    public static final ResourceConditionType<LegacyModeCondition> RESOURCE_CONDITION_TYPE = ResourceConditionType.create(UltimineAddition.getLocation("legacy_mode"), CODEC);
 
-    public LegacyModeCondition(boolean state) {
-        this.state = state;
+    @Override
+    public ResourceConditionType<?> getType() {
+        return RESOURCE_CONDITION_TYPE;
     }
 
     @Override
-    public ResourceLocation getID() {
-        return Serializer.NAME;
-    }
-
-    @Override
-    public boolean test(IContext context) {
+    public boolean test(@Nullable HolderLookup.Provider registryLookup) {
         boolean isLegacyMode = ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
-        return isLegacyMode == state;
-    }
-
-    public static class Serializer implements IConditionSerializer<LegacyModeCondition> {
-        private static final ResourceLocation NAME = UltimineAddition.getLocation("legacy_mode");
-        public static final Serializer INSTANCE = new Serializer();
-
-        @Override
-        public void write(JsonObject json, LegacyModeCondition value) {
-            json.addProperty("state", value.state);
-        }
-
-        @Override
-        public LegacyModeCondition read(JsonObject json) {
-            return new LegacyModeCondition(GsonHelper.getAsBoolean(json, "state"));
-        }
-
-        @Override
-        public ResourceLocation getID() {
-            return NAME;
-        }
+        return isLegacyMode == value;
     }
 }

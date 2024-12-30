@@ -9,11 +9,11 @@ import net.ixdarklord.ultimine_addition.common.network.packet.PlayerAbilityPacke
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 
-import static net.ixdarklord.ultimine_addition.common.config.ConfigHandler.COMMON.*;
+import static net.ixdarklord.ultimine_addition.config.ConfigHandler.COMMON.*;
 
 public class WorldEvents {
     public static void init() {
@@ -25,6 +25,6 @@ public class WorldEvents {
         });
 
         TradeRegistry.registerVillagerTrade(VillagerProfession.TOOLSMITH, CARD_TRADE_LEVEL.get(), (trader, rand) ->
-                new MerchantOffer(new ItemStack(Items.EMERALD, rand.nextIntBetweenInclusive(TRADE_LOW_PRICE.get(), TRADE_HIGH_PRICE.get())), ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), 4, 12, 0.09F));
+                new MerchantOffer(new ItemCost(Items.EMERALD, rand.nextIntBetweenInclusive(TRADE_LOW_PRICE.get(), TRADE_HIGH_PRICE.get())), ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), 4, 12, 0.09F));
     }
 }

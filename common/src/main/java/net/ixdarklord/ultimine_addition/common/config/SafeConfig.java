@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.config;
 
 import dev.architectury.platform.Platform;
-import net.ixdarklord.coolcat_lib.util.TomlConfigReader;
+import net.ixdarklord.coolcatlib.api.config.TomlConfigReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -81,7 +81,7 @@ public class SafeConfig<T> {
             return new SafeConfig<>(value != null ? Boolean.parseBoolean(value) : fallbackValue);
         }
 
-        public <E extends Enum<E>> SafeConfig<E> readEnum(String key, E fallbackValue) {;
+        public <E extends Enum<E>> SafeConfig<E> readEnum(String key, E fallbackValue) {
             if (this.reader.hasErrorOccurred()) {
                 LOGGER.error("Unable to get \"{}\"! Assign the fallback value... ({})", key, fallbackValue.name());
                 return new SafeConfig<>(fallbackValue);

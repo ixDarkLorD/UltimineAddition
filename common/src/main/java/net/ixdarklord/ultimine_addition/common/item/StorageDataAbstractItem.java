@@ -7,10 +7,14 @@ import net.minecraft.world.item.ItemStack;
 public abstract class StorageDataAbstractItem extends DataAbstractItem<ItemStorageData> {
     protected final String storageName;
     protected final int maxCapacity;
-    public StorageDataAbstractItem(Properties properties, String storageName, int maxCapacity, ComponentType componentType) {
+    public StorageDataAbstractItem(Properties properties, ItemStorageData storageData, ComponentType componentType) {
         super(properties, componentType);
-        this.storageName = storageName;
-        this.maxCapacity = maxCapacity;
+        this.storageName = storageData.getStorageName();
+        this.maxCapacity = storageData.getMaxCapacity();
+    }
+
+    public int getMaxCapacity() {
+        return maxCapacity;
     }
 
     @Override
@@ -29,6 +33,6 @@ public abstract class StorageDataAbstractItem extends DataAbstractItem<ItemStora
 
     @Override
     public ItemStorageData getData(ItemStack stack) {
-        return new ItemStorageData(this.storageName, this.maxCapacity).loadData(stack);
+        return ItemStorageData.loadData(storageName, maxCapacity, stack);
     }
 }

@@ -1,46 +1,47 @@
 {
   "schemaVersion": 1,
-  "id": "${modId}",
-  "version": "${modVersion}",
+  "id": "${modid}",
+  "version": "${mod_version}",
 
-  "name": "${modName}",
-  "description": "${modDescription}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
   "authors": [
-    "${modAuthor}"
+    "${mod_author}"
   ],
   "contact": {
-    "homepage": "${modPageUrl}",
-    "issues": "${modIssueUrl}",
-    "sources": "${modSourceUrl}"
+    "homepage": "${mod_page_url}",
+    "issues": "${mod_issue_url}",
+    "sources": "${mod_source_url}"
   },
 
-  "license": "${modLicense}",
+  "license": "${mod_license}",
   "icon": "mod_logo.png",
 
-  "environment": "${modFabricEnvironment}",
+  "environment": "${mod_fabric_environment}",
   "entrypoints": {
-    "main": ["${mainEntryPoint}"],
-    "client": ["${clientEntryPoint}"],
-    "fabric-datagen": ["${datagenEntryPoint}"],
+    "main": ["net.ixdarklord.ultimine_addition.core.fabric.FabricSetup"],
+    "client": ["net.ixdarklord.ultimine_addition.core.fabric.FabricClientSetup"],
+    "fabric-datagen": ["net.ixdarklord.ultimine_addition.datagen.DataGeneration"],
     "jei_mod_plugin": ["net.ixdarklord.ultimine_addition.integration.jei.JEIIntegration"]
   },
   "mixins": [
-    "${modId}.mixins.json",
-    "${modId}.common.mixins.json"
+    "${modid}.mixins.json",
+    "${modid}.common.mixins.json"
   ],
+  "accessWidener" : "${modid}.accesswidener",
 
   "depends": {
     "java": ">=17",
-    "minecraft": ">=${minMinecraftVersion} <${nextMinecraftVersion}",
-    "fabricloader": ">=${minFabricVersion}",
-    "fabric-api": ">=${minFabricApiVersion}",
-    "forgeconfigapiport": ">=${forgeConfigAPIVersion}",
-    "architectury": ">=${archVersion}",
-    "coolcat_lib": ">=${ccLibVersion}",
-    "ftbultimine": ">=${ftbUltimineVersion}"
+    "minecraft": ">=${mc_version} <=${max_mc_version}",
+    "fabricloader": ">=${min_fabric_version}",
+    "fabric-api": ">=${min_fabric_api_version}",
+    "forgeconfigapiport": ">=${versions.forgeconfigapiport.get()}",
+    "architectury": ">=${versions.architectury.get()}",
+    "coolcatlib": ">=${coolcatlib_version}",
+    "ftbultimine": ">=${ftbultimine_version}"
   },
   "suggests": {
-    "jei": ">=${jeiVersion}",
-    "trinkets": ">=${trinketsVersion}"
+    "jei": ">=${versions.jei.get()}",
+    "trinkets": ">=${versions.trinkets.get()}"
   }
 }

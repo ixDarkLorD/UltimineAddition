@@ -2,16 +2,20 @@ package net.ixdarklord.ultimine_addition.core.fabric;
 
 import dev.architectury.event.CompoundEventResult;
 import dev.architectury.event.events.common.EntityEvent;
+import dev.ftb.mods.ftbultimine.mixin.AxeItemAccess;
+import dev.ftb.mods.ftbultimine.mixin.ShovelItemAccess;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.ixdarklord.coolcat_lib.common.crafting.CraftingHelper;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.ixdarklord.ultimine_addition.common.brewing.MineGoJuiceRecipe;
-import net.ixdarklord.ultimine_addition.common.event.impl.*;
+import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationEvent;
+import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
+import net.ixdarklord.ultimine_addition.common.event.impl.ToolAction;
+import net.ixdarklord.ultimine_addition.common.event.impl.ToolActions;
 import net.ixdarklord.ultimine_addition.core.CommonSetup;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
@@ -37,8 +41,9 @@ public class FabricSetup implements ModInitializer {
     @Override
     public void onInitialize() {
         CommonSetup.init();
+        CommonSetup.setup();
+        ResourceConditions.register(LegacyModeCondition.RESOURCE_CONDITION_TYPE);
         MineGoJuiceRecipe.register();
-        CraftingHelper.register(LegacyModeCondition.Serializer.INSTANCE);
         this.initEvents();
     }
 
@@ -52,7 +57,6 @@ public class FabricSetup implements ModInitializer {
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> DatapackEvents.POST_RELOAD.invoker().init(server, resourceManager, success));
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> EntityEvent.ADD.invoker().add(entity, world));
         ServerPlayerEvents.COPY_FROM.register(this::onPlayerClone);
-        ServerChunkEvents.CHUNK_UNLOAD.register((world, chunk) -> ChunkUnloadEvent.EVENT.invoker().Unload(chunk, world));
         UseBlockCallback.EVENT.register(this::onRightClick);
     }
 
@@ -68,12 +72,14 @@ public class FabricSetup implements ModInitializer {
         BlockState originalState = level.getBlockState(hitResult.getBlockPos());
         BlockState finalState = originalState;
         ToolAction toolAction = null;
-        if (stack.getItem() instanceof AxeItem item && item.getStripped(originalState).isPresent()) {
-            finalState = item.getStripped(originalState).get();
+        if (stack.getItem() instanceof AxeItem item && ((AxeItemAccess) item).invokeGetStripped(originalState).isPresent()) {
+            finalState = ((AxeItemAccess) item).invokeGetStripped(originalState).get();
             toolAction = ToolActions.AXE_STRIP;
         }
-        if (stack.getItem() instanceof ShovelItem && ShovelItem.FLATTENABLES.get(originalState.getBlock()) != null) {
-            finalState = ShovelItem.FLATTENABLES.get(originalState.getBlock());
+
+        //noinspection ConstantValue
+        if (stack.getItem() instanceof ShovelItem && ShovelItemAccess.getFlattenables().get(originalState.getBlock()) != null) {
+            finalState = ShovelItemAccess.getFlattenables().get(originalState.getBlock());
             toolAction = ToolActions.SHOVEL_FLATTEN;
         }
         if (stack.getItem() instanceof HoeItem) {

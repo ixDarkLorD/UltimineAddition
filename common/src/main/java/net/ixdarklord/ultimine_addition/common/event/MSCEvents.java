@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static net.ixdarklord.ultimine_addition.common.config.ConfigHandler.COMMON.MASTERED_CARD_EFFECT;
+import static net.ixdarklord.ultimine_addition.config.ConfigHandler.COMMON.MASTERED_CARD_EFFECT;
 
 public class MSCEvents {
     public static void init() {

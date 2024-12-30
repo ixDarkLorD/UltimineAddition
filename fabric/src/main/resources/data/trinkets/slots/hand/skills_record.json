@@ -1,3 +1,9 @@
 {
-  "icon": "ultimine_addition:slot/skills_record"
+  "icon": "ultimine_addition:gui/slots/skills_record",
+  "replace": true,
+  "amount": 1,
+  "drop_rule": "default",
+  "validator_predicates": ["trinkets:tag"],
+  "quick_move_predicates": ["trinkets:all"],
+  "tooltip_predicates": ["trinkets:all"]
 }

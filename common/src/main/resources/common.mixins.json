@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "net.ixdarklord.ultimine_addition.mixin",
+  "client": [
+    "client.BlockEntityWithoutLevelRendererMixin",
+    "client.GuiGraphicsMixin"
+  ],
+  "mixins": [
+    "BrewingStandBlockEntityMixin",
+    "FTBUltimineMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

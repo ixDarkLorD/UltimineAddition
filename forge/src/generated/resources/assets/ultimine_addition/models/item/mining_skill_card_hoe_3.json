@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "ultimine_addition:item/mining_skill_card_hoe_3"
-  }
-}

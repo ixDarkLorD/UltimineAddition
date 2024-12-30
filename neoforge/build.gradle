@@ -1,0 +1,14 @@
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/neoforge.gradle"
+
+dependencies {
+    modApi libs.architectury.neoforge.get()
+    modApi "net.ixdarklord.coolcatlib:neoforge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+
+    modCompileOnlyApi libs.jei.api.neoforge.get()
+    modRuntimeOnly libs.jei.neoforge.get()
+
+    modImplementation "curse.maven:ftb-library-forge-404465:$ftblibrary_neoforge_version_id"
+    modImplementation "curse.maven:ftb-ultimine-forge-386134:$ftbultimine_neoforge_version_id"
+    modImplementation "curse.maven:mekanism-268560:5574951"
+    modImplementation "curse.maven:mekanism-tools-268567:5574955"
+}

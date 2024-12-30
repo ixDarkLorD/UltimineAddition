@@ -8,9 +8,9 @@ import net.minecraft.world.item.ItemStack;
 public class TrinketsIntegration {
     public static ItemStack getSkillsRecordItem(Player player) {
         return TrinketsApi.getTrinketComponent(player)
-                .map(trinketComponent -> trinketComponent.getEquipped(Registration.SKILLS_RECORD.get()))
+                .map(c -> c.getEquipped(Registration.SKILLS_RECORD.get()))
                 .filter(tuples -> !tuples.isEmpty())
-                .map(tuples -> tuples.get(0).getB())
+                .map(tuples -> tuples.getFirst().getB())
                 .orElse(ItemStack.EMPTY);
     }
 }

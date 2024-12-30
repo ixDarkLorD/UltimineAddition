@@ -1,0 +1,12 @@
+{
+  "values": [
+    "#c:dyes/black",
+    "#c:dyes/red",
+    "#c:dyes/green",
+    "minecraft:black_dye",
+    "minecraft:red_dye",
+    "minecraft:green_dye",
+    "minecraft:blue_dye",
+    "#c:dyes/blue"
+  ]
+}

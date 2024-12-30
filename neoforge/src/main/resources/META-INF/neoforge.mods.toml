@@ -1,0 +1,58 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+issueTrackerURL = "${mod_issue_url}"
+license = "${mod_license}"
+
+[[mods]]
+modId = "${modid}"
+displayName = "${mod_name}"
+version = "${mod_version}"
+description = "${mod_description}"
+authors = "${mod_author}"
+logoFile = "mod_logo.png"
+updateJSONURL="${mod_neoforge_update_url}"
+
+[[dependencies.${modid}]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${min_neoforge_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${modid}]]
+modId = "minecraft"
+type = "required"
+versionRange = "[${mc_version},) , (,${max_mc_version}]"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${modid}]]
+modId = "architectury"
+type = "required"
+versionRange = "[${versions.architectury.get()},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${modid}]]
+modId = "coolcatlib"
+type = "required"
+versionRange = "[${coolcatlib_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${modid}]]
+modId = "ftbultimine"
+type = "required"
+versionRange = "[${ftbultimine_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${modid}]]
+modId = "jei"
+type = "optional"
+versionRange = "[${versions.jei.get()},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config = "${modid}.common.mixins.json"
