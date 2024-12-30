@@ -76,7 +76,7 @@ public class MCRecipe extends ShapelessRecipe {
             NonNullList<ItemStack> inputs = NonNullList.create();
             for (ItemStack itemStack : input.items()) {
                 if (!itemStack.isEmpty() && !(itemStack.getItem() instanceof MiningSkillCardItem))
-                    inputs.add(itemStack);
+                    inputs.add(itemStack.copy());
             }
 
             if (!inputs.isEmpty()) {
