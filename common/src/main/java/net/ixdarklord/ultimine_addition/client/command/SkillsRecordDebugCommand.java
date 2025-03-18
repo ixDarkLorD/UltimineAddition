@@ -20,6 +20,7 @@ public class SkillsRecordDebugCommand {
     private static int setEditMode(ClientCommandRegistrationEvent.ClientCommandSourceStack source, boolean state) {
         if (ConfigHandler.CLIENT.SR_EDIT_MODE.get() != state) {
             ConfigHandler.CLIENT.SR_EDIT_MODE.set(state);
+            ConfigHandler.CLIENT.SR_EDIT_MODE.save();
             source.arch$sendSuccess(() -> Component.translatable("command.ultimine_addition.skills_record.edit_mode.success", state), true);
             return 1;
         } else {

@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Locale;
 
 public class UltimineAddition {
-
 	public static final String MOD_ID = "ultimine_addition";
 	public static final String MOD_NAME = "Ultimine Addition";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);

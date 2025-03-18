@@ -2,14 +2,15 @@ package net.ixdarklord.ultimine_addition.core.neoforge;
 
 import com.mojang.serialization.MapCodec;
 import dev.architectury.event.CompoundEventResult;
-import net.ixdarklord.ultimine_addition.common.brewing.MineGoJuiceRecipe;
 import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
 import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationEvent;
+import net.ixdarklord.ultimine_addition.common.event.impl.ConfigLifecycleEvent;
 import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
-import net.ixdarklord.ultimine_addition.common.event.impl.ToolAction;
+import net.ixdarklord.ultimine_addition.config.ConfigInfo;
 import net.ixdarklord.ultimine_addition.core.CommonSetup;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
+import net.ixdarklord.ultimine_addition.util.ToolAction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,12 +18,13 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
-import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -54,6 +56,33 @@ public class NeoForgeSetup {
         @SubscribeEvent
         private static void onCommonSetup(FMLCommonSetupEvent event) {
             event.enqueueWork(CommonSetup::setup);
+        }
+
+        @SubscribeEvent
+        private static void onConfigLoading(ModConfigEvent.Loading event) {
+            ModConfig config = event.getConfig();
+            ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
+                    new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
+                    ConfigLifecycleEvent.ConfigUpdateType.LOADING
+            );
+        }
+
+        @SubscribeEvent
+        private static void onConfigReloading(ModConfigEvent.Reloading event) {
+            ModConfig config = event.getConfig();
+            ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
+                    new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
+                    ConfigLifecycleEvent.ConfigUpdateType.RELOADING
+            );
+        }
+
+        @SubscribeEvent
+        private static void onConfigUnloading(ModConfigEvent.Unloading event) {
+            ModConfig config = event.getConfig();
+            ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
+                    new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
+                    ConfigLifecycleEvent.ConfigUpdateType.UNLOADING
+            );
         }
     }
 
@@ -97,11 +126,6 @@ public class NeoForgeSetup {
                     event.setFinalState(result.object());
                 }
             }
-        }
-
-        @SubscribeEvent
-        private static void onBrewingRecipesRegister(RegisterBrewingRecipesEvent event) {
-            MineGoJuiceRecipe.register(event);
         }
     }
 }

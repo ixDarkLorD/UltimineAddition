@@ -1,0 +1,38 @@
+{
+  "parent": "ultimine_addition:empty_card",
+  "criteria": {
+    "has_hoe_card": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ultimine_addition:mining_skill_card_hoe"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.craft",
+      "with": [
+        {
+          "translate": "item.ultimine_addition.mining_skill_card_hoe"
+        }
+      ]
+    },
+    "icon": {
+      "count": 1,
+      "id": "ultimine_addition:mining_skill_card_hoe"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.craft.card.hoe"
+    }
+  },
+  "requirements": [
+    [
+      "has_hoe_card"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

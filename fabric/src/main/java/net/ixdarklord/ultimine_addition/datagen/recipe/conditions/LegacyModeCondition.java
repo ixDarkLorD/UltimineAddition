@@ -25,6 +25,6 @@ public record LegacyModeCondition(boolean value) implements ResourceCondition {
     @Override
     public boolean test(@Nullable HolderLookup.Provider registryLookup) {
         boolean isLegacyMode = ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
-        return isLegacyMode == value;
+        return value == isLegacyMode;
     }
 }

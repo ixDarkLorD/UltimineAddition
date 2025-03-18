@@ -17,7 +17,7 @@ public record PlayerAbilityPacket(boolean state) implements CustomPacketPayload 
     );
 
     public static void handle(PlayerAbilityPacket message, NetworkManager.PacketContext context) {
-        context.queue(() -> ServicePlatform.Players.setPlayerUltimineCapability(context.getPlayer(), message.state));
+        context.queue(() -> ServicePlatform.get().players().setPlayerUltimineCapability(context.getPlayer(), message.state));
     }
 
     @Override

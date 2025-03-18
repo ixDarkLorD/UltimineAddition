@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -63,14 +64,22 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return stack.getOrDefault(DATA_COMPONENT, create(type)).setDataHolder(stack);
     }
 
+    @ApiStatus.Internal
+    public static ItemStack createForCreativeTab(MiningSkillCardItem cardItem, MiningSkillCardItem.Tier tier) {
+        ItemStack card = cardItem.getDefaultInstance();
+        MiningSkillCardData data = new MiningSkillCardData(UUID.fromString("00000000-0000-0000-0000-000000000000"), tier, cardItem.getType().getDefaultDisplayItem().getDefaultInstance(), 0, Lists.newArrayList());
+        data.saveData(card);
+        return card;
+    }
+
     @Override
     public void saveData(ItemStack stack) {
         stack.set(DATA_COMPONENT, this);
         super.saveData(stack);
     }
 
-    public MiningSkillCardData sendToClient(ServerPlayer player) {
-        PacketHandler.sendToPlayer(new MiningSkillCardPacket(this, this.get()), player);
+    public MiningSkillCardData sendToClient(ServerPlayer player, int slotIndex) {
+        PacketHandler.sendToPlayer(new MiningSkillCardPacket(slotIndex, this), player);
         this.finishedChallenges.clear();
         return this;
     }
@@ -123,14 +132,10 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         AtomicInteger slotId = new AtomicInteger(1);
         AtomicInteger quantity = new AtomicInteger();
         MiningSkillCardItem.Type type = ((MiningSkillCardItem) dataHolder.getItem()).getType();
-        switch (tier) {
-            case Unlearned -> quantity.set(ConfigHandler.COMMON.TIER_0_CHALLENGES_AMOUNT.get());
-            case Novice -> quantity.set(ConfigHandler.COMMON.TIER_1_CHALLENGES_AMOUNT.get());
-            case Apprentice -> quantity.set(ConfigHandler.COMMON.TIER_2_CHALLENGES_AMOUNT.get());
-            case Adept -> quantity.set(ConfigHandler.COMMON.TIER_3_CHALLENGES_AMOUNT.get());
-        }
+        quantity.set(ConfigHandler.SERVER.CARD_CHALLENGES_AMOUNT.getValue(tier));
+
         if (tier != MiningSkillCardItem.Tier.Unlearned && tier != MiningSkillCardItem.Tier.Mastered)
-            setPotionPoints(this.getMaxPotionPoints());
+            this.resetPotionPoints();
 
         challenges.clear();
         ChallengesManager.INSTANCE.getRandomChallenges(quantity.get(), type, this.tier).forEach((location, data) -> {
@@ -140,8 +145,8 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return this;
     }
 
-    public MiningSkillCardData validateChallenges() {
-        if (this.tier == MiningSkillCardItem.Tier.Mastered) return this;
+    public boolean validateChallenges() {
+        if (this.tier == MiningSkillCardItem.Tier.Mastered) return false;
 
         MiningSkillCardItem.Type type = ((MiningSkillCardItem) dataHolder.getItem()).getType();
         if (!this.challenges.isEmpty()) {
@@ -158,16 +163,20 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
                     ChallengesManager.INSTANCE.getRandomChallenges(1, type, this.tier).forEach((location, data) -> {
                         if (this.challenges.stream().filter(challengeData1 -> challengeData1.id.equals(location)).toList().isEmpty()) {
                             this.challenges.add(new ChallengeHolder(location, challengeData.order, data.getRequiredAmount()));
-                            if (ConfigHandler.COMMON.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
-                                ChallengesManager.LOGGER.info("Changed the challenge from: id:\"{}\" to: id:\"{}\"", challengeData.id, location);
+                            if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
+                                ChallengesManager.LOGGER.debug("Changing the invalid challenge! id:\"{}\" to: id:\"{}\"", challengeData.id, location);
                             }
                             isDone.set(false);
                         }
                     });
                 } while (isDone.get());
             });
-        } else initChallenges();
-        return this;
+            return !removedChallenges.isEmpty();
+
+        } else {
+            initChallenges();
+            return true;
+        }
     }
 
     public MiningSkillCardData setDisplayItem(ItemStack stack) {
@@ -222,6 +231,11 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return this;
     }
 
+    public MiningSkillCardData resetPotionPoints() {
+        this.setPotionPoints(this.getMaxPotionPoints());
+        return this;
+    }
+
     public MiningSkillCardData setTier(MiningSkillCardItem.Tier tier) {
         this.tier = tier;
         return this;
@@ -271,12 +285,11 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
     }
 
     public int getMaxPotionPoints() {
-        return switch (this.tier) {
-            case Novice -> ConfigHandler.COMMON.TIER_1_POTION_POINTS.get();
-            case Apprentice -> ConfigHandler.COMMON.TIER_2_POTION_POINTS.get();
-            case Adept -> ConfigHandler.COMMON.TIER_3_POTION_POINTS.get();
-            default -> 0;
-        };
+        return ConfigHandler.SERVER.CARD_POTION_POINTS.getMapValue().get(tier);
+    }
+
+    public boolean isCreativeItem() {
+        return this.uuid.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"));
     }
 
     @Override

@@ -13,8 +13,6 @@ import net.ixdarklord.ultimine_addition.client.handler.ItemRendererHandler;
 import net.ixdarklord.ultimine_addition.client.renderer.item.IItemRenderer;
 import net.ixdarklord.ultimine_addition.client.renderer.item.UAItemRenderer;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
-import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
-import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -31,8 +29,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -73,20 +69,6 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         }
     }
 
-    public static void giveMineGoJuice(ServerPlayer player, Type type) {
-        Holder<MobEffect> effect = Registration.MOB_EFFECTS.getRegistrar().getHolder(MineGoJuiceEffect.getId(type));
-        if (effect == null) return;
-
-        MobEffectInstance instance = new MobEffectInstance(effect, 20, 2, false, false, false);
-        if (player.getActiveEffectsMap().keySet()
-                .stream()
-                .filter(mobEffect -> mobEffect instanceof MineGoJuiceEffect juiceEffect && juiceEffect.getType() == type)
-                .toList()
-                .isEmpty()) {
-            player.addEffect(instance);
-        }
-    }
-
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
@@ -101,16 +83,18 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
 
         component = Component.translatable("tooltip.ultimine_addition.skill_card.tier", !stack.has(MiningSkillCardData.DATA_COMPONENT) ? Component.literal("§kNawaf") : getData(stack).getTier().getDisplayName());
         tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
-        if (stack.has(MiningSkillCardData.DATA_COMPONENT) && type != EMPTY && getData(stack).getTier() != Tier.Unlearned && getData(stack).getTier() != Tier.Mastered) {
-            ChatFormatting formatting = ChatFormattingUtils.get3ColorPercentageFormat(getData(stack).getPotionPoints(), getData(stack).getMaxPotionPoints());
-            component = Component.translatable("tooltip.ultimine_addition.skill_card.potion_point", Component.literal(String.valueOf(getData(stack).getPotionPoints())).withStyle(formatting));
+
+        MiningSkillCardData data = stack.get(MiningSkillCardData.DATA_COMPONENT);
+        if (type != EMPTY && data != null && !data.isCreativeItem() && data.getTier() != Tier.Unlearned && data.getTier() != Tier.Mastered) {
+            ChatFormatting[] formatting = ChatFormattingUtils.get3LevelChatFormatting(data.getPotionPoints(), data.getMaxPotionPoints());
+            component = Component.translatable("tooltip.ultimine_addition.skill_card.potion_point", Component.literal(String.valueOf(data.getPotionPoints())).withStyle(formatting));
             tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
         }
 
         if (Minecraft.getInstance().screen instanceof SkillsRecordScreen screen &&
                 screen.getMenu().getCardSlots().stream().anyMatch(slot -> slot.getItem().equals(stack))) return;
 
-        if (getData(stack).getTier() != Tier.Mastered) {
+        if (data != null && data.getTier() != Tier.Mastered) {
             component = Component.translatable("tooltip.ultimine_addition.skill_card.info").withStyle(ChatFormatting.WHITE);
             List<Component> components = ComponentHelper.splitComponent(component, getSplitterLength());
             tooltipComponents.addAll(components);
@@ -120,14 +104,16 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     @Override
     public boolean isBarVisible(ItemStack itemStack) {
         var data = getData(itemStack);
-        if (!itemStack.has(MiningSkillCardData.DATA_COMPONENT) || type == EMPTY || data.getTier() == Tier.Unlearned || data.getTier() == Tier.Mastered) return false;
+        if (!itemStack.has(MiningSkillCardData.DATA_COMPONENT) || type == EMPTY || data.isCreativeItem() || data.getTier() == Tier.Unlearned || data.getTier() == Tier.Mastered) return false;
         return !data.isPotionPointsFull();
     }
+
     @Override
     public int getBarWidth(ItemStack itemStack) {
         var data = getData(itemStack);
         return Math.round((float) data.getPotionPoints() / data.getMaxPotionPoints() * 13.0F);
     }
+
     @Override
     public int getBarColor(ItemStack itemStack) {
         return Mth.hsvToRgb(Math.max(0.0F, (getBarWidth(itemStack) / 13.0F)) / 3.0F, 1.0F, 1.0F);
@@ -350,7 +336,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
                     return enumValue;
                 }
             }
-            throw new RuntimeException("There is no tier enum with value: " + input);
+            throw new IllegalArgumentException("There is no tier enum with value: " + input);
         }
 
     }

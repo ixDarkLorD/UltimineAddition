@@ -14,13 +14,13 @@ public record LegacyModeCondition(boolean value) implements ICondition {
     ).apply(inst, LegacyModeCondition::new));
 
     @Override
-    public boolean test(@NotNull IContext context) {
-        boolean isLegacyMode = ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
-        return isLegacyMode == value;
+    public @NotNull MapCodec<? extends ICondition> codec() {
+        return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends ICondition> codec() {
-        return CODEC;
+    public boolean test(@NotNull IContext context) {
+        boolean isLegacyMode = ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
+        return value == isLegacyMode;
     }
 }

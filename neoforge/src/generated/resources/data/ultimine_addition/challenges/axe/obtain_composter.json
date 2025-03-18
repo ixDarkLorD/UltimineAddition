@@ -1,0 +1,15 @@
+{
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  },
+  "for_card_tier": 2,
+  "for_card_type": "axe",
+  "required_amount": {
+    "max": 4,
+    "min": 2
+  },
+  "targeted_blocks": [
+    "minecraft:composter"
+  ]
+}

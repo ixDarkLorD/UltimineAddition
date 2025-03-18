@@ -16,8 +16,6 @@ import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-
 public class MiningSkillsCardInterpreter implements ISubtypeInterpreter<ItemStack> {
     public static void init(ISubtypeRegistration registration) {
         registration.registerSubtypeInterpreter(ModItems.MINING_SKILL_CARD_PICKAXE, new MiningSkillsCardInterpreter());
@@ -35,8 +33,9 @@ public class MiningSkillsCardInterpreter implements ISubtypeInterpreter<ItemStac
 
     @Override
     public @Nullable Object getSubtypeData(ItemStack stack, UidContext uidContext) {
-        return stack.has(MiningSkillCardData.DATA_COMPONENT)
-                ? Objects.requireNonNull(stack.get(MiningSkillCardData.DATA_COMPONENT)).getTier()
+        MiningSkillCardData data = stack.get(MiningSkillCardData.DATA_COMPONENT);
+        return data != null
+                ? data.getTier()
                 : null;
     }
 
@@ -46,11 +45,11 @@ public class MiningSkillsCardInterpreter implements ISubtypeInterpreter<ItemStac
         StringBuilder builder = new StringBuilder(stack.getItem().getDescriptionId());
         var data = MiningSkillCardData.loadData(stack);
         switch (data.getTier()) {
-            case Unlearned -> builder.append(":unlearned");
-            case Novice -> builder.append(":novice");
-            case Apprentice -> builder.append(":apprentice");
-            case Adept -> builder.append(":adept");
-            case Mastered -> builder.append(":mastered");
+            case Unlearned -> builder.append(".unlearned");
+            case Novice -> builder.append(".novice");
+            case Apprentice -> builder.append(".apprentice");
+            case Adept -> builder.append(".adept");
+            case Mastered -> builder.append(".mastered");
         }
         return builder.toString();
     }

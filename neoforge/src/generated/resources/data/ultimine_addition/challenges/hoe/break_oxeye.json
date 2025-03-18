@@ -1,0 +1,15 @@
+{
+  "challenge_type": {
+    "consume_block": true,
+    "id": "break_block"
+  },
+  "for_card_tier": 2,
+  "for_card_type": "hoe",
+  "required_amount": {
+    "max": 64,
+    "min": 16
+  },
+  "targeted_blocks": [
+    "minecraft:oxeye_daisy"
+  ]
+}

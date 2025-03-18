@@ -20,8 +20,8 @@ public class ClientEventHandler {
         ClientGuiEvent.RENDER_HUD.register(ChallengesInfoPanel.INSTANCE::render);
         ClientTickEvent.CLIENT_POST.register((instance) -> {
             FTBUltimineIntegration.keyEvent(instance.player);
-            if (ServicePlatform.SlotAPI.isModLoaded()
-                    && !ServicePlatform.SlotAPI.getSkillsRecordItem(instance.player).isEmpty()
+            if (ServicePlatform.get().slotAPI().isModLoaded()
+                    && !ServicePlatform.get().slotAPI().getSkillsRecordItem(instance.player).isEmpty()
                     && Minecraft.getInstance().screen == null
                     && KeyHandler.KEY_OPEN_SKILLS_RECORD.consumeClick()) {
                 PacketHandler.sendToServer(new SkillsRecordPacket.Open());

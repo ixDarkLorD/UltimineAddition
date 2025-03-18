@@ -4,11 +4,11 @@ import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
-import net.ixdarklord.coolcatlib.api.init.commands.ArgumentTypeRegistry;
+import net.ixdarklord.coolcatlib.api.core.commands.ArgumentTypeRegistry;
 import net.ixdarklord.coolcatlib.api.util.ParticleTypes;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.advancement.UltimineObtainTrigger;
-import net.ixdarklord.ultimine_addition.common.command.arguments.CardSlotsArgument;
+import net.ixdarklord.ultimine_addition.common.command.arguments.CardHolderArgument;
 import net.ixdarklord.ultimine_addition.common.command.arguments.CardTierArgument;
 import net.ixdarklord.ultimine_addition.common.command.arguments.ChallengesArgument;
 import net.ixdarklord.ultimine_addition.common.data.item.ItemStorageData;
@@ -16,6 +16,7 @@ import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
+import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffectInstance;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
@@ -37,7 +38,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -103,9 +103,9 @@ public class Registration {
             RegistrySupplier<MobEffect> mobEffect = mineGoJuiceList.get(id);
             if (mobEffect == null || !mobEffect.isPresent()) continue;
 
-            POTIONS.register(id, () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MobEffectInstance(mobEffect, ConfigHandler.COMMON.TIER_1_TIME_SAFE.get() * 20, 0)));
-            POTIONS.register(id + "_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MobEffectInstance(mobEffect, ConfigHandler.COMMON.TIER_2_TIME_SAFE.get() * 20, 1)));
-            POTIONS.register(id + "_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MobEffectInstance(mobEffect, ConfigHandler.COMMON.TIER_3_TIME_SAFE.get() * 20, 2)));
+            POTIONS.register(id, () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MineGoJuiceEffectInstance(mobEffect, 0)));
+            POTIONS.register(id + "_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MineGoJuiceEffectInstance(mobEffect, 1)));
+            POTIONS.register(id + "_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MineGoJuiceEffectInstance(mobEffect, 2)));
         }
         mineGoJuiceList.clear();
         POTIONS.register();
@@ -117,12 +117,12 @@ public class Registration {
                 builder.icon(ModItems.MINER_CERTIFICATE::getDefaultInstance);
                 builder.displayItems((itemDisplayParameters, output) -> {
                     output.accept(ModItems.MINER_CERTIFICATE.getDefaultInstance());
-                    if (ConfigHandler.COMMON.PLAYSTYLE_MODE_SAFE.get() != PlaystyleMode.LEGACY) {
+                    if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
                         output.accept(ModItems.SKILLS_RECORD);
                         output.accept(ModItems.INK_CHAMBER);
                         output.accept(ModItems.PEN);
                         ItemStack pen = ModItems.PEN.getDefaultInstance();
-                        ModItems.PEN.getData(pen).fullCapacity().saveData(pen);
+                        ModItems.PEN.getData(pen).setToFullCapacity().saveData(pen);
                         output.accept(pen);
 
                         output.accept(ModItems.CARD_BLUEPRINT);
@@ -132,9 +132,10 @@ public class Registration {
                             if (item instanceof MiningSkillCardItem cardItem) {
                                 output.accept(item);
                                 if (cardItem.getType() != MiningSkillCardItem.Type.EMPTY) {
-                                    ItemStack card = cardItem.getDefaultInstance();
-                                    cardItem.getData(card).setTier(MiningSkillCardItem.Tier.Mastered).saveData(card);
-                                    output.accept(card);
+                                    for (MiningSkillCardItem.Tier value : MiningSkillCardItem.Tier.values()) {
+                                        if (value == MiningSkillCardItem.Tier.Unlearned) continue;
+                                        output.accept(MiningSkillCardData.createForCreativeTab(cardItem, value));
+                                    }
                                 }
                             }
                         }
@@ -151,11 +152,11 @@ public class Registration {
     public static final RegistrySupplier<Item> PEN = ITEMS.register("pen", () -> ModItems.PEN);
     public static final RegistrySupplier<Item> CARD_BLUEPRINT = ITEMS.register("card_blueprint", () -> ModItems.CARD_BLUEPRINT);
 
-    public static final RegistrySupplier<Item> MINING_SKILL_CARD_EMPTY = ITEMS.register("mining_skill_card_empty", () -> ModItems.MINING_SKILL_CARD_EMPTY);
-    public static final RegistrySupplier<Item> MINING_SKILL_CARD_PICKAXE = ITEMS.register("mining_skill_card_pickaxe", () -> ModItems.MINING_SKILL_CARD_PICKAXE);
-    public static final RegistrySupplier<Item> MINING_SKILL_CARD_AXE = ITEMS.register("mining_skill_card_axe", () -> ModItems.MINING_SKILL_CARD_AXE);
-    public static final RegistrySupplier<Item> MINING_SKILL_CARD_SHOVEL = ITEMS.register("mining_skill_card_shovel", () -> ModItems.MINING_SKILL_CARD_SHOVEL);
-    public static final RegistrySupplier<Item> MINING_SKILL_CARD_HOE = ITEMS.register("mining_skill_card_hoe", () -> ModItems.MINING_SKILL_CARD_HOE);
+    public static final RegistrySupplier<MiningSkillCardItem> MINING_SKILL_CARD_EMPTY = ITEMS.register("mining_skill_card_empty", () -> ModItems.MINING_SKILL_CARD_EMPTY);
+    public static final RegistrySupplier<MiningSkillCardItem> MINING_SKILL_CARD_PICKAXE = ITEMS.register("mining_skill_card_pickaxe", () -> ModItems.MINING_SKILL_CARD_PICKAXE);
+    public static final RegistrySupplier<MiningSkillCardItem> MINING_SKILL_CARD_AXE = ITEMS.register("mining_skill_card_axe", () -> ModItems.MINING_SKILL_CARD_AXE);
+    public static final RegistrySupplier<MiningSkillCardItem> MINING_SKILL_CARD_SHOVEL = ITEMS.register("mining_skill_card_shovel", () -> ModItems.MINING_SKILL_CARD_SHOVEL);
+    public static final RegistrySupplier<MiningSkillCardItem> MINING_SKILL_CARD_HOE = ITEMS.register("mining_skill_card_hoe", () -> ModItems.MINING_SKILL_CARD_HOE);
 
     // Mob Effects
     public static final RegistrySupplier<MobEffect> MINE_GO_JUICE_PICKAXE = MOB_EFFECTS.register("mine_go_juice_pickaxe", () -> ModMobEffects.MINE_GO_JUICE_PICKAXE);
@@ -165,18 +166,18 @@ public class Registration {
 
     // Potions
     public static final RegistrySupplier<Potion> KNOWLEDGE_POTION = POTIONS.register("knowledge", Potion::new);
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_PICKAXE_POTION = POTIONS.register("mine_go_juice_pickaxe", () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MobEffectInstance(MINE_GO_JUICE_PICKAXE, ConfigHandler.COMMON.TIER_1_TIME_SAFE.get() * 20, 0)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_PICKAXE_POTION2 = POTIONS.register("mine_go_juice_pickaxe_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MobEffectInstance(MINE_GO_JUICE_PICKAXE, ConfigHandler.COMMON.TIER_2_TIME_SAFE.get() * 20, 1)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_PICKAXE_POTION3 = POTIONS.register("mine_go_juice_pickaxe_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MobEffectInstance(MINE_GO_JUICE_PICKAXE, ConfigHandler.COMMON.TIER_3_TIME_SAFE.get() * 20, 2)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_AXE_POTION = POTIONS.register("mine_go_juice_axe", () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MobEffectInstance(MINE_GO_JUICE_AXE, ConfigHandler.COMMON.TIER_1_TIME_SAFE.get() * 20, 0)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_AXE_POTION2 = POTIONS.register("mine_go_juice_axe_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MobEffectInstance(MINE_GO_JUICE_AXE, ConfigHandler.COMMON.TIER_2_TIME_SAFE.get() * 20, 1)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_AXE_POTION3 = POTIONS.register("mine_go_juice_axe_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MobEffectInstance(MINE_GO_JUICE_AXE, ConfigHandler.COMMON.TIER_3_TIME_SAFE.get() * 20, 2)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_SHOVEL_POTION = POTIONS.register("mine_go_juice_shovel", () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MobEffectInstance(MINE_GO_JUICE_SHOVEL, ConfigHandler.COMMON.TIER_1_TIME_SAFE.get() * 20, 0)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_SHOVEL_POTION2 = POTIONS.register("mine_go_juice_shovel_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MobEffectInstance(MINE_GO_JUICE_SHOVEL, ConfigHandler.COMMON.TIER_2_TIME_SAFE.get() * 20, 1)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_SHOVEL_POTION3 = POTIONS.register("mine_go_juice_shovel_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MobEffectInstance(MINE_GO_JUICE_SHOVEL, ConfigHandler.COMMON.TIER_3_TIME_SAFE.get() * 20, 2)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_HOE_POTION = POTIONS.register("mine_go_juice_hoe", () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MobEffectInstance(MINE_GO_JUICE_HOE, ConfigHandler.COMMON.TIER_1_TIME_SAFE.get() * 20, 0)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_HOE_POTION2 = POTIONS.register("mine_go_juice_hoe_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MobEffectInstance(MINE_GO_JUICE_HOE, ConfigHandler.COMMON.TIER_2_TIME_SAFE.get() * 20, 1)));
-    public static final RegistrySupplier<Potion> MINE_GO_JUICE_HOE_POTION3 = POTIONS.register("mine_go_juice_hoe_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MobEffectInstance(MINE_GO_JUICE_HOE, ConfigHandler.COMMON.TIER_3_TIME_SAFE.get() * 20, 2)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_PICKAXE_POTION = POTIONS.register("mine_go_juice_pickaxe", () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MineGoJuiceEffectInstance(MINE_GO_JUICE_PICKAXE, 0)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_PICKAXE_POTION2 = POTIONS.register("mine_go_juice_pickaxe_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MineGoJuiceEffectInstance(MINE_GO_JUICE_PICKAXE, 1)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_PICKAXE_POTION3 = POTIONS.register("mine_go_juice_pickaxe_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MineGoJuiceEffectInstance(MINE_GO_JUICE_PICKAXE, 2)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_AXE_POTION = POTIONS.register("mine_go_juice_axe", () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MineGoJuiceEffectInstance(MINE_GO_JUICE_AXE, 0)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_AXE_POTION2 = POTIONS.register("mine_go_juice_axe_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MineGoJuiceEffectInstance(MINE_GO_JUICE_AXE, 1)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_AXE_POTION3 = POTIONS.register("mine_go_juice_axe_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MineGoJuiceEffectInstance(MINE_GO_JUICE_AXE, 2)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_SHOVEL_POTION = POTIONS.register("mine_go_juice_shovel", () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MineGoJuiceEffectInstance(MINE_GO_JUICE_SHOVEL, 0)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_SHOVEL_POTION2 = POTIONS.register("mine_go_juice_shovel_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MineGoJuiceEffectInstance(MINE_GO_JUICE_SHOVEL, 1)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_SHOVEL_POTION3 = POTIONS.register("mine_go_juice_shovel_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MineGoJuiceEffectInstance(MINE_GO_JUICE_SHOVEL, 2)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_HOE_POTION = POTIONS.register("mine_go_juice_hoe", () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MineGoJuiceEffectInstance(MINE_GO_JUICE_HOE, 0)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_HOE_POTION2 = POTIONS.register("mine_go_juice_hoe_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MineGoJuiceEffectInstance(MINE_GO_JUICE_HOE, 1)));
+    public static final RegistrySupplier<Potion> MINE_GO_JUICE_HOE_POTION3 = POTIONS.register("mine_go_juice_hoe_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MineGoJuiceEffectInstance(MINE_GO_JUICE_HOE, 2)));
 
     // Containers
     public static final RegistrySupplier<MenuType<SkillsRecordMenu>> SKILLS_RECORD_CONTAINER = CONTAINERS.register("skills_record", () -> MenuRegistry.ofExtended((id, inv, buf) -> new SkillsRecordMenu(id, inv, new RegistryFriendlyByteBuf(buf, inv.player.level().registryAccess()))));
@@ -196,7 +197,7 @@ public class Registration {
 
     // Arguments
     public static final RegistrySupplier<ArgumentTypeInfo<CardTierArgument, ?>> CARD_TIER_ARGUMENT = ARGUMENT_TYPES.register("card_tier", () -> ArgumentTypeRegistry.register(CardTierArgument.class, SingletonArgumentInfo.contextFree(CardTierArgument::tier)));
-    public static final RegistrySupplier<ArgumentTypeInfo<CardSlotsArgument, ?>> CARD_SLOTS_ARGUMENT = ARGUMENT_TYPES.register("card_slots", () -> ArgumentTypeRegistry.register(CardSlotsArgument.class, SingletonArgumentInfo.contextFree(CardSlotsArgument::slots)));
+    public static final RegistrySupplier<ArgumentTypeInfo<CardHolderArgument, ?>> CARD_SLOTS_ARGUMENT = ARGUMENT_TYPES.register("card_slots", () -> ArgumentTypeRegistry.register(CardHolderArgument.class, SingletonArgumentInfo.contextFree(CardHolderArgument::slot)));
     public static final RegistrySupplier<ArgumentTypeInfo<ChallengesArgument, ?>> CHALLENGES_ARGUMENT = ARGUMENT_TYPES.register("challenges", () -> ArgumentTypeRegistry.register(ChallengesArgument.class, SingletonArgumentInfo.contextFree(ChallengesArgument::data)));
 
     //Criterion Triggers

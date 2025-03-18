@@ -44,8 +44,7 @@ public class CustomMSCApi {
 
         if (directory.isDirectory()) {
             File[] jsonFiles = directory.listFiles((dir, name) -> name.endsWith(".json"));
-
-            if (jsonFiles != null) {
+            if (jsonFiles != null && jsonFiles.length > 0) {
                 LOGGER.info("Loading Custom Mining Skill Cards...");
                 Stopwatch stopwatch = Stopwatch.createStarted();
 
@@ -73,7 +72,7 @@ public class CustomMSCApi {
 
                         uniqueIds.add(type.getId());
                         items.add(type);
-                        LOGGER.info("[Enabled] Custom card \"{}\" is loaded.", type.getId());
+                        LOGGER.info("Custom card \"{}\" is loaded.", type.getId());
                     }
                 }
                 if (!items.isEmpty())

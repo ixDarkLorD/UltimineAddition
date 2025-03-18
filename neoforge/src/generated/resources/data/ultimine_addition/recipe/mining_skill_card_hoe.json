@@ -1,0 +1,22 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "ultimine_addition:legacy_mode",
+      "value": false
+    }
+  ],
+  "type": "ultimine_addition:mining_card_recipe",
+  "group": "ultimine_addition",
+  "ingredients": [
+    {
+      "item": "ultimine_addition:mining_skill_card_empty"
+    },
+    {
+      "tag": "minecraft:hoes"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "ultimine_addition:mining_skill_card_hoe"
+  }
+}

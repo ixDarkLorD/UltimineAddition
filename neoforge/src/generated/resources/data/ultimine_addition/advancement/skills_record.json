@@ -1,0 +1,39 @@
+{
+  "parent": "ultimine_addition:empty_card",
+  "criteria": {
+    "has_skills_record": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ultimine_addition:skills_record"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.craft",
+      "with": [
+        {
+          "translate": "item.ultimine_addition.skills_record"
+        }
+      ]
+    },
+    "frame": "goal",
+    "icon": {
+      "count": 1,
+      "id": "ultimine_addition:skills_record"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.craft.skills_record"
+    }
+  },
+  "requirements": [
+    [
+      "has_skills_record"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -31,8 +31,8 @@ public class PlayerAbilityCommand {
         int i = 0;
         String State = String.valueOf(state);
         for (ServerPlayer player : targets) {
-            if (ServicePlatform.Players.isPlayerUltimineCapable(player) != state) {
-                ServicePlatform.Players.setPlayerUltimineCapability(player, state);
+            if (ServicePlatform.get().players().isPlayerUltimineCapable(player) != state) {
+                ServicePlatform.get().players().setPlayerUltimineCapability(player, state);
                 i++;
 
                 if (player == source.getPlayer()) {

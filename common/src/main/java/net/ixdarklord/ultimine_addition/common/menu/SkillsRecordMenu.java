@@ -22,22 +22,25 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData> {
+    public static final int CONTAINER_SIZE = 6;
+    public static final int[] CARD_SLOTS = {0, 1, 2, 3};
     private final ItemStack stack;
     private final Player player;
     private final Inventory playerInventory;
     private final SimpleContainer container;
-    public final Optional<InteractionHand> interactionHand;
+    public final @Nullable InteractionHand interactionHand;
 
     public SkillsRecordMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buf) {
-        this(id, inventory, inventory.player, ItemStack.STREAM_CODEC.decode(buf), buf.readOptional(buffer -> buf.readEnum(InteractionHand.class)));
+        this(id, inventory, inventory.player, ItemStack.STREAM_CODEC.decode(buf), buf.readBoolean() ? buf.readEnum(InteractionHand.class) : null);
     }
 
-    public SkillsRecordMenu(int id, Inventory playerInventory, Player player, ItemStack stack, Optional<InteractionHand> interactionHand) {
+    public SkillsRecordMenu(int id, Inventory playerInventory, Player player, ItemStack stack, @Nullable InteractionHand interactionHand) {
         super(Registration.SKILLS_RECORD_CONTAINER.get(), id);
         if (!(stack.getItem() instanceof SkillsRecordItem))
             throw new IllegalArgumentException("Invalid item! This container only accepts Skills Record.");
@@ -59,7 +62,7 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
     public void slotsChanged(Container container) {
         super.slotsChanged(container);
         if (player instanceof ServerPlayer sPlayer) {
-            getData().sendToClient(sPlayer).saveData(stack);
+            getData().sendToClient(sPlayer, this.interactionHand).saveData(stack);
         }
     }
 
@@ -94,8 +97,8 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return this.interactionHand.map(interactionHand -> player.getItemInHand(interactionHand).equals(stack))
-                .orElseGet(() -> ServicePlatform.SlotAPI.getSkillsRecordItem(player).equals(stack));
+        return this.getInteractionHand().map(interactionHand -> player.getItemInHand(interactionHand).equals(stack))
+                .orElseGet(() -> ServicePlatform.get().slotAPI().getSkillsRecordItem(player).equals(stack));
     }
 
     public Player getPlayer() {
@@ -163,6 +166,10 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
 
     public SkillsRecordData getData() {
         return createData().insertContainer(container);
+    }
+
+    public Optional<InteractionHand> getInteractionHand() {
+        return Optional.ofNullable(interactionHand);
     }
 
     @Override

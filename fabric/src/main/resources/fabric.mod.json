@@ -17,7 +17,7 @@
   "license": "${mod_license}",
   "icon": "mod_logo.png",
 
-  "environment": "${mod_fabric_environment}",
+  "environment": "${mod_environment}",
   "entrypoints": {
     "main": ["net.ixdarklord.ultimine_addition.core.fabric.FabricSetup"],
     "client": ["net.ixdarklord.ultimine_addition.core.fabric.FabricClientSetup"],

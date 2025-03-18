@@ -19,7 +19,7 @@ public class KeyHandler {
 
     public static void register() {
         KeyMappingRegistry.register(KEY_SHOW_PROGRESSION_BAR);
-        if (ServicePlatform.SlotAPI.isModLoaded())
+        if (ServicePlatform.get().slotAPI().isModLoaded())
             KeyMappingRegistry.register(KEY_OPEN_SKILLS_RECORD);
     }
 }

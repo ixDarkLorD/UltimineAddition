@@ -39,8 +39,9 @@ public class LanguageBuilder {
         add(Registration.MINE_GO_JUICE_SHOVEL.get(), "Mine-Go Juice: Worm Whispers");
         add(Registration.MINE_GO_JUICE_HOE.get(), "Mine-Go Juice: Soil Serenade");
 
-        add("jei", "info.cards.obtain", "You can obtain this item from a level %s toolsmith villager.");
-        add("jei", "info.cards.grade_up", "You can obtain the Mastered tier by accomplishing challenges using the Skills Record.");
+        add("jei", "info.cards.obtain", "You can obtain this item from a level %s Toolsmith Villager.");
+        add("jei", "info.cards.grade_up", "You can upgrade the tier of the Mining Skill Card by completing challenges in the Skills Record.");
+        add("jei", "info.cards.mastered", "You can achieve the Mastered tier by completing challenges using the Skills Record.");
         add("jei", "tooltip.missing_card", "or Tiered up Card");
         add("jei", "category.item_storage.pen", "Refill Pen");
         add("jei", "recipe.item_storage.ink_chamber", "Ink Amount: %s+");
@@ -106,8 +107,12 @@ public class LanguageBuilder {
         add("gui", "skills_record.progress", "Progress: %s");
         add("gui", "skills_record.missing_items", "You can't accomplish any challenge! It would help if you had these items available:");
         add("gui", "skills_record.not_enough_ink", "There is not enough ink in the pen! Please refill it.");
-        add("gui", "skills_record.pin", "Press to pin the challenge.");
+        add("gui", "skills_record.pin.click", "Click to Pin this Challenge");
         add("gui", "skills_record.pin.panel", "There are %s+ more hidden panels");
+        add("gui", "skills_record.edit.click", "Click to Edit this Challenge");
+        add("gui", "skills_record.edit.copy_id", "Click to Copy Challenge ID to Clipboard");
+        add("gui", "skills_record.edit.copy_success", "Copied Challenge ID to Clipboard!");
+        add("gui", "skills_record.edit.new_value", "Enter the new value.\nMax Value: %s");
 
         add("toast", "challenge.completed", "Challenge Completed!");
         add("toast", "challenge.completed.info", "You have completed Challenge %s in %s");

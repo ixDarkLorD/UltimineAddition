@@ -1,0 +1,25 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "ultimine_addition:legacy_mode",
+      "value": false
+    }
+  ],
+  "type": "ultimine_addition:item_storage_data",
+  "category": "misc",
+  "ingredients": [
+    {
+      "increment_amount": 50,
+      "tag": "ultimine_addition:more_valuable_pigment"
+    },
+    {
+      "increment_amount": 10,
+      "tag": "ultimine_addition:less_valuable_pigment"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "ultimine_addition:pen"
+  },
+  "storage_name": "ink_chamber"
+}

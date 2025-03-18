@@ -4,6 +4,7 @@ import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
 import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
 import net.ixdarklord.ultimine_addition.common.network.packet.PlayerAbilityPacket;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -13,13 +14,15 @@ import net.neoforged.neoforge.common.ItemAbility;
 
 import java.util.List;
 
-public class ServicePlatformPlayersImpl {
-    public static boolean isPlayerUltimineCapable(Player player) {
+public class ServicePlatformPlayersImpl implements ServicePlatform.Players {
+    @Override
+    public boolean isPlayerUltimineCapable(Player player) {
         return player.hasData(NeoForgeSetup.PLAYER_ABILITY_DATA)
                 && player.getData(NeoForgeSetup.PLAYER_ABILITY_DATA).getAbility();
     }
 
-    public static void setPlayerUltimineCapability(Player player, boolean state) {
+    @Override
+    public void setPlayerUltimineCapability(Player player, boolean state) {
         PlayerAbilityData data = PlayerAbilityData.create();
         player.setData(NeoForgeSetup.PLAYER_ABILITY_DATA, data.setAbility(state));
         if (player instanceof ServerPlayer serverPlayer) {
@@ -27,15 +30,18 @@ public class ServicePlatformPlayersImpl {
         }
     }
 
-    public static double getReachAttribute(Player player) {
+    @Override
+    public double getReachAttribute(Player player) {
         return player.isCreative() ? 5.0 : 4.5;
     }
 
-    public static boolean isCorrectToolForBlock(ItemStack stack, BlockState state) {
+    @Override
+    public boolean isCorrectToolForBlock(ItemStack stack, BlockState state) {
         return stack.isCorrectToolForDrops(state);
     }
 
-    public static boolean isToolPaxel(ItemStack stack) {
+    @Override
+    public boolean isToolPaxel(ItemStack stack) {
         // Solution #1
         // Lookup for paxel tag
         if (stack.is(PlatformTags.get().PAXELS()) || stack.is(PlatformTags.get().TOOLS_PAXELS())) {

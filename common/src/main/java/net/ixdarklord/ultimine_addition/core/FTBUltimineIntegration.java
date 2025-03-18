@@ -27,21 +27,15 @@ import net.minecraft.world.item.ItemStack;
 import java.util.*;
 
 import static dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig.MAX_BLOCKS;
-import static net.ixdarklord.ultimine_addition.config.ConfigHandler.COMMON.PLAYSTYLE_MODE;
 
 public class FTBUltimineIntegration implements FTBUltiminePlugin {
     private static boolean isButtonPressed;
 
     @Override
-    public void init() {
-        UltimineAddition.LOGGER.info("Registering plugin to FTBUltimine!");
-    }
-
-    @Override
     public boolean canUltimine(Player player) {
-        boolean result = ServicePlatform.Players.isPlayerUltimineCapable(player);
+        boolean result = ServicePlatform.get().players().isPlayerUltimineCapable(player);
         if (result) return true;
-        if (PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return result;
+        if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return result;
 
         if (isPlayerHasCustomCardValidEffect(player)) {
             if (ItemUtils.isItemInHandCustomCardValid(player)) result = true;
@@ -70,7 +64,7 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                 MutableComponent MSG = Component.translatable("info.ultimine_addition.incapable");
                 Component requiredTool = null;
 
-                if (!ServicePlatform.Players.isPlayerUltimineCapable(player)) {
+                if (!ServicePlatform.get().players().isPlayerUltimineCapable(player)) {
                     if (ItemUtils.isItemInHandCustomCardValid(player)) {
                         if (!isPlayerHasCustomCardValidEffect(player)) {
                             String[] toolNames = getCustomCardTypes(player).stream()
@@ -89,26 +83,26 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.%s".formatted(toolPrefix)).withStyle(style);
                         }
                     } else if (ItemUtils.isItemInHandPickaxe(player)) {
-                        if (!player.hasEffect(Registration.MINE_GO_JUICE_PICKAXE)) {
+                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_PICKAXE.getId()).orElseThrow())) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.pickaxe");
                         }
                     } else if (ItemUtils.isItemInHandAxe(player)) {
-                        if (!player.hasEffect(Registration.MINE_GO_JUICE_AXE)) {
+                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_AXE.getId()).orElseThrow())) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.axe");
                         }
                     } else if (ItemUtils.isItemInHandShovel(player)) {
-                        if (!player.hasEffect(Registration.MINE_GO_JUICE_SHOVEL)) {
+                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_SHOVEL.getId()).orElseThrow())) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.shovel");
                         }
                     } else if (ItemUtils.isItemInHandHoe(player)) {
-                        if (!player.hasEffect(Registration.MINE_GO_JUICE_HOE)) {
+                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_HOE.getId()).orElseThrow())) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.hoe");
                         }
                     } else if (ItemUtils.isItemInHandNotTools(player)) {
                         requiredTool = Component.translatable("info.ultimine_addition.required_skill.all");
                     }
 
-                    if (PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
+                    if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
                         if (requiredTool != null) {
                             player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
                             player.displayClientMessage(Component.literal("✖ ")
@@ -144,11 +138,12 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
     }
 
     public static int getMaxBlocks(ServerPlayer player) {
-        if (!ConfigHandler.COMMON.TIER_BASED_MAX_BLOCKS.get())
+        if (!ConfigHandler.SERVER.CARD_TIER_BASED_MAX_BLOCKS.get()) {
             return FTBUltimine.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
+        }
 
-        List<MobEffectInstance> instances = new ArrayList<>(player.getActiveEffects().stream().filter(mobEffectInstance -> mobEffectInstance.getEffect() instanceof MineGoJuiceEffect).toList());
-        if (!ServicePlatform.Players.isPlayerUltimineCapable(player) && !instances.isEmpty()) {
+        List<MobEffectInstance> instances = new ArrayList<>(player.getActiveEffects().stream().filter(mobEffectInstance -> mobEffectInstance.getEffect().value() instanceof MineGoJuiceEffect).toList());
+        if (!ServicePlatform.get().players().isPlayerUltimineCapable(player) && !instances.isEmpty()) {
             instances.sort(Comparator.comparingInt(MobEffectInstance::getAmplifier).reversed());
 
             if (ItemUtils.isItemInHandCustomCardValid(player)) {
@@ -159,22 +154,19 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                     return false;
                 });
             } else if (ItemUtils.isItemInHandPickaxe(player)) {
-                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.PICKAXE);
+                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect().value()).getType() != MiningSkillCardItem.Type.PICKAXE);
             } else if (ItemUtils.isItemInHandAxe(player)) {
-                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.AXE);
+                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect().value()).getType() != MiningSkillCardItem.Type.AXE);
             } else if (ItemUtils.isItemInHandShovel(player)) {
-                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.SHOVEL);
+                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect().value()).getType() != MiningSkillCardItem.Type.SHOVEL);
             } else if (ItemUtils.isItemInHandHoe(player)) {
-                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.HOE);
+                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect().value()).getType() != MiningSkillCardItem.Type.HOE);
             }
 
             if (!instances.isEmpty()) {
-                return switch (instances.getFirst().getAmplifier()) {
-                    case 0 -> ConfigHandler.COMMON.TIER_1_MAX_BLOCKS.get();
-                    case 1 -> ConfigHandler.COMMON.TIER_2_MAX_BLOCKS.get();
-                    case 2 -> ConfigHandler.COMMON.TIER_3_MAX_BLOCKS.get();
-                    default -> MAX_BLOCKS.get();
-                };
+                try {
+                    return ConfigHandler.SERVER.CARD_TIER_MAX_BLOCKS.getValue(MiningSkillCardItem.Tier.fromInt(instances.getFirst().getAmplifier()+1));
+                } catch (IllegalArgumentException ignored) {}
             }
         }
         return FTBUltimine.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
@@ -182,7 +174,7 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
 
     public static List<Shape> getEnabledShapes() {
         return ShapeRegistryAccessor.getShapesList().stream()
-                .filter(shape -> !ConfigHandler.COMMON.BLACKLISTED_SHAPES.get().contains(shape.getName()))
+                .filter(shape -> !ConfigHandler.SERVER.BLACKLISTED_SHAPES.get().contains(shape.getName()))
                 .toList();
     }
 

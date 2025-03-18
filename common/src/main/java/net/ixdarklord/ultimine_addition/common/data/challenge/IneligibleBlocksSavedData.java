@@ -1,6 +1,5 @@
 package net.ixdarklord.ultimine_addition.common.data.challenge;
 
-import dev.architectury.platform.Platform;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.BlockPos;
@@ -93,8 +92,8 @@ public class IneligibleBlocksSavedData extends SavedData {
     }
 
     public void printDebug() {
-        if (!ConfigHandler.COMMON.INELIGIBLE_BLOCKS_LOGGER.get() && !Platform.isDevelopmentEnvironment()) return;
-        ChunkEntries.forEach((chunkPos, chunkEntries) -> LOGGER.debug("{\"ChunkPos\": {}, \"Entries\": [{}]}", chunkPos, chunkEntries.parallelStream()
+        if (!ConfigHandler.SERVER.INELIGIBLE_BLOCKS_LOGGER.get()) return;
+        ChunkEntries.forEach((chunkPos, chunkEntries) -> LOGGER.debug("[Ineligible Blocks] {\"ChunkPos\": {}, \"Entries\": [{}]}", chunkPos, chunkEntries.parallelStream()
                 .map(BlockEntry::toJSONFormat)
                 .collect(Collectors.joining(", "))));
     }

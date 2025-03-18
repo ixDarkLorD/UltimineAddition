@@ -1,0 +1,17 @@
+{
+  "values": [
+    "#c:chests",
+    "#c:chests/trapped",
+    "#minecraft:beds",
+    "minecraft:sponge",
+    "minecraft:wet_sponge",
+    "minecraft:moss_block",
+    "minecraft:moss_carpet",
+    "minecraft:crafting_table",
+    "minecraft:hay_block",
+    "minecraft:barrel",
+    "minecraft:ladder",
+    "minecraft:composter",
+    "minecraft:bookshelf"
+  ]
+}

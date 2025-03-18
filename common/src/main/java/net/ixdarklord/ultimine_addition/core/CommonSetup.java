@@ -15,7 +15,6 @@ public class CommonSetup {
     }
 
     public static void setup() {
-        ConfigHandler.validate();
         EventHandler.register();
         PacketHandler.init();
     }

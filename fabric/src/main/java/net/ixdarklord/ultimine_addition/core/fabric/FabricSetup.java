@@ -4,6 +4,7 @@ import dev.architectury.event.CompoundEventResult;
 import dev.architectury.event.events.common.EntityEvent;
 import dev.ftb.mods.ftbultimine.mixin.AxeItemAccess;
 import dev.ftb.mods.ftbultimine.mixin.ShovelItemAccess;
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
@@ -11,14 +12,16 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
-import net.ixdarklord.ultimine_addition.common.brewing.MineGoJuiceRecipe;
 import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationEvent;
+import net.ixdarklord.ultimine_addition.common.event.impl.ConfigLifecycleEvent;
 import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
-import net.ixdarklord.ultimine_addition.common.event.impl.ToolAction;
-import net.ixdarklord.ultimine_addition.common.event.impl.ToolActions;
+import net.ixdarklord.ultimine_addition.config.ConfigInfo;
 import net.ixdarklord.ultimine_addition.core.CommonSetup;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
+import net.ixdarklord.ultimine_addition.util.ToolAction;
+import net.ixdarklord.ultimine_addition.util.ToolActions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -43,11 +46,31 @@ public class FabricSetup implements ModInitializer {
         CommonSetup.init();
         CommonSetup.setup();
         ResourceConditions.register(LegacyModeCondition.RESOURCE_CONDITION_TYPE);
-        MineGoJuiceRecipe.register();
         this.initEvents();
     }
 
     private void initEvents() {
+        NeoForgeModConfigEvents.loading(UltimineAddition.MOD_ID).register(config ->
+                ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
+                        new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
+                        ConfigLifecycleEvent.ConfigUpdateType.LOADING
+                )
+        );
+
+        NeoForgeModConfigEvents.reloading(UltimineAddition.MOD_ID).register(config ->
+                ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
+                        new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
+                        ConfigLifecycleEvent.ConfigUpdateType.RELOADING
+                )
+        );
+
+        NeoForgeModConfigEvents.unloading(UltimineAddition.MOD_ID).register(config ->
+                ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
+                        new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
+                        ConfigLifecycleEvent.ConfigUpdateType.UNLOADING
+                )
+        );
+
         CommonLifecycleEvents.TAGS_LOADED.register((registries, client) -> {
             DatapackEvents.TagUpdate.Cause cause = client ? DatapackEvents.TagUpdate.Cause.CLIENT_PACKET_RECEIVED : DatapackEvents.TagUpdate.Cause.SERVER_DATA_LOAD;
             DatapackEvents.TAG_UPDATE.invoker().init(registries, cause, cause == DatapackEvents.TagUpdate.Cause.SERVER_DATA_LOAD || Minecraft.getInstance().getSingleplayerServer() == null);
@@ -61,8 +84,8 @@ public class FabricSetup implements ModInitializer {
     }
 
     private void onPlayerClone(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean wonGame) {
-        boolean state = ServicePlatform.Players.isPlayerUltimineCapable(oldPlayer);
-        ServicePlatform.Players.setPlayerUltimineCapability(newPlayer, state);
+        boolean state = ServicePlatform.get().players().isPlayerUltimineCapable(oldPlayer);
+        ServicePlatform.get().players().setPlayerUltimineCapability(newPlayer, state);
     }
 
     private InteractionResult onRightClick(Player player, Level level, InteractionHand hand, BlockHitResult hitResult) {

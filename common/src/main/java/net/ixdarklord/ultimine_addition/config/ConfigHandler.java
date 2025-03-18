@@ -1,28 +1,21 @@
 package net.ixdarklord.ultimine_addition.config;
 
+import com.google.common.collect.ImmutableList;
 import dev.ftb.mods.ftbultimine.shape.Shape;
 import net.ixdarklord.ultimine_addition.client.gui.screens.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
+import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.mixin.ShapeRegistryAccessor;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class ConfigHandler {
     public static void register() {
-        ServicePlatform.registerConfig();
-    }
-
-    public static void validate() {
-        if (COMMON.TRADE_LOW_PRICE.get() > COMMON.TRADE_HIGH_PRICE.get()) {
-            throw new IllegalArgumentException("The low price has a higher value than high price.");
-        }
-        if (COMMON.LEGACY_REQUIRED_AMOUNT_MIN.get() > COMMON.LEGACY_REQUIRED_AMOUNT_MAX.get()) {
-            throw new IllegalArgumentException("The low required amount has a higher value than max required amount.");
-        }
+        ServicePlatform.get().registerConfig();
     }
 
     public static class CLIENT {
@@ -39,31 +32,41 @@ public class ConfigHandler {
         static {
             BUILDER.push("Settings");
             SR_EDIT_MODE = BUILDER
-                    .comment("This will enable or disable the Skills Record's Edit Mode.")
+                    .comment("Enables or disables Edit Mode in the Skills Record screen.",
+                            "Edit Mode allows customization of the Skills Record interface.")
                     .define("sr_edit_mode", false);
+
             BUILDER.push("Visuals");
             TEXT_SCREEN_SHADOW = BUILDER
-                    .comment("This will enable or disable the drop shadow effect in the text screen of the Skills Record.")
+                    .comment("Toggles the drop shadow effect on text in the Skills Record screen.",
+                            "When enabled, text will have a subtle shadow for better readability.")
                     .define("text_screen_shadow", true);
+
             BACKGROUND_COLOR = BUILDER
-                    .comment("This is the background color for the skills record GUI.")
+                    .comment("Sets the background color of the Skills Record GUI.",
+                            "Choose from predefined color options to customize the interface.")
                     .defineEnum("background_color", SkillsRecordScreen.BGColor.DEFAULT);
+
             ANIMATIONS_MODE = BUILDER
-                    .comment("This will enable or disable the animations on the skills record GUI.")
+                    .comment("Enables or disables animations in the Skills Record GUI.",
+                            "Animations provide visual feedback for interactions.")
                     .define("animations_mode", true);
+
             PROGRESS_BAR = BUILDER
-                    .comment("Here you can choose whatever mode you prefer for the bar visibility",
-                            "In the skills record GUI.",
-                            "0: Always on.",
-                            "1: On holding its keybind. \"Default Keybind: Shift\"",
-                            "2: Disabled.")
+                    .comment("Controls the visibility mode of the progress bar:",
+                            "0: Always visible.",
+                            "1: Visible only when holding its keybind.",
+                            "2: Disabled entirely.")
                     .defineInRange("progress_bar_mode", 0, 0, 2);
+
             CHALLENGES_PANEL_POSITION = BUILDER
-                    .comment("You can choose when will the challenges panel appears on the screen.")
+                    .comment("Determines the position of the Challenges panel on the screen.",
+                            "Choose from predefined positions (e.g., LEFT, RIGHT).")
                     .defineEnum("challenges_panel_pos", ChallengesInfoPanel.Panel.Position.LEFT);
+
             MSC_RENDERER = BUILDER
-                    .comment("Here you can enable or disable the Mining Skill Card Renderer",
-                            "It's not recommended for now! [WIP]")
+                    .comment("Enables or disables the Mining Skill Card Renderer.",
+                            "Note: This feature is a work in progress (WIP) and not recommended for regular use.")
                     .define("msc_renderer", false);
             BUILDER.pop();
             SPEC = BUILDER.build();
@@ -73,159 +76,180 @@ public class ConfigHandler {
     public static class COMMON {
         public static final ModConfigSpec SPEC;
         public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
-        public static final SafeConfig.Builder SAFE_CONFIG_BUILDER = new SafeConfig.Builder(UltimineAddition.MOD_ID, "common-config.toml", "%s/SafeConfig".formatted(UltimineAddition.MOD_NAME));
-
-        /**
-         * This is a safe version of {@link COMMON#PLAYSTYLE_MODE} to use even if the config wasn't loaded.
-         */
-        public static final SafeConfig<PlaystyleMode> PLAYSTYLE_MODE_SAFE;
         public static final ModConfigSpec.EnumValue<PlaystyleMode> PLAYSTYLE_MODE;
+
+        static {
+            BUILDER.push("Playstyle");
+            PLAYSTYLE_MODE = BUILDER.worldRestart()
+                    .comment("Defines the playstyle mode for the mod:",
+                            "%s: Modern playstyle with new features and challenges.".formatted(PlaystyleMode.MODERN.name()),
+                            "%s [WIP]: Single-tier Mining Skill Card that upgrades to Mastered upon challenge completion.".formatted(PlaystyleMode.ONE_TIER_ONLY.name()),
+                            "%s: Restores mechanics from v0.1.0 (only one miner certificate and one challenge).".formatted(PlaystyleMode.LEGACY.name()))
+                    .defineEnum("playstyle_mode", PlaystyleMode.MODERN);
+            BUILDER.pop();
+            SPEC = BUILDER.build();
+        }
+    }
+
+    public static class SERVER {
+        public static final ModConfigSpec SPEC;
+        public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+
+        // General Settings
         public static final ModConfigSpec.ConfigValue<List<? extends String>> BLACKLISTED_SHAPES;
-        public static final ModConfigSpec.IntValue CARD_TRADE_LEVEL;
-        public static final ModConfigSpec.IntValue TRADE_LOW_PRICE;
-        public static final ModConfigSpec.IntValue TRADE_HIGH_PRICE;
-        public static final ModConfigSpec.DoubleValue PAPER_CONSUMPTION_RATE;
         public static final ModConfigSpec.BooleanValue IS_PLACED_BY_ENTITY_CONDITION;
-        public static final ModConfigSpec.IntValue CHALLENGE_VALIDATOR;
-        public static final ModConfigSpec.BooleanValue TIER_BASED_MAX_BLOCKS;
-        public static final ModConfigSpec.IntValue LEGACY_REQUIRED_AMOUNT_MIN;
-        public static final ModConfigSpec.IntValue LEGACY_REQUIRED_AMOUNT_MAX;
-        public static final ModConfigSpec.IntValue TIER_0_CHALLENGES_AMOUNT;
-        public static final ModConfigSpec.IntValue TIER_1_CHALLENGES_AMOUNT;
-        public static final ModConfigSpec.IntValue TIER_2_CHALLENGES_AMOUNT;
-        public static final ModConfigSpec.IntValue TIER_3_CHALLENGES_AMOUNT;
+        public static final ModConfigSpec.IntValue CARD_VALIDATOR;
 
-        public static final ModConfigSpec.IntValue TIER_1_POTION_POINTS;
-        public static final ModConfigSpec.IntValue TIER_2_POTION_POINTS;
-        public static final ModConfigSpec.IntValue TIER_3_POTION_POINTS;
+        // Gameplay Settings
+        public static final ModConfigSpec.DoubleValue PAPER_CONSUMPTION_RATE;
+        public static final ListConfigValue.Integer LEGACY_REQUIRED_AMOUNT;
+        public static final ListConfigValue.EnumValue<MiningSkillCardItem.Tier> CARD_CHALLENGES_AMOUNT;
+        public static final ListConfigValue.EnumValue<MiningSkillCardItem.Tier> CARD_POTION_POINTS;
+        public static final ListConfigValue.EnumValue<MiningSkillCardItem.Tier> CARD_POTION_DURATIONS;
+        public static final ModConfigSpec.BooleanValue CARD_MASTERED_EFFECT;
+        public static final ModConfigSpec.BooleanValue CARD_TIER_BASED_MAX_BLOCKS;
+        public static final ListConfigValue.EnumValue<MiningSkillCardItem.Tier> CARD_TIER_MAX_BLOCKS;
 
-        public static final ModConfigSpec.BooleanValue MASTERED_CARD_EFFECT;
-        public static final ModConfigSpec.IntValue TIER_1_MAX_BLOCKS;
-        public static final ModConfigSpec.IntValue TIER_2_MAX_BLOCKS;
-        public static final ModConfigSpec.IntValue TIER_3_MAX_BLOCKS;
+        // Trades Settings
+        public static final ModConfigSpec.IntValue VILLAGER_CARD_TRADE_LEVEL;
+        public static final ListConfigValue.Integer CARD_TRADE_PRICE;
 
-        /**
-         * This is a safe version of {@link COMMON#TIER_1_TIME} to use even if the config wasn't loaded.
-         */
-        public static final SafeConfig<Integer> TIER_1_TIME_SAFE;
-
-        /**
-         * This is a safe version of {@link COMMON#TIER_2_TIME} to use even if the config wasn't loaded.
-         */
-        public static final SafeConfig<Integer> TIER_2_TIME_SAFE;
-
-        /**
-         * This is a safe version of {@link COMMON#TIER_3_TIME} to use even if the config wasn't loaded.
-         */
-        public static final SafeConfig<Integer> TIER_3_TIME_SAFE;
-
-        public static final ModConfigSpec.IntValue TIER_1_TIME;
-        public static final ModConfigSpec.IntValue TIER_2_TIME;
-        public static final ModConfigSpec.IntValue TIER_3_TIME;
+        // Debugging Settings
         public static final ModConfigSpec.BooleanValue INELIGIBLE_BLOCKS_LOGGER;
         public static final ModConfigSpec.BooleanValue CHALLENGE_MANAGER_LOGGER;
         public static final ModConfigSpec.BooleanValue CHALLENGE_ACTIONS_LOGGER;
 
         static {
             BUILDER.push("General");
-            PLAYSTYLE_MODE = BUILDER
-                    .comment("%s: This is the current modern playstyle of the mod! With new features and exciting challenges.".formatted(PlaystyleMode.MODERN.name()),
-                            "%s [WIP]: There will be one tier for the Mining Skill Card. If you complete all the challenges, it will turn the card to the Mastered tier immediately.".formatted(PlaystyleMode.ONE_TIER_ONLY.name()),
-                            "%s: It will revert the mod mechanics as it was on the original release. (\"v0.1.0\") There will be only the miner certificate with one challenge to complete.".formatted(PlaystyleMode.LEGACY.name()))
-                    .defineEnum("playstyle_mode", PlaystyleMode.MODERN);
-
             BLACKLISTED_SHAPES = BUILDER
-                    .comment("Specifies the types of shapes that players are not allowed to use.",
-                            "Shapes IDs: %s".formatted(ShapeRegistryAccessor.getShapesList().stream().map(Shape::getName).toList()))
-                    .defineList("blacklisted_shapes",
-                            Collections.emptyList(),
-                            String::new,
+                    .comment("Defines a list of forbidden shape types for mining.",
+                            "Valid shape IDs: %s".formatted(ShapeRegistryAccessor.getShapesList().stream().map(Shape::getName).toList()))
+                    .defineList("blacklisted_shapes", Collections.emptyList(), String::new,
                             o -> o instanceof String s && ShapeRegistryAccessor.getShapesList().stream().map(Shape::getName).anyMatch(s1 -> s1.equals(s)));
 
-            PAPER_CONSUMPTION_RATE = BUILDER
-                    .comment("You can change the rate of paper consumption in the Skills Record.")
-                    .defineInRange("paper_consummation_rate", 0.35, 0, 1);
             IS_PLACED_BY_ENTITY_CONDITION = BUILDER
-                    .comment("This condition is when the block is placed by any entity... It will not count as a point toward the challenges.")
+                    .comment("If enabled, blocks placed by entities will not count towards challenges.",
+                            "This prevents exploiting challenges with entity-placed blocks.")
                     .define("is_placed_by_entity_condition", true);
-            CHALLENGE_VALIDATOR = BUILDER
-                    .comment("Here, You can change the time to validate the challenges in the mining skills card for fixing the corrupted data if present.",
-                            "It's formatted in seconds.")
+
+            CARD_VALIDATOR = BUILDER
+                    .comment("Sets the validation time (in seconds) for fixing corrupted Mining Skill Cards.",
+                            "Range: 1 ~ 600 seconds.")
                     .defineInRange("challenge_validator", 2, 1, 600);
             BUILDER.pop();
 
-            BUILDER.push("Trades");
-            CARD_TRADE_LEVEL = BUILDER
-                    .comment("Here, you can change which level the Mining Skill Card appears in villager trades.")
-                    .defineInRange("villager_card_trade_level", 2, 1, 5);
-            TRADE_LOW_PRICE = BUILDER
-                    .comment("It will change the Mining Skill Card cost in villager trades.")
-                    .defineInRange("trade_low_price", 8, 1, 64);
-            TRADE_HIGH_PRICE = BUILDER.defineInRange("trade_high_price", 24, 1, 64);
-            BUILDER.pop();
+            BUILDER.push("Gameplay");
+            PAPER_CONSUMPTION_RATE = BUILDER
+                    .comment("Adjusts the paper consumption rate in the Skills Record.",
+                            "Range: 0 (no consumption) to 1 (full consumption).")
+                    .defineInRange("paper_consummation_rate", 0.35, 0, 1);
 
-            BUILDER.push("Challenges");
-            LEGACY_REQUIRED_AMOUNT_MIN = BUILDER
-                    .comment("Here, you can change the value for the required amount of ores.",
-                            "NOTE: This values only matters if the playstyle is set on Legacy.")
-                    .defineInRange("legacy_required_amount_min", 400, 1, 999999);
-            LEGACY_REQUIRED_AMOUNT_MAX = BUILDER.defineInRange("legacy_required_amount_max", 400, 1, 999999);
-            TIER_0_CHALLENGES_AMOUNT = BUILDER
-                    .comment("You can change the values on how many challenges should be given in each tier.",
-                            "But remember that you must have the exact number of challenges available in the Datapack.",
-                            "Otherwise, it will make the game crash!")
-                    .defineInRange("tier_0_challenges_amount", 1, 1, 20);
-            TIER_1_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_1_challenges_amount", 2, 1, 20);
-            TIER_2_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_2_challenges_amount", 4, 1, 20);
-            TIER_3_CHALLENGES_AMOUNT = BUILDER.defineInRange("tier_3_challenges_amount", 5, 1, 20);
-            BUILDER.pop();
+            LEGACY_REQUIRED_AMOUNT = new ListConfigValue.Integer(2, 1, Integer.MAX_VALUE);
+            LEGACY_REQUIRED_AMOUNT.define(
+                    BUILDER,
+                    "legacy_required_amount",
+                    ImmutableList.of(1, 100),
+                    "Defines the required amount range for the miner certificate challenge.",
+                    "Only applicable if the playstyle mode is set to LEGACY."
+            );
 
-            BUILDER.push("Potions");
-            TIER_1_POTION_POINTS = BUILDER
-                    .comment("You can change the values on how many potion points should be given in each tier.")
-                    .defineInRange("tier_1_potion_points", 3, 0, 20);
-            TIER_2_POTION_POINTS = BUILDER.defineInRange("tier_2_potion_points", 2, 0, 20);
-            TIER_3_POTION_POINTS = BUILDER.defineInRange("tier_3_potion_points", 1, 0, 20);
-            BUILDER.pop();
+            CARD_CHALLENGES_AMOUNT = new ListConfigValue.EnumValue<>(4, MiningSkillCardItem.Tier.class, 1, 30);
+            CARD_CHALLENGES_AMOUNT.defineMap(
+                    BUILDER,
+                    "card_challenges_amount",
+                    Map.of(
+                            MiningSkillCardItem.Tier.Unlearned, 1,
+                            MiningSkillCardItem.Tier.Novice,2,
+                            MiningSkillCardItem.Tier.Apprentice,3,
+                            MiningSkillCardItem.Tier.Adept,4
+                    ),
+                    "Defines the number of challenges per tier.",
+                    "Each tier can have a different number of challenges.",
+                    "Range: 1 ~ 30"
+            );
 
-            BUILDER.push("Ability");
-            MASTERED_CARD_EFFECT = BUILDER
-                    .comment("If a Mining Skill Card reaches the \"mastered\" tier, it will give the player the ultimine ability for the exact tool the card has on.")
-                    .define("mastered_card_effect", true);
-            TIER_BASED_MAX_BLOCKS = BUILDER
-                    .comment("This makes the ultimine max blocks value different for every tier.")
+
+            CARD_POTION_POINTS = new ListConfigValue.EnumValue<>(3, MiningSkillCardItem.Tier.class, 1, 20);
+            CARD_POTION_POINTS.defineMap(
+                    BUILDER,
+                    "card_potion_points",
+                    Map.of(
+                            MiningSkillCardItem.Tier.Novice,3,
+                            MiningSkillCardItem.Tier.Apprentice,2,
+                            MiningSkillCardItem.Tier.Adept,1
+                    ),
+                    "Defines the potion points awarded per tier.",
+                    "Higher tiers may award fewer points.",
+                    "Range: 1 ~ 20"
+            );
+
+            CARD_POTION_DURATIONS = new ListConfigValue.EnumValue<>(3, MiningSkillCardItem.Tier.class, 60, 3600);
+            CARD_POTION_DURATIONS.defineMap(
+                    BUILDER.worldRestart(),
+                    "card_potion_durations",
+                    Map.of(
+                            MiningSkillCardItem.Tier.Novice,300,
+                            MiningSkillCardItem.Tier.Apprentice,600,
+                            MiningSkillCardItem.Tier.Adept,1200
+                    ),
+                    "Defines the duration (in seconds) of the Ultimine ability per tier.",
+                    "Range: 60 ~ 3600 seconds."
+            );
+
+            CARD_MASTERED_EFFECT = BUILDER
+                    .comment("If enabled, a Mastered Mining Skill Card grants the Ultimine ability for its corresponding tool.",
+                            "This provides a significant gameplay advantage.")
+                    .define("card_mastered_effect", true);
+
+            CARD_TIER_BASED_MAX_BLOCKS = BUILDER
+                    .comment("If enabled, the Ultimine max blocks value will vary based on the card tier.",
+                            "This adds a tier-based progression system.")
                     .define("tier_based_max_blocks", true);
 
-            TIER_1_MAX_BLOCKS = BUILDER
-                    .comment("You can change the ultimine max blocks value for each tier.")
-                    .defineInRange("tier_1_max_blocks", 8, 1, 64);
-            TIER_2_MAX_BLOCKS = BUILDER.defineInRange("tier_2_max_blocks", 16, 1, 64);
-            TIER_3_MAX_BLOCKS = BUILDER.defineInRange("tier_3_max_blocks", 32, 1, 64);
-
-            TIER_1_TIME = BUILDER
-                    .comment("You can change the ultimine ability time per tier.",
-                            "It's formatted in seconds.")
-                    .defineInRange("tier_1_time", 300, 60, 3600);
-            TIER_2_TIME = BUILDER.defineInRange("tier_2_time", 600, 60, 3600);
-            TIER_3_TIME = BUILDER.defineInRange("tier_3_time", 1200, 60, 3600);
+            CARD_TIER_MAX_BLOCKS = new ListConfigValue.EnumValue<>(3, MiningSkillCardItem.Tier.class, 1, 64);
+            CARD_TIER_MAX_BLOCKS.defineMap(
+                    BUILDER,
+                    "card_max_blocks",
+                    Map.of(
+                            MiningSkillCardItem.Tier.Novice,8,
+                            MiningSkillCardItem.Tier.Apprentice,16,
+                            MiningSkillCardItem.Tier.Adept,32
+                    ),
+                    "Defines the Ultimine max blocks value for each tier.",
+                    "Range: 1 ~ 64 blocks."
+            );
             BUILDER.pop();
 
-            BUILDER.push("Debug");
+            BUILDER.push("Trades");
+            VILLAGER_CARD_TRADE_LEVEL = BUILDER.worldRestart()
+                    .comment("Defines the required trade level for card trading with villagers.")
+                    .defineInRange("card_trade_level", 1, 1, 5);
+
+            CARD_TRADE_PRICE = new ListConfigValue.Integer(2, 1, 256);
+            CARD_TRADE_PRICE.define(
+                    BUILDER,
+                    "card_trade_price",
+                    ImmutableList.of(10, 100),
+                    "Defines the trade price range for Mining Skill Cards.",
+                    "Range: 1 ~ 256."
+            );
+            BUILDER.pop();
+
+            BUILDER.push("Debugging");
             INELIGIBLE_BLOCKS_LOGGER = BUILDER
-                    .comment("Enable or disable the IneligibleBlocks logger.")
-                    .define("ineligible_blocks_logger", false);
+                    .comment("Enables or disables logging of ineligible blocks for challenges.",
+                            "Useful for debugging challenge eligibility issues.")
+                    .define("ineligible_blocks_logger", true);
             CHALLENGE_MANAGER_LOGGER = BUILDER
-                    .comment("Enable or disable the ChallengeManager logger.")
-                    .define("challenge_manager_logger", false);
+                    .comment("Enables or disables logging for the Challenge Manager.",
+                            "Useful for tracking challenge progress and errors.")
+                    .define("challenge_manager_logger", true);
             CHALLENGE_ACTIONS_LOGGER = BUILDER
-                    .define("challenge_actions_logger", false);
+                    .comment("Enables or disables logging for challenge actions.",
+                            "Useful for debugging challenge-related events.")
+                    .define("challenge_actions_logger", true);
             BUILDER.pop();
             SPEC = BUILDER.build();
-
-            PLAYSTYLE_MODE_SAFE = SAFE_CONFIG_BUILDER.readEnum("General.playstyle_mode", PlaystyleMode.MODERN);
-            TIER_1_TIME_SAFE = SAFE_CONFIG_BUILDER.readInt("Ability.tier_1_time", 300);
-            TIER_2_TIME_SAFE = SAFE_CONFIG_BUILDER.readInt("Ability.tier_2_time", 600);
-            TIER_3_TIME_SAFE = SAFE_CONFIG_BUILDER.readInt("Ability.tier_3_time", 1200);
         }
     }
 }

@@ -6,9 +6,9 @@ import dev.ftb.mods.ftbultimine.FTBUltimine;
 import dev.ftb.mods.ftbultimine.FTBUltiminePlayerData;
 import dev.ftb.mods.ftbultimine.mixin.AxeItemAccess;
 import dev.ftb.mods.ftbultimine.mixin.ShovelItemAccess;
-import net.ixdarklord.ultimine_addition.common.event.ChallengeEvents;
-import net.ixdarklord.ultimine_addition.common.event.impl.ToolAction;
-import net.ixdarklord.ultimine_addition.common.event.impl.ToolActions;
+import net.ixdarklord.ultimine_addition.common.event.MSCEvents;
+import net.ixdarklord.ultimine_addition.util.ToolAction;
+import net.ixdarklord.ultimine_addition.util.ToolActions;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -93,7 +93,7 @@ abstract class FTBUltimineMixin {
                 }
 
                 for (BlockPos pos : blockPosList) {
-                    CompoundEventResult<BlockState> eventResult = ChallengeEvents.onBlockToolModificationEvent(originalState, finalState, context, toolAction, false);
+                    CompoundEventResult<BlockState> eventResult = MSCEvents.onBlockToolModificationEvent(originalState, finalState, context, toolAction, false);
                     if (eventResult.isPresent() && eventResult.object() != null) {
                         level.setBlockAndUpdate(pos, eventResult.object());
                     }

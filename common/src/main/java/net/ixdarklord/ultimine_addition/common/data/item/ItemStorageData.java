@@ -73,7 +73,7 @@ public class ItemStorageData extends DataHandler<ItemStorageData, ItemStack> {
         return this.capacity;
     }
 
-    public ItemStorageData fullCapacity() {
+    public ItemStorageData setToFullCapacity() {
         this.capacity = this.maxCapacity;
         return this;
     }

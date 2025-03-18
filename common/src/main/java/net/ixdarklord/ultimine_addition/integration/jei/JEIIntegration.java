@@ -4,6 +4,7 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.*;
+import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
@@ -13,8 +14,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 @JeiPlugin
 public class JEIIntegration implements IModPlugin {
@@ -26,8 +27,8 @@ public class JEIIntegration implements IModPlugin {
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
-        registration.registerSubtypeInterpreter(ModItems.PEN, new PenInterpreter());
         MiningSkillsCardInterpreter.init(registration);
+        registration.registerSubtypeInterpreter(ModItems.PEN, new PenInterpreter());
     }
 
     @Override
@@ -42,15 +43,29 @@ public class JEIIntegration implements IModPlugin {
 
     @Override
     public void registerRecipes(@NotNull IRecipeRegistration registration) {
+        registration.addRecipes(RecipeTypes.CRAFTING, ItemStorageDataRecipeCategory.getAdjustedCraftingRecipe());
         registration.addRecipes(ItemStorageDataRecipeCategory.RECIPE_TYPE, ItemStorageDataRecipeCategory.getItemStorageDataRecipes());
-        List<ItemStack> cards = Stream.of(ModItems.MINING_SKILL_CARD_PICKAXE, ModItems.MINING_SKILL_CARD_AXE, ModItems.MINING_SKILL_CARD_SHOVEL, ModItems.MINING_SKILL_CARD_HOE).map(item -> {
-            ItemStack stack = item.getDefaultInstance();
-            item.getData(stack).setTier(MiningSkillCardItem.Tier.Mastered).saveData(stack);
-            return stack;
-        }).toList();
 
-        registration.addItemStackInfo(cards, Component.translatable("jei.ultimine_addition.info.cards.grade_up"));
-        registration.addItemStackInfo(ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), Component.translatable("jei.ultimine_addition.info.cards.obtain", ConfigHandler.COMMON.CARD_TRADE_LEVEL.get()));
+        final List<MiningSkillCardItem> skillCardItems = List.of(
+                ModItems.MINING_SKILL_CARD_PICKAXE,
+                ModItems.MINING_SKILL_CARD_AXE,
+                ModItems.MINING_SKILL_CARD_SHOVEL,
+                ModItems.MINING_SKILL_CARD_HOE
+        );
+
+        final List<ItemStack> allCards = skillCardItems.stream()
+                .flatMap(item -> Arrays.stream(MiningSkillCardItem.Tier.values())
+                        .filter(tier -> tier != MiningSkillCardItem.Tier.Mastered)
+                        .map(tier -> MiningSkillCardData.createForCreativeTab(item, tier))
+                ).toList();
+
+        final List<ItemStack> masteredCards = skillCardItems.stream()
+                .map(item -> MiningSkillCardData.createForCreativeTab(item, MiningSkillCardItem.Tier.Mastered))
+                .toList();
+
+        registration.addItemStackInfo(allCards, Component.translatable("jei.ultimine_addition.info.cards.grade_up"));
+        registration.addItemStackInfo(masteredCards, Component.translatable("jei.ultimine_addition.info.cards.mastered"));
+        registration.addItemStackInfo(ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), Component.translatable("jei.ultimine_addition.info.cards.obtain", ConfigHandler.SERVER.VILLAGER_CARD_TRADE_LEVEL.get()));
     }
 
     @Override

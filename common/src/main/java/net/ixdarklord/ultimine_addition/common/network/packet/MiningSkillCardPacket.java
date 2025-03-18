@@ -1,59 +1,60 @@
 package net.ixdarklord.ultimine_addition.common.network.packet;
 
 import dev.architectury.networking.NetworkManager;
-import net.ixdarklord.coolcatlib.api.util.InventoryHelper;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
-import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
-import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
-import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.BrewingStandMenu;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-public record MiningSkillCardPacket(MiningSkillCardData data, ItemStack stack) implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<MiningSkillCardPacket> TYPE = new CustomPacketPayload.Type<>(UltimineAddition.getLocation("mining_skill_card_sync_s2c"));
+public record MiningSkillCardPacket(int slotIndex, MiningSkillCardData data) implements CustomPacketPayload {
+    public static final Type<MiningSkillCardPacket> TYPE = new Type<>(UltimineAddition.getLocation("mining_skill_card_sync_s2c"));
     public static final StreamCodec<RegistryFriendlyByteBuf, MiningSkillCardPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT, MiningSkillCardPacket::slotIndex,
             MiningSkillCardData.STREAM_CODEC, MiningSkillCardPacket::data,
-            ItemStack.STREAM_CODEC, MiningSkillCardPacket::stack,
             MiningSkillCardPacket::new
     );
 
     public static void handle(MiningSkillCardPacket message, NetworkManager.PacketContext context) {
         context.queue(() -> {
-            try {
-                Player player = context.getPlayer();
-                List<ItemStack> stacks = new ArrayList<>(InventoryHelper.listMatchingItem(player.getInventory(), message.stack.getItem()));
-                stacks.addAll(ItemUtils.listMatchingItem(player, Registration.SKILLS_RECORD.get()).stream()
-                        .map(stack -> SkillsRecordData.loadData(stack).getContainer().getItems())
-                        .flatMap(Collection::stream)
-                        .toList());
+            Player player = context.getPlayer();
+            ItemStack stack = player.getSlot(message.slotIndex).get();
+            if (stack.isEmpty())
+                throw new IllegalArgumentException("The assigned slot index does not contain the mining skill card item!");
 
-                for (ItemStack stack : stacks) {
-                    var data1 = message.stack.get(MiningSkillCardData.DATA_COMPONENT);
-                    var data2 = stack.get(MiningSkillCardData.DATA_COMPONENT);
-                    if (data1 == null) break;
-
-                    if (data2 != null && data1.getUUID().equals(data2.getUUID())) {
-                        message.data.setDataHolder(stack).clientUpdate().saveData(stack);
-                        break;
-                    }
-                }
-            } catch (Exception err) {
-                UltimineAddition.LOGGER.error("Error occurred in the payload!", err);
-            }
+            message.data.setDataHolder(stack).clientUpdate().saveData(stack);
         });
     }
 
     @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {
         return TYPE;
+    }
+
+    public record SyncBrewing(ItemStack stack) implements CustomPacketPayload {
+        public static final Type<SyncBrewing> TYPE = new Type<>(UltimineAddition.getLocation("mining_skill_card_sync_brewing"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, SyncBrewing> STREAM_CODEC = StreamCodec.composite(
+                ItemStack.STREAM_CODEC, SyncBrewing::stack,
+                SyncBrewing::new
+        );
+
+        @Override
+        public @NotNull Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SyncBrewing message, NetworkManager.PacketContext context) {
+            context.queue(() -> {
+                Player player = context.getPlayer();
+                if (player.containerMenu instanceof BrewingStandMenu standMenu) {
+                    standMenu.setItem(3, 0, message.stack.copy());
+                }
+            });
+        }
     }
 }

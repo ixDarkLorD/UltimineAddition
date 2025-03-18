@@ -1,19 +1,26 @@
 package net.ixdarklord.ultimine_addition.util;
 
-import net.ixdarklord.coolcatlib.api.util.InventoryHelper;
-import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
+import net.ixdarklord.coolcatlib.api.util.SlotReference;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
-import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.SlotRange;
+import net.minecraft.world.inventory.SlotRanges;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 public class ItemUtils {
     public record ItemSorter(ItemStack item, int slotId, int order){}
@@ -30,41 +37,63 @@ public class ItemUtils {
     }
 
     public static ItemStack findItemInHand(Player player, Item item) {
-        ItemStack stack = player.getMainHandItem();
+        ItemStack stack = ServicePlatform.get().slotAPI().isModLoaded()
+                ? ServicePlatform.get().slotAPI().getSkillsRecordItem(player)
+                : player.getMainHandItem();
         if (stack.getItem() != item) stack = player.getOffhandItem();
-        if (ServicePlatform.SlotAPI.isModLoaded() && stack.getItem() != item)
-            stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
 
         if (stack.getItem() == item) return stack;
         return ItemStack.EMPTY;
     }
 
-    public static List<ItemStack> listMatchingItem(Player player, Item item) {
-        List<ItemStack> result = new ArrayList<>();
-        if (ServicePlatform.SlotAPI.isModLoaded()) {
-            ItemStack stack = ServicePlatform.SlotAPI.getSkillsRecordItem(player);
-            if (!stack.isEmpty() && stack.is(item)) result.add(stack);
+    public static int getSlotIndex(@Nullable InteractionHand hand) {
+        int index = -1;
+        switch (hand) {
+            case MAIN_HAND -> index = Objects.requireNonNull(SlotRanges.nameToIds("weapon.mainhand")).slots().getFirst();
+            case OFF_HAND -> index = Objects.requireNonNull(SlotRanges.nameToIds("weapon.offhand")).slots().getFirst();
+            case null -> {}
         }
-        result.addAll(InventoryHelper.listMatchingItem(player.getInventory(), item));
+        return index;
+    }
+
+    public static List<SlotReference.Player> getSlotReferences(Player player, Item item) {
+        return getSlotReferences(player, itemStack -> itemStack.is(item));
+    }
+
+    public static List<SlotReference.Player> getSlotReferences(Player player, Predicate<ItemStack> predicate) {
+        List<SlotReference.Player> result = new ArrayList<>();
+        for (String slotName : SlotRanges.singleSlotNames().toList()) {
+            SlotRange slotRange = SlotRanges.nameToIds(slotName);
+            if (slotRange == null) continue;
+            Integer slot = slotRange.slots().getFirst();
+            if (predicate.test(player.getSlot(slot).get())) {
+                result.add(new SlotReference.Player(player, slot));
+            }
+        }
+        if (ServicePlatform.get().slotAPI().isModLoaded()) {
+            ItemStack stack = ServicePlatform.get().slotAPI().getSkillsRecordItem(player);
+            if (predicate.test(stack)) result.add(new SlotReference.Player(null, -1) {
+                @Override
+                public @NotNull ItemStack getItem() {
+                    return ServicePlatform.get().slotAPI().getSkillsRecordItem(player);
+                }
+
+                @Override
+                public boolean setItem(ItemStack item) {
+                    throw new UnsupportedOperationException("You can't set an item in the %s slot.".formatted(ServicePlatform.get().slotAPI().getAPIName()));
+                }
+            });
+        }
         return result;
     }
 
-    public static ItemStack findMatchSkillsRecord(Player player, SkillsRecordData data) {
-        List<ItemStack> stacks = listMatchingItem(player, Registration.SKILLS_RECORD.get());
-        for (ItemStack stack : stacks) {
-            if (Objects.equals(SkillsRecordData.loadData(stack).getUUID(), data.getUUID()))
-                return stack;
-        }
-        return ItemStack.EMPTY;
-    }
-
     public static boolean checkTargetedBlock(Player player) {
-        HitResult hit = player.pick(ServicePlatform.Players.getReachAttribute(player), 1.0F, false);
+        HitResult hit = player.pick(ServicePlatform.get().players().getReachAttribute(player), 1.0F, false);
         if (!(hit instanceof BlockHitResult hitResult)) return false;
 
         BlockState blockState = player.level().getBlockState(hitResult.getBlockPos());
         ItemStack tool = player.getItemInHand(player.getUsedItemHand());
-        return ServicePlatform.Players.isCorrectToolForBlock(tool, blockState);
+        return ServicePlatform.get().players().isCorrectToolForBlock(tool, blockState);
     }
 
     public static boolean isItemInHandNotTools(Player player) {
@@ -99,6 +128,6 @@ public class ItemUtils {
 
     public static boolean isItemInHandPaxel(Player player) {
         ItemStack stack = getItemInHand(player, true);
-        return ServicePlatform.Players.isToolPaxel(stack);
+        return ServicePlatform.get().players().isToolPaxel(stack);
     }
 }

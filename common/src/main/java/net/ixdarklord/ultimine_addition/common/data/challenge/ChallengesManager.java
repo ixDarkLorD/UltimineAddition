@@ -45,10 +45,8 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
         challenges.clear();
         object.forEach((location, json) -> {
             AtomicReference<ChallengesData> challenge = new AtomicReference<>();
-            challenge.set(ChallengesData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(err -> {
-                LOGGER.error("There is an issue with ({}) challenge JSON file.", location.toString());
-                return new IllegalStateException(err);
-            }));
+            challenge.set(ChallengesData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(err ->
+                    new IllegalStateException("There is an issue with (%s) challenge JSON file.\n".formatted(location.toString()) + err)));
             if (challenge.get().getChallengeType() == ChallengesData.Type.INTERACT_WITH_BLOCK || challenge.get().getChallengeType() == ChallengesData.Type.INTERACT_WITH_BLOCK_CONSUME) {
                 LOGGER.warn("This challenge type ({}) you choose in ({}) isn't stable! You may have to change the type until a new update comes to fix it.", challenge.get().getChallengeType().getTypeName(), location.toString());
             }
@@ -59,8 +57,7 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
     public Map<ResourceLocation, ChallengesData> getRandomChallenges(int quantity, MiningSkillCardItem.Type type, MiningSkillCardItem.Tier tier) {
         if (quantity > challenges.values().stream().filter(data -> (data.getForCardType().equals(type) && data.getForCardTier().isEligible(tier))).toList().size()) {
             String error = String.format("There aren't enough %s %s challenges for tier %s to add it to Mining Skill Card.", quantity, type.getId().toLowerCase(), tier.name().toLowerCase());
-            LOGGER.error(error);
-            return new HashMap<>();
+            throw new IllegalArgumentException(error);
         }
 
         Map<ResourceLocation, ChallengesData> randomValues = new HashMap<>();
@@ -73,9 +70,11 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
                 randomValues.put(randomKey, challenges.get(randomKey));
             }
         }
-        if (ConfigHandler.COMMON.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
-            LOGGER.info("Added Challenges:");
-            randomValues.forEach((location, data) -> LOGGER.info("id: {}", location));
+        if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
+            ChallengesManager.LOGGER.debug("/----------[Challenge Tracker]----------/");
+            LOGGER.debug("| Added Challenges...");
+            randomValues.forEach((location, data) -> LOGGER.debug("|> ID: {}", location));
+            ChallengesManager.LOGGER.debug("/----------------------------------------/");
         }
         return randomValues;
     }

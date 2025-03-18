@@ -5,48 +5,35 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class ServicePlatform {
+public interface ServicePlatform {
     @ExpectPlatform
-    public static void registerConfig() {
-        throw new AssertionError();
+    static ServicePlatform get() {
+        throw new UnsupportedOperationException("This method has not been implemented in the loader.");
     }
 
-    public static class SlotAPI {
-        @ExpectPlatform
-        public static boolean isModLoaded() {
-            throw new AssertionError();
-        }
+    void registerConfig();
 
-        @ExpectPlatform
-        public static ItemStack getSkillsRecordItem(Player player) {
-            return ItemStack.EMPTY;
-        }
+    SlotAPI slotAPI();
+
+    Players players();
+
+    interface SlotAPI {
+        String getAPIName();
+
+        boolean isModLoaded();
+
+        ItemStack getSkillsRecordItem(Player player);
     }
 
-    public static class Players {
-        @ExpectPlatform
-        public static boolean isPlayerUltimineCapable(Player player) {
-            throw new AssertionError();
-        }
+    interface Players {
+        boolean isPlayerUltimineCapable(Player player);
 
-        @ExpectPlatform
-        public static void setPlayerUltimineCapability(Player player, boolean state) {
-            throw new AssertionError();
-        }
+        void setPlayerUltimineCapability(Player player, boolean state);
 
-        @ExpectPlatform
-        public static double getReachAttribute(Player player) {
-            throw new AssertionError();
-        }
+        double getReachAttribute(Player player);
 
-        @ExpectPlatform
-        public static boolean isCorrectToolForBlock(ItemStack stack, BlockState blockState) {
-            throw new AssertionError();
-        }
+        boolean isCorrectToolForBlock(ItemStack stack, BlockState blockState);
 
-        @ExpectPlatform
-        public static boolean isToolPaxel(ItemStack stack) {
-            throw new AssertionError();
-        }
+        boolean isToolPaxel(ItemStack stack);
     }
 }

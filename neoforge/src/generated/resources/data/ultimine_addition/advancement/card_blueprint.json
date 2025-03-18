@@ -1,0 +1,60 @@
+{
+  "parent": "ultimine_addition:gathering_amethyst",
+  "criteria": {
+    "amethyst_adv": {
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type_specific": {
+                "type": "minecraft:player",
+                "advancements": {
+                  "ultimine_addition:gathering_amethyst": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:tick"
+    },
+    "has_card_blueprint": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ultimine_addition:card_blueprint"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.craft",
+      "with": [
+        {
+          "translate": "item.ultimine_addition.card_blueprint"
+        }
+      ]
+    },
+    "icon": {
+      "count": 1,
+      "id": "ultimine_addition:card_blueprint"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.craft.card.blueprint"
+    }
+  },
+  "requirements": [
+    [
+      "amethyst_adv"
+    ],
+    [
+      "has_card_blueprint"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

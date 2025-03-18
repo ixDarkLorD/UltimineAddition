@@ -1,0 +1,43 @@
+{
+  "criteria": {
+    "has_early_items": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#minecraft:logs"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "killed_by_something": {
+      "trigger": "minecraft:entity_killed_player"
+    },
+    "killed_something": {
+      "trigger": "minecraft:player_killed_entity"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "ultimine_addition:textures/gui/adv_background.png",
+    "description": {
+      "translate": "advancement.ultimine_addition.root.desc"
+    },
+    "icon": {
+      "count": 1,
+      "id": "ultimine_addition:miner_certificate"
+    },
+    "show_toast": false,
+    "title": {
+      "translate": "itemGroup.ultimine_addition.tab"
+    }
+  },
+  "requirements": [
+    [
+      "has_early_items",
+      "killed_by_something",
+      "killed_something"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

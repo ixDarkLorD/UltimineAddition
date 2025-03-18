@@ -3,8 +3,8 @@ package net.ixdarklord.ultimine_addition.client.gui.components.skills_record;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
+import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.AbstractDraggableWidget;
 import net.ixdarklord.coolcatlib.api.util.ColorUtils;
-import net.ixdarklord.ultimine_addition.client.gui.components.AbstractDraggableWidget;
 import net.ixdarklord.ultimine_addition.client.gui.screens.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.gui.tooltip.SkillsRecordTooltip;
@@ -15,7 +15,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
@@ -36,8 +35,7 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 public class ConfigurationPanel extends AbstractDraggableWidget {
     private static final ResourceLocation BACKGROUND_LOCATION = UltimineAddition.getLocation("container/skills_record/configuration/background");
-    private static final WidgetSprites VALUE_BUTTON_SPRITES = new WidgetSprites(UltimineAddition.getLocation("container/skills_record/configuration/value_button_enabled"), UltimineAddition.getLocation("container/skills_record/configuration/value_button_disabled"), UltimineAddition.getLocation("container/skills_record/configuration/value_button_focused"));
-    private static final int BUTTON_WIDTH = 100;
+    private static final int BUTTON_WIDTH = 45;
     private static final int BUTTON_HEIGHT = 14;
     private SkillsRecordScreen.BGColor backgroundColor;
     private boolean isAnimationsEnabled;
@@ -50,7 +48,11 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
     private ColorableImageButton challengesPanelSizeButton;
 
     public ConfigurationPanel(int x, int y) {
-        super(Component.translatable("gui.ultimine_addition.skills_record.configuration").withColor(new Color(0xFAF1C1).getRGB()), x, y, 118, 108, true);
+        super(Component.translatable("gui.ultimine_addition.skills_record.configuration").withStyle(ChatFormatting.GRAY),
+                x, y,
+                BUTTON_WIDTH + 18, 102,
+                true
+        );
         this.visible = false;
         this.blitOffset = ItemRenderer.ITEM_COUNT_BLIT_OFFSET + 400F;
         this.backgroundColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
@@ -87,7 +89,7 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
             this.saveValuesToConfig();
         }, Component.translatable("gui.ultimine_addition.skills_record.option.panel_pos"));
 
-        this.challengesPanelSizeButton = this.addButton(linearLayout, (button) -> {}, Component.translatable("gui.ultimine_addition.skills_record.option.panel_size"));
+//        this.challengesPanelSizeButton = this.addButton(linearLayout, (button) -> {}, Component.translatable("gui.ultimine_addition.skills_record.option.panel_size"));
 
         for (AbstractButton button : this.getButtons()) {
             button.setWidth(BUTTON_WIDTH + this.getWidthSpacing());
@@ -98,9 +100,8 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
     protected void updateChildren() {
         super.updateChildren();
         this.title.setPosition(this.x + 9, this.y + 16);
-        this.title.setSize(100 + this.getWidthSpacing(), 11);
+        this.title.setSize(BUTTON_WIDTH + 2 + this.getWidthSpacing(), 11);
         this.title.alignCenter();
-        this.challengesPanelSizeButton.active = false;
 
         for (AbstractButton button : this.getButtons()) {
             if (button instanceof ColorableImageButton imageButton)
@@ -175,7 +176,7 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
     }
 
     private ColorableImageButton addButton(LinearLayout layout, Button.OnPress onPress, Component message) {
-        ColorableImageButton button = new ColorableImageButton(this.x, this.y + BUTTON_HEIGHT * getButtons().size(), BUTTON_WIDTH, BUTTON_HEIGHT, VALUE_BUTTON_SPRITES, onPress, message) {
+        ColorableImageButton button = new ColorableImageButton(this.x, this.y + BUTTON_HEIGHT * getButtons().size(), BUTTON_WIDTH, BUTTON_HEIGHT, SkillsRecordScreen.BUTTON_SPRITES, onPress, message) {
             @Override
             public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
                 super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
@@ -211,12 +212,12 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
 
     @Override
     public @NotNull ScreenRectangle getDraggingRectangle() {
-        return new ScreenRectangle(this.x + 8, this.y + 5, 102 + this.getWidthSpacing(), 7);
+        return new ScreenRectangle(this.getRectangle().position().x() + 8, this.getRectangle().position().y() + 5, this.getRectangle().width() - 16, 7);
     }
 
     @Override
     protected @NotNull ScreenRectangle layoutRectangle() {
-        return new ScreenRectangle(this.x + 9, this.y + 27, 100 + this.getWidthSpacing(), 72 + this.getHeightSpacing());
+        return new ScreenRectangle(this.getRectangle().position().x() + 9, this.getRectangle().position().y() + 27, this.getRectangle().width() - 18, this.getRectangle().height() - 36);
     }
 
     @Override

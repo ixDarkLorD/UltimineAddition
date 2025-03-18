@@ -1,0 +1,60 @@
+{
+  "parent": "ultimine_addition:slime_balls",
+  "criteria": {
+    "has_pen": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ultimine_addition:pen"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "slime_adv": {
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type_specific": {
+                "type": "minecraft:player",
+                "advancements": {
+                  "ultimine_addition:slime_balls": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:tick"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.craft",
+      "with": [
+        {
+          "translate": "item.ultimine_addition.pen"
+        }
+      ]
+    },
+    "icon": {
+      "count": 1,
+      "id": "ultimine_addition:pen"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.craft.pen"
+    }
+  },
+  "requirements": [
+    [
+      "slime_adv"
+    ],
+    [
+      "has_pen"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

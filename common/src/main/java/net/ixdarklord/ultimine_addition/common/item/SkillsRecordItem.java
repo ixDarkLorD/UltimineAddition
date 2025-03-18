@@ -10,7 +10,6 @@ import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,7 +33,6 @@ import java.util.stream.Stream;
 
 public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
     public static final Component TITLE = Component.translatable("item.ultimine_addition.skills_record");
-    public static final int CONTAINER_SIZE = 6;
     public SkillsRecordItem(Properties properties) {
         super(properties, ComponentType.TOOLS);
     }
@@ -53,13 +51,13 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
             return new InteractionResultHolder<>(InteractionResult.PASS, stack);
         }
 
-        Optional<InteractionHand> interactionHand = Optional.of(usedHand);
         if (stack.has(SkillsRecordData.DATA_COMPONENT)) {
             MenuRegistry.openExtendedMenu((ServerPlayer) player,
-                    new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, stack, interactionHand), TITLE),
+                    new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, stack, usedHand), TITLE),
                     buf -> {
                         ItemStack.STREAM_CODEC.encode(new RegistryFriendlyByteBuf(buf, ((ServerPlayer) player).serverLevel().registryAccess()), stack);
-                        buf.writeOptional(interactionHand, FriendlyByteBuf::writeEnum);
+                        buf.writeBoolean(true);
+                        buf.writeEnum(usedHand);
             });
         }
 

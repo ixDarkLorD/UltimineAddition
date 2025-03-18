@@ -31,17 +31,17 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
         if (level.isClientSide()) {
-            if (ServicePlatform.Players.isPlayerUltimineCapable(player))
+            if (ServicePlatform.get().players().isPlayerUltimineCapable(player))
                 level.playLocalSound(player, SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
 
             return InteractionResultHolder.pass(stack);
         }
-        if (!ServicePlatform.Players.isPlayerUltimineCapable(player)) {
+        if (!ServicePlatform.get().players().isPlayerUltimineCapable(player)) {
             if (isAccomplished(stack)) {
                 this.playParticleAndSound(player);
                 Registration.ULTIMINE_OBTAIN_TRIGGER.get().trigger((ServerPlayer) player);
                 getData(stack).playCelebration(true).sendClientMessage(player).sendToClient((ServerPlayer) player).saveData(stack);
-                ServicePlatform.Players.setPlayerUltimineCapability(player, true);
+                ServicePlatform.get().players().setPlayerUltimineCapability(player, true);
                 if (!player.isCreative()) stack.shrink(1);
                 return InteractionResultHolder.success(stack);
             }

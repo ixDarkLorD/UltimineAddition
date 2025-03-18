@@ -1,0 +1,37 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "ultimine_addition:legacy_mode",
+      "value": false
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "ultimine_addition",
+  "key": {
+    "B": {
+      "item": "minecraft:blue_dye"
+    },
+    "G": {
+      "item": "minecraft:green_dye"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "minecraft:red_dye"
+    }
+  },
+  "pattern": [
+    "INI",
+    "RGB",
+    "INI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ultimine_addition:ink_chamber"
+  }
+}

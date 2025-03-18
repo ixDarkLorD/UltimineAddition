@@ -17,6 +17,7 @@ import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
 import net.ixdarklord.ultimine_addition.common.network.packet.SkillsRecordPacket;
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -31,6 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -56,7 +58,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     private final Map<Integer, List<ResourceLocation>> pinnedChallenges = new TreeMap<>();
 
     private SkillsRecordData() {
-        this(UUID.randomUUID(), new SimpleContainer(SkillsRecordItem.CONTAINER_SIZE), -1, false);
+        this(UUID.randomUUID(), new SimpleContainer(SkillsRecordMenu.CONTAINER_SIZE), -1, false);
     }
 
     private SkillsRecordData(UUID uuid, SimpleContainer container, int selectedCard, boolean consumeMode) {
@@ -149,11 +151,11 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                     boolean isCorrectAction = challengeData.getChallengeType().equals(challengeType) || challengeData.getChallengeType().equals(challengeType.getConsumeVersion());
                     boolean isValidBlock = blocks.contains(state.getBlock());
                     boolean isCorrectTool = !hasCorrectGamemode || ChallengesManager.INSTANCE.isCorrectTool(player, challengeData);
-                    boolean isBlockPlacedByEntity = ConfigHandler.COMMON.IS_PLACED_BY_ENTITY_CONDITION.get() && hasCorrectGamemode && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY) && savedData.isBlockPlacedByEntity(pos);
+                    boolean isBlockPlacedByEntity = ConfigHandler.SERVER.IS_PLACED_BY_ENTITY_CONDITION.get() && hasCorrectGamemode && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY) && savedData.isBlockPlacedByEntity(pos);
 
-                    if (ConfigHandler.COMMON.CHALLENGE_ACTIONS_LOGGER.get()) {
-                        ChallengesManager.LOGGER.debug("/===========================================/");
-                        ChallengesManager.LOGGER.debug("Challenge: {}", identifier.getId());
+                    if (ConfigHandler.SERVER.CHALLENGE_ACTIONS_LOGGER.get()) {
+                        ChallengesManager.LOGGER.debug("/----------[Challenge Tracker]----------/");
+                        ChallengesManager.LOGGER.debug("Challenge Id: {}", identifier.getId());
                         ChallengesManager.LOGGER.debug("hasCorrectGamemode: {}", hasCorrectGamemode);
                         ChallengesManager.LOGGER.debug("isMissingRequiredItems: {}", isMissingRequiredItems);
                         ChallengesManager.LOGGER.debug("notEnoughInk: {}", notEnoughInk);
@@ -162,7 +164,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                         ChallengesManager.LOGGER.debug("isValidBlock: {}", isValidBlock);
                         ChallengesManager.LOGGER.debug("isCorrectTool: {}", isCorrectTool);
                         ChallengesManager.LOGGER.debug("isBlockPlacedByEntity: {}", isBlockPlacedByEntity);
-                        ChallengesManager.LOGGER.debug("/===========================================/");
+                        ChallengesManager.LOGGER.debug("/----------------------------------------/");
                     }
 
                     if (!isMissingRequiredItems && !notEnoughInk && !isChallengeAccomplished && isCorrectAction && isValidBlock && isCorrectTool && isBlockPlacedByEntity) {
@@ -182,13 +184,13 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                     if (!isMissingRequiredItems && !notEnoughInk && !isChallengeAccomplished && isCorrectAction && isValidBlock && isCorrectTool && !isBlockPlacedByEntity) {
                         if (challengeData.getChallengeType().isConsuming()) {
                             if (consumeMode) {
-                                cardData.addAmount(identifier.getId(), 1).sendToClient(player).saveData(stack);
+                                cardData.addAmount(identifier.getId(), 1).saveData(stack);
                                 if (hasCorrectGamemode) consumeContents();
                                 isConsumed.set(Pair.of(true, true));
                                 player.level().removeBlock(pos, false);
                             }
                         } else {
-                            cardData.addAmount(identifier.getId(), 1).sendToClient(player).saveData(stack);
+                            cardData.addAmount(identifier.getId(), 1).saveData(stack);
                             if (hasCorrectGamemode) consumeContents();
                             isConsumed.set(Pair.of(true, false));
                         }
@@ -201,7 +203,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     }
 
     @Environment(EnvType.CLIENT)
-    public SkillsRecordData togglePinned(int slot, ResourceLocation challengeId) {
+    public SkillsRecordData togglePinned(int slot, ResourceLocation challengeId, SkillsRecordMenu menu) {
         if (this.pinnedChallenges.containsKey(slot)) {
             if (!this.pinnedChallenges.get(slot).contains(challengeId)) {
                 this.pinnedChallenges.get(slot).add(challengeId);
@@ -214,8 +216,13 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         if (challengeData.isPresent()) {
             challengeData.get().togglePinned();
             data.saveData(itemStack);
+            if (menu.interactionHand == InteractionHand.OFF_HAND) {
+                ItemStack itemStack1 = this.get().copy();
+                this.saveData(itemStack1);
+                menu.getPlayer().getInventory().offhand.set(0, itemStack1);
+            }
         }
-        return sendToServer();
+        return sendToServer(menu.interactionHand);
     }
 
     private void consumeContents() {
@@ -226,7 +233,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
             item.getData(pen).removeAmount(1).saveData(pen);
         }
         if (paper.getItem() == Items.PAPER) {
-            boolean chance = ThreadLocalRandom.current().nextDouble() < ConfigHandler.COMMON.PAPER_CONSUMPTION_RATE.get();
+            boolean chance = ThreadLocalRandom.current().nextDouble() < ConfigHandler.SERVER.PAPER_CONSUMPTION_RATE.get();
             paper.shrink(chance ? 1 : 0);
         }
     }
@@ -269,11 +276,11 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     }
 
     public SkillsRecordData insertContainer(Container container) {
-        if (container.getContainerSize() != SkillsRecordItem.CONTAINER_SIZE)
+        if (container.getContainerSize() != SkillsRecordMenu.CONTAINER_SIZE)
             throw new IllegalArgumentException("You have inserted a container of size other than %s! (Inserted Container Size: %s)"
-                    .formatted(SkillsRecordItem.CONTAINER_SIZE, container.getContainerSize()));
+                    .formatted(SkillsRecordMenu.CONTAINER_SIZE, container.getContainerSize()));
 
-        NonNullList<ItemStack> stacks = NonNullList.withSize(SkillsRecordItem.CONTAINER_SIZE, ItemStack.EMPTY);
+        NonNullList<ItemStack> stacks = NonNullList.withSize(SkillsRecordMenu.CONTAINER_SIZE, ItemStack.EMPTY);
         for (int i = 0; i < container.getContainerSize(); i++) {
             stacks.set(i, container.getItem(i));
         }
@@ -291,13 +298,21 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         return this;
     }
 
-    public SkillsRecordData sendToClient(ServerPlayer player) {
-        PacketHandler.sendToPlayer(new SkillsRecordPacket.SyncData(Env.CLIENT, this), player);
+    public SkillsRecordData sendToClient(ServerPlayer player, @Nullable InteractionHand hand) {
+        return sendToClient(player, ItemUtils.getSlotIndex(hand));
+    }
+
+    public SkillsRecordData sendToClient(ServerPlayer player, int slotIndex) {
+        PacketHandler.sendToPlayer(new SkillsRecordPacket.SyncData(Env.CLIENT, slotIndex, this), player);
         return this;
     }
 
-    public SkillsRecordData sendToServer() {
-        PacketHandler.sendToServer(new SkillsRecordPacket.SyncData(Env.SERVER, this));
+    public SkillsRecordData sendToServer(@Nullable InteractionHand hand) {
+        return sendToServer(ItemUtils.getSlotIndex(hand));
+    }
+
+    public SkillsRecordData sendToServer(int slotIndex) {
+        PacketHandler.sendToServer(new SkillsRecordPacket.SyncData(Env.SERVER, slotIndex, this));
         return this;
     }
 

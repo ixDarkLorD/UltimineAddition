@@ -96,13 +96,13 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
 
     public void tick(ServerPlayer player) {
         if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY && this.legacy.isEmpty()) {
-            int min = ConfigHandler.COMMON.LEGACY_REQUIRED_AMOUNT_MIN.get();
-            int max = ConfigHandler.COMMON.LEGACY_REQUIRED_AMOUNT_MAX.get();
+            int min = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getValue().getFirst();
+            int max = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getValue().getLast();
             this.legacy = Optional.of(new Legacy(RandomSource.create().nextIntBetweenInclusive(min, max)));
             this.saveData(this.get());
         }
 
-        if (ServicePlatform.Players.isPlayerUltimineCapable(player)) return;
+        if (ServicePlatform.get().players().isPlayerUltimineCapable(player)) return;
         if (this.legacy.isPresent()) {
             if (!this.isAccomplished && this.legacy.get().getMinedBlocks() == this.legacy.get().getRequiredAmount()) {
                 this.completeSound(true).setAccomplished(true).sendToClient(player).saveData(this.get());
@@ -148,7 +148,7 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
 
 
     public MinerCertificateData sendClientMessage(Player player) {
-        if (!ServicePlatform.Players.isPlayerUltimineCapable(player))
+        if (!ServicePlatform.get().players().isPlayerUltimineCapable(player))
             player.displayClientMessage(Component.translatable("info.ultimine_addition.obtain").withStyle(ChatFormatting.GOLD), true);
         else
             player.displayClientMessage(Component.translatable("info.ultimine_addition.obtained_already").withStyle(ChatFormatting.RED), true);
@@ -218,7 +218,7 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
                     tooltipComponents.add(1, createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.opened").withStyle(ChatFormatting.GOLD)));
             } else {
                 if (!data.isAccomplished) {
-                    ChatFormatting formatting = ChatFormattingUtils.get3ColorPercentageFormat(minedBlocks, requiredAmount);
+                    ChatFormatting[] formatting = ChatFormattingUtils.get3LevelChatFormatting(minedBlocks, requiredAmount);
                     Component component = Component.literal(String.valueOf(minedBlocks)).withStyle(formatting);
                     tooltipComponents.add(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest.info", requiredAmount).withStyle(ChatFormatting.DARK_AQUA));
                     tooltipComponents.add(Component.literal("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest", component).withStyle(ChatFormatting.GRAY)));

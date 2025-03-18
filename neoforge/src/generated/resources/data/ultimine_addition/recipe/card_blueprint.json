@@ -1,0 +1,31 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "ultimine_addition:legacy_mode",
+      "value": false
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "ultimine_addition",
+  "key": {
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "L": {
+      "tag": "c:gems/lapis"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    }
+  },
+  "pattern": [
+    "ALA",
+    "LPL",
+    "ALA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ultimine_addition:card_blueprint"
+  }
+}
