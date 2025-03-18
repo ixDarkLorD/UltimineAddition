@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.utils.Env;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.ixdarklord.ultimine_addition.client.handler.ClientHandler;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
@@ -216,11 +217,6 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         if (challengeData.isPresent()) {
             challengeData.get().togglePinned();
             data.saveData(itemStack);
-            if (menu.interactionHand == InteractionHand.OFF_HAND) {
-                ItemStack itemStack1 = this.get().copy();
-                this.saveData(itemStack1);
-                menu.getPlayer().getInventory().offhand.set(0, itemStack1);
-            }
         }
         return sendToServer(menu.interactionHand);
     }
@@ -298,6 +294,15 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         return this;
     }
 
+    @Environment(EnvType.CLIENT)
+    private void updateOffhand(InteractionHand interactionHand) {
+        if (interactionHand == InteractionHand.OFF_HAND) {
+            ItemStack itemStack1 = this.get().copy();
+            this.saveData(itemStack1);
+            ClientHandler.getPlayer().getInventory().offhand.set(0, itemStack1);
+        }
+    }
+
     public SkillsRecordData sendToClient(ServerPlayer player, @Nullable InteractionHand hand) {
         return sendToClient(player, ItemUtils.getSlotIndex(hand));
     }
@@ -308,6 +313,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     }
 
     public SkillsRecordData sendToServer(@Nullable InteractionHand hand) {
+        this.updateOffhand(hand);
         return sendToServer(ItemUtils.getSlotIndex(hand));
     }
 
