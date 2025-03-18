@@ -292,8 +292,9 @@ public class ChallengesInfoPanel {
         for (Panel panel : PANEL_LIST) {
             if (panel.isNotActive()) continue;
             if (panel.isNotMorePanel()) {
-                textLength = Math.max(font.width(panel.getTitle()), textLength);
-                textLength = Math.max(0, textLength - panel.getWidth());
+                int titleWidth = font.width(panel.getTitle());
+                int adjustedWidth = Math.max(0, titleWidth - panel.getWidth());
+                textLength = Math.max(textLength, adjustedWidth);
             }
         }
         return textLength > 0 ? textLength + 8 : 0;

@@ -37,13 +37,15 @@ public class ItemUtils {
     }
 
     public static ItemStack findItemInHand(Player player, Item item) {
-        ItemStack stack = ServicePlatform.get().slotAPI().isModLoaded()
-                ? ServicePlatform.get().slotAPI().getSkillsRecordItem(player)
-                : player.getMainHandItem();
-        if (stack.getItem() != item) stack = player.getOffhandItem();
+        ItemStack stack = player.getMainHandItem();
 
-        if (stack.getItem() == item) return stack;
-        return ItemStack.EMPTY;
+        if (stack.getItem() != item)
+            stack = player.getOffhandItem();
+
+        if (ServicePlatform.get().slotAPI().isModLoaded() && stack.getItem() != item) {
+            stack = ServicePlatform.get().slotAPI().getSkillsRecordItem(player);
+        }
+        return stack.getItem() == item ? stack : ItemStack.EMPTY;
     }
 
     public static int getSlotIndex(@Nullable InteractionHand hand) {
