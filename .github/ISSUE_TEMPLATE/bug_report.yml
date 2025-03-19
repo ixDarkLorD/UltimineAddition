@@ -1,5 +1,5 @@
 name: Bug Report
-description: Create a bug report to help us improve
+description: Report a bug to help us improve the mod.
 title: "[Bug]: "
 labels: [ "bug" ]
 assignees:
@@ -7,70 +7,70 @@ assignees:
 body:
   - type: markdown
     attributes:
-      value: "**Thank you for addressing the issue! And keep helping us to keep improving. We appreciate your time!**"
-  -   type: textarea
-      attributes:
-        label: Describe the Bug
-        description: A clear and concise description of what the bug is.
-        placeholder: "Example: I clicked the button, and the game stopped working!"
-      validations:
-        required: true
-  -   type: textarea
-      attributes:
-        label: To Reproduce
-        description: Tell us about the steps to reproduce the bug.
-        value: |
-          1.
-          2.
-          3.
-          4.
-      validations:
-        required: false
-  -   type: textarea
-      attributes:
-        label: Catch the bug In Action!
-        description: If applicable, add screenshots or videos to help explain your problem.
-      validations:
-        required: false
-  -   type: input
-      attributes:
-        label: Crash Report or Log
-        description: If applicable, please add a **link** to the crash report or log that was created when this issue occured. You can upload the crash report to a site like Pastebin or GitHub Gist.
-        placeholder: "Please don't paste the whole crash report in this issue"
-      validations:
-        required: false
-  -   type: input
-      attributes:
-        label: OS
-        description: The operating system you were using when the bug occurred
-        placeholder: "e.g. Windows 11, iOS"
-      validations:
-        required: true
-  -   type: dropdown
-      attributes:
-        label: Minecraft Version
-        description: The version of Minecraft you were using when the bug occurred
-        options:
-          - "1.18.2"
-          - "1.19.2"
-          - "1.20.1"
-          - "1.21"
-          - "1.21.1"
-      validations:
-        required: true
-  -   type: dropdown
-      attributes:
-        label: ModLoader
-        description: What is the ModLoader you were using when the bug occurred
-        options:
-          - "Forge"
-          - "Fabric"
-          - "NeoForge"
-      validations:
-        required: true
-  -   type: input
-      attributes:
-        label: Mod Version
-        description: The mod version you where using when the bug occurred
-      validations:
-        required: true
+      value: "**Thank you for reporting this issue! Your feedback helps us improve. We appreciate your time and effort!**"
+  - type: textarea
+    attributes:
+      label: Bug Description
+      description: Provide a clear and concise description of the bug.
+      placeholder: "Example: Clicking the button causes the game to crash."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: List the steps to reproduce the bug.
+      value: |
+        1.
+        2.
+        3.
+        4.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Screenshots or Videos
+      description: If possible, attach screenshots or videos to illustrate the issue.
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Crash Report or Log
+      description: If applicable, provide a **link** to the crash report or log (e.g., Pastebin or GitHub Gist).  
+      placeholder: "Do not paste the full crash report here."
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Operating System
+      description: Specify the operating system used when the bug occurred.
+      placeholder: "e.g., Windows 11, macOS Ventura"
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Minecraft Version
+      description: Select the version of Minecraft you were using.
+      options:
+        - "1.18.2"
+        - "1.19.2"
+        - "1.20.1"
+        - "1.21"
+        - "1.21.1"
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Mod Loader
+      description: Select the Mod Loader you were using.
+      options:
+        - "Forge"
+        - "Fabric"
+        - "NeoForge"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Mod Version
+      description: Enter the mod version used when the bug occurred.
+    validations:
+      required: true
