@@ -97,8 +97,7 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return this.getInteractionHand().map(interactionHand -> player.getItemInHand(interactionHand).equals(stack))
-                .orElseGet(() -> ServicePlatform.get().slotAPI().getSkillsRecordItem(player).equals(stack));
+        return ItemStack.isSameItem(this.getInteractionHand().map(player::getItemInHand).orElseGet(() -> ServicePlatform.get().slotAPI().getSkillsRecordItem(player)), stack);
     }
 
     public Player getPlayer() {
