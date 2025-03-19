@@ -47,7 +47,7 @@ public class LanguageBuilder {
         add("jei", "recipe.item_storage.ink_chamber", "Ink Amount: %s+");
 
         addCurios("skills_record", "Skills Record");
-        addTrinkets("interactionHand.skills_record", "Skills Record");
+        addTrinkets("hand.skills_record", "Skills Record");
 
         add("tooltip", "legacy_mode.disabled_item", "This item has been Disabled by Legacy Mode.");
         add("tooltip", "certificate.info", "Interact with this parchment to obtain the ultimine ability permanently!");

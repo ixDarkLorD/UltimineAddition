@@ -4,6 +4,9 @@ dependencies {
     modApi libs.architectury.neoforge.get()
     modApi "net.ixdarklord.coolcatlib:neoforge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
 
+    modCompileOnly "${libs.curios.neoforge.get()}:api"
+    modRuntimeOnly libs.curios.neoforge.get()
+
     modCompileOnlyApi libs.jei.api.neoforge.get()
     modRuntimeOnly libs.jei.neoforge.get()
 

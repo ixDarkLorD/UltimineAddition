@@ -42,7 +42,7 @@
   "command.ultimine_addition.set_ability.success": "You have successfully set the ultimine ability to %s!",
   "command.ultimine_addition.skills_record.edit_mode.already_setted": "The Skills Record's edit mode is already set to %s.",
   "command.ultimine_addition.skills_record.edit_mode.success": "You have successfully set the Skills Record's edit mode to %s!",
-  "curios.identifier.skills_record": "Skills Record",
+  "curios.identifier.skills_record": "Skills Record Slot",
   "effect.ultimine_addition.mine_go_juice_axe": "Mine-Go Juice: Lumberjack Limbo",
   "effect.ultimine_addition.mine_go_juice_hoe": "Mine-Go Juice: Soil Serenade",
   "effect.ultimine_addition.mine_go_juice_pickaxe": "Mine-Go Juice: Rock Roulette",
@@ -166,5 +166,5 @@
   "tooltip.ultimine_addition.skills_record.contents": "Contents:",
   "tooltip.ultimine_addition.skills_record.info": "A tool needed for upgrading mining skills card.",
   "tooltip.ultimine_addition.skills_record.press.left_click": "Press Left Click Mouse to cycle through blocks.",
-  "trinkets.slot.interactionHand.skills_record": "Skills Record"
+  "trinkets.slot.hand.skills_record": "Skills Record Slot"
 }

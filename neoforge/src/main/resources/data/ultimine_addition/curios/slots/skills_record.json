@@ -1,0 +1,6 @@
+{
+  "replace": true,
+  "icon": "ultimine_addition:item/skills_record_slot",
+  "size": 1,
+  "render_toggle": false
+}

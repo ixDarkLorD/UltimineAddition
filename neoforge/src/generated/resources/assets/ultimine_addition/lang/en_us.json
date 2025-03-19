@@ -166,5 +166,5 @@
   "tooltip.ultimine_addition.skills_record.contents": "Contents:",
   "tooltip.ultimine_addition.skills_record.info": "A tool needed for upgrading mining skills card.",
   "tooltip.ultimine_addition.skills_record.press.left_click": "Press Left Click Mouse to cycle through blocks.",
-  "trinkets.slot.interactionHand.skills_record": "Skills Record"
+  "trinkets.slot.hand.skills_record": "Skills Record"
 }
