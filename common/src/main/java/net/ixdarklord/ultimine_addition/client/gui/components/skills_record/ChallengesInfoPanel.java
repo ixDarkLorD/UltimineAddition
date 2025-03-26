@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.client.gui.screens;
+package net.ixdarklord.ultimine_addition.client.gui.components.skills_record;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
@@ -11,6 +11,7 @@ import net.ixdarklord.coolcatlib.api.util.ColorUtils;
 import net.ixdarklord.coolcatlib.api.util.MathUtils;
 import net.ixdarklord.coolcatlib.api.util.RenderUtils;
 import net.ixdarklord.coolcatlib.api.util.ScreenPosition;
+import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
@@ -18,7 +19,7 @@ import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -43,9 +44,9 @@ import static net.ixdarklord.ultimine_addition.util.ItemUtils.findItemInHand;
 
 @Environment(EnvType.CLIENT)
 public class ChallengesInfoPanel {
-    private static final ResourceLocation SLOT_INDICATOR_SPRITE = ResourceLocation.fromNamespaceAndPath(UltimineAddition.MOD_ID, "challenge_panel/slot_indicator");
-    private static final ResourceLocation TITLE_SPRITE = ResourceLocation.fromNamespaceAndPath(UltimineAddition.MOD_ID, "challenge_panel/title");
-    private static final ResourceLocation DESC_SPRITE = ResourceLocation.fromNamespaceAndPath(UltimineAddition.MOD_ID, "challenge_panel/description");
+    private static final ResourceLocation SLOT_INDICATOR_SPRITE = ResourceLocation.fromNamespaceAndPath(FTBUltimineAddition.MOD_ID, "challenge_panel/slot_indicator");
+    private static final ResourceLocation TITLE_SPRITE = ResourceLocation.fromNamespaceAndPath(FTBUltimineAddition.MOD_ID, "challenge_panel/title");
+    private static final ResourceLocation DESC_SPRITE = ResourceLocation.fromNamespaceAndPath(FTBUltimineAddition.MOD_ID, "challenge_panel/description");
 
     public static final RenderStateShard.TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("translucent_transparency", () -> {
         RenderSystem.enableBlend();
@@ -117,10 +118,10 @@ public class ChallengesInfoPanel {
             int X = offsets[0];
             int Y = getAlignedYPos(offsets[1], slot, 4);
 
-            SkillsRecordScreen.BGColor bgColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
+            SkillsRecordScreen.OverlayColor overlayColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
             if (panel.isNotMorePanel()) {
                 // Slots
-                RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
+                RenderSystem.setShaderColor(overlayColor.getRed(), overlayColor.getGreen(), overlayColor.getBlue(), overlayColor.getAlpha());
                 guiGraphics.blitSprite(SLOT_INDICATOR_SPRITE, X + 5, Y, 51, 10);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
@@ -130,13 +131,13 @@ public class ChallengesInfoPanel {
                 guiGraphics.fill(X+8 + spacing, Y+3, X+14 + spacing, Y+9, color.getRGB());
 
                 // Title BG
-                RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
+                RenderSystem.setShaderColor(overlayColor.getRed(), overlayColor.getGreen(), overlayColor.getBlue(), overlayColor.getAlpha());
                 guiGraphics.blitSprite(TITLE_SPRITE, X, Y + 10, panel.getWidth() + textLength, 11);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
                 // Info BG
                 TRANSLUCENT_TRANSPARENCY.setupRenderState();
-                RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
+                RenderSystem.setShaderColor(overlayColor.getRed(), overlayColor.getGreen(), overlayColor.getBlue(), overlayColor.getAlpha());
                 guiGraphics.blitSprite(DESC_SPRITE, X, Y + 18, panel.getWidth() + textLength, 14 + Math.max(0, font.lineHeight * (panel.getInfos().size() - 1)));
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 TRANSLUCENT_TRANSPARENCY.clearRenderState();
@@ -145,7 +146,7 @@ public class ChallengesInfoPanel {
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 guiGraphics.drawCenteredString(font, panel.getTitle(), X + ((panel.getWidth() + textLength) / 2), Y + 11, Color.WHITE.getRGB());
             } else {
-                RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
+                RenderSystem.setShaderColor(overlayColor.getRed(), overlayColor.getGreen(), overlayColor.getBlue(), overlayColor.getAlpha());
 
                 // Title BG
                 guiGraphics.blitSprite(TITLE_SPRITE, X, Y + 10, panel.getWidth() + textLength, 11);

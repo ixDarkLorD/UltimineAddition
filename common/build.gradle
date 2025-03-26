@@ -9,5 +9,3 @@ dependencies {
     modCompileOnly "curse.maven:ftb-library-forge-404465:$ftblibrary_neoforge_version_id"
     modCompileOnly "curse.maven:ftb-ultimine-forge-386134:$ftbultimine_neoforge_version_id"
 }
-
-sourceSets.main.resources { srcDir 'src/main/generated' }

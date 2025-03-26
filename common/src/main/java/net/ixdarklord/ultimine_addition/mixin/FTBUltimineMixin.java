@@ -7,9 +7,9 @@ import dev.ftb.mods.ftbultimine.FTBUltiminePlayerData;
 import dev.ftb.mods.ftbultimine.mixin.AxeItemAccess;
 import dev.ftb.mods.ftbultimine.mixin.ShovelItemAccess;
 import net.ixdarklord.ultimine_addition.common.event.MSCEvents;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.util.ToolAction;
 import net.ixdarklord.ultimine_addition.util.ToolActions;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,20 +39,20 @@ import java.util.List;
 abstract class FTBUltimineMixin {
 
     @Redirect(method = "blockBroken", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/config/FTBUltimineServerConfig;getMaxBlocks(Lnet/minecraft/server/level/ServerPlayer;)I"))
-    private int redirect$MaxBlocks$1(ServerPlayer player) {
+    private int UA$Redirect$blockBroken$1(ServerPlayer player) {
         return FTBUltimineIntegration.getMaxBlocks(player);
     }
     @Redirect(method = "blockRightClick", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/config/FTBUltimineServerConfig;getMaxBlocks(Lnet/minecraft/server/level/ServerPlayer;)I"))
-    private int redirect$MaxBlocks$2(ServerPlayer player) {
+    private int UA$Redirect$blockBroken$2(ServerPlayer player) {
         return FTBUltimineIntegration.getMaxBlocks(player);
     }
     @Redirect(method = "playerTick", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/config/FTBUltimineServerConfig;getMaxBlocks(Lnet/minecraft/server/level/ServerPlayer;)I"))
-    private int redirect$MaxBlocks$3(ServerPlayer player) {
+    private int UA$Redirect$blockBroken$3(ServerPlayer player) {
         return FTBUltimineIntegration.getMaxBlocks(player);
     }
 
     @Inject(method = "blockRightClick", at = @At(value = "HEAD"))
-    private void redirect$RightClickEvent(Player pl, InteractionHand hand, BlockPos clickPos, Direction face, CallbackInfoReturnable<EventResult> cir) {
+    private void UA$Redirect$blockRightClick(Player pl, InteractionHand hand, BlockPos clickPos, Direction face, CallbackInfoReturnable<EventResult> cir) {
         if (pl instanceof ServerPlayer player) {
             ItemStack stack = player.getItemInHand(hand);
             Level level = player.level();

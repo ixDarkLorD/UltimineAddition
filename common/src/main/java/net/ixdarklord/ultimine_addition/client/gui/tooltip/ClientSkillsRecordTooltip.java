@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.client.gui.tooltip;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.ixdarklord.ultimine_addition.client.gui.screens.ChallengesInfoPanel;
+import net.ixdarklord.ultimine_addition.client.gui.components.skills_record.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.client.gui.Font;
@@ -63,8 +63,8 @@ public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
     }
 
     private void blit(GuiGraphics guiGraphics, int x, int y, Texture texture) {
-        SkillsRecordScreen.BGColor bgColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
-        RenderSystem.setShaderColor(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), bgColor.getAlpha());
+        SkillsRecordScreen.OverlayColor overlayColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
+        RenderSystem.setShaderColor(overlayColor.getRed(), overlayColor.getGreen(), overlayColor.getBlue(), overlayColor.getAlpha());
         guiGraphics.blitSprite(texture.sprite, x, y, 0, texture.w, texture.h);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
@@ -122,7 +122,7 @@ public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
             int cellWidth = (getWidth(font) - gridSize * cellSpacing) / gridSize;
             int cellHeight = (getHeight() - gridSize * cellSpacing) / gridSize;
 
-            SkillsRecordScreen.BGColor[] colors = SkillsRecordScreen.BGColor.values();
+            SkillsRecordScreen.OverlayColor[] colors = SkillsRecordScreen.OverlayColor.values();
             int colorIndex = 0;
 
             for (int row = 0; row < gridSize; row++) {

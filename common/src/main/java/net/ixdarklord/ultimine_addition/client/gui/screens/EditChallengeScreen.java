@@ -1,11 +1,10 @@
-package net.ixdarklord.ultimine_addition.client.gui.components.skills_record;
+package net.ixdarklord.ultimine_addition.client.gui.screens;
 
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatlib.api.util.RenderUtils;
-import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
@@ -20,13 +19,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 
 public class EditChallengeScreen extends Screen {
-    private static final ResourceLocation BACKGROUND_SPRITE = UltimineAddition.getLocation("container/skills_record/edit_challenge/background");
-    private static final ResourceLocation ARROW_SPRITE = UltimineAddition.getLocation("container/skills_record/edit_challenge/arrow");
+    private static final ResourceLocation BACKGROUND_SPRITE = FTBUltimineAddition.getLocation("container/skills_record/edit_challenge/background");
+    private static final ResourceLocation ARROW_SPRITE = FTBUltimineAddition.getLocation("container/skills_record/edit_challenge/arrow");
     protected int imageWidth = 155;
     protected int imageHeight = 91;
     protected int leftPos;
@@ -36,7 +36,7 @@ public class EditChallengeScreen extends Screen {
     private EditBox newValueBox;
     private ColorableImageButton doneButton;
 
-    public EditChallengeScreen(SkillsRecordScreen parent, MiningSkillCardData.ChallengeHolder challengeHolder) {
+    public EditChallengeScreen(@NotNull SkillsRecordScreen parent, MiningSkillCardData.ChallengeHolder challengeHolder) {
         super(Component.translatable("selectWorld.edit")
                 .append(" ")
                 .append(Component.translatable("challenge.ultimine_addition.title", Component.literal("[%s]".formatted(challengeHolder.getOrder())))));
@@ -105,18 +105,6 @@ public class EditChallengeScreen extends Screen {
         FrameLayout layout = new FrameLayout(this.leftPos + 10, this.topPos + 64, 135, 17);
         LinearLayout linearLayout = layout.addChild(LinearLayout.horizontal().spacing(5));
 
-        linearLayout.addChild(this.addRenderableWidget(new ColorableImageButton(0, 0, 45, 13, SkillsRecordScreen.BUTTON_SPRITES, button ->
-                EditChallengeScreen.this.onClose(), CommonComponents.GUI_CANCEL) {
-
-            @Override
-            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-                int i = this.getX() + 2;
-                int j = this.getX() + this.getWidth() - 2;
-                renderScrollingString(guiGraphics, font, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight() - 1, Color.WHITE.getRGB());
-            }
-        }));
-
         this.doneButton = linearLayout.addChild(this.addRenderableWidget(new ColorableImageButton(0, 0, 45, 13, SkillsRecordScreen.BUTTON_SPRITES, button -> {
             SkillsRecordData data = this.parent.getMenu().getData();
             MiningSkillCardData cardData = MiningSkillCardData.loadData(data.getCardSlots().get(this.parent.selectedSlot));
@@ -128,6 +116,18 @@ public class EditChallengeScreen extends Screen {
             this.minecraft.player.playSound(SoundEvents.PLAYER_LEVELUP, 1F, 1.5F);
             EditChallengeScreen.this.onClose();
         }, CommonComponents.GUI_DONE) {
+            @Override
+            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
+                int i = this.getX() + 2;
+                int j = this.getX() + this.getWidth() - 2;
+                renderScrollingString(guiGraphics, font, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight() - 1, Color.WHITE.getRGB());
+            }
+        }));
+
+        linearLayout.addChild(this.addRenderableWidget(new ColorableImageButton(0, 0, 45, 13, SkillsRecordScreen.BUTTON_SPRITES, button ->
+                EditChallengeScreen.this.onClose(), CommonComponents.GUI_CANCEL) {
+
             @Override
             public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
                 super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);

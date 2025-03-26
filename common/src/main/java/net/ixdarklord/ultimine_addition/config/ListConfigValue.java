@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.config;
 
 import net.ixdarklord.coolcatlib.api.util.ValueConverter;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
@@ -287,7 +287,7 @@ public class ListConfigValue<T> {
 
                 // Validate the value
                 if (!elementValidator.test(value)) {
-                    UltimineAddition.LOGGER.error("Value {} is not within the range [{}, {}]", value, minValue, maxValue);
+                    FTBUltimineAddition.LOGGER.error("Value {} is not within the range [{}, {}]", value, minValue, maxValue);
                 }
 
                 // Add to the map

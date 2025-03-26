@@ -1,0 +1,51 @@
+{
+  "parent": "ultimine_addition:card_blueprint",
+  "criteria": {
+    "has_card_blueprint": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ultimine_addition:card_blueprint"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_shape_selector": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ultimine_addition:shape_selector"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.craft",
+      "with": [
+        {
+          "translate": "item.ultimine_addition.shape_selector"
+        }
+      ]
+    },
+    "icon": {
+      "count": 1,
+      "id": "ultimine_addition:shape_selector"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.craft.shape_selector"
+    }
+  },
+  "requirements": [
+    [
+      "has_card_blueprint"
+    ],
+    [
+      "has_shape_selector"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -20,19 +20,22 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class CardHolderArgument implements ArgumentType<Integer> {
-    private static final Collection<String> SLOTS = Util.make(new ArrayList<>(), list -> {
+    private static final Collection<String> EXAMPLES = Arrays.asList("none", "skills_record.slot.1");
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_SLOT =
+            new DynamicCommandExceptionType((slot) -> Component.translatableEscape("slot.unknown", slot));
+
+    private final Collection<String> SLOTS = Util.make(new ArrayList<>(), list -> {
         list.add("self");
         for (int slot : SkillsRecordMenu.CARD_SLOTS)
             list.add("skills_record." + slot);
     });
 
-    private static final Collection<String> EXAMPLES = Arrays.asList("none", "skills_record.slot.1");
+    public CardHolderArgument(boolean inInventory) {
+        if (!inInventory) SLOTS.remove("self");
+    }
 
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_SLOT =
-            new DynamicCommandExceptionType((slot) -> Component.translatableEscape("slot.unknown", slot));
-
-    public static CardHolderArgument slot() {
-        return new CardHolderArgument();
+    public static CardHolderArgument slot(boolean inInventory) {
+        return new CardHolderArgument(inInventory);
     }
 
     public static Integer getSlot(CommandContext<CommandSourceStack> context, String name) {

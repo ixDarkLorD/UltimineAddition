@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.common.network.packet;
+package net.ixdarklord.ultimine_addition.common.network.payloads;
 
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.menu.MenuRegistry;
@@ -7,8 +7,8 @@ import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -20,9 +20,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class SkillsRecordPacket {
+public class SkillsRecordPayload {
     public static class Open implements CustomPacketPayload {
-        public static final Type<SkillsRecordPacket.Open> TYPE = new Type<>(UltimineAddition.getLocation("open_skills_record"));
+        public static final Type<SkillsRecordPayload.Open> TYPE = new Type<>(FTBUltimineAddition.getLocation("open_skills_record"));
         public static final StreamCodec<FriendlyByteBuf, Open> STREAM_CODEC = new StreamCodec<>() {
             @Override
             public @NotNull Open decode(FriendlyByteBuf object) {
@@ -59,8 +59,8 @@ public class SkillsRecordPacket {
     }
 
     public record SyncData(Env env, int slotIndex, SkillsRecordData data) implements CustomPacketPayload {
-        public static final Type<SyncData> S2C_TYPE = new Type<>(UltimineAddition.getLocation("skills_record_sync_s2c"));
-        public static final Type<SyncData> C2S_TYPE = new Type<>(UltimineAddition.getLocation("skills_record_sync_c2s"));
+        public static final Type<SyncData> S2C_TYPE = new Type<>(FTBUltimineAddition.getLocation("skills_record_sync_s2c"));
+        public static final Type<SyncData> C2S_TYPE = new Type<>(FTBUltimineAddition.getLocation("skills_record_sync_c2s"));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, SyncData> STREAM_CODEC = StreamCodec.composite(
                 NetworkHelper.enumStreamCodec(Env.class), SyncData::env,

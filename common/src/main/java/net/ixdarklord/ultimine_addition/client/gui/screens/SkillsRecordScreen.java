@@ -17,7 +17,6 @@ import net.ixdarklord.coolcatlib.api.client.gui.components.TextScreen;
 import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.AbstractDraggableWidget;
 import net.ixdarklord.coolcatlib.api.util.*;
 import net.ixdarklord.ultimine_addition.client.gui.components.skills_record.ConfigurationPanel;
-import net.ixdarklord.ultimine_addition.client.gui.components.skills_record.EditChallengeScreen;
 import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
@@ -30,8 +29,8 @@ import net.ixdarklord.ultimine_addition.common.menu.slot.MiningSkillCardSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.PaperSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.PenSlot;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.hooks.KeyBindingHooks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -76,14 +75,14 @@ import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
 public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu> {
-    public static final WidgetSprites BUTTON_SPRITES = new WidgetSprites(UltimineAddition.getLocation("container/skills_record/button"), UltimineAddition.getLocation("container/skills_record/button_disabled"), UltimineAddition.getLocation("container/skills_record/button_focused"));
-    private final ResourceLocation BACKGROUND_TEXTURE = UltimineAddition.getGuiTexture("container/skills_record", "png");
-    private final ResourceLocation SLOT_SELECT_SPRITE = UltimineAddition.getLocation("container/skills_record/slot_select");
-    private final ResourceLocation PROGRESS_BAR_SPRITE = UltimineAddition.getLocation("container/skills_record/progress_bar");
-    private final ResourceLocation ITEM_DISPLAY_SPRITE = UltimineAddition.getLocation("container/skills_record/item_display");
-    private final WidgetSprites CONFIGURATION_BUTTON_SPRITES = new WidgetSprites(UltimineAddition.getLocation("container/skills_record/configuration_button_enabled"), UltimineAddition.getLocation("container/skills_record/configuration_button_disabled"), UltimineAddition.getLocation("container/skills_record/configuration_button_focused"));
-    private final WidgetSprites CONSUME_BUTTON_SPRITES = new WidgetSprites(UltimineAddition.getLocation("container/skills_record/consume_on"), UltimineAddition.getLocation("container/skills_record/consume_off"), UltimineAddition.getLocation("container/skills_record/consume_on_focused"), UltimineAddition.getLocation("container/skills_record/consume_off_focused"));
-    private final WidgetSprites SCROLLBAR_SPRITE = new WidgetSprites(UltimineAddition.getLocation("container/skills_record/scroller_enabled"), UltimineAddition.getLocation("container/skills_record/scroller_disabled"), UltimineAddition.getLocation("container/skills_record/scroller_focused"));
+    public static final WidgetSprites BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.getLocation("container/skills_record/button"), FTBUltimineAddition.getLocation("container/skills_record/button_disabled"), FTBUltimineAddition.getLocation("container/skills_record/button_focused"));
+    private static final ResourceLocation BACKGROUND_TEXTURE = FTBUltimineAddition.getGuiTexture("container/skills_record", "png");
+    private static final ResourceLocation SLOT_SELECT_SPRITE = FTBUltimineAddition.getLocation("container/skills_record/slot_select");
+    private static final ResourceLocation PROGRESS_BAR_SPRITE = FTBUltimineAddition.getLocation("container/skills_record/progress_bar");
+    private static final ResourceLocation ITEM_DISPLAY_SPRITE = FTBUltimineAddition.getLocation("container/skills_record/item_display");
+    private static final WidgetSprites CONFIGURATION_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.getLocation("container/skills_record/configuration_button_enabled"), FTBUltimineAddition.getLocation("container/skills_record/configuration_button_disabled"), FTBUltimineAddition.getLocation("container/skills_record/configuration_button_focused"));
+    private static final WidgetSprites CONSUME_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.getLocation("container/skills_record/consume_on"), FTBUltimineAddition.getLocation("container/skills_record/consume_off"), FTBUltimineAddition.getLocation("container/skills_record/consume_on_focused"), FTBUltimineAddition.getLocation("container/skills_record/consume_off_focused"));
+    private static final WidgetSprites SCROLLBAR_SPRITE = new WidgetSprites(FTBUltimineAddition.getLocation("container/skills_record/scroller_enabled"), FTBUltimineAddition.getLocation("container/skills_record/scroller_disabled"), FTBUltimineAddition.getLocation("container/skills_record/scroller_focused"));
 
     private final int maxProgress = 100;
     private ColorableImageButton configurationButton;
@@ -279,7 +278,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
         guiGraphics.setColor(this.configuration.getBackgroundColor().getRed(), this.configuration.getBackgroundColor().getGreen(), this.configuration.getBackgroundColor().getBlue(), this.configuration.getBackgroundColor().getAlpha());
-        guiGraphics.blit(this.BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        guiGraphics.blit(BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
@@ -287,7 +286,6 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         Color color = ColorUtils.blendColors(new Color(0, 0, 0), this.configuration.getBackgroundColor().color, 0.75);
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, color.getRGB(), false);
-
         guiGraphics.fill(this.inventoryLabelX - 1, this.inventoryLabelY - 1, this.inventoryLabelX + this.font.width(this.playerInventoryTitle), this.inventoryLabelY + this.font.lineHeight, ColorUtils.RGBToRGBA(color.getRGB(), 0.5F));
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
     }
@@ -447,7 +445,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         boolean isOverButton = isHovering(174, Y, 9, 12, mouseX, mouseY);
 
         guiGraphics.setColor(this.configuration.getBackgroundColor().getRed(), this.configuration.getBackgroundColor().getGreen(), this.configuration.getBackgroundColor().getBlue(), this.configuration.getBackgroundColor().getAlpha());
-        guiGraphics.blitSprite(this.SCROLLBAR_SPRITE.get(this.textScreen.canScroll(), isOverButton), x + 174, y + Y, 10, 13);
+        guiGraphics.blitSprite(SCROLLBAR_SPRITE.get(this.textScreen.canScroll(), isOverButton), x + 174, y + Y, 10, 13);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
@@ -804,7 +802,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         return itemCycle;
     }
 
-    public enum BGColor {
+    public enum OverlayColor {
         DEFAULT(new Color(255, 255, 255)),
         RED(new Color(255, 116, 116)),
         ORANGE(new Color(255, 162, 94)),
@@ -816,7 +814,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
         private final Color color;
 
-        BGColor(Color color) {
+        OverlayColor(Color color) {
             this.color = color;
         }
 
@@ -836,14 +834,14 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             return new ColorUtils(color.getRGB()).getBlue();
         }
 
-        public BGColor next() {
-            int nextIndex = (this.ordinal() + 1) % BGColor.values().length;
-            return BGColor.values()[nextIndex];
+        public OverlayColor next() {
+            int nextIndex = (this.ordinal() + 1) % OverlayColor.values().length;
+            return OverlayColor.values()[nextIndex];
         }
 
-        public BGColor previous() {
-            int prevIndex = (this.ordinal() - 1 + BGColor.values().length) % BGColor.values().length;
-            return BGColor.values()[prevIndex];
+        public OverlayColor previous() {
+            int prevIndex = (this.ordinal() - 1 + OverlayColor.values().length) % OverlayColor.values().length;
+            return OverlayColor.values()[prevIndex];
         }
 
         public Color convert() {

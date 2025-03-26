@@ -8,10 +8,9 @@ import net.ixdarklord.ultimine_addition.client.gui.components.toasts.ChallengesT
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.common.network.packet.MiningSkillCardPacket;
+import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.common.network.payloads.MiningSkillCardPayload;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -28,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
 public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemStack> {
     public static final Codec<MiningSkillCardData> CODEC;
@@ -79,7 +80,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
     }
 
     public MiningSkillCardData sendToClient(ServerPlayer player, int slotIndex) {
-        PacketHandler.sendToPlayer(new MiningSkillCardPacket(slotIndex, this), player);
+        PayloadHandler.sendToPlayer(new MiningSkillCardPayload(slotIndex, this), player);
         this.finishedChallenges.clear();
         return this;
     }
@@ -120,7 +121,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
 
     public MiningSkillCardData initChallenges() {
         if (!(this.dataHolder.getItem() instanceof MiningSkillCardItem)) {
-            UltimineAddition.LOGGER.error("You've tried to initiate challenges on item can't accept it: {}", this.dataHolder.getDescriptionId());
+            LOGGER.error("You've tried to initiate challenges on item can't accept it: {}", this.dataHolder.getDescriptionId());
             return this;
         }
 
@@ -164,7 +165,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
                         if (this.challenges.stream().filter(challengeData1 -> challengeData1.id.equals(location)).toList().isEmpty()) {
                             this.challenges.add(new ChallengeHolder(location, challengeData.order, data.getRequiredAmount()));
                             if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
-                                ChallengesManager.LOGGER.debug("Changing the invalid challenge! id:\"{}\" to: id:\"{}\"", challengeData.id, location);
+                                LOGGER.debug("Changing the invalid challenge! id:\"{}\" to: id:\"{}\"", challengeData.id, location);
                             }
                             isDone.set(false);
                         }
@@ -179,9 +180,8 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         }
     }
 
-    public MiningSkillCardData setDisplayItem(ItemStack stack) {
+    public void setDisplayItem(ItemStack stack) {
         this.displayItem = stack;
-        return this;
     }
 
     public MiningSkillCardData addAmount(ResourceLocation challengeId, int value) {
@@ -195,11 +195,10 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return setAmount(challengeId, currentAmount + value);
     }
 
-    public MiningSkillCardData accomplishChallenge(ResourceLocation challengeId) {
+    public void accomplishChallenge(ResourceLocation challengeId) {
         Optional<ChallengeHolder> challengeData = this.getChallenge(challengeId);
-        if (challengeData.isEmpty()) return this;
-
-        return setAmount(challengeId, challengeData.get().requiredPoints);
+        if (challengeData.isEmpty()) return;
+        setAmount(challengeId, challengeData.get().requiredPoints);
     }
 
     public MiningSkillCardData setAmount(ResourceLocation challengeId, int value) {
@@ -231,9 +230,8 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return this;
     }
 
-    public MiningSkillCardData resetPotionPoints() {
+    public void resetPotionPoints() {
         this.setPotionPoints(this.getMaxPotionPoints());
-        return this;
     }
 
     public MiningSkillCardData setTier(MiningSkillCardItem.Tier tier) {

@@ -12,10 +12,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BlockEntityWithoutLevelRenderer.class, priority = 1600)
-public abstract class BlockEntityWithoutLevelRendererMixin {
-
+abstract class BlockEntityWithoutLevelRendererMixin {
     @Inject(method = "renderByItem", at = @At(value = "HEAD"))
-    private void onRender(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, CallbackInfo ci) {
+    private void UA$Inject$renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, CallbackInfo ci) {
         if (stack.getItem() instanceof IItemRenderer itemRenderer) {
             itemRenderer.createItemRenderer().renderByItem(stack, displayContext, poseStack, buffer, packedLight, packedOverlay);
         }

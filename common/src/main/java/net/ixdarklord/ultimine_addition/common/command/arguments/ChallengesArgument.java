@@ -10,7 +10,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.datafixers.util.Pair;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -50,7 +50,7 @@ public class ChallengesArgument implements ArgumentType<Pair<ResourceLocation, C
         String string = reader.getString().substring(i, reader.getCursor());
 
         try {
-            return string.contains(":") ? ResourceLocation.parse(string) : UltimineAddition.getLocation(string);
+            return string.contains(":") ? ResourceLocation.parse(string) : FTBUltimineAddition.getLocation(string);
         } catch (ResourceLocationException var4) {
             reader.setCursor(i);
             throw ResourceLocation.ERROR_INVALID.createWithContext(reader);

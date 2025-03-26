@@ -3,8 +3,8 @@ package net.ixdarklord.ultimine_addition.common.network;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import net.ixdarklord.coolcatlib.api.hooks.ServerLifecycleHooks;
-import net.ixdarklord.ultimine_addition.common.network.packet.*;
-import net.ixdarklord.ultimine_addition.common.network.packet.config.SyncPlaystyleModeConfig;
+import net.ixdarklord.ultimine_addition.common.network.payloads.*;
+import net.ixdarklord.ultimine_addition.common.network.payloads.config.SyncPlaystyleModePayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
@@ -13,19 +13,20 @@ import net.minecraft.world.phys.AABB;
 
 import java.util.Objects;
 
-public class PacketHandler {
+public class PayloadHandler {
     public static void init() {
-        NetworkHelper.registerC2S(SkillsRecordPacket.Open.TYPE, SkillsRecordPacket.Open.STREAM_CODEC, SkillsRecordPacket.Open::handle);
-        NetworkHelper.registerC2S(SkillsRecordPacket.SyncData.C2S_TYPE, SkillsRecordPacket.SyncData.STREAM_CODEC, SkillsRecordPacket.SyncData::handle);
-        NetworkHelper.registerS2C(SkillsRecordPacket.SyncData.S2C_TYPE, SkillsRecordPacket.SyncData.STREAM_CODEC, SkillsRecordPacket.SyncData::handle);
-        NetworkHelper.registerS2C(MinerCertificatePacket.TYPE, MinerCertificatePacket.STREAM_CODEC, MinerCertificatePacket::handle);
-        NetworkHelper.registerS2C(MiningSkillCardPacket.TYPE, MiningSkillCardPacket.STREAM_CODEC, MiningSkillCardPacket::handle);
-        NetworkHelper.registerS2C(MiningSkillCardPacket.SyncBrewing.TYPE, MiningSkillCardPacket.SyncBrewing.STREAM_CODEC, MiningSkillCardPacket.SyncBrewing::handle);
-        NetworkHelper.registerS2C(SyncChallengesPacket.TYPE, SyncChallengesPacket.STREAM_CODEC, SyncChallengesPacket::handle);
-        NetworkHelper.registerS2C(PlayerAbilityPacket.TYPE, PlayerAbilityPacket.STREAM_CODEC, PlayerAbilityPacket::handle);
+        NetworkHelper.registerC2S(SkillsRecordPayload.Open.TYPE, SkillsRecordPayload.Open.STREAM_CODEC, SkillsRecordPayload.Open::handle);
+        NetworkHelper.registerC2S(SkillsRecordPayload.SyncData.C2S_TYPE, SkillsRecordPayload.SyncData.STREAM_CODEC, SkillsRecordPayload.SyncData::handle);
+        NetworkHelper.registerC2S(UpdateItemShapePayload.TYPE, UpdateItemShapePayload.STREAM_CODEC, UpdateItemShapePayload::handle);
+        NetworkHelper.registerS2C(SkillsRecordPayload.SyncData.S2C_TYPE, SkillsRecordPayload.SyncData.STREAM_CODEC, SkillsRecordPayload.SyncData::handle);
+        NetworkHelper.registerS2C(MinerCertificatePayload.TYPE, MinerCertificatePayload.STREAM_CODEC, MinerCertificatePayload::handle);
+        NetworkHelper.registerS2C(MiningSkillCardPayload.TYPE, MiningSkillCardPayload.STREAM_CODEC, MiningSkillCardPayload::handle);
+        NetworkHelper.registerS2C(MiningSkillCardPayload.SyncBrewing.TYPE, MiningSkillCardPayload.SyncBrewing.STREAM_CODEC, MiningSkillCardPayload.SyncBrewing::handle);
+        NetworkHelper.registerS2C(SyncChallengesPayload.TYPE, SyncChallengesPayload.STREAM_CODEC, SyncChallengesPayload::handle);
+        NetworkHelper.registerS2C(PlayerAbilityPayload.TYPE, PlayerAbilityPayload.STREAM_CODEC, PlayerAbilityPayload::handle);
 
         // Config
-        NetworkHelper.registerS2C(SyncPlaystyleModeConfig.TYPE, SyncPlaystyleModeConfig.STREAM_CODEC, SyncPlaystyleModeConfig::handle);
+        NetworkHelper.registerS2C(SyncPlaystyleModePayload.TYPE, SyncPlaystyleModePayload.STREAM_CODEC, SyncPlaystyleModePayload::handle);
     }
 
     public static <T extends CustomPacketPayload> void sendToServer(T payload) {

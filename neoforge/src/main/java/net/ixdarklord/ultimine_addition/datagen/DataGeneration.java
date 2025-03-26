@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.datagen;
 
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.advancement.AdvancementGenerator;
 import net.ixdarklord.ultimine_addition.datagen.challenge.ChallengeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.language.LanguageGenerator;
@@ -19,7 +19,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 import java.util.concurrent.CompletableFuture;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = UltimineAddition.MOD_ID)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = FTBUltimineAddition.MOD_ID)
 public class DataGeneration {
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event) {

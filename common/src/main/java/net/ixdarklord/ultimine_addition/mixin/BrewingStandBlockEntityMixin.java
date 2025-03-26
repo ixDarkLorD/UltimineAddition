@@ -2,9 +2,9 @@ package net.ixdarklord.ultimine_addition.mixin;
 
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.common.network.packet.MiningSkillCardPacket;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.common.network.payloads.MiningSkillCardPayload;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
@@ -45,8 +45,8 @@ abstract class BrewingStandBlockEntityMixin {
                 List<ServerPlayer> players = serverLevel.getPlayers(brewingStandBlock::stillValid);
 
                 for (ServerPlayer player : players) {
-                    UltimineAddition.LOGGER.debug("{} synced potion points! [B:{} / A:{}]", player.getDisplayName().getString(), oldPoints, data.getPotionPoints());
-                    PacketHandler.sendToPlayer(new MiningSkillCardPacket.SyncBrewing(stack.copy()), player);
+                    FTBUltimineAddition.LOGGER.debug("{} synced potion points! [B:{} / A:{}]", player.getDisplayName().getString(), oldPoints, data.getPotionPoints());
+                    PayloadHandler.sendToPlayer(new MiningSkillCardPayload.SyncBrewing(stack.copy()), player);
                 }
             }
         }

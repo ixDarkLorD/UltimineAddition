@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.mixin.client;
 
 import net.ixdarklord.coolcatlib.api.item.ComponentItem;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,18 +24,18 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 @Mixin(value = GuiGraphics.class)
-public abstract class GuiGraphicsMixin {
+abstract class GuiGraphicsMixin {
     @Shadow public abstract void renderTooltipInternal(Font font, List<ClientTooltipComponent> components, int mouseX, int mouseY, ClientTooltipPositioner tooltipPositioner);
     @Shadow @Final private Minecraft minecraft;
 
     @Inject(method = "renderTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;II)V", at = @At("HEAD"), cancellable = true)
-    private void onRenderTooltip(Font font, List<Component> tooltipLines, Optional<TooltipComponent> visualTooltipComponent, int mouseX, int mouseY, CallbackInfo ci) {
+    private void UA$Inject$onRenderTooltip(Font font, List<Component> tooltipLines, Optional<TooltipComponent> visualTooltipComponent, int mouseX, int mouseY, CallbackInfo ci) {
         List<ClientTooltipComponent> list = tooltipLines.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Collectors.toList());
         if (visualTooltipComponent.isPresent()) {
             TooltipComponent tooltipComponent = visualTooltipComponent.get();
             if (this.minecraft.screen instanceof AbstractContainerScreen<?> screen && screen.hoveredSlot != null && screen.hoveredSlot.getItem().getItem() instanceof ComponentItem) {
                 for (int i = 0; i < tooltipLines.size(); i++) {
-                    if (tooltipLines.get(i).getString().equalsIgnoreCase(UltimineAddition.MOD_ID + ".tooltip_image"))
+                    if (tooltipLines.get(i).getString().equalsIgnoreCase(FTBUltimineAddition.MOD_ID + ".tooltip_image"))
                         list.set(i, ClientTooltipComponent.create(tooltipComponent));
                 }
 

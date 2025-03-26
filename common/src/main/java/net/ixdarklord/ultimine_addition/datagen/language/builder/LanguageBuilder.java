@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.datagen.language.builder;
 
 import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.effect.MobEffect;
@@ -16,9 +16,10 @@ public class LanguageBuilder {
     public static LanguageBuilder INSTANCE = new LanguageBuilder();
     private final Map<Object, String> translations = new HashMap<>();
     public LanguageBuilder() {
-        add("itemGroup", "tab", "Ultimine Addition");
+        add("itemGroup", "tab", "FTB Ultimine Addition");
         add(Registration.MINER_CERTIFICATE.get(), "Miner Certificate");
         add(Registration.SKILLS_RECORD.get(), "Skills Record");
+        add(Registration.SHAPE_SELECTOR.get(), "Shape Selector");
         add(Registration.INK_CHAMBER.get(), "Ink Chamber");
         add(Registration.PEN.get(), "Pen");
         add(Registration.CARD_BLUEPRINT.get(), "Card Blueprint");
@@ -60,6 +61,7 @@ public class LanguageBuilder {
         add("tooltip", "skills_record.info", "A tool needed for upgrading mining skills card.");
         add("tooltip", "skills_record.contents", "Contents:");
         add("tooltip", "skills_record.press.left_click", "Press Left Click Mouse to cycle through blocks.");
+        add("tooltip", "shape_selector.info", "Need a specific mining shape for your favorite tool? This is where you assign it!");
         add("tooltip", "skill_card.component", "You can use this item to craft any other skill card type.");
         add("tooltip", "skill_card.potion_point", "Potion Points: %s");
         add("tooltip", "skill_card.tier", "Tier: %s");
@@ -81,6 +83,11 @@ public class LanguageBuilder {
         add("gui", "color.blue", "Blue");
         add("gui", "color.indigo", "Indigo");
         add("gui", "color.violet", "Violet");
+        add("gui", "action.set", "Set");
+        add("gui", "action.clear", "Clear");
+        add("gui", "shape_selector.insert", "Insert a tool!");
+        add("gui", "shape_selector.selected", "You have chosen this shape!");
+        add("gui", "shape_selector.blacklisted", "This shape is blacklisted!");
         add("gui", "skills_record.configuration", "Configuration");
         add("gui", "skills_record.option.soon", "Coming Soon...");
         add("gui", "skills_record.option.bg_color", "Background Color");
@@ -127,7 +134,8 @@ public class LanguageBuilder {
         add("advancement", "obtain.card.empty", "Well... This is Useless!");
         add("advancement", "craft.pen", "Isn't this Exquisite?");
         add("advancement", "craft.skills_record", "It's time to take notes!");
-        add("advancement", "craft.card.blueprint", "Ctrl-C + Ctrl-V = Copy-Paste");
+        add("advancement", "craft.card_blueprint", "Ctrl-C + Ctrl-V = Copy-Paste");
+        add("advancement", "craft.shape_selector", "When One Tool Just Isn't Enough!");
         add("advancement", "craft.card.pickaxe", "That's my Geode Gobbler!");
         add("advancement", "craft.card.axe", "Oh, I had an AXEIDENT! Did you get it?");
         add("advancement", "craft.card.shovel", "Gold Rush!");
@@ -145,6 +153,7 @@ public class LanguageBuilder {
         add("challenge", "interact_with_block", "Interact with %s.");
         add("challenge", "various_blocks", "one of these blocks (%s)");
 
+        add("info", "using_tool_shape", "Selected and using the %s shape");
         add("info", "placed_by_entity", "Ineligible block! This block was placed by %s.");
         add("info", "obtain", "Congratulations on learning the excavation skill!");
         add("info", "obtained_already", "You have already obtained this knowledge!");
@@ -158,6 +167,7 @@ public class LanguageBuilder {
         add("info", "required_skill.hoe", "Hoe");
         add("info", "required_skill.all", "All Tools");
 
+        add("argument", "ultimine_shape.unknown", "Unknown ultimine shape '%s'");
         add("argument", "inventory.unknown", "Unknown inventory '%s'");
         add("argument", "challenge.unknown", "Unknown challenge '%s'");
         add("argument", "cards.tier.unknown", "Unknown card tier '%s'");
@@ -178,8 +188,12 @@ public class LanguageBuilder {
         add("command", "set_ability.sender", "You have successfully set the ultimine ability to %s for:");
         add("command", "set_ability.receiver", "Your ultimine ability has been set to %s! (by %s)");
         add("command", "set_ability.already_setted", "The ultimine ability is already set to %s.");
+        add("command", "ultimine_shape.success.add", "You have successfully added the shape (%s) to the blacklist.");
+        add("command", "ultimine_shape.success.remove", "You have successfully removed the shape (%s) from the blacklist.");
+        add("command", "ultimine_shape.included", "The shape (%s) has already been added to the blacklist.");
+        add("command", "ultimine_shape.excluded", "The shape (%s) is not listed in the blacklist.");
 
-        add("key.category", "general", "Ultimine Addition");
+        add("key.category", "general", "FTB Ultimine Addition");
         add(KeyHandler.KEY_OPEN_SKILLS_RECORD, "Open Skills Record");
         add(KeyHandler.KEY_SHOW_PROGRESSION_BAR, "Skills Record: Show Progression Bar");
     }
@@ -202,7 +216,7 @@ public class LanguageBuilder {
     }
 
     private void add(String category, String key, @NotNull String value) {
-        add(String.format("%s.%s.%s", category, UltimineAddition.MOD_ID, key), value);
+        add(String.format("%s.%s.%s", category, FTBUltimineAddition.MOD_ID, key), value);
     }
 
     private void addPotion(String key, String value, @Nullable String potionType) {

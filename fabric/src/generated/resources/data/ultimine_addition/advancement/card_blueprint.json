@@ -45,7 +45,7 @@
       "id": "ultimine_addition:card_blueprint"
     },
     "title": {
-      "translate": "advancement.ultimine_addition.craft.card.blueprint"
+      "translate": "advancement.ultimine_addition.craft.card_blueprint"
     }
   },
   "requirements": [

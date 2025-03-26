@@ -19,7 +19,7 @@
   },
   "display": {
     "announce_to_chat": false,
-    "background": "ultimine_addition:textures/gui/adv_background.png",
+    "background": "ultimine_addition:textures/gui/advancement/adv_background.png",
     "description": {
       "translate": "advancement.ultimine_addition.root.desc"
     },

@@ -12,6 +12,7 @@ dependencies {
 
     modImplementation "curse.maven:ftb-library-forge-404465:$ftblibrary_neoforge_version_id"
     modImplementation "curse.maven:ftb-ultimine-forge-386134:$ftbultimine_neoforge_version_id"
-    modImplementation "curse.maven:mekanism-268560:5574951"
-    modImplementation "curse.maven:mekanism-tools-268567:5574955"
+    modRuntimeOnly "curse.maven:mekanism-268560:5574951"
+    modRuntimeOnly "curse.maven:mekanism-tools-268567:5574955"
+    modRuntimeOnly "curse.maven:building-gadgets-298187:5968587"
 }

@@ -6,8 +6,8 @@ import net.ixdarklord.coolcatlib.api.util.ChatFormattingUtils;
 import net.ixdarklord.ultimine_addition.client.handler.ClientMinerCertificateHandler;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.item.MinerCertificateItem;
-import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.common.network.packet.MinerCertificatePacket;
+import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.common.network.payloads.MinerCertificatePayload;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
@@ -64,7 +64,7 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
     }
 
     public MinerCertificateData sendToClient(ServerPlayer player) {
-        PacketHandler.sendToPlayer(new MinerCertificatePacket(this, this.get()), player);
+        PayloadHandler.sendToPlayer(new MinerCertificatePayload(this, this.get()), player);
         return this;
     }
 

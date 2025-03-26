@@ -5,12 +5,11 @@ import net.fabricmc.api.Environment;
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.AbstractDraggableWidget;
 import net.ixdarklord.coolcatlib.api.util.ColorUtils;
-import net.ixdarklord.ultimine_addition.client.gui.screens.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.gui.tooltip.SkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -34,10 +33,10 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class ConfigurationPanel extends AbstractDraggableWidget {
-    private static final ResourceLocation BACKGROUND_LOCATION = UltimineAddition.getLocation("container/skills_record/configuration/background");
+    private static final ResourceLocation BACKGROUND_LOCATION = FTBUltimineAddition.getLocation("container/skills_record/configuration/background");
     private static final int BUTTON_WIDTH = 45;
     private static final int BUTTON_HEIGHT = 14;
-    private SkillsRecordScreen.BGColor backgroundColor;
+    private SkillsRecordScreen.OverlayColor backgroundColor;
     private boolean isAnimationsEnabled;
     private int progressMode;
 
@@ -198,7 +197,7 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
         ConfigHandler.CLIENT.CHALLENGES_PANEL_POSITION.set(ChallengesInfoPanel.INSTANCE.getPanelPos());
     }
 
-    public SkillsRecordScreen.BGColor getBackgroundColor() {
+    public SkillsRecordScreen.OverlayColor getBackgroundColor() {
         return backgroundColor;
     }
 

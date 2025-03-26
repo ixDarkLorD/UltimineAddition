@@ -15,7 +15,7 @@ import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -36,40 +36,38 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class CardsCommand {
+
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
         var challengeArgument = Commands.argument("challenge_id", ChallengesArgument.data())
-                .then(Commands.literal("in_inventory").then(Commands.argument("slot_index", SlotArgument.slot()).then(Commands.argument("card_holder", CardHolderArgument.slot())
+                .then(Commands.literal("in_inventory").then(Commands.argument("slot_index", SlotArgument.slot()).then(Commands.argument("card_holder", CardHolderArgument.slot(true))
                         .then(Commands.literal("set_point").then(Commands.argument("amount", IntegerArgumentType.integer(0)).executes(context -> updateChallengeValue(context.getSource(), EntityArgument.getPlayers(context, "targets"), ChallengesArgument.getData(context, "challenge_id"), new CardLocation(context), IntegerArgumentType.getInteger(context, "amount"), true))))
                         .then(Commands.literal("add_point").then(Commands.argument("amount", IntegerArgumentType.integer(1)).executes(context -> updateChallengeValue(context.getSource(), EntityArgument.getPlayers(context, "targets"), ChallengesArgument.getData(context, "challenge_id"), new CardLocation(context), IntegerArgumentType.getInteger(context, "amount"), false))))
-                        .then(Commands.literal("accomplish").executes(context -> updateChallengeValue(context.getSource(), EntityArgument.getPlayers(context, "targets"), ChallengesArgument.getData(context, "challenge_id"), new CardLocation(context), null, null)))
+                        .then(Commands.literal("accomplish").executes(context -> updateChallengeValue(context.getSource(), EntityArgument.getPlayers(context, "targets"), ChallengesArgument.getData(context, "challenge_id"), new CardLocation(context), null, false)))
                 )));
 
         var tierArgument = Commands.argument("new_tier", CardTierArgument.tier())
-                .then(Commands.literal("in_inventory").then(Commands.argument("slot_index", SlotArgument.slot()).then(Commands.argument("card_holder", CardHolderArgument.slot())
+                .then(Commands.literal("in_inventory").then(Commands.argument("slot_index", SlotArgument.slot()).then(Commands.argument("card_holder", CardHolderArgument.slot(true))
                         .executes(context -> updateTierValue(context.getSource(), EntityArgument.getPlayers(context, "targets"), CardTierArgument.getTier(context, "new_tier"), new CardLocation(context))))));
 
         if (ServicePlatform.get().slotAPI().isModLoaded()) {
-            challengeArgument.then(Commands.literal("in_%s".formatted(ServicePlatform.get().slotAPI().getAPIName())).then(Commands.argument("card_holder", CardHolderArgument.slot())
+            challengeArgument.then(Commands.literal("in_%s".formatted(ServicePlatform.get().slotAPI().getAPIName())).then(Commands.argument("card_holder", CardHolderArgument.slot(false))
                     .then(Commands.literal("set_point").then(Commands.argument("amount", IntegerArgumentType.integer(0)).executes(context -> updateChallengeValue(context.getSource(), EntityArgument.getPlayers(context, "targets"), ChallengesArgument.getData(context, "challenge_id"), new CardLocation(context), IntegerArgumentType.getInteger(context, "amount"), true))))
                     .then(Commands.literal("add_point").then(Commands.argument("amount", IntegerArgumentType.integer(1)).executes(context -> updateChallengeValue(context.getSource(), EntityArgument.getPlayers(context, "targets"), ChallengesArgument.getData(context, "challenge_id"), new CardLocation(context), IntegerArgumentType.getInteger(context, "amount"), false))))
-                    .then(Commands.literal("accomplish").executes(context -> updateChallengeValue(context.getSource(), EntityArgument.getPlayers(context, "targets"), ChallengesArgument.getData(context, "challenge_id"), new CardLocation(context), null, null))))
+                    .then(Commands.literal("accomplish").executes(context -> updateChallengeValue(context.getSource(), EntityArgument.getPlayers(context, "targets"), ChallengesArgument.getData(context, "challenge_id"), new CardLocation(context), null, false))))
             );
 
-            tierArgument.then(Commands.literal("in_%s".formatted(ServicePlatform.get().slotAPI().getAPIName())).then(Commands.argument("card_holder", CardHolderArgument.slot())
+            tierArgument.then(Commands.literal("in_%s".formatted(ServicePlatform.get().slotAPI().getAPIName())).then(Commands.argument("card_holder", CardHolderArgument.slot(false))
                     .executes(context -> updateTierValue(context.getSource(), EntityArgument.getPlayers(context, "targets"), CardTierArgument.getTier(context, "new_tier"), new CardLocation(context)))));
         }
 
-
-        var command = UltimineAddition.getCommandPrompt(Commands.LEVEL_GAMEMASTERS)
-                .then(Commands.literal("mining_skill_card")
+        FTBUltimineAddition.withCommandPrompt(dispatcher, Commands.LEVEL_GAMEMASTERS, builder ->
+                builder.then(Commands.literal("mining_skill_card")
                         .then(Commands.literal("challenges")
                                 .then(Commands.argument("targets", EntityArgument.players())
                                         .then(challengeArgument)))
                         .then(Commands.literal("change_tier")
                                 .then(Commands.argument("targets", EntityArgument.players())
-                                        .then(tierArgument)))
-                );
-        dispatcher.register(command);
+                                        .then(tierArgument)))));
     }
 
     private static int updateChallengeValue(CommandSourceStack source, @NotNull Collection<ServerPlayer> targets, Pair<ResourceLocation, ChallengesData> cData, CardLocation cardLocation, @Nullable Integer amount, Boolean replaceValue) {
@@ -101,10 +99,13 @@ public class CardsCommand {
                 }
 
                 int oldPoints = challengeHolder.getCurrentPoints();
-                int newPoints = amount == null ? 0 : replaceValue ? amount : oldPoints + amount;
+                Integer newPoints = amount == null ? null : replaceValue ? amount : oldPoints + amount;
 
                 if (!cardData.isChallengeAccomplished(challengeId) || replaceValue) {
-                    cardData.setAmount(challengeId, newPoints).saveData(cardStack);
+                    if (newPoints != null) {
+                        cardData.setAmount(challengeId, newPoints);
+                    } else cardData.accomplishChallenge(challengeId);
+                    cardData.saveData(cardStack);
                     if (recordData == null)
                         cardData.sendToClient(player, cardLocation.inventoryIndex).saveData(cardStack);
                     else
@@ -137,7 +138,7 @@ public class CardsCommand {
             }
         } catch (Exception err) {
             if (Platform.isDevelopmentEnvironment())
-                UltimineAddition.LOGGER.error("Error occurred while executing the command!", err);
+                FTBUltimineAddition.LOGGER.error("Error occurred while executing the command!", err);
         }
         return i;
     }
@@ -196,7 +197,7 @@ public class CardsCommand {
             }
         } catch (Exception err) {
             if (Platform.isDevelopmentEnvironment())
-                UltimineAddition.LOGGER.error("Error occurred!", err);
+                FTBUltimineAddition.LOGGER.error("Error occurred!", err);
         }
         return i;
     }

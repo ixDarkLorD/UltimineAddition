@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.config;
 
 import com.google.common.collect.ImmutableList;
 import dev.ftb.mods.ftbultimine.shape.Shape;
-import net.ixdarklord.ultimine_addition.client.gui.screens.ChallengesInfoPanel;
+import net.ixdarklord.ultimine_addition.client.gui.components.skills_record.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
@@ -21,7 +21,7 @@ public class ConfigHandler {
     public static class CLIENT {
         public static final ModConfigSpec SPEC;
         public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
-        public static final ModConfigSpec.EnumValue<SkillsRecordScreen.BGColor> BACKGROUND_COLOR;
+        public static final ModConfigSpec.EnumValue<SkillsRecordScreen.OverlayColor> BACKGROUND_COLOR;
         public static final ModConfigSpec.ConfigValue<Boolean> ANIMATIONS_MODE;
         public static final ModConfigSpec.IntValue PROGRESS_BAR;
         public static final ModConfigSpec.EnumValue<ChallengesInfoPanel.Panel.Position> CHALLENGES_PANEL_POSITION;
@@ -45,7 +45,7 @@ public class ConfigHandler {
             BACKGROUND_COLOR = BUILDER
                     .comment("Sets the background color of the Skills Record GUI.",
                             "Choose from predefined color options to customize the interface.")
-                    .defineEnum("background_color", SkillsRecordScreen.BGColor.DEFAULT);
+                    .defineEnum("background_color", SkillsRecordScreen.OverlayColor.DEFAULT);
 
             ANIMATIONS_MODE = BUILDER
                     .comment("Enables or disables animations in the Skills Record GUI.",

@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.datagen.particle;
 
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.data.PackOutput;
 
@@ -12,12 +12,12 @@ public class ParticleGenerator extends ParticleProvider {
     @Override
     protected void addParticles() {
         add(Registration.CELEBRATE_PARTICLE.get(),
-                UltimineAddition.getLocation("celebrate"),
-                UltimineAddition.getLocation("diamond_pickaxe"),
-                UltimineAddition.getLocation("diamond_axe"),
-                UltimineAddition.getLocation("celebrate"),
-                UltimineAddition.getLocation("diamond_shovel"),
-                UltimineAddition.getLocation("diamond_hoe"),
-                UltimineAddition.getLocation("celebrate"));
+                FTBUltimineAddition.getLocation("celebrate"),
+                FTBUltimineAddition.getLocation("diamond_pickaxe"),
+                FTBUltimineAddition.getLocation("diamond_axe"),
+                FTBUltimineAddition.getLocation("celebrate"),
+                FTBUltimineAddition.getLocation("diamond_shovel"),
+                FTBUltimineAddition.getLocation("diamond_hoe"),
+                FTBUltimineAddition.getLocation("celebrate"));
     }
 }

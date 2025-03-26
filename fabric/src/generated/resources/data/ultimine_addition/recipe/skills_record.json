@@ -10,22 +10,22 @@
   "group": "ultimine_addition",
   "key": {
     "C": {
-      "item": "ultimine_addition:mining_skill_card_empty"
+      "item": "minecraft:yellow_concrete"
     },
     "I": {
       "item": "minecraft:iron_ingot"
     },
-    "S": {
-      "tag": "minecraft:wooden_slabs"
+    "M": {
+      "item": "ultimine_addition:mining_skill_card_empty"
     },
-    "Y": {
-      "item": "minecraft:yellow_concrete"
+    "N": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    "SIS",
-    "YCY",
-    "SYS"
+    "NIN",
+    "CMC",
+    "NCN"
   ],
   "result": {
     "count": 1,

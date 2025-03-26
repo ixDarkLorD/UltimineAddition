@@ -9,7 +9,6 @@ import java.util.List;
 
 @Mixin(ShapeRegistry.class)
 public interface ShapeRegistryAccessor {
-
     @Accessor("LIST")
     static List<Shape> getShapesList() {
         throw new AssertionError();
@@ -17,11 +16,6 @@ public interface ShapeRegistryAccessor {
 
     @Accessor("defaultShape")
     static Shape getDefaultShape() {
-        throw new AssertionError();
-    }
-
-    @Accessor("defaultShape")
-    static void setDefaultShape(Shape defaultShape) {
         throw new AssertionError();
     }
 }

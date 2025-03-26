@@ -11,8 +11,8 @@ import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSa
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
-import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.common.network.packet.SyncChallengesPacket;
+import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.common.network.payloads.SyncChallengesPayload;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
@@ -41,7 +41,7 @@ public class ChallengesEvents {
 
         DatapackEvents.SYNC.register((player, isJoined) -> {
             if (!ChallengesManager.INSTANCE.getAllChallenges().isEmpty()) {
-                PacketHandler.sendToPlayer(new SyncChallengesPacket(ChallengesManager.INSTANCE.getAllChallenges()), player);
+                PayloadHandler.sendToPlayer(new SyncChallengesPayload(ChallengesManager.INSTANCE.getAllChallenges()), player);
             }
         });
     }

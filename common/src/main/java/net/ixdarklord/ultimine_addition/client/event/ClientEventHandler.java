@@ -5,11 +5,11 @@ import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
 import dev.architectury.event.events.client.ClientTooltipEvent;
 import net.ixdarklord.ultimine_addition.client.command.SkillsRecordDebugCommand;
-import net.ixdarklord.ultimine_addition.client.gui.screens.ChallengesInfoPanel;
+import net.ixdarklord.ultimine_addition.client.gui.components.skills_record.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.ItemTooltipEvents;
 import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
-import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.common.network.packet.SkillsRecordPacket;
+import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.common.network.payloads.SkillsRecordPayload;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.client.Minecraft;
@@ -24,7 +24,7 @@ public class ClientEventHandler {
                     && !ServicePlatform.get().slotAPI().getSkillsRecordItem(instance.player).isEmpty()
                     && Minecraft.getInstance().screen == null
                     && KeyHandler.KEY_OPEN_SKILLS_RECORD.consumeClick()) {
-                PacketHandler.sendToServer(new SkillsRecordPacket.Open());
+                PayloadHandler.sendToServer(new SkillsRecordPayload.Open());
             }
         });
         ClientCommandRegistrationEvent.EVENT.register(SkillsRecordDebugCommand::register);

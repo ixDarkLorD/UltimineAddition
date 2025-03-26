@@ -5,9 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import dev.architectury.platform.Platform;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,19 +20,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.Type.*;
+import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
 public class ChallengesManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     public static ChallengesManager INSTANCE = new ChallengesManager();
-    public static final Logger LOGGER = LoggerFactory.getLogger(UltimineAddition.MOD_NAME + "/ChallengesManager");
     private Map<ResourceLocation, ChallengesData> challenges = new TreeMap<>();
 
     public ChallengesManager() {
@@ -71,10 +68,10 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
             }
         }
         if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
-            ChallengesManager.LOGGER.debug("/----------[Challenge Tracker]----------/");
+            LOGGER.debug("/----------[Challenge Tracker]----------/");
             LOGGER.debug("| Added Challenges...");
             randomValues.forEach((location, data) -> LOGGER.debug("|> ID: {}", location));
-            ChallengesManager.LOGGER.debug("/----------------------------------------/");
+            LOGGER.debug("/----------------------------------------/");
         }
         return randomValues;
     }

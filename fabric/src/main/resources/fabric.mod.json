@@ -25,7 +25,7 @@
     "jei_mod_plugin": ["net.ixdarklord.ultimine_addition.integration.jei.JEIIntegration"]
   },
   "mixins": [
-    "${modid}.mixins.json",
+    "${modid}.fabric.mixins.json",
     "${modid}.common.mixins.json"
   ],
   "accessWidener" : "${modid}.accesswidener",

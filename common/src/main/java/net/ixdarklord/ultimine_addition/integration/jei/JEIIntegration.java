@@ -8,7 +8,7 @@ import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -22,7 +22,7 @@ public class JEIIntegration implements IModPlugin {
 
     @Override
     public @NotNull ResourceLocation getPluginUid() {
-        return UltimineAddition.getLocation("jei_integration");
+        return FTBUltimineAddition.getLocation("jei_integration");
     }
 
     @Override

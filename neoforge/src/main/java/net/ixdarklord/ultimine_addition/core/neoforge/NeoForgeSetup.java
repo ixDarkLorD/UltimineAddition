@@ -8,7 +8,7 @@ import net.ixdarklord.ultimine_addition.common.event.impl.ConfigLifecycleEvent;
 import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
 import net.ixdarklord.ultimine_addition.config.ConfigInfo;
 import net.ixdarklord.ultimine_addition.core.CommonSetup;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
 import net.ixdarklord.ultimine_addition.util.ToolAction;
 import net.minecraft.client.Minecraft;
@@ -32,13 +32,13 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.function.Supplier;
 
-@Mod(UltimineAddition.MOD_ID)
+@Mod(FTBUltimineAddition.MOD_ID)
 public class NeoForgeSetup {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
-            DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, UltimineAddition.MOD_ID);
+            DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, FTBUltimineAddition.MOD_ID);
 
     private static final DeferredRegister<MapCodec<? extends ICondition>> CONDITION_CODECS =
-            DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, UltimineAddition.MOD_ID);
+            DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, FTBUltimineAddition.MOD_ID);
 
     public static final Supplier<AttachmentType<PlayerAbilityData>> PLAYER_ABILITY_DATA = ATTACHMENT_TYPES.register(
             "player_ability", () -> AttachmentType.builder(PlayerAbilityData::create).serialize(PlayerAbilityData.CODEC).build()
@@ -51,7 +51,7 @@ public class NeoForgeSetup {
         ATTACHMENT_TYPES.register(bus);
     }
 
-    @EventBusSubscriber(modid = UltimineAddition.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = FTBUltimineAddition.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
     private static class EventBus {
         @SubscribeEvent
         private static void onCommonSetup(FMLCommonSetupEvent event) {
@@ -86,7 +86,7 @@ public class NeoForgeSetup {
         }
     }
 
-    @EventBusSubscriber(modid = UltimineAddition.MOD_ID)
+    @EventBusSubscriber(modid = FTBUltimineAddition.MOD_ID)
     public static class Event {
         @SubscribeEvent
         private static void onTagsUpdate(TagsUpdatedEvent event) {

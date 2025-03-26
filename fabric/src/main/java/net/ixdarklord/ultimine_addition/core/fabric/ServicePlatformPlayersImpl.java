@@ -2,8 +2,8 @@ package net.ixdarklord.ultimine_addition.core.fabric;
 
 import net.ixdarklord.ultimine_addition.common.data.player.IPlayerData;
 import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
-import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.common.network.packet.PlayerAbilityPacket;
+import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.common.network.payloads.PlayerAbilityPayload;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,17 +23,8 @@ public final class ServicePlatformPlayersImpl implements ServicePlatform.Players
     public void setPlayerUltimineCapability(Player player, boolean state) {
         PlayerAbilityData data = ((IPlayerData) player).ua$getUltimineData().setAbility(state);
         if (player instanceof ServerPlayer serverPlayer) {
-            PacketHandler.sendToPlayer(new PlayerAbilityPacket(data.getAbility()), serverPlayer);
+            PayloadHandler.sendToPlayer(new PlayerAbilityPayload(data.getAbility()), serverPlayer);
         }
-    }
-
-    @Override
-    @SuppressWarnings("CommentedOutCode")
-    public double getReachAttribute(Player player) {
-        /*if (FabricLoader.getInstance().isModLoaded("reach-entity-attributes")) {
-            return ReachEntityAttributes.getReachDistance(player, value);
-        }*/
-        return player.isCreative() ? 5.0 : 4.5;
     }
 
     @Override

@@ -13,7 +13,7 @@ import net.ixdarklord.ultimine_addition.client.handler.ItemRendererHandler;
 import net.ixdarklord.ultimine_addition.client.renderer.item.IItemRenderer;
 import net.ixdarklord.ultimine_addition.client.renderer.item.UAItemRenderer;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
@@ -204,7 +204,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         }
 
         public ResourceLocation getRegistryId() {
-            return UltimineAddition.getLocation("mining_skill_card_%s".formatted(id));
+            return FTBUltimineAddition.getLocation("mining_skill_card_%s".formatted(id));
         }
 
         public List<String> getRequiredTools() {

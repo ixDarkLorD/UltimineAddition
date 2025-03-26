@@ -6,6 +6,7 @@ import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.SlotRange;
 import net.minecraft.world.inventory.SlotRanges;
@@ -90,7 +91,8 @@ public class ItemUtils {
     }
 
     public static boolean checkTargetedBlock(Player player) {
-        HitResult hit = player.pick(ServicePlatform.get().players().getReachAttribute(player), 1.0F, false);
+        double distance = player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE);
+        HitResult hit = player.pick(player.isCreative() ? distance + (double)0.5F : distance, 1.0F, false);
         if (!(hit instanceof BlockHitResult hitResult)) return false;
 
         BlockState blockState = player.level().getBlockState(hitResult.getBlockPos());
@@ -98,9 +100,14 @@ public class ItemUtils {
         return ServicePlatform.get().players().isCorrectToolForBlock(tool, blockState);
     }
 
-    public static boolean isItemInHandNotTools(Player player) {
-        return !(getItemInHand(player, true).getItem() instanceof DiggerItem);
+    public static boolean isItemInHandTool(Player player) {
+        return isToolItem(getItemInHand(player, true));
     }
+
+    public static boolean isToolItem(ItemStack stack) {
+        return stack.getItem() instanceof DiggerItem;
+    }
+
     public static boolean isItemInHandCustomCardValid(Player player) {
         return FTBUltimineIntegration.getCustomCardTypes(player).stream()
                 .map(MiningSkillCardItem.Type::utilizeRequiredTools)

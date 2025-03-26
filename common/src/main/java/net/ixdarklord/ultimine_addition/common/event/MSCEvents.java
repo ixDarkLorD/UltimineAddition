@@ -16,7 +16,7 @@ import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationE
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.ixdarklord.ultimine_addition.util.ToolAction;
 import net.ixdarklord.ultimine_addition.util.ToolActions;
@@ -108,7 +108,7 @@ public class MSCEvents {
             if (oldCardData.isCreativeItem()) {
                 MiningSkillCardData newCardData = MiningSkillCardData.create(cardItem.getType()).setDataHolder(itemStack);
                 newCardData.setTier(oldCardData.getTier()).initChallenges().saveData(itemStack);
-                UltimineAddition.LOGGER.debug("[Data Tracker] Card UUID have been changed! {}", "[O: %s | N: %s]".formatted(oldCardData.getUUID(), newCardData.getUUID()));
+                FTBUltimineAddition.LOGGER.debug("[Data Tracker] Card UUID have been changed! {}", "[O: %s | N: %s]".formatted(oldCardData.getUUID(), newCardData.getUUID()));
                 needSync = true;
             }
             if (MiningSkillCardData.loadData(itemStack).validateChallenges())
@@ -152,7 +152,7 @@ public class MSCEvents {
                 }
 
                 if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get()) {
-                    UltimineAddition.LOGGER.debug("[Challenge Tracker] Action: {}, Is Task Succeed: {}, Block: {}", toolAction.name(), taskProcess.getFirst(), originalState.getBlock().getName().getString());
+                    FTBUltimineAddition.LOGGER.debug("[Challenge Tracker] Action: {}, Is Task Succeed: {}, Block: {}", toolAction.name(), taskProcess.getFirst(), originalState.getBlock().getName().getString());
                 }
 
                 if (taskProcess.getFirst()) {

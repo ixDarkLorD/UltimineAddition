@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.core.neoforge;
 
 import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
-import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.common.network.packet.PlayerAbilityPacket;
+import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.common.network.payloads.PlayerAbilityPayload;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,13 +26,8 @@ public class ServicePlatformPlayersImpl implements ServicePlatform.Players {
         PlayerAbilityData data = PlayerAbilityData.create();
         player.setData(NeoForgeSetup.PLAYER_ABILITY_DATA, data.setAbility(state));
         if (player instanceof ServerPlayer serverPlayer) {
-            PacketHandler.sendToPlayer(new PlayerAbilityPacket(data.getAbility()), serverPlayer);
+            PayloadHandler.sendToPlayer(new PlayerAbilityPayload(data.getAbility()), serverPlayer);
         }
-    }
-
-    @Override
-    public double getReachAttribute(Player player) {
-        return player.isCreative() ? 5.0 : 4.5;
     }
 
     @Override

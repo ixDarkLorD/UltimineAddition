@@ -14,8 +14,8 @@ import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSa
 import net.ixdarklord.ultimine_addition.common.item.PenItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
-import net.ixdarklord.ultimine_addition.common.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.common.network.packet.SkillsRecordPacket;
+import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.common.network.payloads.SkillsRecordPayload;
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
@@ -46,6 +46,8 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
 public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     public static final Codec<SkillsRecordData> CODEC;
@@ -155,29 +157,29 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                     boolean isBlockPlacedByEntity = ConfigHandler.SERVER.IS_PLACED_BY_ENTITY_CONDITION.get() && hasCorrectGamemode && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY) && savedData.isBlockPlacedByEntity(pos);
 
                     if (ConfigHandler.SERVER.CHALLENGE_ACTIONS_LOGGER.get()) {
-                        ChallengesManager.LOGGER.debug("/----------[Challenge Tracker]----------/");
-                        ChallengesManager.LOGGER.debug("Challenge Id: {}", identifier.getId());
-                        ChallengesManager.LOGGER.debug("hasCorrectGamemode: {}", hasCorrectGamemode);
-                        ChallengesManager.LOGGER.debug("isMissingRequiredItems: {}", isMissingRequiredItems);
-                        ChallengesManager.LOGGER.debug("notEnoughInk: {}", notEnoughInk);
-                        ChallengesManager.LOGGER.debug("isChallengeAccomplished: {}", isChallengeAccomplished);
-                        ChallengesManager.LOGGER.debug("isCorrectAction: {}", isCorrectAction);
-                        ChallengesManager.LOGGER.debug("isValidBlock: {}", isValidBlock);
-                        ChallengesManager.LOGGER.debug("isCorrectTool: {}", isCorrectTool);
-                        ChallengesManager.LOGGER.debug("isBlockPlacedByEntity: {}", isBlockPlacedByEntity);
-                        ChallengesManager.LOGGER.debug("/----------------------------------------/");
+                        LOGGER.debug("/----------[Challenge Tracker]----------/");
+                        LOGGER.debug("Challenge Id: {}", identifier.getId());
+                        LOGGER.debug("hasCorrectGamemode: {}", hasCorrectGamemode);
+                        LOGGER.debug("isMissingRequiredItems: {}", isMissingRequiredItems);
+                        LOGGER.debug("notEnoughInk: {}", notEnoughInk);
+                        LOGGER.debug("isChallengeAccomplished: {}", isChallengeAccomplished);
+                        LOGGER.debug("isCorrectAction: {}", isCorrectAction);
+                        LOGGER.debug("isValidBlock: {}", isValidBlock);
+                        LOGGER.debug("isCorrectTool: {}", isCorrectTool);
+                        LOGGER.debug("isBlockPlacedByEntity: {}", isBlockPlacedByEntity);
+                        LOGGER.debug("/----------------------------------------/");
                     }
 
                     if (!isMissingRequiredItems && !notEnoughInk && !isChallengeAccomplished && isCorrectAction && isValidBlock && isCorrectTool && isBlockPlacedByEntity) {
                         savedData.getChunkEntries().forEach((chunkPos, chunkEntries) -> {
                             var list = chunkEntries.stream()
-                                    .filter(blockEntry -> !blockEntry.placedBlocks().stream().filter(blockInfo -> blockInfo.pos.equals(pos)).toList().isEmpty())
+                                    .filter(blockEntry -> !blockEntry.placedBlocks().stream().filter(blockInfo -> blockInfo.pos().equals(pos)).toList().isEmpty())
                                     .toList();
 
                             if (!list.isEmpty()) {
                                 IneligibleBlocksSavedData.BlockEntry blockEntry = list.getFirst();
                                 MutableComponent component = Component.literal("[").append(SkillsRecordItem.TITLE.copy().withStyle(ChatFormatting.YELLOW)).append("] ").withStyle(ChatFormatting.GRAY);
-                                MutableComponent info = Component.translatable("info.ultimine_addition.placed_by_entity", Component.translatable("entity.%s.%s".formatted(blockEntry.entityId().getNamespace(), blockEntry.entityId().getPath()))).withStyle(ChatFormatting.RED);
+                                MutableComponent info = Component.translatable("info.ultimine_addition.placed_by_entity", Component.translatable("entity.%s.%s".formatted(blockEntry.placerData().entityId().getNamespace(), blockEntry.placerData().entityId().getPath()))).withStyle(ChatFormatting.RED);
                                 player.displayClientMessage(component.append(info), true);
                             }
                         });
@@ -308,7 +310,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     }
 
     public SkillsRecordData sendToClient(ServerPlayer player, int slotIndex) {
-        PacketHandler.sendToPlayer(new SkillsRecordPacket.SyncData(Env.CLIENT, slotIndex, this), player);
+        PayloadHandler.sendToPlayer(new SkillsRecordPayload.SyncData(Env.CLIENT, slotIndex, this), player);
         return this;
     }
 
@@ -318,7 +320,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
     }
 
     public SkillsRecordData sendToServer(int slotIndex) {
-        PacketHandler.sendToServer(new SkillsRecordPacket.SyncData(Env.SERVER, slotIndex, this));
+        PayloadHandler.sendToServer(new SkillsRecordPayload.SyncData(Env.SERVER, slotIndex, this));
         return this;
     }
 

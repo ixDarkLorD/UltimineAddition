@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_card_blueprint": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ultimine_addition:card_blueprint"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "ultimine_addition:shape_selector"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_card_blueprint"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "ultimine_addition:shape_selector"
+    ]
+  }
+}

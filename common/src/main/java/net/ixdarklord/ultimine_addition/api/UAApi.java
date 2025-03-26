@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.api;
 
 import com.google.common.base.Stopwatch;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class UAApi {
-    private final static Logger LOGGER = LogManager.getLogger(UltimineAddition.MOD_NAME + "/API");
+    private final static Logger LOGGER = LogManager.getLogger(FTBUltimineAddition.MOD_NAME + "/API");
     private final static Collection<IUAPlugin> plugins = new HashSet<>();
 
     public static void init() {

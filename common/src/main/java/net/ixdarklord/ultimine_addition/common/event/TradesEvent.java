@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.common.event;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.registry.level.entity.trade.TradeRegistry;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.ItemCost;
@@ -16,7 +16,7 @@ import static net.ixdarklord.ultimine_addition.config.ConfigHandler.SERVER.VILLA
 public class TradesEvent {
     public static void init() {
         LifecycleEvent.SERVER_BEFORE_START.register(minecraftServer -> {
-            UltimineAddition.LOGGER.debug("[Trade Tracker] Trades have been registered!");
+            FTBUltimineAddition.LOGGER.debug("[Trade Tracker] Trades have been registered!");
             TradeRegistry.registerVillagerTrade(VillagerProfession.TOOLSMITH, VILLAGER_CARD_TRADE_LEVEL.get(), (trader, rand) ->
                     new MerchantOffer(
                             new ItemCost(Items.EMERALD, rand.nextIntBetweenInclusive(CARD_TRADE_PRICE.getValue().getFirst(), CARD_TRADE_PRICE.getValue().getLast())),

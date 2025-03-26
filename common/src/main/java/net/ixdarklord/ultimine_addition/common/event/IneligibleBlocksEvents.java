@@ -7,6 +7,7 @@ import dev.architectury.event.events.common.TickEvent;
 import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSavedData;
 import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationEvent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,9 +21,10 @@ public class IneligibleBlocksEvents {
 
         BlockEvent.PLACE.register((level, pos, state, placer) -> {
             if (level instanceof ServerLevel serverLevel) {
+                if (state.is(Blocks.AIR)) return EventResult.pass();
                 var data = IneligibleBlocksSavedData.getOrCreate(serverLevel);
                 if (!i.get() && placer != null) {
-                    data.add(placer, new IneligibleBlocksSavedData.BlockInfo(state, pos));
+                    data.add(placer, new IneligibleBlocksSavedData.BlockInfo(pos, state));
                 }
                 i.set(false);
             }
@@ -36,6 +38,7 @@ public class IneligibleBlocksEvents {
             }
             return EventResult.pass();
         });
+
         TickEvent.SERVER_LEVEL_PRE.register(instance -> IneligibleBlocksSavedData.getOrCreate(instance).validateBlocks(instance));
     }
 }

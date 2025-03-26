@@ -6,8 +6,8 @@ import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.recipe.builder.ItemStorageDataRecipeBuilder;
 import net.ixdarklord.ultimine_addition.datagen.recipe.builder.MCRecipeBuilder;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
@@ -37,14 +37,14 @@ public class RecipeGenerator extends FabricRecipeProvider {
                 .pattern("ALA")
                 .pattern("LPL")
                 .pattern("ALA")
-                .group(UltimineAddition.MOD_ID)
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_amethyst_shard", inventoryTrigger(ItemPredicate.Builder.item().of(Items.AMETHYST_SHARD).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_EMPTY.get(), 2)
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
                 .requires(Registration.CARD_BLUEPRINT.get())
-                .group(UltimineAddition.MOD_ID)
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
@@ -52,40 +52,52 @@ public class RecipeGenerator extends FabricRecipeProvider {
         MCRecipeBuilder.create(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_PICKAXE.get())
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
                 .requires(ItemTags.PICKAXES)
-                .group(UltimineAddition.MOD_ID)
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
         MCRecipeBuilder.create(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_AXE.get())
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
                 .requires(ItemTags.AXES)
-                .group(UltimineAddition.MOD_ID)
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
         MCRecipeBuilder.create(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_SHOVEL.get())
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
                 .requires(ItemTags.SHOVELS)
-                .group(UltimineAddition.MOD_ID)
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
         MCRecipeBuilder.create(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_HOE.get())
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
                 .requires(ItemTags.HOES)
-                .group(UltimineAddition.MOD_ID)
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Registration.SKILLS_RECORD.get())
-                .define('S', ItemTags.WOODEN_SLABS)
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Registration.SHAPE_SELECTOR.get())
+                .define('N', Items.IRON_NUGGET)
                 .define('I', Items.IRON_INGOT)
-                .define('Y', Items.YELLOW_CONCRETE)
-                .define('C', Registration.MINING_SKILL_CARD_EMPTY.get())
-                .pattern("SIS")
-                .pattern("YCY")
-                .pattern("SYS")
-                .group(UltimineAddition.MOD_ID)
+                .define('C', Items.GRAY_CONCRETE)
+                .define('M', Registration.CARD_BLUEPRINT.get())
+                .pattern("NIN")
+                .pattern("CMC")
+                .pattern("NCN")
+                .group(FTBUltimineAddition.MOD_ID)
+                .unlockedBy("has_card_blueprint", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.CARD_BLUEPRINT.get()).build()))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Registration.SKILLS_RECORD.get())
+                .define('N', Items.IRON_NUGGET)
+                .define('I', Items.IRON_INGOT)
+                .define('C', Items.YELLOW_CONCRETE)
+                .define('M', Registration.MINING_SKILL_CARD_EMPTY.get())
+                .pattern("NIN")
+                .pattern("CMC")
+                .pattern("NCN")
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
@@ -98,7 +110,7 @@ public class RecipeGenerator extends FabricRecipeProvider {
                 .pattern("INI")
                 .pattern("RGB")
                 .pattern("INI")
-                .group(UltimineAddition.MOD_ID)
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_skills_record", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.SKILLS_RECORD.get()).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
@@ -110,7 +122,7 @@ public class RecipeGenerator extends FabricRecipeProvider {
                 .pattern(" GS")
                 .pattern("GCG")
                 .pattern("IG ")
-                .group(UltimineAddition.MOD_ID)
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_ink_chamber", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.INK_CHAMBER.get()).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
@@ -118,9 +130,9 @@ public class RecipeGenerator extends FabricRecipeProvider {
                 .storage("ink_chamber")
                 .requires(ModItemTags.MORE_VALUABLE_PIGMENT, 50)
                 .requires(ModItemTags.LESS_VALUABLE_PIGMENT, 10)
-                .group(UltimineAddition.MOD_ID)
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_pen", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.PEN.get()).build()))
-                .save(withConditions(output, new LegacyModeCondition(false)), UltimineAddition.getLocation("refill"));
+                .save(withConditions(output, new LegacyModeCondition(false)), FTBUltimineAddition.getLocation("refill"));
 
         MCRecipeBuilder.create(RecipeCategory.MISC, Registration.MINER_CERTIFICATE.get())
                 .requires(Items.PAPER)
@@ -128,7 +140,7 @@ public class RecipeGenerator extends FabricRecipeProvider {
                 .requires(Registration.MINING_SKILL_CARD_AXE.get(), MiningSkillCardItem.Tier.Mastered)
                 .requires(Registration.MINING_SKILL_CARD_SHOVEL.get(), MiningSkillCardItem.Tier.Mastered)
                 .requires(Registration.MINING_SKILL_CARD_HOE.get(), MiningSkillCardItem.Tier.Mastered)
-                .group(UltimineAddition.MOD_ID)
+                .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_skills_record", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.SKILLS_RECORD.get()).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
@@ -140,6 +152,6 @@ public class RecipeGenerator extends FabricRecipeProvider {
                 .pattern("2P3")
                 .pattern(" 4 ")
                 .unlockedBy("has_miner_certificate", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINER_CERTIFICATE.get()).build()))
-                .save(withConditions(output, new LegacyModeCondition(true)), UltimineAddition.getLocation("miner_certificate_legacy"));
+                .save(withConditions(output, new LegacyModeCondition(true)), FTBUltimineAddition.getLocation("miner_certificate_legacy"));
     }
 }

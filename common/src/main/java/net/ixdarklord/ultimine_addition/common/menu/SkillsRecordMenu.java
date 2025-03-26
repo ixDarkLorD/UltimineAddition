@@ -8,9 +8,9 @@ import net.ixdarklord.ultimine_addition.common.menu.slot.CustomSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.MiningSkillCardSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.PaperSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.PenSlot;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -70,6 +70,7 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
     public @NotNull ItemStack quickMoveStack(@NotNull Player player, int index) {
         Slot sourceSlot = slots.get(index);
         if (!sourceSlot.hasItem()) return ItemStack.EMPTY;
+
         ItemStack sourceStack = sourceSlot.getItem();
         ItemStack copyOfSourceStack = sourceStack.copy();
 
@@ -82,7 +83,7 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
                 return ItemStack.EMPTY;
             }
         } else {
-            UltimineAddition.LOGGER.error("Invalid slotIndex:{}", index);
+            FTBUltimineAddition.LOGGER.error("Invalid slotIndex:{}", index);
             return ItemStack.EMPTY;
         }
 

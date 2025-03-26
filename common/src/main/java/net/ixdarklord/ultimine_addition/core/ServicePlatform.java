@@ -30,8 +30,6 @@ public interface ServicePlatform {
 
         void setPlayerUltimineCapability(Player player, boolean state);
 
-        double getReachAttribute(Player player);
-
         boolean isCorrectToolForBlock(ItemStack stack, BlockState blockState);
 
         boolean isToolPaxel(ItemStack stack);

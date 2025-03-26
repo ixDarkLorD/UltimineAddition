@@ -9,6 +9,7 @@ output/
 bin/
 libs/
 .cache/
+build_numbers.json
 
 .classpath
 .project

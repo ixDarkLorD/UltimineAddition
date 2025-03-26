@@ -1,12 +1,13 @@
 package net.ixdarklord.ultimine_addition.core.neoforge;
 
+import net.ixdarklord.ultimine_addition.client.gui.screens.ShapeSelectorScreen;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.gui.tooltip.ClientSkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.client.gui.tooltip.SkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.client.particle.CelebrateParticle;
 import net.ixdarklord.ultimine_addition.core.ClientSetup;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -16,13 +17,13 @@ import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactori
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
-@Mod(value = UltimineAddition.MOD_ID, dist = Dist.CLIENT)
+@Mod(value = FTBUltimineAddition.MOD_ID, dist = Dist.CLIENT)
 public class NeoForgeClientSetup {
     public NeoForgeClientSetup() {
         ClientSetup.init();
     }
 
-    @EventBusSubscriber(modid = UltimineAddition.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = FTBUltimineAddition.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class EventBus {
         @SubscribeEvent
         private static void onClientSetup(FMLClientSetupEvent event) {
@@ -37,6 +38,7 @@ public class NeoForgeClientSetup {
         @SubscribeEvent
         private static void onMenuScreensRegister(RegisterMenuScreensEvent event) {
             event.register(Registration.SKILLS_RECORD_CONTAINER.get(), SkillsRecordScreen::new);
+            event.register(Registration.SHAPE_SELECTOR_CONTAINER.get(), ShapeSelectorScreen::new);
         }
 
         @SubscribeEvent

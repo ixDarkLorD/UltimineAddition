@@ -98,7 +98,7 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                         if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_HOE.getId()).orElseThrow())) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.hoe");
                         }
-                    } else if (ItemUtils.isItemInHandNotTools(player)) {
+                    } else if (!ItemUtils.isItemInHandTool(player)) {
                         requiredTool = Component.translatable("info.ultimine_addition.required_skill.all");
                     }
 
@@ -172,6 +172,15 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
         return FTBUltimine.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
     }
 
+    public static Shape getShape(String shapeId) {
+        for (Shape shape : ShapeRegistryAccessor.getShapesList()) {
+            if (shape.getName().equals(shapeId)) {
+                return shape;
+            }
+        }
+        return null;
+    }
+
     public static List<Shape> getEnabledShapes() {
         return ShapeRegistryAccessor.getShapesList().stream()
                 .filter(shape -> !ConfigHandler.SERVER.BLACKLISTED_SHAPES.get().contains(shape.getName()))
@@ -185,5 +194,15 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
             idx -= getEnabledShapes().size();
         }
         return idx >= 0 && idx < getEnabledShapes().size() ? getEnabledShapes().get(idx) : ShapeRegistryAccessor.getDefaultShape();
+    }
+
+    public static boolean hasToolWithShape(Player player) {
+        ItemStack stack = player.getMainHandItem();
+        return stack.has(Registration.SELECTED_SHAPE_COMPONENT.get());
+    }
+
+    public static Shape getToolShape(Player player) {
+        ItemStack stack = player.getMainHandItem();
+        return Objects.requireNonNull(stack.get(Registration.SELECTED_SHAPE_COMPONENT.get())).shape();
     }
 }

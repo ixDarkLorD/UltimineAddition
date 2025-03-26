@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Blocks;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static net.ixdarklord.ultimine_addition.core.UltimineAddition.getLocation;
+import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.getLocation;
 
 public class ChallengeGenerator extends ChallengeProvider {
 

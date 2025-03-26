@@ -17,8 +17,8 @@ import net.ixdarklord.ultimine_addition.common.event.impl.ConfigLifecycleEvent;
 import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
 import net.ixdarklord.ultimine_addition.config.ConfigInfo;
 import net.ixdarklord.ultimine_addition.core.CommonSetup;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
 import net.ixdarklord.ultimine_addition.util.ToolAction;
 import net.ixdarklord.ultimine_addition.util.ToolActions;
@@ -50,21 +50,21 @@ public class FabricSetup implements ModInitializer {
     }
 
     private void initEvents() {
-        NeoForgeModConfigEvents.loading(UltimineAddition.MOD_ID).register(config ->
+        NeoForgeModConfigEvents.loading(FTBUltimineAddition.MOD_ID).register(config ->
                 ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
                         new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
                         ConfigLifecycleEvent.ConfigUpdateType.LOADING
                 )
         );
 
-        NeoForgeModConfigEvents.reloading(UltimineAddition.MOD_ID).register(config ->
+        NeoForgeModConfigEvents.reloading(FTBUltimineAddition.MOD_ID).register(config ->
                 ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
                         new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
                         ConfigLifecycleEvent.ConfigUpdateType.RELOADING
                 )
         );
 
-        NeoForgeModConfigEvents.unloading(UltimineAddition.MOD_ID).register(config ->
+        NeoForgeModConfigEvents.unloading(FTBUltimineAddition.MOD_ID).register(config ->
                 ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
                         new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
                         ConfigLifecycleEvent.ConfigUpdateType.UNLOADING

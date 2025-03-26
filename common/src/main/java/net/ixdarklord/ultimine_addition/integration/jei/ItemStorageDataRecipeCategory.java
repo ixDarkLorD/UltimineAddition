@@ -23,7 +23,7 @@ import net.ixdarklord.ultimine_addition.common.item.StorageDataAbstractItem;
 import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.DataIngredient;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -54,9 +54,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorageDataRecipe> {
-    public static final ResourceLocation TEXTURES = UltimineAddition.getGuiTexture("jei/item_storage_data_recipe", "png");
+    public static final ResourceLocation TEXTURES = FTBUltimineAddition.getGuiTexture("jei/item_storage_data_recipe", "png");
     public static final RecipeType<ItemStorageDataRecipe> RECIPE_TYPE =
-            RecipeType.create(UltimineAddition.MOD_ID, "item_storage_data", ItemStorageDataRecipe.class);
+            RecipeType.create(FTBUltimineAddition.MOD_ID, "item_storage_data", ItemStorageDataRecipe.class);
     private final IDrawable background;
     private final ITickTimer timer;
     private Component title;

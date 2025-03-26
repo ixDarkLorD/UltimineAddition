@@ -1,8 +1,8 @@
-package net.ixdarklord.ultimine_addition.common.network.packet;
+package net.ixdarklord.ultimine_addition.common.network.payloads;
 
 import dev.architectury.networking.NetworkManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,15 +12,15 @@ import net.minecraft.world.inventory.BrewingStandMenu;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public record MiningSkillCardPacket(int slotIndex, MiningSkillCardData data) implements CustomPacketPayload {
-    public static final Type<MiningSkillCardPacket> TYPE = new Type<>(UltimineAddition.getLocation("mining_skill_card_sync_s2c"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, MiningSkillCardPacket> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.INT, MiningSkillCardPacket::slotIndex,
-            MiningSkillCardData.STREAM_CODEC, MiningSkillCardPacket::data,
-            MiningSkillCardPacket::new
+public record MiningSkillCardPayload(int slotIndex, MiningSkillCardData data) implements CustomPacketPayload {
+    public static final Type<MiningSkillCardPayload> TYPE = new Type<>(FTBUltimineAddition.getLocation("mining_skill_card_sync_s2c"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MiningSkillCardPayload> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT, MiningSkillCardPayload::slotIndex,
+            MiningSkillCardData.STREAM_CODEC, MiningSkillCardPayload::data,
+            MiningSkillCardPayload::new
     );
 
-    public static void handle(MiningSkillCardPacket message, NetworkManager.PacketContext context) {
+    public static void handle(MiningSkillCardPayload message, NetworkManager.PacketContext context) {
         context.queue(() -> {
             Player player = context.getPlayer();
             ItemStack stack = player.getSlot(message.slotIndex).get();
@@ -37,7 +37,7 @@ public record MiningSkillCardPacket(int slotIndex, MiningSkillCardData data) imp
     }
 
     public record SyncBrewing(ItemStack stack) implements CustomPacketPayload {
-        public static final Type<SyncBrewing> TYPE = new Type<>(UltimineAddition.getLocation("mining_skill_card_sync_brewing"));
+        public static final Type<SyncBrewing> TYPE = new Type<>(FTBUltimineAddition.getLocation("mining_skill_card_sync_brewing"));
         public static final StreamCodec<RegistryFriendlyByteBuf, SyncBrewing> STREAM_CODEC = StreamCodec.composite(
                 ItemStack.STREAM_CODEC, SyncBrewing::stack,
                 SyncBrewing::new

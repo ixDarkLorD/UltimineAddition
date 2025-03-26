@@ -10,6 +10,8 @@ public class ModItems {
             .rarity(Rarity.EPIC));
     public static final SkillsRecordItem SKILLS_RECORD = new SkillsRecordItem(new Item.Properties()
             .stacksTo(1));
+    public static final ShapeSelectorItem SHAPE_SELECTOR = new ShapeSelectorItem(new Item.Properties()
+            .stacksTo(1));
     public static final ModernItem INK_CHAMBER = new ModernItem(new Item.Properties()
             .stacksTo(64), ComponentItem.ComponentType.CRAFTING);
     public static final PenItem PEN = new PenItem(new Item.Properties()
