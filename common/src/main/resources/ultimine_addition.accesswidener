@@ -1,4 +1,5 @@
-accessWidener v1 named
+accessWidener v2 named
+
 # MobEffectInstance
 accessible field net/minecraft/world/effect/MobEffectInstance duration I
 

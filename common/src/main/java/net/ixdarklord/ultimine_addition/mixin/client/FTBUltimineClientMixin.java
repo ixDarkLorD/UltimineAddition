@@ -13,31 +13,61 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Mixin(FTBUltimineClient.class)
 abstract class FTBUltimineClientMixin {
-    @ModifyReturnValue(method = "sneak", at = @At("RETURN"), remap = false)
-    private boolean UA$ModifyReturn$sneak(boolean original) {
+    @ModifyReturnValue(method = "isMenuSneaking", at = @At("RETURN"), remap = false)
+    private boolean UA$ModifyReturn$isMenuSneaking(boolean original) {
         if (FTBUltimineIntegration.hasToolWithShape(FTBUltimineClient.getClientPlayer())) {
             return false;
         }
         return original;
     }
 
-    @Inject(method = "addPressedInfo", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/network/chat/Component;literal(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;", ordinal = 2), remap=false)
-    private void UA$Inject$addPressedInfo(List<MutableComponent> list, CallbackInfo ci) {
+    @ModifyReturnValue(method = "addPressedInfo", at = @At(value = "RETURN"), remap = false)
+    private <T> List<T> UA$ModifyReturn$addPressedInfo(List<T> original) {
         if (FTBUltimineIntegration.hasToolWithShape(FTBUltimineClient.getClientPlayer())) {
-            ItemStack stack = FTBUltimineClient.getClientPlayer().getMainHandItem();
-            list.add(Component.translatable("info.ultimine_addition.using_tool_shape", stack.getDisplayName()).withStyle(ChatFormatting.GRAY));
+            try {
+                Class<T> indentedLineClass = (Class<T>) Class.forName("dev.ftb.mods.ftbultimine.client.FTBUltimineClient$IndentedLine");
+
+                Constructor<T> constructor = indentedLineClass.getDeclaredConstructor(int.class, Component.class);
+                constructor.setAccessible(true);
+
+                ItemStack stack = FTBUltimineClient.getClientPlayer().getMainHandItem();
+                Component text = Component.translatable("info.ultimine_addition.using_tool_shape", stack.getDisplayName())
+                        .withStyle(ChatFormatting.GRAY);
+                T indentedLine = constructor.newInstance(0, text);
+
+                Method textMethod = indentedLineClass.getDeclaredMethod("text");
+                textMethod.setAccessible(true);
+
+                List<T> modified = new ArrayList<>(original);
+
+                MutableComponent component = Component.translatable("ftbultimine.change_shape.short").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                T secondLine = modified.get(1);
+
+                Component invoke = (Component) textMethod.invoke(secondLine);
+                if (invoke.getString().equals(component.getString())) {
+                    modified.remove(1);
+                }
+
+                modified.add(1, indentedLine);
+                return Collections.unmodifiableList(modified);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+        return original;
     }
 
-    @Redirect(method = "addPressedInfo", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/shape/ShapeRegistry;getShape(I)Ldev/ftb/mods/ftbultimine/shape/Shape;", ordinal = 1), remap=false)
+    @Redirect(method = "addPressedInfo", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/shape/ShapeRegistry;getShape(I)Ldev/ftb/mods/ftbultimine/shape/Shape;", ordinal = 1), remap = false)
     private Shape UA$Redirect$addPressedInfo(int idx) {
         if (FTBUltimineIntegration.hasToolWithShape(FTBUltimineClient.getClientPlayer())) {
             ItemStack stack = FTBUltimineClient.getClientPlayer().getMainHandItem();

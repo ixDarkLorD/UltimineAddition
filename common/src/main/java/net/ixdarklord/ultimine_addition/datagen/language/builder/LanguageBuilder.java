@@ -62,6 +62,7 @@ public class LanguageBuilder {
         add("tooltip", "skills_record.contents", "Contents:");
         add("tooltip", "skills_record.press.left_click", "Press Left Click Mouse to cycle through blocks.");
         add("tooltip", "shape_selector.info", "Need a specific mining shape for your favorite tool? This is where you assign it!");
+        add("tooltip", "shape_selector.selected", "Active Ultimine Shape:");
         add("tooltip", "skill_card.component", "You can use this item to craft any other skill card type.");
         add("tooltip", "skill_card.potion_point", "Potion Points: %s");
         add("tooltip", "skill_card.tier", "Tier: %s");

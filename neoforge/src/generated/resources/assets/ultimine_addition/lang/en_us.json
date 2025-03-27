@@ -167,6 +167,7 @@
   "tooltip.ultimine_addition.pen.info": "It's a required tool for the Skills Record.",
   "tooltip.ultimine_addition.pen.ink_chamber": "Ink Chamber: %s",
   "tooltip.ultimine_addition.shape_selector.info": "Need a specific mining shape for your favorite tool? This is where you assign it!",
+  "tooltip.ultimine_addition.shape_selector.selected": "Active Ultimine Shape:",
   "tooltip.ultimine_addition.skill_card.component": "You can use this item to craft any other skill card type.",
   "tooltip.ultimine_addition.skill_card.info": "You have to put it in the Skills Record to discover the challenges given to you.",
   "tooltip.ultimine_addition.skill_card.info.empty": "A mining card that can record your mining actions and skills. It can be Useful!",

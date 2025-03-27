@@ -2,10 +2,10 @@ apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/grad
 
 dependencies {
     modApi libs.architectury.common.get()
-    modApi "net.ixdarklord.coolcatlib:common:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    modApi "net.ixdarklord.coolcatlib:common:1.21-${coolcatlib_version}"
     modApi libs.forgeconfigapiport.common.get()
     modApi libs.jei.api.common.get()
 
-    modCompileOnly "curse.maven:ftb-library-forge-404465:$ftblibrary_neoforge_version_id"
-    modCompileOnly "curse.maven:ftb-ultimine-forge-386134:$ftbultimine_neoforge_version_id"
+    modApi "dev.ftb.mods:ftb-ultimine:${ftbultimine_version}"
+    modApi "dev.ftb.mods:ftb-library:${ftblibrary_version}"
 }
