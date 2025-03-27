@@ -9,7 +9,7 @@ dependencies {
     modRuntimeOnly libs.jei.fabric.get()
     modApi libs.trinkets.fabric.get()
 
-    modImplementation "curse.maven:ftb-library-fabric-438495:$ftblibrary_fabric_version_id"
-    modImplementation "curse.maven:ftb-ultimine-fabric-448231:$ftbultimine_fabric_version_id"
+    modApi "dev.ftb.mods:ftb-ultimine-fabric:${ftbultimine_version}"
+    modApi "dev.ftb.mods:ftb-library-fabric:${ftblibrary_version}"
     modImplementation "curse.maven:adapaxels-406691:5641012"
 }

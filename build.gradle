@@ -5,4 +5,23 @@ plugins {
     alias libs.plugins.modpublisher apply false
 }
 
+allprojects {
+    repositories {
+        maven {
+            url "https://maven.saps.dev/releases"
+            content {
+                includeGroup "dev.latvian.mods"
+                includeGroup "dev.ftb.mods"
+            }
+        }
+        maven {
+            url "https://maven.saps.dev/snapshots"
+            content {
+                includeGroup "dev.latvian.mods"
+                includeGroup "dev.ftb.mods"
+            }
+        }
+    }
+}
+
 apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/main.gradle"
