@@ -22,7 +22,7 @@ public class JEIIntegration implements IModPlugin {
 
     @Override
     public @NotNull ResourceLocation getPluginUid() {
-        return FTBUltimineAddition.getLocation("jei_integration");
+        return FTBUltimineAddition.rl("jei_integration");
     }
 
     @Override

@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public record SyncChallengesPayload(Map<ResourceLocation, ChallengesData> dataMap) implements CustomPacketPayload {
-    public static final Type<SyncChallengesPayload> TYPE = new Type<>(FTBUltimineAddition.getLocation("sync_challenges"));
+    public static final Type<SyncChallengesPayload> TYPE = new Type<>(FTBUltimineAddition.rl("sync_challenges"));
     private static final StreamCodec<RegistryFriendlyByteBuf, Map<ResourceLocation, ChallengesData>> CHALLENGES_STREAM_CODEC =
             ByteBufCodecs.map(i -> new HashMap<>(), ResourceLocation.STREAM_CODEC, ChallengesData.STREAM_CODEC);
 

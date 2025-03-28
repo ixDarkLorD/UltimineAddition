@@ -16,7 +16,7 @@ public class FTBUltimineAddition {
 	public static final Logger LOGGER = LogManager.getLogger();
 	private static final String GUI_DIR = "textures/gui/";
 
-	public static ResourceLocation getLocation(String name) {
+	public static ResourceLocation rl(String name) {
 		return ResourceLocation.fromNamespaceAndPath(MOD_ID, name.toLowerCase(Locale.ROOT));
 	}
 	public static ResourceLocation getGuiTexture(String textureName, String fileType) {

@@ -12,7 +12,4 @@ dependencies {
 
     modApi "dev.ftb.mods:ftb-ultimine-neoforge:${ftbultimine_version}"
     modApi "dev.ftb.mods:ftb-library-neoforge:${ftblibrary_version}"
-    modRuntimeOnly "curse.maven:mekanism-268560:5574951"
-    modRuntimeOnly "curse.maven:mekanism-tools-268567:5574955"
-    modRuntimeOnly "curse.maven:building-gadgets-298187:5968587"
 }

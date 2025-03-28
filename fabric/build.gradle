@@ -11,5 +11,4 @@ dependencies {
 
     modApi "dev.ftb.mods:ftb-ultimine-fabric:${ftbultimine_version}"
     modApi "dev.ftb.mods:ftb-library-fabric:${ftblibrary_version}"
-    modImplementation "curse.maven:adapaxels-406691:5641012"
 }

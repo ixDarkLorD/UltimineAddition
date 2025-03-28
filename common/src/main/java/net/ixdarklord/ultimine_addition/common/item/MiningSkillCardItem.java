@@ -204,7 +204,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         }
 
         public ResourceLocation getRegistryId() {
-            return FTBUltimineAddition.getLocation("mining_skill_card_%s".formatted(id));
+            return FTBUltimineAddition.rl("mining_skill_card_%s".formatted(id));
         }
 
         public List<String> getRequiredTools() {

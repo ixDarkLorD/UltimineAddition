@@ -68,8 +68,8 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
             }
         }
         if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
-            LOGGER.debug("/----------[Challenge Tracker]----------/");
-            LOGGER.debug("| Added Challenges...");
+            LOGGER.debug("/----------[Challenge Tracker]-----------/");
+            LOGGER.debug("| Added Challenges:");
             randomValues.forEach((location, data) -> LOGGER.debug("|> ID: {}", location));
             LOGGER.debug("/----------------------------------------/");
         }

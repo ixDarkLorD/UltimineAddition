@@ -9,6 +9,6 @@ public class ModBlockTags {
     public static final TagKey<Block> DENY_IS_PLACED_BY_ENTITY = create("deny_is_placed_by_entity");
 
     private static TagKey<Block> create(String name) {
-        return TagKey.create(Registries.BLOCK, FTBUltimineAddition.getLocation(name));
+        return TagKey.create(Registries.BLOCK, FTBUltimineAddition.rl(name));
     }
 }

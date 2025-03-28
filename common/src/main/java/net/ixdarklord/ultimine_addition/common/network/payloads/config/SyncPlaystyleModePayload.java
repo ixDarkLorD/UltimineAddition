@@ -11,7 +11,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.jetbrains.annotations.NotNull;
 
 public record SyncPlaystyleModePayload(PlaystyleMode mode) implements CustomPacketPayload {
-    public static final Type<SyncPlaystyleModePayload> TYPE = new Type<>(FTBUltimineAddition.getLocation("sync_playstyle_mode_config"));
+    public static final Type<SyncPlaystyleModePayload> TYPE = new Type<>(FTBUltimineAddition.rl("sync_playstyle_mode_config"));
     public static final StreamCodec<FriendlyByteBuf, SyncPlaystyleModePayload> STREAM_CODEC = StreamCodec.composite(
             NetworkHelper.enumStreamCodec(PlaystyleMode.class), SyncPlaystyleModePayload::mode,
             SyncPlaystyleModePayload::new

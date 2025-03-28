@@ -33,7 +33,7 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class ConfigurationPanel extends AbstractDraggableWidget {
-    private static final ResourceLocation BACKGROUND_LOCATION = FTBUltimineAddition.getLocation("container/skills_record/configuration/background");
+    private static final ResourceLocation BACKGROUND_LOCATION = FTBUltimineAddition.rl("container/skills_record/configuration/background");
     private static final int BUTTON_WIDTH = 45;
     private static final int BUTTON_HEIGHT = 14;
     private SkillsRecordScreen.OverlayColor backgroundColor;

@@ -10,7 +10,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.jetbrains.annotations.NotNull;
 
 public record PlayerAbilityPayload(boolean state) implements CustomPacketPayload {
-    public static final Type<PlayerAbilityPayload> TYPE = new Type<>(FTBUltimineAddition.getLocation("sync_player_ability"));
+    public static final Type<PlayerAbilityPayload> TYPE = new Type<>(FTBUltimineAddition.rl("sync_player_ability"));
     public static final StreamCodec<RegistryFriendlyByteBuf, PlayerAbilityPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL, PlayerAbilityPayload::state,
             PlayerAbilityPayload::new
