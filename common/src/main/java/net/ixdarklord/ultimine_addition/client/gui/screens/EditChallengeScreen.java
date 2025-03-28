@@ -25,8 +25,8 @@ import org.lwjgl.glfw.GLFW;
 import java.awt.*;
 
 public class EditChallengeScreen extends Screen {
-    private static final ResourceLocation BACKGROUND_SPRITE = FTBUltimineAddition.getLocation("container/skills_record/edit_challenge/background");
-    private static final ResourceLocation ARROW_SPRITE = FTBUltimineAddition.getLocation("container/skills_record/edit_challenge/arrow");
+    private static final ResourceLocation BACKGROUND_SPRITE = FTBUltimineAddition.rl("container/skills_record/edit_challenge/background");
+    private static final ResourceLocation ARROW_SPRITE = FTBUltimineAddition.rl("container/skills_record/edit_challenge/arrow");
     protected int imageWidth = 155;
     protected int imageHeight = 91;
     protected int leftPos;

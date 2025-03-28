@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public record MiningSkillCardPayload(int slotIndex, MiningSkillCardData data) implements CustomPacketPayload {
-    public static final Type<MiningSkillCardPayload> TYPE = new Type<>(FTBUltimineAddition.getLocation("mining_skill_card_sync_s2c"));
+    public static final Type<MiningSkillCardPayload> TYPE = new Type<>(FTBUltimineAddition.rl("mining_skill_card_sync_s2c"));
     public static final StreamCodec<RegistryFriendlyByteBuf, MiningSkillCardPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT, MiningSkillCardPayload::slotIndex,
             MiningSkillCardData.STREAM_CODEC, MiningSkillCardPayload::data,
@@ -37,7 +37,7 @@ public record MiningSkillCardPayload(int slotIndex, MiningSkillCardData data) im
     }
 
     public record SyncBrewing(ItemStack stack) implements CustomPacketPayload {
-        public static final Type<SyncBrewing> TYPE = new Type<>(FTBUltimineAddition.getLocation("mining_skill_card_sync_brewing"));
+        public static final Type<SyncBrewing> TYPE = new Type<>(FTBUltimineAddition.rl("mining_skill_card_sync_brewing"));
         public static final StreamCodec<RegistryFriendlyByteBuf, SyncBrewing> STREAM_CODEC = StreamCodec.composite(
                 ItemStack.STREAM_CODEC, SyncBrewing::stack,
                 SyncBrewing::new

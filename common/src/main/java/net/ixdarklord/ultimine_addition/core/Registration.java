@@ -119,13 +119,15 @@ public class Registration {
                     output.accept(ModItems.SHAPE_SELECTOR);
                     if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
                         output.accept(ModItems.SKILLS_RECORD);
+                        output.accept(ModItems.INK_CHAMBER);
+                        output.accept(ModItems.PEN);
                         ItemStack pen = ModItems.PEN.getDefaultInstance();
                         ModItems.PEN.getData(pen).setToFullCapacity().saveData(pen);
                         output.accept(pen);
                         output.accept(ModItems.CARD_BLUEPRINT);
                         for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
                             String name = "mining_skill_card_" + type.getId();
-                            Item item = BuiltInRegistries.ITEM.get(FTBUltimineAddition.getLocation(name));
+                            Item item = BuiltInRegistries.ITEM.get(FTBUltimineAddition.rl(name));
                             if (item instanceof MiningSkillCardItem cardItem) {
                                 output.accept(item);
                                 if (cardItem.getType() != MiningSkillCardItem.Type.EMPTY) {

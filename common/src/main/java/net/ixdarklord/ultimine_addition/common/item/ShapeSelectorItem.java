@@ -41,4 +41,9 @@ public class ShapeSelectorItem extends ComponentItem {
         MenuRegistry.openMenu(serverPlayer, new SimpleMenuProvider(ShapeSelectorMenu::new, TITLE));
         return super.use(level, player, usedHand);
     }
+
+    @Override
+    public boolean appendToName() {
+        return true;
+    }
 }

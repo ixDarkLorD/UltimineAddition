@@ -127,7 +127,7 @@ public class RecipeGenerator extends RecipeProvider {
                 .requires(ModItemTags.LESS_VALUABLE_PIGMENT, 10)
                 .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_pen", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.PEN.get()).build()))
-                .save(output.withConditions(new LegacyModeCondition(false)), FTBUltimineAddition.getLocation("refill"));
+                .save(output.withConditions(new LegacyModeCondition(false)), FTBUltimineAddition.rl("refill"));
 
         MCRecipeBuilder.create(RecipeCategory.MISC, Registration.MINER_CERTIFICATE.get())
                 .requires(Items.PAPER)
@@ -147,6 +147,6 @@ public class RecipeGenerator extends RecipeProvider {
                 .pattern("2P3")
                 .pattern(" 4 ")
                 .unlockedBy("has_miner_certificate", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINER_CERTIFICATE.get()).build()))
-                .save(output.withConditions(new LegacyModeCondition(true)), FTBUltimineAddition.getLocation("miner_certificate_legacy"));
+                .save(output.withConditions(new LegacyModeCondition(true)), FTBUltimineAddition.rl("miner_certificate_legacy"));
     }
 }

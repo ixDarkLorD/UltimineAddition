@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class SkillsRecordPayload {
     public static class Open implements CustomPacketPayload {
-        public static final Type<SkillsRecordPayload.Open> TYPE = new Type<>(FTBUltimineAddition.getLocation("open_skills_record"));
+        public static final Type<SkillsRecordPayload.Open> TYPE = new Type<>(FTBUltimineAddition.rl("open_skills_record"));
         public static final StreamCodec<FriendlyByteBuf, Open> STREAM_CODEC = new StreamCodec<>() {
             @Override
             public @NotNull Open decode(FriendlyByteBuf object) {
@@ -59,8 +59,8 @@ public class SkillsRecordPayload {
     }
 
     public record SyncData(Env env, int slotIndex, SkillsRecordData data) implements CustomPacketPayload {
-        public static final Type<SyncData> S2C_TYPE = new Type<>(FTBUltimineAddition.getLocation("skills_record_sync_s2c"));
-        public static final Type<SyncData> C2S_TYPE = new Type<>(FTBUltimineAddition.getLocation("skills_record_sync_c2s"));
+        public static final Type<SyncData> S2C_TYPE = new Type<>(FTBUltimineAddition.rl("skills_record_sync_s2c"));
+        public static final Type<SyncData> C2S_TYPE = new Type<>(FTBUltimineAddition.rl("skills_record_sync_c2s"));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, SyncData> STREAM_CODEC = StreamCodec.composite(
                 NetworkHelper.enumStreamCodec(Env.class), SyncData::env,

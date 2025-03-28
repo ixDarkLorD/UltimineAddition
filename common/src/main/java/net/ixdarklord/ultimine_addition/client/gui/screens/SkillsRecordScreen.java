@@ -75,14 +75,14 @@ import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
 public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu> {
-    public static final WidgetSprites BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.getLocation("container/skills_record/button"), FTBUltimineAddition.getLocation("container/skills_record/button_disabled"), FTBUltimineAddition.getLocation("container/skills_record/button_focused"));
+    public static final WidgetSprites BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/button"), FTBUltimineAddition.rl("container/skills_record/button_disabled"), FTBUltimineAddition.rl("container/skills_record/button_focused"));
     private static final ResourceLocation BACKGROUND_TEXTURE = FTBUltimineAddition.getGuiTexture("container/skills_record", "png");
-    private static final ResourceLocation SLOT_SELECT_SPRITE = FTBUltimineAddition.getLocation("container/skills_record/slot_select");
-    private static final ResourceLocation PROGRESS_BAR_SPRITE = FTBUltimineAddition.getLocation("container/skills_record/progress_bar");
-    private static final ResourceLocation ITEM_DISPLAY_SPRITE = FTBUltimineAddition.getLocation("container/skills_record/item_display");
-    private static final WidgetSprites CONFIGURATION_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.getLocation("container/skills_record/configuration_button_enabled"), FTBUltimineAddition.getLocation("container/skills_record/configuration_button_disabled"), FTBUltimineAddition.getLocation("container/skills_record/configuration_button_focused"));
-    private static final WidgetSprites CONSUME_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.getLocation("container/skills_record/consume_on"), FTBUltimineAddition.getLocation("container/skills_record/consume_off"), FTBUltimineAddition.getLocation("container/skills_record/consume_on_focused"), FTBUltimineAddition.getLocation("container/skills_record/consume_off_focused"));
-    private static final WidgetSprites SCROLLBAR_SPRITE = new WidgetSprites(FTBUltimineAddition.getLocation("container/skills_record/scroller_enabled"), FTBUltimineAddition.getLocation("container/skills_record/scroller_disabled"), FTBUltimineAddition.getLocation("container/skills_record/scroller_focused"));
+    private static final ResourceLocation SLOT_SELECT_SPRITE = FTBUltimineAddition.rl("container/skills_record/slot_select");
+    private static final ResourceLocation PROGRESS_BAR_SPRITE = FTBUltimineAddition.rl("container/skills_record/progress_bar");
+    private static final ResourceLocation ITEM_DISPLAY_SPRITE = FTBUltimineAddition.rl("container/skills_record/item_display");
+    private static final WidgetSprites CONFIGURATION_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/configuration_button_enabled"), FTBUltimineAddition.rl("container/skills_record/configuration_button_disabled"), FTBUltimineAddition.rl("container/skills_record/configuration_button_focused"));
+    private static final WidgetSprites CONSUME_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/consume_on"), FTBUltimineAddition.rl("container/skills_record/consume_off"), FTBUltimineAddition.rl("container/skills_record/consume_on_focused"), FTBUltimineAddition.rl("container/skills_record/consume_off_focused"));
+    private static final WidgetSprites SCROLLBAR_SPRITE = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/scroller_enabled"), FTBUltimineAddition.rl("container/skills_record/scroller_disabled"), FTBUltimineAddition.rl("container/skills_record/scroller_focused"));
 
     private final int maxProgress = 100;
     private ColorableImageButton configurationButton;

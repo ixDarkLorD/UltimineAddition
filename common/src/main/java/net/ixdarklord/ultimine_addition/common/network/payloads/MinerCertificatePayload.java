@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public record MinerCertificatePayload(MinerCertificateData data, ItemStack stack) implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<MinerCertificatePayload> TYPE = new CustomPacketPayload.Type<>(FTBUltimineAddition.getLocation("miner_certificate_sync_s2c"));
+    public static final CustomPacketPayload.Type<MinerCertificatePayload> TYPE = new CustomPacketPayload.Type<>(FTBUltimineAddition.rl("miner_certificate_sync_s2c"));
     public static final StreamCodec<RegistryFriendlyByteBuf, MinerCertificatePayload> STREAM_CODEC = StreamCodec.composite(
             MinerCertificateData.STREAM_CODEC, MinerCertificatePayload::data,
             ItemStack.STREAM_CODEC, MinerCertificatePayload::stack,

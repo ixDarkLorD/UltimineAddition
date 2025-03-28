@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.ixdarklord.coolcatlib.api.util.JsonUtils;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraft.data.models.model.ModelTemplate;
@@ -17,11 +18,14 @@ import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.models.model.TextureSlot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public abstract class ItemModelProvider extends FabricModelProvider {
     private final List<ModelBuilder> builders = new ArrayList<>();
@@ -107,9 +111,10 @@ public abstract class ItemModelProvider extends FabricModelProvider {
         return "Item Models";
     }
 
-    protected static class ModelBuilder {
+    public static class ModelBuilder {
         private final ResourceLocation id;
         private final String string;
+        protected final ModelBuilder.TransformsBuilder transforms = new TransformsBuilder();
         private final ModelTemplate template;
         private BlockModel.GuiLight guiLight;
         private boolean isAddingStringToFileName;
@@ -127,6 +132,14 @@ public abstract class ItemModelProvider extends FabricModelProvider {
 
         public ResourceLocation getItemTextureLocation() {
             return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "item/" + id.getPath() + (string != null ? string : ""));
+        }
+
+        private ModelBuilder self() {
+            return this;
+        }
+
+        public ModelBuilder.TransformsBuilder transforms() {
+            return this.transforms;
         }
 
         @SuppressWarnings("UnusedReturnValue")
@@ -160,10 +173,50 @@ public abstract class ItemModelProvider extends FabricModelProvider {
                 overrides.stream().map(OverrideBuilder::toJson).forEach(overridesJson::add);
                 root.add("overrides", overridesJson);
             }
+
+            Map<ItemDisplayContext, ItemTransform> transforms = this.transforms.build();
+            if (!transforms.isEmpty()) {
+                JsonObject display = new JsonObject();
+
+                for(Map.Entry<ItemDisplayContext, ItemTransform> e : transforms.entrySet()) {
+                    JsonObject transform = new JsonObject();
+                    ItemTransform vec = e.getValue();
+                    if (!vec.equals(ItemTransform.NO_TRANSFORM)) {
+                        if (!vec.translation.equals(ItemTransformDeserializer.DEFAULT_TRANSLATION)) {
+                            transform.add("translation", this.serializeVector3f(e.getValue().translation));
+                        }
+
+                        if (!vec.rotation.equals(ItemTransformDeserializer.DEFAULT_ROTATION)) {
+                            transform.add("rotation", this.serializeVector3f(vec.rotation));
+                        }
+
+                        if (!vec.scale.equals(ItemTransformDeserializer.DEFAULT_SCALE)) {
+                            transform.add("scale", this.serializeVector3f(e.getValue().scale));
+                        }
+
+                        display.add(e.getKey().getSerializedName(), transform);
+                    }
+                }
+
+                root.add("display", display);
+            }
+
             return root;
         }
 
-        protected class OverrideBuilder {
+        private JsonArray serializeVector3f(Vector3f vec) {
+            JsonArray ret = new JsonArray();
+            ret.add(this.serializeFloat(vec.x()));
+            ret.add(this.serializeFloat(vec.y()));
+            ret.add(this.serializeFloat(vec.z()));
+            return ret;
+        }
+
+        private Number serializeFloat(float f) {
+            return (float)((int)f) == f ? (int)f : f;
+        }
+
+        public class OverrideBuilder {
             protected final Map<ResourceLocation, Float> predicates = new LinkedHashMap<>();
             protected ResourceLocation model;
 
@@ -186,6 +239,71 @@ public abstract class ItemModelProvider extends FabricModelProvider {
                 ret.add("predicate", predicatesJson);
                 ret.addProperty("model", model.toString());
                 return ret;
+            }
+        }
+
+        public class TransformsBuilder {
+            private final Map<ItemDisplayContext, ModelBuilder.TransformsBuilder.TransformVecBuilder> transforms = new LinkedHashMap<>();
+
+            public TransformsBuilder() {
+            }
+
+            public ModelBuilder.TransformsBuilder.TransformVecBuilder transform(ItemDisplayContext type) {
+                Preconditions.checkNotNull(type, "Perspective cannot be null");
+                return this.transforms.computeIfAbsent(type, TransformVecBuilder::new);
+            }
+
+            Map<ItemDisplayContext, ItemTransform> build() {
+                return this.transforms.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> ((TransformVecBuilder)e.getValue()).build(), (k1, k2) -> {
+                    throw new IllegalArgumentException();
+                }, LinkedHashMap::new));
+            }
+
+            public ModelBuilder end() {
+                return ModelBuilder.this.self();
+            }
+
+            public class TransformVecBuilder {
+                private Vector3f rotation;
+                private Vector3f translation;
+                private Vector3f scale;
+
+                TransformVecBuilder(ItemDisplayContext type) {
+                    this.rotation = new Vector3f(ItemTransformDeserializer.DEFAULT_ROTATION);
+                    this.translation = new Vector3f(ItemTransformDeserializer.DEFAULT_TRANSLATION);
+                    this.scale = new Vector3f(ItemTransformDeserializer.DEFAULT_SCALE);
+                }
+
+                public ModelBuilder.TransformsBuilder.TransformVecBuilder rotation(float x, float y, float z) {
+                    this.rotation = new Vector3f(x, y, z);
+                    return this;
+                }
+
+                public ModelBuilder.TransformsBuilder.TransformVecBuilder leftRotation(float x, float y, float z) {
+                    return this.rotation(x, y, z);
+                }
+
+                public ModelBuilder.TransformsBuilder.TransformVecBuilder translation(float x, float y, float z) {
+                    this.translation = new Vector3f(x, y, z);
+                    return this;
+                }
+
+                public ModelBuilder.TransformsBuilder.TransformVecBuilder scale(float sc) {
+                    return this.scale(sc, sc, sc);
+                }
+
+                public ModelBuilder.TransformsBuilder.TransformVecBuilder scale(float x, float y, float z) {
+                    this.scale = new Vector3f(x, y, z);
+                    return this;
+                }
+
+                ItemTransform build() {
+                    return new ItemTransform(this.rotation, this.translation, this.scale);
+                }
+
+                public ModelBuilder.TransformsBuilder end() {
+                    return TransformsBuilder.this;
+                }
             }
         }
     }

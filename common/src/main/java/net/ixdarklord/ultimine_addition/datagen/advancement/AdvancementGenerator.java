@@ -45,7 +45,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .addCriterion("killed_by_something", KilledTrigger.TriggerInstance.entityKilledPlayer())
                     .addCriterion("killed_something", KilledTrigger.TriggerInstance.playerKilledEntity())
                     .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.getLocation("root").toString());
+                    .save(consumer, FTBUltimineAddition.rl("root").toString());
 
             AdvancementHolder amethyst = Advancement.Builder.advancement().parent(root).display(
                             Items.AMETHYST_SHARD,
@@ -56,7 +56,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_amethyst", InventoryChangeTrigger.TriggerInstance.hasItems(Items.AMETHYST_SHARD))
                     .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.getLocation("gathering_amethyst").toString());
+                    .save(consumer, FTBUltimineAddition.rl("gathering_amethyst").toString());
 
             AdvancementHolder cardBlueprint = Advancement.Builder.advancement().parent(amethyst).display(
                             ModItems.CARD_BLUEPRINT,
@@ -68,7 +68,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .addCriterion("amethyst_adv", advancementTrigger(amethyst))
                     .addCriterion("has_card_blueprint", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.CARD_BLUEPRINT))
                     .requirements(AdvancementRequirements.Strategy.AND)
-                    .save(consumer, FTBUltimineAddition.getLocation("card_blueprint").toString());
+                    .save(consumer, FTBUltimineAddition.rl("card_blueprint").toString());
 
             AdvancementHolder shapeSelector = Advancement.Builder.advancement().parent(cardBlueprint).display(
                             ModItems.SHAPE_SELECTOR,
@@ -80,7 +80,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .addCriterion("has_card_blueprint", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.CARD_BLUEPRINT))
                     .addCriterion("has_shape_selector", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.SHAPE_SELECTOR))
                     .requirements(AdvancementRequirements.Strategy.AND)
-                    .save(consumer, FTBUltimineAddition.getLocation("shape_selector").toString());
+                    .save(consumer, FTBUltimineAddition.rl("shape_selector").toString());
 
             AdvancementHolder slime = Advancement.Builder.advancement().parent(root).display(
                             Items.SLIME_BALL,
@@ -91,7 +91,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_slime_balls", InventoryChangeTrigger.TriggerInstance.hasItems(Items.SLIME_BALL))
                     .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.getLocation("slime_balls").toString());
+                    .save(consumer, FTBUltimineAddition.rl("slime_balls").toString());
 
             AdvancementHolder pen = Advancement.Builder.advancement().parent(slime).display(
                             ModItems.PEN,
@@ -103,7 +103,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .addCriterion("slime_adv", advancementTrigger(slime))
                     .addCriterion("has_pen", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.PEN))
                     .requirements(AdvancementRequirements.Strategy.AND)
-                    .save(consumer, FTBUltimineAddition.getLocation("pen").toString());
+                    .save(consumer, FTBUltimineAddition.rl("pen").toString());
 
             AdvancementHolder emptyCard = Advancement.Builder.advancement().parent(root).display(
                             ModItems.MINING_SKILL_CARD_EMPTY,
@@ -115,7 +115,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .addCriterion("trade_for_empty_card", tradedWithVillager(ItemPredicate.Builder.item().of(ModItems.MINING_SKILL_CARD_EMPTY).build()))
                     .addCriterion("has_empty_card", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.MINING_SKILL_CARD_EMPTY))
                     .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.getLocation("empty_card").toString());
+                    .save(consumer, FTBUltimineAddition.rl("empty_card").toString());
 
             AdvancementHolder skillsRecord = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.SKILLS_RECORD,
@@ -126,7 +126,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_skills_record", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.SKILLS_RECORD))
                     .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.getLocation("skills_record").toString());
+                    .save(consumer, FTBUltimineAddition.rl("skills_record").toString());
 
             AdvancementHolder pickaxeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_PICKAXE,
@@ -137,7 +137,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_pickaxe_card", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.MINING_SKILL_CARD_PICKAXE))
                     .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.getLocation("pickaxe_card").toString());
+                    .save(consumer, FTBUltimineAddition.rl("pickaxe_card").toString());
 
             AdvancementHolder axeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_AXE,
@@ -148,7 +148,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_axe_card", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.MINING_SKILL_CARD_AXE))
                     .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.getLocation("axe_card").toString());
+                    .save(consumer, FTBUltimineAddition.rl("axe_card").toString());
 
             AdvancementHolder shovelCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_SHOVEL,
@@ -159,7 +159,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_shovel_card", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.MINING_SKILL_CARD_SHOVEL))
                     .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.getLocation("shovel_card").toString());
+                    .save(consumer, FTBUltimineAddition.rl("shovel_card").toString());
 
             AdvancementHolder hoeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_HOE,
@@ -170,7 +170,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_hoe_card", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.MINING_SKILL_CARD_HOE))
                     .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.getLocation("hoe_card").toString());
+                    .save(consumer, FTBUltimineAddition.rl("hoe_card").toString());
 
             AdvancementHolder ultiminePower = Advancement.Builder.advancement().parent(skillsRecord).display(
                             Util.make(() -> {
@@ -185,7 +185,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             true, true, false)
                     .addCriterion("has_ultimine_ability", UltimineObtainTrigger.Instance.obtain())
                     .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.getLocation("ultimine_ability").toString());
+                    .save(consumer, FTBUltimineAddition.rl("ultimine_ability").toString());
         }
     }
 }

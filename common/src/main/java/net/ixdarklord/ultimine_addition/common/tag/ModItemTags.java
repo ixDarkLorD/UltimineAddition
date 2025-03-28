@@ -11,6 +11,6 @@ public class ModItemTags {
     public static final TagKey<Item> LESS_VALUABLE_PIGMENT = create("less_valuable_pigment");
 
     private static TagKey<Item> create(String name) {
-        return TagKey.create(Registries.ITEM, FTBUltimineAddition.getLocation(name));
+        return TagKey.create(Registries.ITEM, FTBUltimineAddition.rl(name));
     }
 }

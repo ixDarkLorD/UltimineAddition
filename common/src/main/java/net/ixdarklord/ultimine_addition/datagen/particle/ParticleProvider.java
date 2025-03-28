@@ -40,7 +40,7 @@ public abstract class ParticleProvider implements DataProvider {
             }
 
             JSONProperties.add("textures", array);
-            futures[i++] = DataProvider.saveStable(cache, JSONProperties, pathProvider.file(FTBUltimineAddition.getLocation(particle.getKey()), "json"));
+            futures[i++] = DataProvider.saveStable(cache, JSONProperties, pathProvider.file(FTBUltimineAddition.rl(particle.getKey()), "json"));
         }
 
         return CompletableFuture.allOf(futures);

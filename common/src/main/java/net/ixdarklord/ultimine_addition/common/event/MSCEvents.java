@@ -100,7 +100,7 @@ public class MSCEvents {
         List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || stack.getItem() instanceof MiningSkillCardItem);
 
         Function<ItemStack, Boolean> validateCardFunction = itemStack -> {
-            if (itemStack.isEmpty() || !(itemStack.getItem() instanceof MiningSkillCardItem cardItem))
+            if (itemStack.isEmpty() || !(itemStack.getItem() instanceof MiningSkillCardItem cardItem) || cardItem.getType() == MiningSkillCardItem.Type.EMPTY)
                 return false;
 
             boolean needSync = false;

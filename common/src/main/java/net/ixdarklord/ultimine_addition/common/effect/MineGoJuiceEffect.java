@@ -22,7 +22,7 @@ public class MineGoJuiceEffect extends MobEffect {
     }
 
     public static ResourceLocation getId(MiningSkillCardItem.Type type) {
-        return FTBUltimineAddition.getLocation("mine_go_juice_%s".formatted(type.getId()));
+        return FTBUltimineAddition.rl("mine_go_juice_%s".formatted(type.getId()));
     }
 
     public static void giveEffect(ServerPlayer player, MiningSkillCardItem.Type type) {
