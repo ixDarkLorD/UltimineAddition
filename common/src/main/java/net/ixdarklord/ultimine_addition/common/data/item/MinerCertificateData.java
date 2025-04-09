@@ -6,8 +6,8 @@ import net.ixdarklord.coolcatlib.api.util.ChatFormattingUtils;
 import net.ixdarklord.ultimine_addition.client.handler.ClientMinerCertificateHandler;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.item.MinerCertificateItem;
-import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
-import net.ixdarklord.ultimine_addition.common.network.payloads.MinerCertificatePayload;
+import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.MinerCertificatePayload;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
@@ -63,8 +63,8 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
         super.saveData(stack);
     }
 
-    public MinerCertificateData sendToClient(ServerPlayer player) {
-        PayloadHandler.sendToPlayer(new MinerCertificatePayload(this, this.get()), player);
+    public MinerCertificateData sendToClient(int slotIndex, ServerPlayer player) {
+        PayloadHandler.sendToPlayer(new MinerCertificatePayload(slotIndex, this), player);
         return this;
     }
 
@@ -94,21 +94,20 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
         DATA_COMPONENT = DataComponentType.<MinerCertificateData>builder().persistent(CODEC).networkSynchronized(STREAM_CODEC).build();
     }
 
-    public void tick(ServerPlayer player) {
+    public void tick(int slotIndex, ServerPlayer player) {
         if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY && this.legacy.isEmpty()) {
-            int min = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getValue().getFirst();
-            int max = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getValue().getLast();
+            int min = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getMin();
+            int max = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getMax();
             this.legacy = Optional.of(new Legacy(RandomSource.create().nextIntBetweenInclusive(min, max)));
             this.saveData(this.get());
         }
 
-        if (ServicePlatform.get().players().isPlayerUltimineCapable(player)) return;
         if (this.legacy.isPresent()) {
             if (!this.isAccomplished && this.legacy.get().getMinedBlocks() == this.legacy.get().getRequiredAmount()) {
-                this.completeSound(true).setAccomplished(true).sendToClient(player).saveData(this.get());
+                this.completeSound(true).setAccomplished(true).sendToClient(slotIndex, player).saveData(this.get());
             }
         } else if (!isAccomplished) {
-            this.completeSound(true).setAccomplished(true).sendToClient(player).saveData(this.get());
+            this.completeSound(true).setAccomplished(true).sendToClient(slotIndex, player).saveData(this.get());
         }
     }
 

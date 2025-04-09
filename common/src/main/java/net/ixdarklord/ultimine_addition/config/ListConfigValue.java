@@ -1,10 +1,12 @@
 package net.ixdarklord.ultimine_addition.config;
 
+import com.google.common.collect.ImmutableList;
 import net.ixdarklord.coolcatlib.api.util.ValueConverter;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -35,7 +37,7 @@ public class ListConfigValue<T> {
      * @param defaultValue The default value for the list (as a list of T).
      * @param comment      The comment describing the configuration.
      */
-    public void define(
+    protected void define(
             ModConfigSpec.Builder builder,
             String key,
             List<T> defaultValue,
@@ -80,7 +82,7 @@ public class ListConfigValue<T> {
     }
 
     /**
-     * Converts a list of T into a comma-separated string.
+     * Converts a list of {@link T} into a comma-separated string.
      *
      * @param list The list to convert.
      * @return A string in the format "value1, value2, value3".
@@ -97,10 +99,10 @@ public class ListConfigValue<T> {
     }
 
     /**
-     * Parses a comma-separated string into a list of T.
+     * Parses a comma-separated string into a list of {@link T}.
      *
      * @param input The input string (e.g., "value1, value2, value3").
-     * @return A list of T.
+     * @return A list of {@link T}.
      */
     private List<T> parseStringToList(String input) {
         List<T> list = new ArrayList<>();
@@ -108,7 +110,7 @@ public class ListConfigValue<T> {
         for (String part : parts) {
             list.add(valueConverter.parse(part.trim()));
         }
-        return list;
+        return Collections.unmodifiableList(list);
     }
 
     /**
@@ -123,13 +125,17 @@ public class ListConfigValue<T> {
         return configValue;
     }
 
+    public void set(List<T> values) {
+        getConfigValue().set(listToString(values));
+    }
+
     /**
      * Gets the current value of the configuration as a list of T.
      *
      * @return The current value of the list.
      */
-    public List<T> getValue() {
-        return parseStringToList(configValue.get());
+    protected List<T> getValue() {
+        return parseStringToList(getConfigValue().get());
     }
 
     /**
@@ -137,8 +143,8 @@ public class ListConfigValue<T> {
      *
      * @return The default value of the list.
      */
-    public List<T> getDefaultValue() {
-        return parseStringToList(configValue.getDefault());
+    protected List<T> getDefaultValue() {
+        return parseStringToList(getConfigValue().getDefault());
     }
 
     /**
@@ -164,24 +170,35 @@ public class ListConfigValue<T> {
         return true;
     }
 
-    public static final class Integer extends ListConfigValue<java.lang.Integer> {
+    public static final class RangeValue extends ListConfigValue<Integer> {
         /**
          * Constructor for IntegerList with a range-based validator.
          *
-         * @param expectedSize The expected size of the list.
          * @param minValue     The minimum allowed value for each element.
          * @param maxValue     The maximum allowed value for each element.
          */
-        public Integer(int expectedSize, int minValue, int maxValue) {
+        public RangeValue(int minValue, int maxValue) {
             super(
-                    expectedSize,
+                    2,
                     value -> value >= minValue && value <= maxValue,
                     ValueConverter.INTEGER
             );
         }
+
+        public void define(ModConfigSpec.Builder builder, String key, int minRange, int maxRange, String... comment) {
+            super.define(builder, key, ImmutableList.of(minRange, maxRange), comment);
+        }
+
+        public int getMin() {
+            return getValue().getFirst();
+        }
+
+        public int getMax() {
+            return getValue().getLast();
+        }
     }
 
-    public static final class EnumValue<E extends java.lang.Enum<E>> extends ListConfigValue<java.lang.Integer> {
+    public static final class EnumValue<E extends Enum<E>> extends ListConfigValue<Integer> {
         private final Class<E> enumClass;
         private final int minValue;
         private final int maxValue;
@@ -204,15 +221,15 @@ public class ListConfigValue<T> {
         /**
          * Defines a configuration value for a map of enum keys and values.
          *
-         * @param builder        The ModConfigSpec.Builder instance.
-         * @param key            The configuration key.
-         * @param defaultValue   The default value for the map (as a map of enum keys and values).
-         * @param comment        The comment describing the configuration.
+         * @param builder      The ModConfigSpec.Builder instance.
+         * @param key          The configuration key.
+         * @param defaultValue The default value for the map (as a map of enum keys and values).
+         * @param comment      The comment describing the configuration.
          */
-        public void defineMap(
+        public void defineEnums(
                 ModConfigSpec.Builder builder,
                 String key,
-                java.util.Map<E, java.lang.Integer> defaultValue,
+                java.util.Map<E, Integer> defaultValue,
                 String... comment) {
 
             if (defaultValue.size() != expectedSize) {
@@ -229,13 +246,13 @@ public class ListConfigValue<T> {
                             return false;
                         }
 
-                        java.util.Map<E, java.lang.Integer> parsedMap = parseStringToMap((String) obj, valueConverter);
+                        java.util.Map<E, Integer> parsedMap = parseStringToMap((String) obj, valueConverter);
 
                         if (parsedMap.size() != expectedSize) {
                             return false;
                         }
 
-                        for (java.lang.Integer value : parsedMap.values()) {
+                        for (Integer value : parsedMap.values()) {
                             if (!elementValidator.test(value)) {
                                 return false;
                             }
@@ -251,9 +268,9 @@ public class ListConfigValue<T> {
          * @param valueConverter A converter for parsing strings to type V and vice versa.
          * @return A string in the format "key1=value1, key2=value2, key3=value3".
          */
-        private String mapToString(java.util.Map<E, java.lang.Integer> map, ValueConverter<java.lang.Integer> valueConverter) {
+        private String mapToString(java.util.Map<E, Integer> map, ValueConverter<Integer> valueConverter) {
             StringBuilder sb = new StringBuilder();
-            for (java.util.Map.Entry<E, java.lang.Integer> entry : map.entrySet()) {
+            for (java.util.Map.Entry<E, Integer> entry : map.entrySet()) {
                 if (!sb.isEmpty()) {
                     sb.append(", ");
                 }
@@ -271,8 +288,8 @@ public class ListConfigValue<T> {
          * @param valueConverter A converter for parsing strings to type V and vice versa.
          * @return A map of enum keys and values.
          */
-        private java.util.Map<E, java.lang.Integer> parseStringToMap(String input, ValueConverter<java.lang.Integer> valueConverter) {
-            java.util.Map<E, java.lang.Integer> map = new java.util.HashMap<>();
+        private java.util.Map<E, Integer> parseStringToMap(String input, ValueConverter<Integer> valueConverter) {
+            java.util.Map<E, Integer> map = new java.util.HashMap<>();
             String[] parts = input.split(",");
             for (String part : parts) {
                 String[] keyValue = part.trim().split("=");
@@ -301,7 +318,7 @@ public class ListConfigValue<T> {
          *
          * @return The current value of the map.
          */
-        public java.util.Map<E, java.lang.Integer> getMapValue() {
+        public java.util.Map<E, Integer> getMapValue() {
             return parseStringToMap(configValue.get(), valueConverter);
         }
 
@@ -310,7 +327,7 @@ public class ListConfigValue<T> {
          *
          * @return The default value of the map.
          */
-        public java.util.Map<E, java.lang.Integer> getDefaultMapValue() {
+        public java.util.Map<E, Integer> getDefaultMapValue() {
             return parseStringToMap(configValue.getDefault(), valueConverter);
         }
 
@@ -320,8 +337,8 @@ public class ListConfigValue<T> {
          * @param enumKey The enum key to look up.
          * @return The value associated with the enum key, or null if the key is not found.
          */
-        public java.lang.Integer getValue(E enumKey) {
-            java.util.Map<E, java.lang.Integer> map = getMapValue();
+        public Integer getValue(E enumKey) {
+            java.util.Map<E, Integer> map = getMapValue();
             return map.get(enumKey);
         }
 
@@ -331,19 +348,9 @@ public class ListConfigValue<T> {
          * @param enumKey The enum key to look up.
          * @return The default value associated with the enum key, or null if the key is not found.
          */
-        public java.lang.Integer getDefaultValue(E enumKey) {
-            java.util.Map<E, java.lang.Integer> map = getDefaultMapValue();
+        public Integer getDefaultValue(E enumKey) {
+            java.util.Map<E, Integer> map = getDefaultMapValue();
             return map.get(enumKey);
-        }
-
-        @Override
-        public List<java.lang.Integer> getValue() {
-            throw new UnsupportedOperationException("Unsupported operation.");
-        }
-
-        @Override
-        public List<java.lang.Integer> getDefaultValue() {
-            throw new UnsupportedOperationException("Unsupported operation.");
         }
     }
 }

@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.util;
 
+import com.google.common.collect.Lists;
 import net.ixdarklord.coolcatlib.api.util.SlotReference;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
@@ -17,7 +18,6 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -59,17 +59,26 @@ public class ItemUtils {
         return index;
     }
 
-    public static List<SlotReference.Player> getSlotReferences(Player player, Item item) {
-        return getSlotReferences(player, itemStack -> itemStack.is(item));
+    public static List<SlotReference.Player> getSlotReferences(Player player, Item item, boolean onlyInventory) {
+        return getSlotReferences(player, itemStack -> itemStack.is(item), onlyInventory);
     }
 
-    public static List<SlotReference.Player> getSlotReferences(Player player, Predicate<ItemStack> predicate) {
-        List<SlotReference.Player> result = new ArrayList<>();
-        for (String slotName : SlotRanges.singleSlotNames().toList()) {
+    public static List<SlotReference.Player> getSlotReferences(Player player, Predicate<ItemStack> predicate, boolean onlyInventory) {
+        List<SlotReference.Player> result = Lists.newArrayList();
+        Predicate<String> filter = s -> {
+            if (onlyInventory) {
+                return s.contains("hotbar") || s.contains("inventory") || s.equals("weapon.offhand") || s.contains("armor");
+            }
+            return !s.equals("weapon") && !s.equals("weapon.mainhand");
+        };
+        List<String> slotNames = SlotRanges.singleSlotNames().filter(filter).toList();
+
+        for (String slotName : slotNames) {
             SlotRange slotRange = SlotRanges.nameToIds(slotName);
             if (slotRange == null) continue;
             Integer slot = slotRange.slots().getFirst();
-            if (predicate.test(player.getSlot(slot).get())) {
+            boolean match = result.stream().anyMatch(ref -> ref.getIndex() == slot);
+            if (!match && predicate.test(player.getSlot(slot).get())) {
                 result.add(new SlotReference.Player(player, slot));
             }
         }

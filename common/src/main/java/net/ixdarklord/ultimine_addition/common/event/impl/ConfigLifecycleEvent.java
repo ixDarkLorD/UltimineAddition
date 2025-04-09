@@ -5,7 +5,7 @@ import dev.architectury.event.EventFactory;
 import net.ixdarklord.ultimine_addition.config.ConfigInfo;
 
 public class ConfigLifecycleEvent {
-    public static final Event<ConfigUpdate> EVENT = EventFactory.createEventResult(ConfigUpdate.class);
+    public static final Event<ConfigUpdate> EVENT = EventFactory.createLoop();
 
     @FunctionalInterface
     public interface ConfigUpdate {

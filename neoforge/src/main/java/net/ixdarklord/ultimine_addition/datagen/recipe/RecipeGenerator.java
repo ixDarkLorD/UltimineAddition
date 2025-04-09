@@ -15,6 +15,7 @@ import net.minecraft.data.recipes.*;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.Tags;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -24,7 +25,7 @@ public class RecipeGenerator extends RecipeProvider {
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput output) {
+    protected void buildRecipes(@NotNull RecipeOutput output) {
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Registration.CARD_BLUEPRINT.get())
                 .define('A', Items.AMETHYST_SHARD)
                 .define('P', Items.PAPER)
@@ -34,7 +35,7 @@ public class RecipeGenerator extends RecipeProvider {
                 .pattern("ALA")
                 .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_amethyst_shard", inventoryTrigger(ItemPredicate.Builder.item().of(Items.AMETHYST_SHARD).build()))
-                .save(output.withConditions(new LegacyModeCondition(false)));
+                .save(output);
 
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_EMPTY.get(), 2)
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())

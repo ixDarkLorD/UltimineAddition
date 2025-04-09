@@ -1,17 +1,13 @@
-package net.ixdarklord.ultimine_addition.common.network;
+package net.ixdarklord.ultimine_addition.network;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
-import net.ixdarklord.coolcatlib.api.hooks.ServerLifecycleHooks;
-import net.ixdarklord.ultimine_addition.common.network.payloads.*;
-import net.ixdarklord.ultimine_addition.common.network.payloads.config.SyncPlaystyleModePayload;
+import net.ixdarklord.ultimine_addition.network.payloads.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
-
-import java.util.Objects;
 
 public class PayloadHandler {
     public static void init() {
@@ -24,9 +20,7 @@ public class PayloadHandler {
         NetworkHelper.registerS2C(MiningSkillCardPayload.SyncBrewing.TYPE, MiningSkillCardPayload.SyncBrewing.STREAM_CODEC, MiningSkillCardPayload.SyncBrewing::handle);
         NetworkHelper.registerS2C(SyncChallengesPayload.TYPE, SyncChallengesPayload.STREAM_CODEC, SyncChallengesPayload::handle);
         NetworkHelper.registerS2C(PlayerAbilityPayload.TYPE, PlayerAbilityPayload.STREAM_CODEC, PlayerAbilityPayload::handle);
-
-        // Config
-        NetworkHelper.registerS2C(SyncPlaystyleModePayload.TYPE, SyncPlaystyleModePayload.STREAM_CODEC, SyncPlaystyleModePayload::handle);
+        NetworkHelper.registerS2C(ConfigSyncPayload.TYPE, ConfigSyncPayload.STREAM_CODEC, ConfigSyncPayload::handle);
     }
 
     public static <T extends CustomPacketPayload> void sendToServer(T payload) {
@@ -35,11 +29,6 @@ public class PayloadHandler {
 
     public static <T extends CustomPacketPayload> void sendToPlayer(T payload, ServerPlayer player) {
         NetworkManager.sendToPlayer(player, payload);
-    }
-
-    public static <T extends CustomPacketPayload> void sendToPlayers(T payload) {
-        sendToPlayers(payload, Objects.requireNonNull(ServerLifecycleHooks.getCurrentServer(), "server is null!")
-                .getPlayerList().getPlayers());
     }
 
     public static <T extends CustomPacketPayload> void sendToPlayers(T payload, Iterable<ServerPlayer> players) {

@@ -2,8 +2,8 @@ package net.ixdarklord.ultimine_addition.mixin;
 
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
-import net.ixdarklord.ultimine_addition.common.network.payloads.MiningSkillCardPayload;
+import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.MiningSkillCardPayload;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;

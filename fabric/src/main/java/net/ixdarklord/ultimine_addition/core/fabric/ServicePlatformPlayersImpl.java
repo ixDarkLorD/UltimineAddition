@@ -2,8 +2,8 @@ package net.ixdarklord.ultimine_addition.core.fabric;
 
 import net.ixdarklord.ultimine_addition.common.data.player.IPlayerData;
 import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
-import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
-import net.ixdarklord.ultimine_addition.common.network.payloads.PlayerAbilityPayload;
+import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.PlayerAbilityPayload;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.server.level.ServerPlayer;

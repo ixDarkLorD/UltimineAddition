@@ -6,6 +6,7 @@ public class EventHandler {
         ChallengesEvents.init();
         IneligibleBlocksEvents.init();
         SyncEvents.init();
+        CertificateEvents.init();
         TradesEvent.init();
         CommandEvents.init();
         BrewingEvents.init();

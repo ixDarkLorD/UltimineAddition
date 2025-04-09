@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @see PlatformTags
  */
-public final class PlatformTagsImpl extends PlatformTags {
+public final class PlatformTagsImpl implements PlatformTags {
     public static @NotNull PlatformTags get() {
         return new PlatformTagsImpl();
     }

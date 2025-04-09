@@ -6,6 +6,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
 public class ModItemTags {
+    public static final TagKey<Item> LEGACY_DISABLED_ITEMS = create("legacy_disabled_items");
     public static final TagKey<Item> MINING_SKILL_CARD = create("mining_skill_card");
     public static final TagKey<Item> MORE_VALUABLE_PIGMENT = create("more_valuable_pigment");
     public static final TagKey<Item> LESS_VALUABLE_PIGMENT = create("less_valuable_pigment");

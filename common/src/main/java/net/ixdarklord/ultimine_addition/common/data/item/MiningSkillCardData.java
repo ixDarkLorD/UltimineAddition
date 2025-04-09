@@ -8,8 +8,8 @@ import net.ixdarklord.ultimine_addition.client.gui.components.toasts.ChallengesT
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
-import net.ixdarklord.ultimine_addition.common.network.payloads.MiningSkillCardPayload;
+import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.MiningSkillCardPayload;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;

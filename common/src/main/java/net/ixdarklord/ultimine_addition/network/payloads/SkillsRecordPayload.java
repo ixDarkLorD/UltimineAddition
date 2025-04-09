@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.common.network.payloads;
+package net.ixdarklord.ultimine_addition.network.payloads;
 
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.menu.MenuRegistry;
@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class SkillsRecordPayload {
+public final class SkillsRecordPayload {
     public static class Open implements CustomPacketPayload {
         public static final Type<SkillsRecordPayload.Open> TYPE = new Type<>(FTBUltimineAddition.rl("open_skills_record"));
         public static final StreamCodec<FriendlyByteBuf, Open> STREAM_CODEC = new StreamCodec<>() {

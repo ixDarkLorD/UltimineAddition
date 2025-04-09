@@ -65,7 +65,7 @@ public class JEIIntegration implements IModPlugin {
 
         registration.addItemStackInfo(allCards, Component.translatable("jei.ultimine_addition.info.cards.grade_up"));
         registration.addItemStackInfo(masteredCards, Component.translatable("jei.ultimine_addition.info.cards.mastered"));
-        registration.addItemStackInfo(ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), Component.translatable("jei.ultimine_addition.info.cards.obtain", ConfigHandler.SERVER.VILLAGER_CARD_TRADE_LEVEL.get()));
+        ConfigIngredientInfoRecipe.addConfigInfo(registration, ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), "jei.ultimine_addition.info.cards.obtain", ConfigHandler.COMMON.VILLAGER_CARD_TRADE_LEVEL);
     }
 
     @Override

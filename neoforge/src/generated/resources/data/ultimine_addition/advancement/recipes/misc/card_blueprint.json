@@ -1,10 +1,4 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "ultimine_addition:legacy_mode",
-      "value": false
-    }
-  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_amethyst_shard": {

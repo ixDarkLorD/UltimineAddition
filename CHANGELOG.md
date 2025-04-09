@@ -2,6 +2,11 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v1.1.3 Release - April 9, 2025
+### 🐛 Bug Fixes & Improvements
+- Fixed an issue where the mining skill card's villager trade was not being registered correctly.
+- The Miner Certificate in legacy mode now correctly counts points towards the ores challenge.
+
 ## v1.1.2 Release - March 28, 2025
 ### 🐛 Bug Fixes & Improvements
 - The empty pen and ink chamber has been re-added to the Creative Tab. **( It was mistakenly removed; )**

@@ -94,7 +94,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         if (Minecraft.getInstance().screen instanceof SkillsRecordScreen screen &&
                 screen.getMenu().getCardSlots().stream().anyMatch(slot -> slot.getItem().equals(stack))) return;
 
-        if (data != null && data.getTier() != Tier.Mastered) {
+        if (data == null || data.getTier() != Tier.Mastered) {
             component = Component.translatable("tooltip.ultimine_addition.skill_card.info").withStyle(ChatFormatting.WHITE);
             List<Component> components = ComponentHelper.splitComponent(component, getSplitterLength());
             tooltipComponents.addAll(components);

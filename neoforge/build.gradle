@@ -1,5 +1,18 @@
 apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/neoforge.gradle"
 
+loom {
+    runs {
+        devClient {
+            client()
+            setConfigName("NeoForge Dev Client ${libs.versions.minecraft.get()}")
+            programArgs "--username", "Dev"
+        }
+        server {
+            runDir("../run/server")
+        }
+    }
+}
+
 dependencies {
     modApi libs.architectury.neoforge.get()
     modApi "net.ixdarklord.coolcatlib:neoforge:1.21-${coolcatlib_version}"

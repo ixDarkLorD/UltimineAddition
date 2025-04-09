@@ -1,20 +1,17 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
-import net.ixdarklord.coolcatlib.api.item.ComponentItem;
 import net.ixdarklord.coolcatlib.api.util.ColorUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
-import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
+import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
@@ -36,9 +33,7 @@ public class ItemTooltipEvents {
             insertSelectedShapeInfo(stack, components);
         }
 
-        if (stack.getItem() instanceof ComponentItem
-                && stack.getItem() != ModItems.MINER_CERTIFICATE
-                && BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace().equalsIgnoreCase(FTBUltimineAddition.MOD_ID)) {
+        if (stack.is(ModItemTags.LEGACY_DISABLED_ITEMS)) {
             if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
                 components.add(1, Component.translatable("tooltip.ultimine_addition.legacy_mode.disabled_item").withStyle(ChatFormatting.RED));
             }

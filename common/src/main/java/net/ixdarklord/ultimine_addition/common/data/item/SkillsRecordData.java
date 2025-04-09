@@ -14,10 +14,10 @@ import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSa
 import net.ixdarklord.ultimine_addition.common.item.PenItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
-import net.ixdarklord.ultimine_addition.common.network.PayloadHandler;
-import net.ixdarklord.ultimine_addition.common.network.payloads.SkillsRecordPayload;
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.SkillsRecordPayload;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -144,7 +144,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                     var challengeData = ChallengesManager.INSTANCE.getAllChallenges().get(identifier.getId());
                     List<Block> blocks = ChallengesManager.INSTANCE.utilizeTargetedBlocks(challengeData);
                     int inkChamber = getPenSlot().getItem() instanceof PenItem
-                            ? ((PenItem)getAllSlots().get(4).getItem()).getData(getAllSlots().get(4)).getCapacity()
+                            ? ((PenItem) getAllSlots().get(4).getItem()).getData(getAllSlots().get(4)).getCapacity()
                             : 0;
 
                     boolean hasCorrectGamemode = !player.isCreative() && !player.isSpectator();
@@ -201,7 +201,8 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                     }
                 }
             });
-        } catch (ConcurrentModificationException ignored) {}
+        } catch (ConcurrentModificationException ignored) {
+        }
         return isConsumed.get();
     }
 

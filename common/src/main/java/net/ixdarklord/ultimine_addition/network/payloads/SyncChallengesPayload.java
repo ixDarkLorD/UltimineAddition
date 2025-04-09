@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.common.network.payloads;
+package net.ixdarklord.ultimine_addition.network.payloads;
 
 import dev.architectury.networking.NetworkManager;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;

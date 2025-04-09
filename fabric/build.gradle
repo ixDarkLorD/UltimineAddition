@@ -1,5 +1,18 @@
 apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/fabric.gradle"
 
+loom {
+    runs {
+        devClient {
+            client()
+            setConfigName("Fabric Dev Client ${libs.versions.minecraft.get()}")
+            programArgs "--username", "Dev"
+        }
+        server {
+            runDir("../run/server")
+        }
+    }
+}
+
 dependencies {
     modApi libs.architectury.fabric.get()
     modApi "net.ixdarklord.coolcatlib:fabric:1.21-${coolcatlib_version}"
@@ -7,7 +20,7 @@ dependencies {
 
     modCompileOnlyApi libs.jei.api.fabric.get()
     modRuntimeOnly libs.jei.fabric.get()
-    modApi libs.trinkets.fabric.get()
+    modCompileOnly libs.trinkets.fabric.get()
 
     modApi "dev.ftb.mods:ftb-ultimine-fabric:${ftbultimine_version}"
     modApi "dev.ftb.mods:ftb-library-fabric:${ftblibrary_version}"

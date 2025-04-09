@@ -117,6 +117,11 @@ public class Registration {
                 builder.displayItems((itemDisplayParameters, output) -> {
                     output.accept(ModItems.MINER_CERTIFICATE);
                     output.accept(ModItems.SHAPE_SELECTOR);
+
+                    if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+                        output.accept(ModItems.CARD_BLUEPRINT);
+                    }
+
                     if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
                         output.accept(ModItems.SKILLS_RECORD);
                         output.accept(ModItems.INK_CHAMBER);

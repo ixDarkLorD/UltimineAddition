@@ -45,7 +45,7 @@ public class MSCEvents {
 
         BlockEvent.BREAK.register((level, pos, state, pl, xp) -> {
             if (pl instanceof ServerPlayer player) {
-                List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD);
+                List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
                 if (slots.isEmpty()) return EventResult.pass();
                 for (SlotReference.Player slot : slots) {
                     SkillsRecordData data = SkillsRecordData.loadData(slot.getItem());
@@ -68,7 +68,7 @@ public class MSCEvents {
 
     private static void cardBonusEffect(ServerPlayer player) {
         if (!ConfigHandler.SERVER.CARD_MASTERED_EFFECT.get()) return;
-        List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || (stack.getItem() instanceof MiningSkillCardItem item && item.getType() != MiningSkillCardItem.Type.EMPTY));
+        List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || (stack.getItem() instanceof MiningSkillCardItem item && item.getType() != MiningSkillCardItem.Type.EMPTY), false);
         List<MiningSkillCardData> dataList = slots.stream()
                 .map(SlotReference.Player::getItem)
                 .flatMap(itemStack -> {
@@ -97,7 +97,7 @@ public class MSCEvents {
 
     private static void validateCards(ServerPlayer player) {
         if (!ConfigHandler.SERVER.SPEC.isLoaded() || player.tickCount % (20 * ConfigHandler.SERVER.CARD_VALIDATOR.get()) != 0) return;
-        List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || stack.getItem() instanceof MiningSkillCardItem);
+        List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || stack.getItem() instanceof MiningSkillCardItem, false);
 
         Function<ItemStack, Boolean> validateCardFunction = itemStack -> {
             if (itemStack.isEmpty() || !(itemStack.getItem() instanceof MiningSkillCardItem cardItem) || cardItem.getType() == MiningSkillCardItem.Type.EMPTY)
@@ -136,7 +136,7 @@ public class MSCEvents {
         if (player == null) return CompoundEventResult.pass();
         if (PlayerHooks.isFake(player)) return CompoundEventResult.pass();
         if (!context.getLevel().isClientSide()) {
-            List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD);
+            List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
             if (slots.isEmpty()) return CompoundEventResult.pass();
             for (SlotReference.Player slot : slots) {
                 var data = SkillsRecordData.loadData(slot.getItem());

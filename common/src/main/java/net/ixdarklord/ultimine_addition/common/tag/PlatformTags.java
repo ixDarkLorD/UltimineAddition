@@ -10,43 +10,44 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class PlatformTags {
-
+public interface PlatformTags {
     @ExpectPlatform
-    public static @NotNull PlatformTags get() {
-        throw new AssertionError();
+    static @NotNull PlatformTags get() {
+        throw new UnsupportedOperationException("This loader is not supported!");
     }
 
     // ITEM
-    public abstract @NotNull TagKey<Item> SLIME();
+    @NotNull TagKey<Item> SLIME();
 
     // BLOCKS
-    public abstract @NotNull TagKey<Block> STONES();
-    public abstract @NotNull TagKey<Block> COBBLESTONES();
-    public abstract @NotNull TagKey<Block> OBSIDIAN();
+    @NotNull TagKey<Block> STONES();
+    @NotNull TagKey<Block> COBBLESTONES();
+    @NotNull TagKey<Block> OBSIDIAN();
 
     // ORES
-    public abstract @NotNull TagKey<Block> ORES();
-    public abstract @NotNull TagKey<Block> COAL_ORES();
-    public abstract @NotNull TagKey<Block> IRON_ORES();
-    public abstract @NotNull TagKey<Block> COPPER_ORES();
-    public abstract @NotNull TagKey<Block> GOLD_ORES();
-    public abstract @NotNull TagKey<Block> LAPIS_ORES();
-    public abstract @NotNull TagKey<Block> REDSTONE_ORES();
-    public abstract @NotNull TagKey<Block> DIAMOND_ORES();
-    public abstract @NotNull TagKey<Block> EMERALD_ORES();
-    public abstract @NotNull TagKey<Block> QUARTZ_ORES();
+    @NotNull TagKey<Block> ORES();
+    @NotNull TagKey<Block> COAL_ORES();
+    @NotNull TagKey<Block> IRON_ORES();
+    @NotNull TagKey<Block> COPPER_ORES();
+    @NotNull TagKey<Block> GOLD_ORES();
+    @NotNull TagKey<Block> LAPIS_ORES();
+    @NotNull TagKey<Block> REDSTONE_ORES();
+    @NotNull TagKey<Block> DIAMOND_ORES();
+    @NotNull TagKey<Block> EMERALD_ORES();
+    @NotNull TagKey<Block> QUARTZ_ORES();
 
     // TOOLS
-    public @NotNull TagKey<Item> PAXELS() {
+    @NotNull
+    default TagKey<Item> PAXELS() {
         return createCommonTag(Registries.ITEM, "paxels");
     }
 
-    public @NotNull TagKey<Item> TOOLS_PAXELS() {
+    @NotNull
+    default TagKey<Item> TOOLS_PAXELS() {
         return createCommonTag(Registries.ITEM, "tools/paxel");
     }
 
-    public <T> TagKey<T> createCommonTag(ResourceKey<Registry<T>> registry, String name) {
+    default <T> TagKey<T> createCommonTag(ResourceKey<Registry<T>> registry, String name) {
         return TagKey.create(registry, ResourceLocation.fromNamespaceAndPath("c", name));
     }
 }

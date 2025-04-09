@@ -4,6 +4,7 @@ dependencies {
     modApi libs.architectury.common.get()
     modApi "net.ixdarklord.coolcatlib:common:1.21-${coolcatlib_version}"
     modApi libs.forgeconfigapiport.common.get()
+    modApi libs.jei.libs.common.get()
     modApi libs.jei.api.common.get()
 
     modApi "dev.ftb.mods:ftb-ultimine:${ftbultimine_version}"

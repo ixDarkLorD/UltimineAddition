@@ -4,6 +4,7 @@ import net.ixdarklord.coolcatlib.api.util.ComponentHelper;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -31,31 +32,32 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
         if (level.isClientSide()) {
-            if (ServicePlatform.get().players().isPlayerUltimineCapable(player))
+            if (ServicePlatform.get().players().isPlayerUltimineCapable(player) && isAccomplished(stack)) {
                 level.playLocalSound(player, SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
+                getData(stack).sendClientMessage(player);
+            }
 
             return InteractionResultHolder.pass(stack);
         }
+
         if (!ServicePlatform.get().players().isPlayerUltimineCapable(player)) {
             if (isAccomplished(stack)) {
                 this.playParticleAndSound(player);
                 Registration.ULTIMINE_OBTAIN_TRIGGER.get().trigger((ServerPlayer) player);
-                getData(stack).playCelebration(true).sendClientMessage(player).sendToClient((ServerPlayer) player).saveData(stack);
+                getData(stack).playCelebration(true).sendClientMessage(player).sendToClient(ItemUtils.getSlotIndex(usedHand), (ServerPlayer) player).saveData(stack);
                 ServicePlatform.get().players().setPlayerUltimineCapability(player, true);
                 if (!player.isCreative()) stack.shrink(1);
                 return InteractionResultHolder.success(stack);
             }
-        } else {
-            getData(stack).sendClientMessage(player);
-            return InteractionResultHolder.fail(stack);
         }
+
         return InteractionResultHolder.fail(stack);
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotIndex, boolean isSelected) {
         if (entity instanceof ServerPlayer player)
-            getData(stack).tick(player);
+            getData(stack).tick(slotIndex, player);
     }
 
     @Override

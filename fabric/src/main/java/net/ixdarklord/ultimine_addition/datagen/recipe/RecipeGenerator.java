@@ -39,7 +39,7 @@ public class RecipeGenerator extends FabricRecipeProvider {
                 .pattern("ALA")
                 .group(FTBUltimineAddition.MOD_ID)
                 .unlockedBy("has_amethyst_shard", inventoryTrigger(ItemPredicate.Builder.item().of(Items.AMETHYST_SHARD).build()))
-                .save(withConditions(output, new LegacyModeCondition(false)));
+                .save(output);
 
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_EMPTY.get(), 2)
                 .requires(Registration.MINING_SKILL_CARD_EMPTY.get())

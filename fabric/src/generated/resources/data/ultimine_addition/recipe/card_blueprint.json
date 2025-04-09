@@ -1,10 +1,4 @@
 {
-  "fabric:load_conditions": [
-    {
-      "condition": "ultimine_addition:legacy_mode",
-      "value": false
-    }
-  ],
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "group": "ultimine_addition",

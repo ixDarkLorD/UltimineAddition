@@ -206,7 +206,7 @@ public class CardsCommand {
         return ItemUtils.getSlotReferences(player,
                         stack -> location.isCardInsideSkillsRecord()
                                 ? stack.getItem() instanceof SkillsRecordItem
-                                : stack.getItem() instanceof MiningSkillCardItem cardItem && cardItem.getType() != MiningSkillCardItem.Type.EMPTY).stream()
+                                : stack.getItem() instanceof MiningSkillCardItem cardItem && cardItem.getType() != MiningSkillCardItem.Type.EMPTY, false).stream()
                 .filter(slot -> slot.getIndex() == location.inventoryIndex)
                 .findAny();
     }
