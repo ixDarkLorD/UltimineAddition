@@ -2,6 +2,10 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v1.1.4 Release - April 9, 2025
+### 🐛 Bug Fixes & Improvements
+- Change the JEI's supported version to a public version, not the latest one (version 19.21.0.247 or higher).
+
 ## v1.1.3 Release - April 9, 2025
 ### 🐛 Bug Fixes & Improvements
 - Fixed an issue where the mining skill card's villager trade was not being registered correctly.
