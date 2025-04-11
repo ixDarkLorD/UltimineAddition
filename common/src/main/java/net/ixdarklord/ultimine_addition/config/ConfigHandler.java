@@ -1,7 +1,8 @@
 package net.ixdarklord.ultimine_addition.config;
 
 import dev.ftb.mods.ftbultimine.shape.Shape;
-import net.ixdarklord.ultimine_addition.client.gui.components.skills_record.ChallengesInfoPanel;
+import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesInfoPanel;
+import net.ixdarklord.ultimine_addition.client.gui.screens.ShapeSelectorScreen;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -34,6 +35,7 @@ public final class ConfigHandler {
         public static final ModConfigSpec.BooleanValue SR_EDIT_MODE;
         public static final ModConfigSpec.BooleanValue MSC_RENDERER;
         public static final ModConfigSpec.BooleanValue TEXT_SCREEN_SHADOW;
+        public static final ModConfigSpec.EnumValue<ShapeSelectorScreen.Filter> SHAPE_SELECTOR_FILTER;
 
         static {
             BUILDER.push("Settings");
@@ -43,6 +45,12 @@ public final class ConfigHandler {
                     .define("sr_edit_mode", false);
 
             BUILDER.push("Visuals");
+            SHAPE_SELECTOR_FILTER = BUILDER
+                    .comment("This config controls the list of shapes appearing on the screen." +
+                            "If set to ALL, it will show all shapes including blacklisted ones." +
+                            "If set to ENABLED_SHAPES, it will show only non-blacklisted shapes.")
+                    .defineEnum("shape_selector_filter", ShapeSelectorScreen.Filter.ALL);
+
             TEXT_SCREEN_SHADOW = BUILDER
                     .comment("Toggles the drop shadow effect on text in the Skills Record screen.",
                             "When enabled, text will have a subtle shadow for better readability.")
@@ -164,7 +172,11 @@ public final class ConfigHandler {
             BUILDER.push("General");
             BLACKLISTED_SHAPES = BUILDER
                     .comment("Defines a list of forbidden shape types for mining.",
-                            "Valid shape IDs: %s".formatted(ShapeRegistryAccessor.getShapesList().stream().map(Shape::getName).toList()))
+                            "Valid shape IDs: [%s]".formatted(ShapeRegistryAccessor.getShapesList().stream()
+                                    .map(Shape::getName)
+                                    .map("\"%s\""::formatted)
+                                    .collect(Collectors.joining(", "))
+                            ))
                     .defineList("blacklisted_shapes", Collections.emptyList(), String::new,
                             o -> o instanceof String s && ShapeRegistryAccessor.getShapesList().stream().map(Shape::getName).anyMatch(s1 -> s1.equals(s)));
 
@@ -174,15 +186,14 @@ public final class ConfigHandler {
                     .define("is_placed_by_entity_condition", true);
 
             CARD_VALIDATOR = BUILDER
-                    .comment("Sets the validation time (in seconds) for fixing corrupted Mining Skill Cards.",
-                            "Range: 1 ~ 600 seconds.")
+                    .comment("Sets the validation time (in seconds) for fixing corrupted Mining Skill Cards.")
                     .defineInRange("challenge_validator", 2, 1, 600);
             BUILDER.pop();
 
             BUILDER.push("Gameplay");
             PAPER_CONSUMPTION_RATE = BUILDER
                     .comment("Adjusts the paper consumption rate in the Skills Record.",
-                            "Range: 0 (no consumption) to 1 (full consumption).")
+                            "Range: 0.0 (no consumption) to 1.0 (full consumption).")
                     .defineInRange("paper_consummation_rate", 0.35, 0, 1);
 
             LEGACY_REQUIRED_AMOUNT = new ListConfigValue.RangeValue(1, Integer.MAX_VALUE);
@@ -206,7 +217,7 @@ public final class ConfigHandler {
                     ),
                     "Defines the number of challenges per tier.",
                     "Each tier can have a different number of challenges.",
-                    "Range: 1 ~ 30"
+                    "Range: 1 ~ 30 challenges"
             );
 
 
@@ -221,7 +232,7 @@ public final class ConfigHandler {
                     ),
                     "Defines the potion points awarded per tier.",
                     "Higher tiers may award fewer points.",
-                    "Range: 1 ~ 20"
+                    "Range: 1 ~ 20 points"
             );
 
             CARD_POTION_DURATIONS = new ListConfigValue.EnumValue<>(3, MiningSkillCardItem.Tier.class, 60, 3600);

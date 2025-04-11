@@ -7,8 +7,6 @@ import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSa
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -17,9 +15,7 @@ import java.util.Optional;
 
 public class CertificateEvents {
     public static void init() {
-        if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
-            legacyFunctions();
-        }
+        legacyFunctions();
     }
 
     private static void legacyFunctions() {

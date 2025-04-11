@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.platform.Platform;
-import net.ixdarklord.ultimine_addition.client.gui.components.toasts.ChallengesToast;
+import net.ixdarklord.ultimine_addition.client.gui.toasts.ChallengesToast;
 import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;

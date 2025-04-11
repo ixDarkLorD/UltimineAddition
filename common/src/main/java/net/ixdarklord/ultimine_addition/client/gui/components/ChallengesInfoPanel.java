@@ -1,6 +1,5 @@
-package net.ixdarklord.ultimine_addition.client.gui.components.skills_record;
+package net.ixdarklord.ultimine_addition.client.gui.components;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
@@ -48,14 +47,6 @@ public class ChallengesInfoPanel {
     private static final ResourceLocation TITLE_SPRITE = ResourceLocation.fromNamespaceAndPath(FTBUltimineAddition.MOD_ID, "challenge_panel/title");
     private static final ResourceLocation DESC_SPRITE = ResourceLocation.fromNamespaceAndPath(FTBUltimineAddition.MOD_ID, "challenge_panel/description");
 
-    public static final RenderStateShard.TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("translucent_transparency", () -> {
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-    }, () -> {
-        RenderSystem.disableBlend();
-        RenderSystem.defaultBlendFunc();
-    });
-
     public static final ChallengesInfoPanel INSTANCE = new ChallengesInfoPanel();
 
     private final int textureWidth = 112;
@@ -64,6 +55,8 @@ public class ChallengesInfoPanel {
     private Panel.Position panelPos = Panel.Position.LEFT;
     private float time;
     private float lastStamp;
+
+    private ChallengesInfoPanel() {}
 
     private void tick(float partialTicks) {
         if (partialTicks < this.lastStamp) {
@@ -101,7 +94,7 @@ public class ChallengesInfoPanel {
         if (!MC.isPaused()) {
             SkillsRecordData recordData = SkillsRecordData.loadData(stack);
             createPanels(recordData);
-            validatePanels(recordData, window, font);
+            validatePanels(recordData, window);
             PANEL_LIST.forEach(panel -> panel.animatedComponent.updateAnimation());
         }
 
@@ -136,11 +129,11 @@ public class ChallengesInfoPanel {
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
                 // Info BG
-                TRANSLUCENT_TRANSPARENCY.setupRenderState();
+                RenderStateShard.TRANSLUCENT_TRANSPARENCY.setupRenderState();
                 RenderSystem.setShaderColor(overlayColor.getRed(), overlayColor.getGreen(), overlayColor.getBlue(), overlayColor.getAlpha());
                 guiGraphics.blitSprite(DESC_SPRITE, X, Y + 18, panel.getWidth() + textLength, 14 + Math.max(0, font.lineHeight * (panel.getInfos().size() - 1)));
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                TRANSLUCENT_TRANSPARENCY.clearRenderState();
+                RenderStateShard.TRANSLUCENT_TRANSPARENCY.clearRenderState();
 
                 // Title String
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -229,7 +222,7 @@ public class ChallengesInfoPanel {
         slideOutPanels(trashList.stream());
     }
 
-    private void validatePanels(SkillsRecordData recordData, Window window, Font font) {
+    private void validatePanels(SkillsRecordData recordData, Window window) {
         PANEL_LIST.forEach(panel -> panel.setActive(true));
         for (int slot = PANEL_LIST.size(); slot-- > 0;) {
             Panel panel = PANEL_LIST.get(slot);
@@ -420,10 +413,6 @@ public class ChallengesInfoPanel {
 
         public int getHeight() {
             return textureDimension.height() + Math.max(0, Minecraft.getInstance().font.lineHeight * (infos.size() - 1));
-        }
-
-        public TextureDimension getTextureDimension() {
-            return textureDimension;
         }
 
         public Component getTitle() {

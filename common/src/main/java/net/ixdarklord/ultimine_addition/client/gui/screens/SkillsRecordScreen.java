@@ -16,7 +16,9 @@ import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatlib.api.client.gui.components.TextScreen;
 import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.AbstractDraggableWidget;
 import net.ixdarklord.coolcatlib.api.util.*;
-import net.ixdarklord.ultimine_addition.client.gui.components.skills_record.ConfigurationPanel;
+import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesInfoPanel;
+import net.ixdarklord.ultimine_addition.client.gui.components.ConfigurationPanel;
+import net.ixdarklord.ultimine_addition.client.gui.tooltip.SkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
@@ -80,7 +82,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     private static final ResourceLocation SLOT_SELECT_SPRITE = FTBUltimineAddition.rl("container/skills_record/slot_select");
     private static final ResourceLocation PROGRESS_BAR_SPRITE = FTBUltimineAddition.rl("container/skills_record/progress_bar");
     private static final ResourceLocation ITEM_DISPLAY_SPRITE = FTBUltimineAddition.rl("container/skills_record/item_display");
-    private static final WidgetSprites CONFIGURATION_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/configuration_button_enabled"), FTBUltimineAddition.rl("container/skills_record/configuration_button_disabled"), FTBUltimineAddition.rl("container/skills_record/configuration_button_focused"));
+    public static final WidgetSprites CONFIGURATION_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/configuration_button_enabled"), FTBUltimineAddition.rl("container/skills_record/configuration_button_disabled"), FTBUltimineAddition.rl("container/skills_record/configuration_button_focused"));
     private static final WidgetSprites CONSUME_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/consume_on"), FTBUltimineAddition.rl("container/skills_record/consume_off"), FTBUltimineAddition.rl("container/skills_record/consume_on_focused"), FTBUltimineAddition.rl("container/skills_record/consume_off_focused"));
     private static final WidgetSprites SCROLLBAR_SPRITE = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/scroller_enabled"), FTBUltimineAddition.rl("container/skills_record/scroller_disabled"), FTBUltimineAddition.rl("container/skills_record/scroller_focused"));
 
@@ -89,6 +91,10 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     private StateSwitchingButton consumeButton;
     public ConfigurationPanel configuration;
     private TextScreen textScreen;
+
+    private SkillsRecordScreen.OverlayColor backgroundColor;
+    private boolean isAnimationsEnabled;
+    private int progressMode;
 
     private static float itemCycle;
     public int selectedSlot;
@@ -124,32 +130,59 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         this.selectedSlot = menu.getData().getSelectedCard();
         this.textScreen = TextScreen.build(this.leftPos + 10, this.topPos + 17, 157, 82, ConfigHandler.CLIENT.TEXT_SCREEN_SHADOW.get(), 2);
 
+        this.backgroundColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
+        this.isAnimationsEnabled = ConfigHandler.CLIENT.ANIMATIONS_MODE.get();
+        this.progressMode = ConfigHandler.CLIENT.PROGRESS_BAR.get();
+
         boolean visibility = this.configuration != null && this.configuration.isVisible();
         this.configuration = this.addWidget(new ConfigurationPanel(this.leftPos + 194, this.topPos));
         this.configuration.setVisible(visibility);
 
-        /*this.addRenderableWidget(new AbstractMultiPanelWidget(this.leftPos - 130, this.topPos, 128, 80, 2, false) {
-            @Override
-            protected void init() {
-                Button button = this.addRenderableWidget(Button.builder(Component.empty(), button1 -> {}).build());
-                Button button2 = this.addRenderableWidget(Button.builder(Component.empty(), button1 -> {}).size(40, 100).build());
-                Button button3 = this.addRenderableWidget(Button.builder(Component.empty(), button1 -> {}).build());
+        this.configuration.addButton((button) -> {
+            if (!Screen.hasShiftDown()) this.backgroundColor = this.backgroundColor.next();
+            else this.backgroundColor = this.backgroundColor.previous();
+            this.saveValuesToConfig();
+        }, Component.translatable("gui.ultimine_addition.skills_record.option.bg_color"), tooltipInfo -> {
+            int color = ColorUtils.RGBToRGBA(this.backgroundColor.convert().getRGB(), this.backgroundColor.getAlpha());
+            tooltipInfo.component = Component.translatable(String.format("gui.ultimine_addition.color.%s", this.backgroundColor.name().toLowerCase())).withStyle(Style.EMPTY.withColor(color));
+            tooltipInfo.tooltipComponent = new SkillsRecordTooltip.Option(0, tooltipInfo.component);
+        });
 
-                this.addToHeader(button);
-                this.addToContents(button2);
-                this.addToFooter(button3);
+        this.configuration.addButton((button) -> {
+            this.isAnimationsEnabled ^= true;
+            this.saveValuesToConfig();
+        }, Component.translatable("gui.ultimine_addition.skills_record.option.animations"), tooltipInfo ->
+                tooltipInfo.component = (this.isAnimationsEnabled ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED)));
 
-                this.selectPanel(1);
-                Button button4 = this.addRenderableWidget(Button.builder(Component.empty(), button1 -> {}).size(60, 90).build());
-                this.addToContents(button4);
-                this.shouldRender(true);
+        this.configuration.addButton((button) -> {
+            this.progressMode = (this.progressMode >= 2) ? 0 : this.progressMode + 1;
+            this.saveValuesToConfig();
+        }, Component.translatable("gui.ultimine_addition.skills_record.option.progression_bar"), tooltipInfo -> {
+            switch (this.progressMode) {
+                case 0 -> tooltipInfo.component = Component.translatable("options.on").withStyle(ChatFormatting.GREEN);
+                case 1 -> tooltipInfo.component = Component.translatable("gui.ultimine_addition.skills_record.option.hold_keybind", KeyHandler.KEY_SHOW_PROGRESSION_BAR.getTranslatedKeyMessage()).withStyle(ChatFormatting.AQUA);
+                case 2 -> tooltipInfo.component = Component.translatable("options.off").withStyle(ChatFormatting.RED);
             }
+        });
 
-            @Override
-            public @NotNull ScreenRectangle getDraggingRectangle() {
-                return ScreenRectangle.empty();
-            }
-        });*/
+        this.configuration.addButton((button) -> {
+            if (!Screen.hasShiftDown())
+                ChallengesInfoPanel.INSTANCE.setPanelPos(ChallengesInfoPanel.INSTANCE.getPanelPos().next());
+            else
+                ChallengesInfoPanel.INSTANCE.setPanelPos(ChallengesInfoPanel.INSTANCE.getPanelPos().previous());
+            this.saveValuesToConfig();
+        }, Component.translatable("gui.ultimine_addition.skills_record.option.panel_pos"), tooltipInfo -> {
+            ChatFormatting color = ChallengesInfoPanel.INSTANCE.getPanelPos().getSerializedName().equals("disabled") ? ChatFormatting.RED : ChatFormatting.WHITE;
+            tooltipInfo.component = Component.translatable("gui.ultimine_addition.skills_record.option.panel_pos.%s".formatted(ChallengesInfoPanel.INSTANCE.getPanelPos().getSerializedName())).withStyle(color);
+            tooltipInfo.tooltipComponent = new SkillsRecordTooltip.Option(1, tooltipInfo.component);
+        });
+    }
+
+    public void saveValuesToConfig() {
+        ConfigHandler.CLIENT.BACKGROUND_COLOR.set(this.backgroundColor);
+        ConfigHandler.CLIENT.ANIMATIONS_MODE.set(this.isAnimationsEnabled);
+        ConfigHandler.CLIENT.PROGRESS_BAR.set(this.progressMode);
+        ConfigHandler.CLIENT.CHALLENGES_PANEL_POSITION.set(ChallengesInfoPanel.INSTANCE.getPanelPos());
     }
 
     @Override
@@ -161,7 +194,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         this.configurationButton = this.addRenderableWidget(new ColorableImageButton(this.leftPos + 174, this.topPos + 4, 10, 10, CONFIGURATION_BUTTON_SPRITES,
                 button -> {
                     this.configuration.toggleVisibility(true);
-                    this.configuration.saveValuesToConfig();
+                    this.saveValuesToConfig();
                 }));
 
         this.consumeButton = this.addRenderableWidget(new StateSwitchingButton(this.leftPos + 174, this.topPos + 106, 10, 18, this.menu.getData().isConsumeMode()) {
@@ -169,13 +202,13 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             @Override
             public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
                 this.sprites = CONSUME_BUTTON_SPRITES;
-                guiGraphics.setColor(SkillsRecordScreen.this.configuration.getBackgroundColor().getRed(), SkillsRecordScreen.this.configuration.getBackgroundColor().getGreen(), SkillsRecordScreen.this.configuration.getBackgroundColor().getBlue(), SkillsRecordScreen.this.configuration.getBackgroundColor().getAlpha());
+                guiGraphics.setColor(SkillsRecordScreen.this.backgroundColor.getRed(), SkillsRecordScreen.this.backgroundColor.getGreen(), SkillsRecordScreen.this.backgroundColor.getBlue(), SkillsRecordScreen.this.backgroundColor.getAlpha());
                 RenderSystem.disableDepthTest();
                 guiGraphics.blitSprite(this.sprites.get(!SkillsRecordScreen.this.lock && this.isStateTriggered, !SkillsRecordScreen.this.lock && this.active && this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
                 RenderSystem.enableDepthTest();
                 guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-                double value = SkillsRecordScreen.this.configuration.isAnimationsEnabled() ? MathUtils.cycledBetweenValues(0.5F, 1.0F, 0.75F, SkillsRecordScreen.this.menu.getPlayer().tickCount / 20.0F, false) : 1.0F;
+                double value = SkillsRecordScreen.this.isAnimationsEnabled ? MathUtils.cycledBetweenValues(0.5F, 1.0F, 0.75F, SkillsRecordScreen.this.menu.getPlayer().tickCount / 20.0F, false) : 1.0F;
                 Color cTo = this.isStateTriggered ? new Color(0x23AC23) : new Color(0xA82222);
                 Color cFrom = this.isStateTriggered ? ColorUtils.blendColors(new Color(0x37FF37), cTo, value) : ColorUtils.blendColors(new Color(0xFF3737), cTo, value);
                 Color color1 = this.isStateTriggered ? cFrom : cTo;
@@ -220,7 +253,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             this.isProgressionBarShown = false;
             this.menu.getAllSlots().forEach(slot -> ((CustomSlot) slot).setEnabled(false));
         } else {
-            if (this.isChallengesExists && !this.isMissingItems && !this.notEnoughInk && this.configuration.getProgressMode() == 0) {
+            if (this.isChallengesExists && !this.isMissingItems && !this.notEnoughInk && this.progressMode == 0) {
                 this.isProgressionBarShown = true;
             } else if (this.selectedSlot == -1 || isCardTierMastered)
                 this.isProgressionBarShown = false;
@@ -237,7 +270,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         }
 
         if (this.configurationButton != null) {
-            this.configurationButton.setColor(this.configuration.getBackgroundColor().color);
+            this.configurationButton.setColor(this.backgroundColor.color);
         }
 
         if (this.consumeButton != null) {
@@ -252,7 +285,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
     @Override
     public void onClose() {
-        this.configuration.saveValuesToConfig();
+        this.saveValuesToConfig();
         super.onClose();
     }
 
@@ -277,14 +310,14 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        guiGraphics.setColor(this.configuration.getBackgroundColor().getRed(), this.configuration.getBackgroundColor().getGreen(), this.configuration.getBackgroundColor().getBlue(), this.configuration.getBackgroundColor().getAlpha());
+        guiGraphics.setColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
         guiGraphics.blit(BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        Color color = ColorUtils.blendColors(new Color(0, 0, 0), this.configuration.getBackgroundColor().color, 0.75);
+        Color color = ColorUtils.blendColors(new Color(0, 0, 0), this.backgroundColor.color, 0.75);
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, color.getRGB(), false);
         guiGraphics.fill(this.inventoryLabelX - 1, this.inventoryLabelY - 1, this.inventoryLabelX + this.font.width(this.playerInventoryTitle), this.inventoryLabelY + this.font.lineHeight, ColorUtils.RGBToRGBA(color.getRGB(), 0.5F));
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
@@ -329,7 +362,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
                 guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 
                 float size = MathUtils.cycledBetweenValues(0.75F, 0.90F, 1.0F, this.menu.getPlayer().tickCount / 20.0F, true);
-                size = this.configuration.isAnimationsEnabled() ? size : 0.90F;
+                size = this.isAnimationsEnabled ? size : 0.90F;
                 poseStack.scale(size, size, size);
 
                 this.minecraft.getItemRenderer().render(displayItem, ItemDisplayContext.GUI, false, poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, model);
@@ -354,7 +387,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
                 poseStack.pushPose();
                 poseStack.translate(x + slot.x, y + slot.y, 100.0F);
                 poseStack.translate(8.0, 8.0, 0.0);
-                guiGraphics.setColor(this.configuration.getBackgroundColor().getRed(), this.configuration.getBackgroundColor().getGreen(), this.configuration.getBackgroundColor().getBlue(), this.configuration.getBackgroundColor().getAlpha());
+                guiGraphics.setColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
                 guiGraphics.fill(RenderType.guiOverlay(), -8, -8, 8, 8, ColorUtils.RGBToRGBA(color, alpha));
                 guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
                 poseStack.popPose();
@@ -365,7 +398,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     private void renderSlotDecorations(GuiGraphics guiGraphics, int x, int y) {
         if (this.lock) return;
 
-        guiGraphics.setColor(this.configuration.getBackgroundColor().getRed(), this.configuration.getBackgroundColor().getGreen(), this.configuration.getBackgroundColor().getBlue(), this.configuration.getBackgroundColor().getAlpha());
+        guiGraphics.setColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
         if (this.menu.getSlot(4).getItem() != ItemStack.EMPTY)
             guiGraphics.blitSprite(SLOT_SELECT_SPRITE, x + 135, y + 99, 4, 8);
 
@@ -437,14 +470,14 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
                 .shouldRender(false);
 
         this.textScreen.selectLastScreen(true)
-                .renderAllBoxes(guiGraphics, Color.DARK_GRAY.getRGB(), this.configuration.getBackgroundColor().color);
+                .renderAllBoxes(guiGraphics, Color.DARK_GRAY.getRGB(), this.backgroundColor.color);
     }
 
     private void renderScroll(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
         int Y = (int) Mth.lerp(this.getScrollOffsetDelta(), 16, 86);
         boolean isOverButton = isHovering(174, Y, 9, 12, mouseX, mouseY);
 
-        guiGraphics.setColor(this.configuration.getBackgroundColor().getRed(), this.configuration.getBackgroundColor().getGreen(), this.configuration.getBackgroundColor().getBlue(), this.configuration.getBackgroundColor().getAlpha());
+        guiGraphics.setColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
         guiGraphics.blitSprite(SCROLLBAR_SPRITE.get(this.textScreen.canScroll(), isOverButton), x + 174, y + Y, 10, 13);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
@@ -514,7 +547,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
-        guiGraphics.setColor(this.configuration.getBackgroundColor().getRed(), this.configuration.getBackgroundColor().getGreen(), this.configuration.getBackgroundColor().getBlue(), this.configuration.getBackgroundColor().getAlpha());
+        guiGraphics.setColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
         guiGraphics.blitSprite(ITEM_DISPLAY_SPRITE, mouseX + alignPosX, mouseY, 26, 26);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
         guiGraphics.pose().popPose();
@@ -651,7 +684,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             return false;
 
         if (KeyBindingHooks.isMatches(KeyHandler.KEY_SHOW_PROGRESSION_BAR, keyCode, scanCode)) {
-            if (this.isChallengesExists && !this.isMissingItems && !this.notEnoughInk && !this.lock && this.configuration.getProgressMode() == 1)
+            if (this.isChallengesExists && !this.isMissingItems && !this.notEnoughInk && !this.lock && this.progressMode == 1)
                 this.isProgressionBarShown = true;
         }
 
@@ -664,7 +697,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             return true;
 
         if (!KeyBindingHooks.isMatches(KeyHandler.KEY_SHOW_PROGRESSION_BAR, keyCode, scanCode)) {
-            if (this.configuration.getProgressMode() == 1) this.isProgressionBarShown = false;
+            if (this.progressMode == 1) this.isProgressionBarShown = false;
             return true;
         }
 

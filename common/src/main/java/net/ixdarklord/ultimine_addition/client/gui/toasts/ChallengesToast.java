@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.client.gui.components.toasts;
+package net.ixdarklord.ultimine_addition.client.gui.toasts;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;

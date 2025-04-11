@@ -2,6 +2,11 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v1.1.5 Release - April 11, 2025
+### ✨ New Feature
+- Added a progression tooltip to the Miner Certificate in Legacy Mode.
+- Introduced a new toggle button in the Shape Selector to filter the shape list between all shapes and non-blacklisted shapes.
+
 ## v1.1.4 Release - April 9, 2025
 ### 🐛 Bug Fixes & Improvements
 - Change the JEI's supported version to a public version, not the latest one (version 19.21.0.247 or higher).
@@ -33,8 +38,8 @@ This file is for listing all the changes to this project
 - Added a new Edit Challenge screen in the Skills Record section, accessible only to players with admin permissions.
 
 <div style="display: flex; gap: 10px;">
-<img src="https://i.imgur.com/t6eklpZ.png" width="300" />
-<img src="https://i.imgur.com/uD5SA3d.png" width="300" />
+<img src="https://i.imgur.com/t6eklpZ.png" width="300"  alt=""/>
+<img src="https://i.imgur.com/uD5SA3d.png" width="300"  alt=""/>
 </div>
 
 ### 🐛 Bug Fixes & Improvements

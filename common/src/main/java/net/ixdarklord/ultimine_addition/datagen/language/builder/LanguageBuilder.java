@@ -76,6 +76,10 @@ public class LanguageBuilder {
         add("tooltip", "pen.info", "It's a required tool for the Skills Record.");
         add("tooltip", "pen.ink_chamber", "Ink Chamber: %s");
 
+        add("gui", "sort", "Sort");
+        add("gui", "filter", "Filter");
+        add("gui", "filter.all", "All");
+        add("gui", "filter.only_enabled", "Only Enabled Shapes");
         add("gui", "color.default", "Default");
         add("gui", "color.red", "Red");
         add("gui", "color.orange", "Orange");

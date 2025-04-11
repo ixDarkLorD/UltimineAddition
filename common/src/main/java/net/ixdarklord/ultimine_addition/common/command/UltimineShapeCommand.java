@@ -18,33 +18,36 @@ public class UltimineShapeCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
         FTBUltimineAddition.withCommandPrompt(dispatcher, Commands.LEVEL_GAMEMASTERS, builder ->
-                builder.then(Commands.literal("blacklist_shape")
-                        .then(Commands.literal("add")
-                                .then(Commands.argument("shape_id", UltimineShapeArgument.shape())
-                                        .executes(context -> updateBlacklistedShapes(context.getSource(), UltimineShapeArgument.getShape(context, "shape_id"), true))))
-                        .then(Commands.literal("remove").then(Commands.argument("shape_id", UltimineShapeArgument.shape())
-                                .executes(context -> updateBlacklistedShapes(context.getSource(), UltimineShapeArgument.getShape(context, "shape_id"), false))))
-                ));
+                builder.then(Commands.literal("ultimine_shape")
+                        .then(Commands.literal("blacklist")
+                                .then(Commands.literal("add")
+                                        .then(Commands.argument("shape_id", UltimineShapeArgument.shape())
+                                                .executes(context -> updateBlacklistedShapes(context.getSource(), UltimineShapeArgument.getShape(context, "shape_id"), true))))
+                                .then(Commands.literal("remove").then(Commands.argument("shape_id", UltimineShapeArgument.shape())
+                                        .executes(context -> updateBlacklistedShapes(context.getSource(), UltimineShapeArgument.getShape(context, "shape_id"), false))))
+                        )));
     }
 
     private static int updateBlacklistedShapes(CommandSourceStack source, Shape shape, boolean adding) {
         ModConfigSpec.ConfigValue<List<? extends String>> config = ConfigHandler.SERVER.BLACKLISTED_SHAPES;
         List<String> shapeIds = Lists.newArrayList(config.get());
 
-        if (shapeIds.contains(shape.getName())) {
-            if (adding)
-                source.sendFailure(Component.translatable("command.ultimine_addition.ultimine_shape.included", shape.getName()));
-            else
-                source.sendFailure(Component.translatable("command.ultimine_addition.ultimine_shape.excluded", shape.getName()));
-            return 0;
-        }
-
         if (adding) {
+            if (shapeIds.contains(shape.getName())) {
+                source.sendFailure(Component.translatable("command.ultimine_addition.ultimine_shape.included", shape.getName()));
+                return 0;
+            }
+
             shapeIds.add(shape.getName());
             config.set(shapeIds);
             config.save();
             source.sendSuccess(() -> Component.translatable("command.ultimine_addition.ultimine_shape.success.add", shape.getName()), true);
         } else {
+            if (!shapeIds.contains(shape.getName())) {
+                source.sendFailure(Component.translatable("command.ultimine_addition.ultimine_shape.excluded", shape.getName()));
+                return 0;
+            }
+
             shapeIds.remove(shape.getName());
             config.set(shapeIds);
             config.save();

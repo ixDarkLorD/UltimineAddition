@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.client.gui.tooltip;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.ixdarklord.ultimine_addition.client.gui.components.skills_record.ChallengesInfoPanel;
+import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.client.gui.Font;
@@ -53,19 +53,19 @@ public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
 
     private void renderSlot(int x, int y, int itemIndex, GuiGraphics guiGraphics, Font font) {
         if (itemIndex >= this.items.size()) {
-            this.blit(guiGraphics, x, y, Texture.SLOT);
+            this.blit(guiGraphics, x, y);
         } else {
             ItemStack itemStack = this.items.get(itemIndex);
-            this.blit(guiGraphics, x, y, Texture.SLOT);
+            this.blit(guiGraphics, x, y);
             guiGraphics.renderItem(itemStack, x + 1, y + 1, itemIndex);
             guiGraphics.renderItemDecorations(font, itemStack, x + 1, y + 1);
         }
     }
 
-    private void blit(GuiGraphics guiGraphics, int x, int y, Texture texture) {
+    private void blit(GuiGraphics guiGraphics, int x, int y) {
         SkillsRecordScreen.OverlayColor overlayColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
         RenderSystem.setShaderColor(overlayColor.getRed(), overlayColor.getGreen(), overlayColor.getBlue(), overlayColor.getAlpha());
-        guiGraphics.blitSprite(texture.sprite, x, y, 0, texture.w, texture.h);
+        guiGraphics.blitSprite(Texture.SLOT.sprite, x, y, 0, Texture.SLOT.w, Texture.SLOT.h);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 

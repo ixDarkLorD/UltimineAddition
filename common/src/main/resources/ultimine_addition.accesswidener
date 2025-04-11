@@ -1,5 +1,9 @@
 accessWidener v2 named
 
+# Gui
+accessible field net/minecraft/client/gui/Gui overlayMessageTime I
+accessible field net/minecraft/client/gui/Gui toolHighlightTimer I
+
 # MobEffectInstance
 accessible field net/minecraft/world/effect/MobEffectInstance duration I
 

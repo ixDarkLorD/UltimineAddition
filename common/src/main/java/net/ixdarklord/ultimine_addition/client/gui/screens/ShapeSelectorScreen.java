@@ -7,15 +7,16 @@ import net.fabricmc.api.Environment;
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatlib.api.util.ColorUtils;
 import net.ixdarklord.coolcatlib.api.util.RenderUtils;
+import net.ixdarklord.ultimine_addition.client.gui.components.ColoredButton;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
 import net.ixdarklord.ultimine_addition.common.menu.ShapeSelectorMenu;
-import net.ixdarklord.ultimine_addition.network.PayloadHandler;
-import net.ixdarklord.ultimine_addition.network.payloads.UpdateItemShapePayload;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.mixin.ShapeRegistryAccessor;
+import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.UpdateItemShapePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -25,10 +26,12 @@ import net.minecraft.client.gui.components.AbstractStringWidget;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -47,6 +50,8 @@ import java.util.Optional;
 public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMenu> {
     private static final ResourceLocation BACKGROUND_TEXTURE = FTBUltimineAddition.getGuiTexture("container/shape_selector", "png");
     private SkillsRecordScreen.OverlayColor color;
+
+    private ColoredButton filterButton;
     private AbstractStringWidget emptyString;
     private SelectBox selectBox;
     private ColorableImageButton setButton;
@@ -66,6 +71,23 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         this.titleLabelY = 5;
         this.inventoryLabelX = (this.imageWidth / 2) - (this.font.width(this.playerInventoryTitle) / 2);
         this.inventoryLabelY = this.imageHeight - 96;
+
+        this.filterButton = this.addWidget(new ColoredButton(this.leftPos + 165, this.topPos + 4, 9, 9, SkillsRecordScreen.CONFIGURATION_BUTTON_SPRITES,
+                button -> {
+                    Filter filter = ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.get();
+                    ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.set(Screen.hasShiftDown() ? filter.previous() : filter.next());
+                    ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.save();
+                    this.selectBox.refreshList();
+                }, Component.empty(), tooltipInfo -> {
+            MutableComponent filterComponent = ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.get() == Filter.ALL
+                    ? Component.translatable("gui.ultimine_addition.filter.all")
+                    : Component.translatable("gui.ultimine_addition.filter.only_enabled");
+
+            tooltipInfo.component = Component.translatable("gui.ultimine_addition.filter")
+                    .append(": ")
+                    .append(filterComponent)
+                    .withStyle(ChatFormatting.WHITE);
+        }));
 
         this.emptyString = this.addRenderableWidget(new AbstractStringWidget(this.leftPos + 61, this.topPos + 16, 102, 54,
                 Component.translatable("gui.ultimine_addition.shape_selector.insert"), this.font) {
@@ -151,6 +173,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         this.color = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
         this.update();
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+        this.filterButton.render(guiGraphics, mouseX, mouseY, partialTick);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
@@ -189,14 +212,39 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
     }
 
+    public enum Filter {
+        ALL,
+        ENABLED_SHAPES;
+
+        public Filter next() {
+            int nextIndex = (this.ordinal() + 1) % Filter.values().length;
+            return Filter.values()[nextIndex];
+        }
+
+        public Filter previous() {
+            int prevIndex = (this.ordinal() - 1 + Filter.values().length) % Filter.values().length;
+            return Filter.values()[prevIndex];
+        }
+    }
+
     private class SelectBox extends ObjectSelectionList<SelectBox.ShapeEntry> {
         public SelectBox(int x, int y, int width, int height) {
             super(Minecraft.getInstance(), width, height, y, 20);
             this.setX(x);
+            this.refreshList();
+        }
 
+        public void refreshList() {
+            this.clearEntries();
             for (Shape shape : ShapeRegistryAccessor.getShapesList()) {
+                if (ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.get() == Filter.ENABLED_SHAPES) {
+                    if (!FTBUltimineIntegration.getEnabledShapes().contains(shape)) {
+                        continue;
+                    }
+                }
                 this.addEntry(new ShapeEntry(shape));
             }
+            this.clampScrollAmount();
         }
 
         @Override
@@ -220,6 +268,11 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         }
 
         @Override
+        public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
+        }
+
+        @Override
         protected void renderListSeparators(GuiGraphics guiGraphics) {
         }
 
@@ -238,9 +291,9 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         protected void renderDecorations(GuiGraphics guiGraphics, int mouseX, int mouseY) {
             if (this.scrollbarVisible()) {
                 int i = this.getScrollbarPosition();
-                int j = (int)((float)(this.height * this.height) / (float)this.getMaxPosition());
+                int j = (int) ((float) (this.height * this.height) / (float) this.getMaxPosition());
                 j = Mth.clamp(j, 32, this.height - 8);
-                int k = (int)this.getScrollAmount() * (this.height - j) / this.getMaxScroll() + this.getY();
+                int k = (int) this.getScrollAmount() * (this.height - j) / this.getMaxScroll() + this.getY();
                 if (k < this.getY()) {
                     k = this.getY();
                 }

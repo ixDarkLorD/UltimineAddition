@@ -15,11 +15,11 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.Collection;
 import java.util.Objects;
 
-public class PlayerAbilityCommand {
+public class UltimineAbilityCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored1, Commands.CommandSelection ignored2) {
         FTBUltimineAddition.withCommandPrompt(dispatcher, Commands.LEVEL_GAMEMASTERS, builder ->
-                builder.then(Commands.literal("player_ability")
+                builder.then(Commands.literal("ultimine_ability")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.literal("set")
                                         .then(Commands.argument("state", BoolArgumentType.bool()).executes(context ->

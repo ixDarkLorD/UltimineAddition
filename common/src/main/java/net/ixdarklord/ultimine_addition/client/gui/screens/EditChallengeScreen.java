@@ -4,6 +4,7 @@ import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatlib.api.util.RenderUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
+import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -87,7 +88,7 @@ public class EditChallengeScreen extends Screen {
 
         });
 
-        this.newValueBox = this.addRenderableWidget(new EditBox(this.font, this.leftPos + 91, this.topPos + 50, 34, 10, Component.translatable("gui.skills_record.edit.new_value")));
+        this.newValueBox = this.addRenderableWidget(new EditBox(this.font, this.leftPos + 91, this.topPos + 50, 34, 10, Component.translatable("gui.ultimine_addition.skills_record.edit.new_value")));
         this.newValueBox.setBordered(false);
         this.newValueBox.setTooltip(Tooltip.create(Component.translatable("gui.ultimine_addition.skills_record.edit.new_value", this.challengeHolder.getRequiredPoints())));
         this.newValueBox.insertText(String.valueOf(this.challengeHolder.getCurrentPoints()));
@@ -269,7 +270,8 @@ public class EditChallengeScreen extends Screen {
     @Override
     public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.setColor(this.parent.configuration.getBackgroundColor().getRed(), this.parent.configuration.getBackgroundColor().getGreen(), this.parent.configuration.getBackgroundColor().getBlue(), this.parent.configuration.getBackgroundColor().getAlpha());
+        SkillsRecordScreen.OverlayColor color = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
+        guiGraphics.setColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
         guiGraphics.blitSprite(BACKGROUND_SPRITE, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
