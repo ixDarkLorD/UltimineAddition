@@ -2,7 +2,8 @@ package net.ixdarklord.ultimine_addition.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.ftb.mods.ftbultimine.FTBUltiminePlayerData;
-import dev.ftb.mods.ftbultimine.shape.Shape;
+import dev.ftb.mods.ftbultimine.api.shape.Shape;
+import dev.ftb.mods.ftbultimine.shape.ShapeRegistry;
 import net.ixdarklord.coolcatlib.api.hooks.ServerLifecycleHooks;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.minecraft.server.MinecraftServer;
@@ -34,7 +35,7 @@ abstract class FTBUltiminePlayerDataMixin {
     }
 
     @Redirect(method = "cycleShape", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/shape/ShapeRegistry;shapeCount()I"), remap=false)
-    public int UA$Redirect$cycleShape() {
+    public int UA$Redirect$cycleShape(ShapeRegistry instance) {
         return FTBUltimineIntegration.getEnabledShapes().size();
     }
 

@@ -2,6 +2,11 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v1.1.6 Release - June 8, 2025
+### 🐛 Bug Fixes & Improvements
+- The mod is now compatible with the new update for **FTBUltimine** (`2101.1.3`); it will no longer crash.
+- Fixed an issue that prevented players from retrieving the **Skills Record** and **Mining Skill Card** from **Refined Storage**.
+
 ## v1.1.5 Release - April 11, 2025
 ### ✨ New Feature
 - Added a progression tooltip to the Miner Certificate in Legacy Mode.

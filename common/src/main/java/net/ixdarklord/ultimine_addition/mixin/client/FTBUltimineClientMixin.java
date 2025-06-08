@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
-import dev.ftb.mods.ftbultimine.shape.Shape;
 import dev.ftb.mods.ftbultimine.shape.ShapeRegistry;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
@@ -35,6 +35,7 @@ abstract class FTBUltimineClientMixin {
     private <T> List<T> UA$ModifyReturn$addPressedInfo(List<T> original) {
         if (FTBUltimineIntegration.hasToolWithShape(FTBUltimineClient.getClientPlayer())) {
             try {
+                @SuppressWarnings("unchecked")
                 Class<T> indentedLineClass = (Class<T>) Class.forName("dev.ftb.mods.ftbultimine.client.FTBUltimineClient$IndentedLine");
 
                 Constructor<T> constructor = indentedLineClass.getDeclaredConstructor(int.class, Component.class);
@@ -67,13 +68,13 @@ abstract class FTBUltimineClientMixin {
         return original;
     }
 
-    @Redirect(method = "addPressedInfo", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/shape/ShapeRegistry;getShape(I)Ldev/ftb/mods/ftbultimine/shape/Shape;", ordinal = 1), remap = false)
-    private Shape UA$Redirect$addPressedInfo(int idx) {
+    @Redirect(method = "addPressedInfo", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/shape/ShapeRegistry;getShape(I)Ldev/ftb/mods/ftbultimine/api/shape/Shape;", ordinal = 1), remap = false)
+    private Shape UA$Redirect$addPressedInfo(ShapeRegistry instance, int idx) {
         if (FTBUltimineIntegration.hasToolWithShape(FTBUltimineClient.getClientPlayer())) {
             ItemStack stack = FTBUltimineClient.getClientPlayer().getMainHandItem();
             SelectedShapeData data = stack.get(Registration.SELECTED_SHAPE_COMPONENT.get());
             if (data != null) return data.shape();
         }
-        return ShapeRegistry.getShape(idx);
+        return instance.getShape(idx);
     }
 }

@@ -46,7 +46,7 @@ import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.T
 
 public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> implements IItemRenderer {
     private final Type type;
-    public MiningSkillCardItem(Type type, Item.Properties properties) {
+    public MiningSkillCardItem(Type type, Properties properties) {
         super(properties, ComponentType.CRAFTING);
         this.type = type;
     }
@@ -54,7 +54,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
-        return InteractionResultHolder.fail(stack);
+        return InteractionResultHolder.pass(stack);
     }
 
     @Override

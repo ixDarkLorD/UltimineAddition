@@ -12,7 +12,6 @@
     "BrewingStandBlockEntityMixin",
     "FTBUltimineMixin",
     "FTBUltiminePlayerDataMixin",
-    "ShapeRegistryAccessor",
     "ShapeRegistryMixin"
   ],
   "injectors": {

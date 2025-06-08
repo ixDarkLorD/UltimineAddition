@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.ftb.mods.ftbultimine.shape.Shape;
+import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
@@ -14,7 +14,6 @@ import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.ixdarklord.ultimine_addition.mixin.ShapeRegistryAccessor;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.UpdateItemShapePayload;
 import net.minecraft.ChatFormatting;
@@ -43,7 +42,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
@@ -121,7 +122,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         this.setButton = this.addRenderableWidget(new ColorableImageButton(this.leftPos + 10, this.topPos + 54, 19, 19, SkillsRecordScreen.BUTTON_SPRITES, button -> {
             SelectBox.ShapeEntry selected = this.selectBox.getSelected();
             if (selected != null) {
-                PayloadHandler.sendToServer(new UpdateItemShapePayload(selected.shape.getName()));
+                PayloadHandler.sendToServer(new UpdateItemShapePayload(selected.shape.getName().toString()));
             }
 
         }) {
@@ -183,18 +184,23 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         SelectBox.ShapeEntry entry = this.selectBox.getHovered();
         if (entry == null) return;
 
-        if (entry.isShapeSelected()) {
-            List<Component> components = List.of(
-                    Component.translatable("gui.ultimine_addition.shape_selector.selected").withColor(0xA0DA3E),
-                    Component.literal("- ").append(entry.displayName)
-            );
-            guiGraphics.renderTooltip(font, components, Optional.empty(), mouseX, mouseY);
-            return;
-        }
+        List<Component> components = new ArrayList<>();
 
         if (!entry.isAllowed()) {
-            guiGraphics.renderTooltip(font, Component.translatable("gui.ultimine_addition.shape_selector.blacklisted").withStyle(ChatFormatting.RED), mouseX, mouseY);
+            components.add(Component.translatable("gui.ultimine_addition.shape_selector.blacklisted").withStyle(ChatFormatting.RED));
+        } else if (entry.isShapeSelected()) {
+            components.add(Component.translatable("gui.ultimine_addition.shape_selector.selected").withColor(0xA0DA3E));
+            components.add(Component.literal("- ").append(entry.shape.getDisplayName()));
         }
+
+        Minecraft mc = Objects.requireNonNull(minecraft);
+        if (mc.options.advancedItemTooltips && hasShiftDown()) {
+            if (!components.isEmpty()) components.add(Component.empty());
+            components.add(Component.literal("Shape ID: ").append(entry.shape.getName().toString()).withStyle(ChatFormatting.GRAY));
+        }
+
+        if (!components.isEmpty())
+            guiGraphics.renderTooltip(font, components, Optional.empty(), mouseX, mouseY);
     }
 
     @Override
@@ -236,7 +242,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
         public void refreshList() {
             this.clearEntries();
-            for (Shape shape : ShapeRegistryAccessor.getShapesList()) {
+            for (Shape shape : FTBUltimineIntegration.getShapesList()) {
                 if (ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.get() == Filter.ENABLED_SHAPES) {
                     if (!FTBUltimineIntegration.getEnabledShapes().contains(shape)) {
                         continue;
@@ -313,11 +319,9 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         @Environment(EnvType.CLIENT)
         private class ShapeEntry extends ObjectSelectionList.Entry<ShapeEntry> {
             private final Shape shape;
-            private final Component displayName;
 
             private ShapeEntry(Shape shape) {
                 this.shape = shape;
-                this.displayName = Component.translatable("ftbultimine.shape." + shape.getName());
             }
 
             private boolean isAllowed() {
@@ -369,11 +373,11 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 if (isShapeSelected()) {
                     guiGraphics.drawString(font, Component.literal("➤"), left + 3, top + (height / 2) - 4, color.getRGB());
                 }
-                RenderUtils.renderScrollingString(guiGraphics, ticks, font, displayName.copy().withStyle(style), false, left + spacing, top, width - spacing, height, 3, color.getRGB());
+                RenderUtils.renderScrollingString(guiGraphics, ticks, font, shape.getDisplayName().copy().withStyle(style), false, left + spacing, top, width - spacing, height, 3, color.getRGB());
             }
 
             public @NotNull Component getNarration() {
-                return displayName;
+                return shape.getDisplayName();
             }
         }
     }

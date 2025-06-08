@@ -1,15 +1,16 @@
 package net.ixdarklord.ultimine_addition.config;
 
-import dev.ftb.mods.ftbultimine.shape.Shape;
+import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.ShapeSelectorScreen;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
-import net.ixdarklord.ultimine_addition.mixin.ShapeRegistryAccessor;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.ConfigSyncPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.Nullable;
@@ -172,13 +173,13 @@ public final class ConfigHandler {
             BUILDER.push("General");
             BLACKLISTED_SHAPES = BUILDER
                     .comment("Defines a list of forbidden shape types for mining.",
-                            "Valid shape IDs: [%s]".formatted(ShapeRegistryAccessor.getShapesList().stream()
-                                    .map(Shape::getName)
-                                    .map("\"%s\""::formatted)
-                                    .collect(Collectors.joining(", "))
-                            ))
+                            "Press \"F3-H\" and then hold \"Left Shift\" to display the Shape ID in the shape selector.",
+                            "Valid shape IDs: [\"ftbultimine:shapeless\", \"ftbultimine:small_tunnel\", etc.]")
                     .defineList("blacklisted_shapes", Collections.emptyList(), String::new,
-                            o -> o instanceof String s && ShapeRegistryAccessor.getShapesList().stream().map(Shape::getName).anyMatch(s1 -> s1.equals(s)));
+                            o -> o instanceof String s && FTBUltimineIntegration.getShapesList().stream()
+                                    .map(Shape::getName)
+                                    .map(ResourceLocation::toString)
+                                    .anyMatch(s1 -> s1.equals(s)));
 
             IS_PLACED_BY_ENTITY_CONDITION = BUILDER
                     .comment("If enabled, blocks placed by entities will not count towards challenges.",

@@ -7,12 +7,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import dev.ftb.mods.ftbultimine.shape.Shape;
-import net.ixdarklord.ultimine_addition.mixin.ShapeRegistryAccessor;
+import dev.ftb.mods.ftbultimine.api.shape.Shape;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.ParserUtils;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,8 +38,8 @@ public class UltimineShapeArgument implements ArgumentType<Shape> {
     @Override
     public Shape parse(StringReader reader) throws CommandSyntaxException {
         String string = ParserUtils.readWhile(reader, (c) -> c != ' ');
-        Optional<Shape> shape = ShapeRegistryAccessor.getShapesList().stream()
-                .filter(s -> string.equals(s.getName()))
+        Optional<Shape> shape = FTBUltimineIntegration.getShapesList().stream()
+                .filter(s -> string.equals(s.getName().toString()))
                 .findFirst();
 
         if (shape.isEmpty())
@@ -50,7 +51,7 @@ public class UltimineShapeArgument implements ArgumentType<Shape> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        List<String> shapesId = ShapeRegistryAccessor.getShapesList().stream().map(Shape::getName).toList();
+        List<String> shapesId = FTBUltimineIntegration.getShapesList().stream().map(Shape::getName).map(ResourceLocation::toString).toList();
         return SharedSuggestionProvider.suggest(shapesId, builder);
     }
 

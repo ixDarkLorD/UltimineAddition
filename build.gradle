@@ -11,13 +11,24 @@ allprojects {
             url "https://maven.saps.dev/releases"
             content {
                 includeGroup "dev.latvian.mods"
-                includeGroup "dev.ftb.mods"
             }
         }
         maven {
             url "https://maven.saps.dev/snapshots"
             content {
                 includeGroup "dev.latvian.mods"
+            }
+        }
+        maven {
+            url "https://maven.ftb.dev/releases"
+            content {
+                includeGroup "dev.ftb.mods"
+            }
+        }
+
+        maven {
+            url "https://maven.ftb.dev/snapshots"
+            content {
                 includeGroup "dev.ftb.mods"
             }
         }

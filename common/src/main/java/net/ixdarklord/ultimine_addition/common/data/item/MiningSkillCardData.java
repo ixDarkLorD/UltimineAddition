@@ -293,13 +293,18 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MiningSkillCardData data)) return false;
-        return potionPoints == data.potionPoints && tier == data.tier && Objects.equals(displayItem, data.displayItem) && Objects.equals(challenges, data.challenges) && Objects.equals(finishedChallenges, data.finishedChallenges);
+        if (!(o instanceof MiningSkillCardData that)) return false;
+        return uuid.equals(that.uuid)
+                && tier == that.tier
+                && ItemStack.isSameItemSameComponents(this.displayItem, that.displayItem)
+                && potionPoints == that.potionPoints
+                && challenges.equals(that.challenges)
+                && finishedChallenges.equals(that.finishedChallenges);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tier, displayItem, potionPoints, challenges, finishedChallenges);
+        return Objects.hash(uuid, tier, potionPoints, challenges, finishedChallenges) + ItemStack.hashItemAndComponents(displayItem);
     }
 
     @Override
@@ -394,7 +399,11 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof ChallengeHolder that)) return false;
-            return order == that.order && currentPoints == that.currentPoints && requiredPoints == that.requiredPoints && isPinned == that.isPinned && Objects.equals(id, that.id);
+            return id.equals(that.id)
+                    && order == that.order
+                    && currentPoints == that.currentPoints
+                    && requiredPoints == that.requiredPoints
+                    && isPinned == that.isPinned;
         }
 
         @Override

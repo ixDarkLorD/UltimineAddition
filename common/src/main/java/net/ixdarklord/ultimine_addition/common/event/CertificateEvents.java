@@ -28,7 +28,6 @@ public class CertificateEvents {
             if (slots.isEmpty()) return EventResult.pass();
 
             for (SlotReference.Player slot : slots) {
-                System.out.println(slot.getIndex());
                 MinerCertificateData data = MinerCertificateData.loadData(slot.getItem());
                 Optional<MinerCertificateData.Legacy> legacy = data.getLegacy();
                 if (legacy.isPresent()) {

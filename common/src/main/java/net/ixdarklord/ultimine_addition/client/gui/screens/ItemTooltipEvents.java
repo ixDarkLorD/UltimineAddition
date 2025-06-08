@@ -64,7 +64,7 @@ public class ItemTooltipEvents {
         SelectedShapeData shapeData = stack.get(Registration.SELECTED_SHAPE_COMPONENT.get());
         double ratio = Mth.clamp((Mth.sin(Util.getMillis() / 160F) + 1.0) / 2.0, 0.0, 1.0);
         Color color = ColorUtils.blendColors(new Color(0xA0DA3E), new Color(0xA0DA3E).brighter(), ratio);
-        Component shapeName = Component.translatable("ftbultimine.shape." + Objects.requireNonNull(shapeData).shape().getName())
+        Component shapeName = Objects.requireNonNull(shapeData).shape().getDisplayName()
                 .withColor(color.getRGB());
 
         List<MutableComponent> componentList = List.of(

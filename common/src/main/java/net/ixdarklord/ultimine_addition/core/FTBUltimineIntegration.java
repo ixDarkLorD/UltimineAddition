@@ -1,15 +1,15 @@
 package net.ixdarklord.ultimine_addition.core;
 
-import dev.ftb.mods.ftbultimine.FTBUltimine;
+import dev.ftb.mods.ftbultimine.api.restriction.RestrictionHandler;
+import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
-import dev.ftb.mods.ftbultimine.integration.FTBRanksIntegration;
-import dev.ftb.mods.ftbultimine.integration.FTBUltiminePlugin;
-import dev.ftb.mods.ftbultimine.shape.Shape;
+import dev.ftb.mods.ftbultimine.integration.IntegrationHandler;
+import dev.ftb.mods.ftbultimine.integration.ranks.FTBRanksIntegration;
+import dev.ftb.mods.ftbultimine.shape.ShapeRegistry;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
-import net.ixdarklord.ultimine_addition.mixin.ShapeRegistryAccessor;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -28,7 +29,8 @@ import java.util.*;
 
 import static dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig.MAX_BLOCKS;
 
-public class FTBUltimineIntegration implements FTBUltiminePlugin {
+public class FTBUltimineIntegration implements RestrictionHandler {
+    public static FTBUltimineIntegration INSTANCE = new FTBUltimineIntegration();
     private static boolean isButtonPressed;
 
     @Override
@@ -59,7 +61,7 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
     }
 
     public static void keyEvent(Player player) {
-        if (FTBUltimineClient.keyBinding.isDown()) {
+        if (FTBUltimineClient.keyBindUltimine.isDown()) {
             if (!isButtonPressed) {
                 MutableComponent MSG = Component.translatable("info.ultimine_addition.incapable");
                 Component requiredTool = null;
@@ -139,7 +141,7 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
 
     public static int getMaxBlocks(ServerPlayer player) {
         if (!ConfigHandler.SERVER.CARD_TIER_BASED_MAX_BLOCKS.get()) {
-            return FTBUltimine.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
+            return IntegrationHandler.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
         }
 
         List<MobEffectInstance> instances = new ArrayList<>(player.getActiveEffects().stream().filter(mobEffectInstance -> mobEffectInstance.getEffect().value() instanceof MineGoJuiceEffect).toList());
@@ -169,22 +171,32 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
                 } catch (IllegalArgumentException ignored) {}
             }
         }
-        return FTBUltimine.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
+        return IntegrationHandler.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
     }
 
-    public static Shape getShape(String shapeId) {
-        for (Shape shape : ShapeRegistryAccessor.getShapesList()) {
+    public static List<Shape> getShapesList() {
+        Object instance = ShapeRegistry.INSTANCE;
+        return ((ShapeRegistryAccessor) instance).getShapesList();
+    }
+
+    public static Shape getDefaultShape() {
+        Object instance = ShapeRegistry.INSTANCE;
+        return ((ShapeRegistryAccessor) instance).getDefaultShape();
+    }
+
+    public static List<Shape> getEnabledShapes() {
+        return getShapesList().stream()
+                .filter(shape -> !ConfigHandler.SERVER.BLACKLISTED_SHAPES.get().contains(shape.getName().toString()))
+                .toList();
+    }
+
+    public static Shape getShape(ResourceLocation shapeId) {
+        for (Shape shape : getShapesList()) {
             if (shape.getName().equals(shapeId)) {
                 return shape;
             }
         }
         return null;
-    }
-
-    public static List<Shape> getEnabledShapes() {
-        return ShapeRegistryAccessor.getShapesList().stream()
-                .filter(shape -> !ConfigHandler.SERVER.BLACKLISTED_SHAPES.get().contains(shape.getName()))
-                .toList();
     }
 
     public static Shape getEnabledShapes(int idx) {
@@ -193,7 +205,7 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
         } else if (idx >= getEnabledShapes().size()) {
             idx -= getEnabledShapes().size();
         }
-        return idx >= 0 && idx < getEnabledShapes().size() ? getEnabledShapes().get(idx) : ShapeRegistryAccessor.getDefaultShape();
+        return idx >= 0 && idx < getEnabledShapes().size() ? getEnabledShapes().get(idx) : getDefaultShape();
     }
 
     public static boolean hasToolWithShape(Player player) {

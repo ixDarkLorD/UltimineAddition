@@ -19,3 +19,9 @@ classes/
 .vscode
 .settings
 *.launch
+
+package.json
+package-lock.json
+.husky
+commitlint.config.js
+node_modules

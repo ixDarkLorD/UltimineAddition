@@ -18,6 +18,7 @@ import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.SkillsRecordPayload;
+import net.ixdarklord.ultimine_addition.util.ContainerUtils;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -355,13 +356,16 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SkillsRecordData data)) return false;
-        return selectedCard == data.selectedCard && consumeMode == data.consumeMode && Objects.equals(uuid, data.uuid) && Objects.equals(container, data.container) && Objects.equals(pinnedChallenges, data.pinnedChallenges);
+        if (!(o instanceof SkillsRecordData that)) return false;
+        return Objects.equals(uuid, that.uuid)
+                && ContainerUtils.equals(container, that.container)
+                && selectedCard == that.selectedCard
+                && consumeMode == that.consumeMode
+                && Objects.equals(pinnedChallenges, that.pinnedChallenges);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, container, selectedCard, consumeMode, pinnedChallenges);
+        return Objects.hash(uuid, selectedCard, consumeMode, pinnedChallenges) + ContainerUtils.hashCode(container);
     }
 }

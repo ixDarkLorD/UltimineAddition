@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.common.command;
 
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.CommandDispatcher;
-import dev.ftb.mods.ftbultimine.shape.Shape;
+import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import net.ixdarklord.ultimine_addition.common.command.arguments.UltimineShapeArgument;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -33,22 +33,22 @@ public class UltimineShapeCommand {
         List<String> shapeIds = Lists.newArrayList(config.get());
 
         if (adding) {
-            if (shapeIds.contains(shape.getName())) {
+            if (shapeIds.contains(shape.getName().toString())) {
                 source.sendFailure(Component.translatable("command.ultimine_addition.ultimine_shape.included", shape.getName()));
                 return 0;
             }
 
-            shapeIds.add(shape.getName());
+            shapeIds.add(shape.getName().toString());
             config.set(shapeIds);
             config.save();
             source.sendSuccess(() -> Component.translatable("command.ultimine_addition.ultimine_shape.success.add", shape.getName()), true);
         } else {
-            if (!shapeIds.contains(shape.getName())) {
+            if (!shapeIds.contains(shape.getName().toString())) {
                 source.sendFailure(Component.translatable("command.ultimine_addition.ultimine_shape.excluded", shape.getName()));
                 return 0;
             }
 
-            shapeIds.remove(shape.getName());
+            shapeIds.remove(shape.getName().toString());
             config.set(shapeIds);
             config.save();
             source.sendSuccess(() -> Component.translatable("command.ultimine_addition.ultimine_shape.success.remove", shape.getName()), true);
