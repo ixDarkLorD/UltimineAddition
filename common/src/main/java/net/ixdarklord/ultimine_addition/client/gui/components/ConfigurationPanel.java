@@ -5,7 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.AbstractDraggableWidget;
-import net.ixdarklord.coolcatlib.api.util.ColorUtils;
+import net.ixdarklord.coolcatlib.api.utils.ColorUtils;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 
 @Environment(EnvType.CLIENT)
 public class ConfigurationPanel extends AbstractDraggableWidget {
-    private static final ResourceLocation BACKGROUND_LOCATION = FTBUltimineAddition.rl("container/skills_record/configuration/background");
+    private static final ResourceLocation BACKGROUND_LOCATION = FTBUltimineAddition.id("container/skills_record/configuration/background");
     private static final int BUTTON_WIDTH = 45;
     private static final int BUTTON_HEIGHT = 14;
     private final List<ColoredButton> buttons = Lists.newArrayList();
@@ -72,7 +72,7 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
 
     @Override
     protected void renderBackground(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        guiGraphics.setColor(this.getBGColor().getRed(), this.getBGColor().getGreen(), this.getBGColor().getBlue(), this.getBGColor().getAlpha());
+        guiGraphics.setColor(this.getBGColor().red(), this.getBGColor().green(), this.getBGColor().blue(), this.getBGColor().alpha());
         guiGraphics.blitSprite(BACKGROUND_LOCATION, getRectangle().left(), getRectangle().top(), getRectangle().width(), getRectangle().height());
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }

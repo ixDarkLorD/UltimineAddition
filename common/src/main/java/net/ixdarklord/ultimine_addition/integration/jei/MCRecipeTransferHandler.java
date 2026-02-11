@@ -94,8 +94,8 @@ public class MCRecipeTransferHandler implements IRecipeTransferHandler<CraftingM
                 .filter(slotView -> {
                     List<ItemStack> list = new ArrayList<>(slotView.getItemStacks().toList());
                     list.removeIf(stack -> {
-                        MiningSkillCardData data = MiningSkillCardData.loadData(stack);
-                        var inv = container.getItems().stream().filter(stack1 -> stack1.is(stack.getItem()) && !MiningSkillCardData.loadData(stack1).getTier().equals(data.getTier())).toList();
+                        MiningSkillCardData data = MiningSkillCardData.load(stack);
+                        var inv = container.getItems().stream().filter(stack1 -> stack1.is(stack.getItem()) && !MiningSkillCardData.load(stack1).getTier().equals(data.getTier())).toList();
                         return inv.isEmpty();
                     });
                     return !list.isEmpty();

@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.common.item;
 
 import dev.architectury.registry.menu.MenuRegistry;
 import net.ixdarklord.coolcatlib.api.item.ComponentItem;
-import net.ixdarklord.coolcatlib.api.util.ComponentHelper;
+import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.common.menu.ShapeSelectorMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;

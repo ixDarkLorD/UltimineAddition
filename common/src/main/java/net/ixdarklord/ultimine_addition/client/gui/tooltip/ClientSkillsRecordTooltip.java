@@ -3,7 +3,6 @@ package net.ixdarklord.ultimine_addition.client.gui.tooltip;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesInfoPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.client.gui.Font;
@@ -64,7 +63,7 @@ public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
 
     private void blit(GuiGraphics guiGraphics, int x, int y) {
         SkillsRecordScreen.OverlayColor overlayColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
-        RenderSystem.setShaderColor(overlayColor.getRed(), overlayColor.getGreen(), overlayColor.getBlue(), overlayColor.getAlpha());
+        RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
         guiGraphics.blitSprite(Texture.SLOT.sprite, x, y, 0, Texture.SLOT.w, Texture.SLOT.h);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
@@ -163,7 +162,7 @@ public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
                     int maxX = minX + cellWidth;
                     int maxY = minY + cellHeight;
 
-                    int selectedDirection = ConfigHandler.CLIENT.CHALLENGES_PANEL_POSITION.get().getPosIndex();
+                    int selectedDirection = ConfigHandler.CLIENT.CHALLENGES_PANEL_ALIGNMENT.get().getPosIndex();
                     int directionIndex = row * gridSize + col;
                     Color color = selectedDirection == directionIndex ? Color.GREEN : Color.GRAY;
                     if (Arrays.stream(disabledPositions).anyMatch(value ->  value == directionIndex))
@@ -172,13 +171,10 @@ public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
                     guiGraphics.fill(minX, minY, maxX, maxY, color.getRGB());
 
                     ResourceLocation CONFIRM_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/confirm");
-                    ResourceLocation CANCEL_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/cancel");
                     int textureX = minX + (cellWidth - 18) / 2;
                     int textureY = minY + (cellHeight - 18) / 2;
                     if (directionIndex == selectedDirection)
                         guiGraphics.blitSprite(CONFIRM_SPRITE, textureX + 1, textureY, 18, 18);
-                    if (directionIndex == 4 && selectedDirection == ChallengesInfoPanel.Panel.Position.DISABLED.getPosIndex())
-                        guiGraphics.blitSprite(CANCEL_SPRITE, textureX + 1, textureY, 18, 18);
                 }
             }
         }

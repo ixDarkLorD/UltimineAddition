@@ -5,13 +5,13 @@ import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.ixdarklord.coolcatlib.api.core.commands.ArgumentTypeRegistry;
-import net.ixdarklord.coolcatlib.api.util.ParticleTypes;
+import net.ixdarklord.coolcatlib.api.utils.ParticleTypes;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.advancement.UltimineObtainTrigger;
-import net.ixdarklord.ultimine_addition.common.command.arguments.CardHolderArgument;
-import net.ixdarklord.ultimine_addition.common.command.arguments.CardTierArgument;
-import net.ixdarklord.ultimine_addition.common.command.arguments.ChallengesArgument;
-import net.ixdarklord.ultimine_addition.common.command.arguments.UltimineShapeArgument;
+import net.ixdarklord.ultimine_addition.common.commands.arguments.CardHolderArgument;
+import net.ixdarklord.ultimine_addition.common.commands.arguments.CardTierArgument;
+import net.ixdarklord.ultimine_addition.common.commands.arguments.ChallengesArgument;
+import net.ixdarklord.ultimine_addition.common.commands.arguments.UltimineShapeArgument;
 import net.ixdarklord.ultimine_addition.common.data.item.*;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffectInstance;
@@ -127,12 +127,12 @@ public class Registration {
                         output.accept(ModItems.INK_CHAMBER);
                         output.accept(ModItems.PEN);
                         ItemStack pen = ModItems.PEN.getDefaultInstance();
-                        ModItems.PEN.getData(pen).setToFullCapacity().saveData(pen);
+                        ModItems.PEN.getData(pen).setToFullCapacity().save();
                         output.accept(pen);
                         output.accept(ModItems.CARD_BLUEPRINT);
                         for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
                             String name = "mining_skill_card_" + type.getId();
-                            Item item = BuiltInRegistries.ITEM.get(FTBUltimineAddition.rl(name));
+                            Item item = BuiltInRegistries.ITEM.get(FTBUltimineAddition.id(name));
                             if (item instanceof MiningSkillCardItem cardItem) {
                                 output.accept(item);
                                 if (cardItem.getType() != MiningSkillCardItem.Type.EMPTY) {
@@ -196,7 +196,7 @@ public class Registration {
     public static final RegistrySupplier<DataComponentType<SkillsRecordData>> SKILLS_RECORD_DATA = DATA_COMPONENT_TYPE.register("skills_record_data", () -> SkillsRecordData.DATA_COMPONENT);
     public static final RegistrySupplier<DataComponentType<MiningSkillCardData>> MINING_SKILL_CARD_DATA = DATA_COMPONENT_TYPE.register("mining_skill_card_data", () -> MiningSkillCardData.DATA_COMPONENT);
     public static final RegistrySupplier<DataComponentType<MinerCertificateData>> MINER_CERTIFICATE_DATA = DATA_COMPONENT_TYPE.register("miner_certificate_data", () -> MinerCertificateData.DATA_COMPONENT);
-    public static final RegistrySupplier<DataComponentType<ItemStorageData>> ITEM_STORAGE_DATA = DATA_COMPONENT_TYPE.register("item_storage_data", () -> ItemStorageData.DATA_COMPONENT);
+    public static final RegistrySupplier<DataComponentType<StorageItemData>> ITEM_STORAGE_DATA = DATA_COMPONENT_TYPE.register("item_storage_data", () -> StorageItemData.DATA_COMPONENT);
     public static final RegistrySupplier<DataComponentType<SelectedShapeData>> SELECTED_SHAPE_COMPONENT = DATA_COMPONENT_TYPE.register("selected_shape", () -> DataComponentType.<SelectedShapeData>builder().persistent(SelectedShapeData.CODEC).networkSynchronized(SelectedShapeData.STREAM_CODEC).build());
 
     // Particles
@@ -204,8 +204,9 @@ public class Registration {
 
     // Arguments
     public static final RegistrySupplier<ArgumentTypeInfo<CardTierArgument, ?>> CARD_TIER_ARGUMENT = ARGUMENT_TYPES.register("card_tier", () -> ArgumentTypeRegistry.register(CardTierArgument.class, SingletonArgumentInfo.contextFree(CardTierArgument::tier)));
-    public static final RegistrySupplier<ArgumentTypeInfo<CardHolderArgument, ?>> CARD_SLOTS_ARGUMENT = ARGUMENT_TYPES.register("card_slots", () -> ArgumentTypeRegistry.register(CardHolderArgument.class, SingletonArgumentInfo.contextFree(() -> CardHolderArgument.slot(true))));
-    public static final RegistrySupplier<ArgumentTypeInfo<ChallengesArgument, ?>> CHALLENGES_ARGUMENT = ARGUMENT_TYPES.register("challenges", () -> ArgumentTypeRegistry.register(ChallengesArgument.class, SingletonArgumentInfo.contextFree(ChallengesArgument::data)));
+    public static final RegistrySupplier<ArgumentTypeInfo<CardHolderArgument, ?>> CARD_SLOTS_ARGUMENT = ARGUMENT_TYPES.register("card_holder_all", () -> ArgumentTypeRegistry.register(CardHolderArgument.class, SingletonArgumentInfo.contextFree(CardHolderArgument::allSlots)));
+    public static final RegistrySupplier<ArgumentTypeInfo<CardHolderArgument.RecordSlots, ?>> CARD_HOLDER_ALL_ARGUMENT = ARGUMENT_TYPES.register("card_holder_record", () -> ArgumentTypeRegistry.register(CardHolderArgument.RecordSlots.class, SingletonArgumentInfo.contextFree(CardHolderArgument::recordSlots)));
+    public static final RegistrySupplier<ArgumentTypeInfo<ChallengesArgument, ?>> CARD_HOLDER_RECORD_ARGUMENT = ARGUMENT_TYPES.register("challenges", () -> ArgumentTypeRegistry.register(ChallengesArgument.class, SingletonArgumentInfo.contextFree(ChallengesArgument::data)));
     public static final RegistrySupplier<ArgumentTypeInfo<UltimineShapeArgument, ?>> ULTIMINE_SHAPE_ARGUMENT = ARGUMENT_TYPES.register("ultimine_shape", () -> ArgumentTypeRegistry.register(UltimineShapeArgument.class, SingletonArgumentInfo.contextFree(UltimineShapeArgument::shape)));
 
     //Criterion Triggers

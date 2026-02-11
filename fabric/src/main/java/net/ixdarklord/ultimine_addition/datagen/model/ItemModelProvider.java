@@ -6,7 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
-import net.ixdarklord.coolcatlib.api.util.JsonUtils;
+import net.ixdarklord.coolcatlib.api.utils.JsonUtils;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemTransform;
@@ -254,7 +254,7 @@ public abstract class ItemModelProvider extends FabricModelProvider {
             }
 
             Map<ItemDisplayContext, ItemTransform> build() {
-                return this.transforms.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> ((TransformVecBuilder)e.getValue()).build(), (k1, k2) -> {
+                return this.transforms.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> e.getValue().build(), (k1, k2) -> {
                     throw new IllegalArgumentException();
                 }, LinkedHashMap::new));
             }

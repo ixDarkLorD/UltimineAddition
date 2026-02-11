@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.client.command;
+package net.ixdarklord.ultimine_addition.client.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 public class SkillsRecordDebugCommand {
 
     public static void register(CommandDispatcher<ClientCommandRegistrationEvent.ClientCommandSourceStack> dispatcher, CommandBuildContext ignored) {
-        FTBUltimineAddition.withCommandPrompt(dispatcher, Commands.LEVEL_GAMEMASTERS, builder ->
+        FTBUltimineAddition.withClientCommandPrompt(dispatcher, Commands.LEVEL_GAMEMASTERS, builder ->
                 builder.then(ClientCommandRegistrationEvent.literal("skills_record")
                         .then(ClientCommandRegistrationEvent.literal("debug_mode")
                                 .then(ClientCommandRegistrationEvent.argument("state", BoolArgumentType.bool()).executes(context -> setEditMode(context.getSource(), BoolArgumentType.getBool(context, "state")))))));

@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.config;
 
 import com.google.common.collect.ImmutableList;
-import net.ixdarklord.coolcatlib.api.util.ValueConverter;
+import net.ixdarklord.coolcatlib.api.utils.ValueConverter;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.neoforged.neoforge.common.ModConfigSpec;
 

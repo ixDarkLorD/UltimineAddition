@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.common.command.arguments;
+package net.ixdarklord.ultimine_addition.common.commands.arguments;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;

@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.common.command;
+package net.ixdarklord.ultimine_addition.common.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -15,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.Collection;
 import java.util.Objects;
 
-public class UltimineAbilityCommand {
+public final class UltimineAbilityCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored1, Commands.CommandSelection ignored2) {
         FTBUltimineAddition.withCommandPrompt(dispatcher, Commands.LEVEL_GAMEMASTERS, builder ->

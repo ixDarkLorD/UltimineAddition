@@ -15,45 +15,19 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 import java.util.Random;
 
-public class ChallengesData {
-    private final MiningSkillCardItem.Type forCardType;
-    private final MiningSkillCardItem.Tier forCardTier;
-    private final Type challengeType;
-    private final ItemStack requiredSpecificTool;
-    private final List<String> targetedBlocks;
-    private final Pair<Integer, Integer> requiredAmount;
+public record ChallengeData(MiningSkillCardItem.Type forCardType, MiningSkillCardItem.Tier forCardTier,
+                            Type challengeType, Pair<Integer, Integer> requiredAmount, ItemStack requiredSpecificTool,
+                            List<String> targetedBlocks) {
+    public static final Codec<ChallengeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            MiningSkillCardItem.Type.CODEC.fieldOf("for_card_type").forGetter(ChallengeData::forCardType),
+            MiningSkillCardItem.Tier.CODEC.fieldOf("for_card_tier").forGetter(ChallengeData::forCardTier),
+            Type.CODEC.fieldOf("challenge_type").forGetter(ChallengeData::challengeType),
+            Codec.pair(Codec.INT.fieldOf("min").codec(), Codec.INT.fieldOf("max").codec()).optionalFieldOf("required_amount", new Pair<>(1, 1)).forGetter(ChallengeData::getRequiredAmountPair),
+            ItemStack.CODEC.optionalFieldOf("required_specific_tool", ItemStack.EMPTY, Lifecycle.experimental()).forGetter(ChallengeData::requiredSpecificTool),
+            Codec.STRING.listOf().fieldOf("targeted_blocks").forGetter(ChallengeData::targetedBlocks)
+    ).apply(instance, ChallengeData::new));
 
-    public static final Codec<ChallengesData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            MiningSkillCardItem.Type.CODEC.fieldOf("for_card_type").forGetter(ChallengesData::getForCardType),
-            MiningSkillCardItem.Tier.CODEC.fieldOf("for_card_tier").forGetter(ChallengesData::getForCardTier),
-            Type.CODEC.fieldOf("challenge_type").forGetter(ChallengesData::getChallengeType),
-            Codec.pair(Codec.INT.fieldOf("min").codec(), Codec.INT.fieldOf("max").codec()).optionalFieldOf("required_amount", new Pair<>(1, 1)).forGetter(ChallengesData::getRequiredAmountPair),
-            ItemStack.CODEC.optionalFieldOf("required_specific_tool", ItemStack.EMPTY, Lifecycle.experimental()).forGetter(ChallengesData::getRequiredSpecificTool),
-            Codec.STRING.listOf().fieldOf("targeted_blocks").forGetter(ChallengesData::getTargetedBlocks)
-    ).apply(instance, ChallengesData::new));
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, ChallengesData> STREAM_CODEC = StreamCodec.of(ChallengesData::writeBuffer, ChallengesData::readBuffer);
-
-    public ChallengesData(MiningSkillCardItem.Type forCardType, MiningSkillCardItem.Tier forCardTier, Type challengeType, Pair<Integer, Integer> requiredAmount, ItemStack requiredSpecificTool, List<String> targetedBlocks) {
-        this.forCardType = forCardType;
-        this.forCardTier = forCardTier;
-        this.challengeType = challengeType;
-        this.requiredAmount = requiredAmount;
-        this.requiredSpecificTool = requiredSpecificTool;
-        this.targetedBlocks = targetedBlocks;
-    }
-
-    public MiningSkillCardItem.Type getForCardType() {
-        return forCardType;
-    }
-
-    public MiningSkillCardItem.Tier getForCardTier() {
-        return forCardTier;
-    }
-
-    public Type getChallengeType() {
-        return challengeType;
-    }
+    public static final StreamCodec<RegistryFriendlyByteBuf, ChallengeData> STREAM_CODEC = StreamCodec.of(ChallengeData::writeBuffer, ChallengeData::readBuffer);
 
     public int getRequiredAmount() {
         Random random = new Random();
@@ -64,36 +38,28 @@ public class ChallengesData {
         return requiredAmount;
     }
 
-    public ItemStack getRequiredSpecificTool() {
-        return requiredSpecificTool;
-    }
+    public static void writeBuffer(RegistryFriendlyByteBuf buf, ChallengeData data) {
+        buf.writeUtf(data.forCardType().getId());
+        buf.writeInt(data.forCardTier().getValue());
 
-    public List<String> getTargetedBlocks() {
-        return targetedBlocks;
-    }
-
-    public static void writeBuffer(RegistryFriendlyByteBuf buf, ChallengesData data) {
-        buf.writeUtf(data.getForCardType().getId());
-        buf.writeInt(data.getForCardTier().getValue());
-
-        buf.writeUtf(data.getChallengeType().getTypeName());
-        buf.writeBoolean(data.getChallengeType().isConsuming());
+        buf.writeUtf(data.challengeType().getTypeId());
+        buf.writeBoolean(data.challengeType().isConsuming());
 
         buf.writeInt(data.getRequiredAmountPair().getFirst());
         buf.writeInt(data.getRequiredAmountPair().getSecond());
 
-        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, data.getRequiredSpecificTool());
-        buf.writeCollection(data.getTargetedBlocks(), FriendlyByteBuf::writeUtf);
+        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, data.requiredSpecificTool());
+        buf.writeCollection(data.targetedBlocks(), FriendlyByteBuf::writeUtf);
     }
 
-    public static ChallengesData readBuffer(RegistryFriendlyByteBuf buf) {
+    public static ChallengeData readBuffer(RegistryFriendlyByteBuf buf) {
         MiningSkillCardItem.Type cardType = MiningSkillCardItem.Type.fromString(buf.readUtf());
         MiningSkillCardItem.Tier cardTier = MiningSkillCardItem.Tier.fromInt(buf.readInt());
         Type type = Type.fromValues(buf.readUtf(), buf.readBoolean());
         Pair<Integer, Integer> requiredAmounts = Pair.of(buf.readInt(), buf.readInt());
         ItemStack requiredSpecificTool = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
         List<String> targetedBlocks = buf.readList(FriendlyByteBuf::readUtf);
-        return new ChallengesData(cardType, cardTier, type, requiredAmounts, requiredSpecificTool, targetedBlocks);
+        return new ChallengeData(cardType, cardTier, type, requiredAmounts, requiredSpecificTool, targetedBlocks);
     }
 
     public enum Type {
@@ -112,6 +78,7 @@ public class ChallengesData {
 
         private final String type;
         private final boolean consume;
+
         Type(String type, boolean consume) {
             this.type = type;
             this.consume = consume;
@@ -125,7 +92,7 @@ public class ChallengesData {
             }
         }, Type::getPair);
 
-        public String getTypeName() {
+        public String getTypeId() {
             return type.toLowerCase();
         }
 
@@ -143,7 +110,7 @@ public class ChallengesData {
 
         public static Type fromValues(String input, boolean state) {
             for (Type enumValue : Type.values()) {
-                if (enumValue.getTypeName().equalsIgnoreCase(input) && enumValue.isConsuming() == state) {
+                if (enumValue.getTypeId().equalsIgnoreCase(input) && enumValue.isConsuming() == state) {
                     return enumValue; // Return the matching enum value
                 }
             }

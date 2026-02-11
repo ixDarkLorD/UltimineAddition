@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class IneligibleBlocksEvents {
     public static void init() {
         AtomicBoolean i = new AtomicBoolean();
-        BlockToolModificationEvent.EVENT.register((originalState, finalState, context, toolAction, simulate) -> {
+        BlockToolModificationEvent.EVENT.register((originalState, context, toolAction, simulate) -> {
             i.set(true);
             return CompoundEventResult.pass();
         });

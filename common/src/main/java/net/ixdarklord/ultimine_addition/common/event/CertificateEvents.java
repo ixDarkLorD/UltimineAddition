@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.common.event;
 
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.BlockEvent;
-import net.ixdarklord.coolcatlib.api.util.SlotReference;
+import net.ixdarklord.coolcatlib.api.utils.SlotReference;
 import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSavedData;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
@@ -28,11 +28,11 @@ public class CertificateEvents {
             if (slots.isEmpty()) return EventResult.pass();
 
             for (SlotReference.Player slot : slots) {
-                MinerCertificateData data = MinerCertificateData.loadData(slot.getItem());
+                MinerCertificateData data = MinerCertificateData.load(slot.get());
                 Optional<MinerCertificateData.Legacy> legacy = data.getLegacy();
                 if (legacy.isPresent()) {
                     legacy.get().addPoint(1);
-                    data.sendToClient(slot.getIndex(), player).saveData(slot.getItem());
+                    data.sendToClient(slot.getIndex(), player).save();
                 }
             }
             return EventResult.pass();

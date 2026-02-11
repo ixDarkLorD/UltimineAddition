@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.network.payloads;
 
 import dev.architectury.networking.NetworkManager;
-import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
+import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -14,10 +14,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public record SyncChallengesPayload(Map<ResourceLocation, ChallengesData> dataMap) implements CustomPacketPayload {
-    public static final Type<SyncChallengesPayload> TYPE = new Type<>(FTBUltimineAddition.rl("sync_challenges"));
-    private static final StreamCodec<RegistryFriendlyByteBuf, Map<ResourceLocation, ChallengesData>> CHALLENGES_STREAM_CODEC =
-            ByteBufCodecs.map(i -> new HashMap<>(), ResourceLocation.STREAM_CODEC, ChallengesData.STREAM_CODEC);
+public record SyncChallengesPayload(Map<ResourceLocation, ChallengeData> dataMap) implements CustomPacketPayload {
+    public static final Type<SyncChallengesPayload> TYPE = new Type<>(FTBUltimineAddition.id("sync_challenges"));
+    private static final StreamCodec<RegistryFriendlyByteBuf, Map<ResourceLocation, ChallengeData>> CHALLENGES_STREAM_CODEC =
+            ByteBufCodecs.map(i -> new HashMap<>(), ResourceLocation.STREAM_CODEC, ChallengeData.STREAM_CODEC);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncChallengesPayload> STREAM_CODEC = StreamCodec.composite(
             CHALLENGES_STREAM_CODEC, SyncChallengesPayload::dataMap,

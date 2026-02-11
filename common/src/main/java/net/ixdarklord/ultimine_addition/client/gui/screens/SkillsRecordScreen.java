@@ -15,12 +15,16 @@ import net.fabricmc.api.Environment;
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatlib.api.client.gui.components.TextScreen;
 import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.AbstractDraggableWidget;
-import net.ixdarklord.coolcatlib.api.util.*;
-import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesInfoPanel;
+import net.ixdarklord.coolcatlib.api.client.utils.MouseHelper;
+import net.ixdarklord.coolcatlib.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatlib.api.utils.ColorUtils;
+import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import net.ixdarklord.coolcatlib.api.utils.MathUtils;
 import net.ixdarklord.ultimine_addition.client.gui.components.ConfigurationPanel;
+import net.ixdarklord.ultimine_addition.client.gui.hud.ChallengesPanelManager;
 import net.ixdarklord.ultimine_addition.client.gui.tooltip.SkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
-import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
+import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
@@ -34,6 +38,8 @@ import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.hooks.KeyBindingHooks;
+import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.SkillsRecordPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -50,7 +56,6 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.NonNullList;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.ClickEvent;
@@ -63,9 +68,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
@@ -77,14 +84,14 @@ import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
 public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu> {
-    public static final WidgetSprites BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/button"), FTBUltimineAddition.rl("container/skills_record/button_disabled"), FTBUltimineAddition.rl("container/skills_record/button_focused"));
+    public static final WidgetSprites BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.id("container/skills_record/button"), FTBUltimineAddition.id("container/skills_record/button_disabled"), FTBUltimineAddition.id("container/skills_record/button_focused"));
     private static final ResourceLocation BACKGROUND_TEXTURE = FTBUltimineAddition.getGuiTexture("container/skills_record", "png");
-    private static final ResourceLocation SLOT_SELECT_SPRITE = FTBUltimineAddition.rl("container/skills_record/slot_select");
-    private static final ResourceLocation PROGRESS_BAR_SPRITE = FTBUltimineAddition.rl("container/skills_record/progress_bar");
-    private static final ResourceLocation ITEM_DISPLAY_SPRITE = FTBUltimineAddition.rl("container/skills_record/item_display");
-    public static final WidgetSprites CONFIGURATION_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/configuration_button_enabled"), FTBUltimineAddition.rl("container/skills_record/configuration_button_disabled"), FTBUltimineAddition.rl("container/skills_record/configuration_button_focused"));
-    private static final WidgetSprites CONSUME_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/consume_on"), FTBUltimineAddition.rl("container/skills_record/consume_off"), FTBUltimineAddition.rl("container/skills_record/consume_on_focused"), FTBUltimineAddition.rl("container/skills_record/consume_off_focused"));
-    private static final WidgetSprites SCROLLBAR_SPRITE = new WidgetSprites(FTBUltimineAddition.rl("container/skills_record/scroller_enabled"), FTBUltimineAddition.rl("container/skills_record/scroller_disabled"), FTBUltimineAddition.rl("container/skills_record/scroller_focused"));
+    private static final ResourceLocation SLOT_SELECT_SPRITE = FTBUltimineAddition.id("container/skills_record/slot_select");
+    public static final ResourceLocation PROGRESS_BAR_SPRITE = FTBUltimineAddition.id("container/skills_record/progress_bar");
+    private static final ResourceLocation ITEM_DISPLAY_SPRITE = FTBUltimineAddition.id("container/skills_record/item_display");
+    public static final WidgetSprites CONFIGURATION_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.id("container/skills_record/configuration_button_enabled"), FTBUltimineAddition.id("container/skills_record/configuration_button_disabled"), FTBUltimineAddition.id("container/skills_record/configuration_button_focused"));
+    private static final WidgetSprites CONSUME_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.id("container/skills_record/consume_on"), FTBUltimineAddition.id("container/skills_record/consume_off"), FTBUltimineAddition.id("container/skills_record/consume_on_focused"), FTBUltimineAddition.id("container/skills_record/consume_off_focused"));
+    private static final WidgetSprites SCROLLBAR_SPRITE = new WidgetSprites(FTBUltimineAddition.id("container/skills_record/scroller_enabled"), FTBUltimineAddition.id("container/skills_record/scroller_disabled"), FTBUltimineAddition.id("container/skills_record/scroller_focused"));
 
     private final int maxProgress = 100;
     private ColorableImageButton configurationButton;
@@ -143,7 +150,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             else this.backgroundColor = this.backgroundColor.previous();
             this.saveValuesToConfig();
         }, Component.translatable("gui.ultimine_addition.skills_record.option.bg_color"), tooltipInfo -> {
-            int color = ColorUtils.RGBToRGBA(this.backgroundColor.convert().getRGB(), this.backgroundColor.getAlpha());
+            int color = ColorUtils.rgbToRgba(this.backgroundColor.convert(), this.backgroundColor.alpha());
             tooltipInfo.component = Component.translatable(String.format("gui.ultimine_addition.color.%s", this.backgroundColor.name().toLowerCase())).withStyle(Style.EMPTY.withColor(color));
             tooltipInfo.tooltipComponent = new SkillsRecordTooltip.Option(0, tooltipInfo.component);
         });
@@ -166,14 +173,11 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         });
 
         this.configuration.addButton((button) -> {
-            if (!Screen.hasShiftDown())
-                ChallengesInfoPanel.INSTANCE.setPanelPos(ChallengesInfoPanel.INSTANCE.getPanelPos().next());
-            else
-                ChallengesInfoPanel.INSTANCE.setPanelPos(ChallengesInfoPanel.INSTANCE.getPanelPos().previous());
+            ChallengesPanelManager.INSTANCE.cycleAlignment(!Screen.hasShiftDown());
             this.saveValuesToConfig();
-        }, Component.translatable("gui.ultimine_addition.skills_record.option.panel_pos"), tooltipInfo -> {
-            ChatFormatting color = ChallengesInfoPanel.INSTANCE.getPanelPos().getSerializedName().equals("disabled") ? ChatFormatting.RED : ChatFormatting.WHITE;
-            tooltipInfo.component = Component.translatable("gui.ultimine_addition.skills_record.option.panel_pos.%s".formatted(ChallengesInfoPanel.INSTANCE.getPanelPos().getSerializedName())).withStyle(color);
+        }, Component.translatable("gui.ultimine_addition.skills_record.option.panel_alignment"), tooltipInfo -> {
+            ChatFormatting color = ChallengesPanelManager.INSTANCE.getPanelAlignment().getSerializedName().equals("disabled") ? ChatFormatting.RED : ChatFormatting.WHITE;
+            tooltipInfo.component = Component.translatable("gui.ultimine_addition.skills_record.option.panel_alignment.%s".formatted(ChallengesPanelManager.INSTANCE.getPanelAlignment().getSerializedName())).withStyle(color);
             tooltipInfo.tooltipComponent = new SkillsRecordTooltip.Option(1, tooltipInfo.component);
         });
     }
@@ -182,7 +186,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         ConfigHandler.CLIENT.BACKGROUND_COLOR.set(this.backgroundColor);
         ConfigHandler.CLIENT.ANIMATIONS_MODE.set(this.isAnimationsEnabled);
         ConfigHandler.CLIENT.PROGRESS_BAR.set(this.progressMode);
-        ConfigHandler.CLIENT.CHALLENGES_PANEL_POSITION.set(ChallengesInfoPanel.INSTANCE.getPanelPos());
+        ConfigHandler.CLIENT.CHALLENGES_PANEL_ALIGNMENT.set(ChallengesPanelManager.INSTANCE.getPanelAlignment());
     }
 
     @Override
@@ -201,34 +205,45 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
             @Override
             public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                this.sprites = CONSUME_BUTTON_SPRITES;
-                guiGraphics.setColor(SkillsRecordScreen.this.backgroundColor.getRed(), SkillsRecordScreen.this.backgroundColor.getGreen(), SkillsRecordScreen.this.backgroundColor.getBlue(), SkillsRecordScreen.this.backgroundColor.getAlpha());
+                this.sprites = SkillsRecordScreen.CONSUME_BUTTON_SPRITES;
+                if (!SkillsRecordScreen.this.isConsumeChallengeExists() && this.isStateTriggered) {
+                    this.isStateTriggered = false;
+                }
+
+                OverlayColor color = SkillsRecordScreen.this.backgroundColor;
+                guiGraphics.setColor(color.red(), color.green(), color.blue(), color.alpha());
                 RenderSystem.disableDepthTest();
-                guiGraphics.blitSprite(this.sprites.get(!SkillsRecordScreen.this.lock && this.isStateTriggered, !SkillsRecordScreen.this.lock && this.active && this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
+                guiGraphics.blitSprite(this.sprites.get(this.isActive() && this.isStateTriggered, this.isActive() && this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
+                if (!this.isActive()) {
+                    guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, ColorUtils.rgbToRgba(Color.BLACK, 0.15F));
+                }
                 RenderSystem.enableDepthTest();
                 guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-                double value = SkillsRecordScreen.this.isAnimationsEnabled ? MathUtils.cycledBetweenValues(0.5F, 1.0F, 0.75F, SkillsRecordScreen.this.menu.getPlayer().tickCount / 20.0F, false) : 1.0F;
-                Color cTo = this.isStateTriggered ? new Color(0x23AC23) : new Color(0xA82222);
-                Color cFrom = this.isStateTriggered ? ColorUtils.blendColors(new Color(0x37FF37), cTo, value) : ColorUtils.blendColors(new Color(0xFF3737), cTo, value);
-                Color color1 = this.isStateTriggered ? cFrom : cTo;
-                Color color2 = this.isStateTriggered ? cTo : cFrom;
-                guiGraphics.fillGradient(this.getX() + 1, this.getY() + (this.isStateTriggered ? 1 : 9), this.getX() + 9, this.getY() + (this.isStateTriggered ? 9 : 17), color1.getRGB(), color2.getRGB());
+                if (this.isActive()) {
+                    double value = SkillsRecordScreen.this.isAnimationsEnabled ? (double)MathUtils.cycledBetweenValues(0.5F, 1.0F, 0.75F, (float) SkillsRecordScreen.this.menu.getPlayer().tickCount / 20.0F, false) : (double)1.0F;
+                    Color cTo = this.isStateTriggered ? new Color(2337827) : new Color(11018786);
+                    Color cFrom = this.isStateTriggered ? ColorUtils.blend(new Color(3669815), cTo, value) : ColorUtils.blend(new Color(16725815), cTo, value);
+                    Color color1 = this.isStateTriggered ? cFrom : cTo;
+                    Color color2 = this.isStateTriggered ? cTo : cFrom;
+                    guiGraphics.fillGradient(this.getX() + 1, this.getY() + (this.isStateTriggered ? 1 : 9), this.getX() + 9, this.getY() + (this.isStateTriggered ? 9 : 17), color1.getRGB(), color2.getRGB());
+                }
 
                 if (this.isActive() && this.isHovered()) {
-                    Component state = (SkillsRecordScreen.this.menu.getData().isConsumeMode()) ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
+                    Component state = SkillsRecordScreen.this.menu.getData().isConsumeMode() ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
                     Component info = Component.literal("➤ ").withStyle(ChatFormatting.GRAY).append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.WHITE));
                     guiGraphics.renderTooltip(SkillsRecordScreen.this.font, info, mouseX, mouseY);
                 }
+
             }
 
             @Override
             public void onClick(double mouseX, double mouseY) {
-                if (!SkillsRecordScreen.this.configuration.isVisible() && SkillsRecordScreen.this.isConsumeChallengeExists()) {
-                    SkillsRecordMenu menu = SkillsRecordScreen.this.menu;
-                    SkillsRecordData data = menu.getData();
-                    data.toggleConsumeMode().sendToServer(menu.interactionHand).saveData(data.get());
-                }
+                this.isStateTriggered ^= true;
+                SkillsRecordMenu menu = SkillsRecordScreen.this.menu;
+                SkillsRecordData data = menu.getData();
+                data.setConsumeMode(this.isStateTriggered).save();
+                PayloadHandler.sendToServer(new SkillsRecordPayload.ToggleConsumeMode(this.isStateTriggered));
             }
         });
     }
@@ -239,33 +254,35 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         if (this.selectedSlot > -1 && this.menu.getCardSlots().get(this.selectedSlot).getItem() == ItemStack.EMPTY) {
             this.selectedSlot = -1;
             SkillsRecordData data = this.menu.getData();
-            data.setSelectedCard(this.selectedSlot).sendToServer(this.menu.interactionHand).saveData(data.get());
+            data.setSelectedCard(this.selectedSlot).save();
+            PayloadHandler.sendToServer(new SkillsRecordPayload.SelectCard(this.selectedSlot));
         }
 
-        MiningSkillCardData data = MiningSkillCardData.loadData(this.selectedSlot > -1 ? this.menu.getCardSlots().get(selectedSlot).getItem() : ItemStack.EMPTY);
+        MiningSkillCardData data = MiningSkillCardData.load(this.selectedSlot > -1 ? this.menu.getCardSlots().get(this.selectedSlot).getItem() : ItemStack.EMPTY);
         boolean isCardTierMastered = data.getTier() == MiningSkillCardItem.Tier.Mastered;
         this.isChallengesExists = !data.getChallenges().isEmpty();
         boolean hasCorrectGamemode = !this.menu.getPlayer().isCreative() && !this.menu.getPlayer().isSpectator();
         this.isMissingItems = hasCorrectGamemode && (!this.menu.getAllSlots().get(4).hasItem() || !this.menu.getAllSlots().get(5).hasItem());
         this.notEnoughInk = hasCorrectGamemode && this.selectedSlot > -1 && this.menu.getInkAmount() == 0;
-
-        if (this.lock || this.configuration.isVisible()) {
-            this.isProgressionBarShown = false;
-            this.menu.getAllSlots().forEach(slot -> ((CustomSlot) slot).setEnabled(false));
-        } else {
+        if (!this.lock && !this.configuration.isVisible()) {
             if (this.isChallengesExists && !this.isMissingItems && !this.notEnoughInk && this.progressMode == 0) {
                 this.isProgressionBarShown = true;
-            } else if (this.selectedSlot == -1 || isCardTierMastered)
+            } else if (this.selectedSlot == -1 || isCardTierMastered) {
                 this.isProgressionBarShown = false;
-            this.menu.getAllSlots().forEach(slot -> ((CustomSlot) slot).setEnabled(true));
+            }
+
+            this.menu.getAllSlots().forEach((slot) -> ((CustomSlot)slot).setEnabled(true));
+        } else {
+            this.isProgressionBarShown = false;
+            this.menu.getAllSlots().forEach((slot) -> ((CustomSlot)slot).setEnabled(false));
         }
 
         this.textScreen.clear();
         this.textScreen.setHeight(82 - (this.isProgressionBarShown ? 9 : 0), true);
 
-        for (GuiEventListener child : this.children()) {
+        for(GuiEventListener child : this.children()) {
             if (child instanceof AbstractWidget widget) {
-                widget.active = !lock;
+                widget.active = !this.lock;
             }
         }
 
@@ -275,11 +292,12 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
         if (this.consumeButton != null) {
             if (this.consumeButton.active) {
-                this.consumeButton.active = !this.configuration.isVisible();
+                this.consumeButton.active = !this.configuration.isVisible() && this.isConsumeChallengeExists();
             }
-            this.consumeButton.setStateTriggered(this.menu.getData().isConsumeMode());
-            if (this.consumeButton.isFocused())
+
+            if (this.consumeButton.isFocused()) {
                 this.consumeButton.setFocused(false);
+            }
         }
     }
 
@@ -310,16 +328,16 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        guiGraphics.setColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
+        guiGraphics.setColor(this.backgroundColor.red(), this.backgroundColor.green(), this.backgroundColor.blue(), this.backgroundColor.alpha());
         guiGraphics.blit(BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        Color color = ColorUtils.blendColors(new Color(0, 0, 0), this.backgroundColor.color, 0.75);
+        Color color = ColorUtils.blend(new Color(0, 0, 0), this.backgroundColor.color, 0.25);
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, color.getRGB(), false);
-        guiGraphics.fill(this.inventoryLabelX - 1, this.inventoryLabelY - 1, this.inventoryLabelX + this.font.width(this.playerInventoryTitle), this.inventoryLabelY + this.font.lineHeight, ColorUtils.RGBToRGBA(color.getRGB(), 0.5F));
+        guiGraphics.fill(this.inventoryLabelX - 1, this.inventoryLabelY - 1, this.inventoryLabelX + this.font.width(this.playerInventoryTitle), this.inventoryLabelY + this.font.lineHeight, ColorUtils.rgbToRgba(color.getRGB(), 0.5F));
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
     }
 
@@ -387,8 +405,8 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
                 poseStack.pushPose();
                 poseStack.translate(x + slot.x, y + slot.y, 100.0F);
                 poseStack.translate(8.0, 8.0, 0.0);
-                guiGraphics.setColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
-                guiGraphics.fill(RenderType.guiOverlay(), -8, -8, 8, 8, ColorUtils.RGBToRGBA(color, alpha));
+                guiGraphics.setColor(this.backgroundColor.red(), this.backgroundColor.green(), this.backgroundColor.blue(), this.backgroundColor.alpha());
+                guiGraphics.fill(RenderType.guiOverlay(), -8, -8, 8, 8, ColorUtils.rgbToRgba(color, alpha));
                 guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
                 poseStack.popPose();
             }
@@ -398,7 +416,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     private void renderSlotDecorations(GuiGraphics guiGraphics, int x, int y) {
         if (this.lock) return;
 
-        guiGraphics.setColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
+        guiGraphics.setColor(this.backgroundColor.red(), this.backgroundColor.green(), this.backgroundColor.blue(), this.backgroundColor.alpha());
         if (this.menu.getSlot(4).getItem() != ItemStack.EMPTY)
             guiGraphics.blitSprite(SLOT_SELECT_SPRITE, x + 135, y + 99, 4, 8);
 
@@ -413,7 +431,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
     private void renderTextBox(GuiGraphics guiGraphics) {
         ItemStack stack = selectedSlot > -1 ? this.menu.getCardSlots().get(this.selectedSlot).getItem() : ItemStack.EMPTY;
-        MiningSkillCardData data = MiningSkillCardData.loadData(stack);
+        MiningSkillCardData data = MiningSkillCardData.load(stack);
 
         if (this.menu.isCardSlotsEmpty()) {
             textScreen.selectScreen(0)
@@ -477,7 +495,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         int Y = (int) Mth.lerp(this.getScrollOffsetDelta(), 16, 86);
         boolean isOverButton = isHovering(174, Y, 9, 12, mouseX, mouseY);
 
-        guiGraphics.setColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
+        guiGraphics.setColor(this.backgroundColor.red(), this.backgroundColor.green(), this.backgroundColor.blue(), this.backgroundColor.alpha());
         guiGraphics.blitSprite(SCROLLBAR_SPRITE.get(this.textScreen.canScroll(), isOverButton), x + 174, y + Y, 10, 13);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
@@ -494,7 +512,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         poseStack.pushPose();
         poseStack.translate(x + 11, y + 97, 0);
         poseStack.mulPose(Axis.ZN.rotationDegrees(90));
-        guiGraphics.fillGradient(RenderType.guiOverlay(), 0, 0, 5, bar, ColorUtils.RGBToRGBA(getProgressionBarColor(), 0.55F), ColorUtils.RGBToRGBA(getProgressionBarColor(), 0.75F), 0);
+        guiGraphics.fillGradient(RenderType.guiOverlay(), 0, 0, 5, bar, ColorUtils.rgbToRgba(getProgressionBarColor(), 0.55F), ColorUtils.rgbToRgba(getProgressionBarColor(), 0.75F), 0);
         poseStack.popPose();
 
         if (this.lock) return;
@@ -547,7 +565,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
-        guiGraphics.setColor(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), this.backgroundColor.getAlpha());
+        guiGraphics.setColor(this.backgroundColor.red(), this.backgroundColor.green(), this.backgroundColor.blue(), this.backgroundColor.alpha());
         guiGraphics.blitSprite(ITEM_DISPLAY_SPRITE, mouseX + alignPosX, mouseY, 26, 26);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
         guiGraphics.pose().popPose();
@@ -560,10 +578,10 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         AtomicBoolean result = new AtomicBoolean();
         this.menu.getCardSlots().forEach(slot -> {
             ItemStack stack = slot.getItem();
-            MiningSkillCardData cardData = MiningSkillCardData.loadData(stack);
+            MiningSkillCardData cardData = MiningSkillCardData.load(stack);
             if (!cardData.getChallenges().stream().filter(identifier -> {
                 if (ChallengesManager.INSTANCE.getAllChallenges().get(identifier.getId()) == null) return false;
-                return ChallengesManager.INSTANCE.getAllChallenges().get(identifier.getId()).getChallengeType().isConsuming();
+                return ChallengesManager.INSTANCE.getAllChallenges().get(identifier.getId()).challengeType().isConsuming();
             }).toList().isEmpty())
                 result.set(true);
         });
@@ -579,21 +597,22 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             Style style = this.textScreen.getComponentStyleAt(mouseX, mouseY);
             if (style != null && style.getClickEvent() != null) {
                 if (style.getClickEvent().getValue().contains("[cycle]")) {
-                    itemCycle++;
+                    ++itemCycle;
                     return true;
                 }
+
                 if (this.selectedSlot > -1 && style.getClickEvent().getValue().contains("[pin]")) {
                     String value = style.getClickEvent().getValue().split("<>")[1];
                     ResourceLocation challengeId = ResourceLocation.parse(value);
-
-                    var data = this.menu.getData();
-                    data.togglePinned(this.selectedSlot, challengeId, this.menu).saveData(data.get());
+                    SkillsRecordData data = this.menu.getData();
+                    data.togglePinned(this.selectedSlot, challengeId).save();
+                    PayloadHandler.sendToServer(new SkillsRecordPayload.PinChallenge(this.selectedSlot, challengeId));
                     return true;
-                } else if (this.selectedSlot > -1 && style.getClickEvent().getValue().contains("[edit]")) {
-                    JsonElement element = JsonParser.parseString(style.getClickEvent().getValue().split("<>")[1]);
+                }
 
-                    DataResult<Pair<MiningSkillCardData.ChallengeHolder, JsonElement>> decode =
-                            MiningSkillCardData.ChallengeHolder.CODEC.decode(JsonOps.INSTANCE, element);
+                if (this.selectedSlot > -1 && style.getClickEvent().getValue().contains("[edit]")) {
+                    JsonElement element = JsonParser.parseString(style.getClickEvent().getValue().split("<>")[1]);
+                    DataResult<Pair<MiningSkillCardData.Challenge, JsonElement>> decode = MiningSkillCardData.Challenge.CODEC.decode(JsonOps.INSTANCE, element);
                     Objects.requireNonNull(this.minecraft).setScreen(new EditChallengeScreen(this, decode.getOrThrow().getFirst()));
                     return true;
                 }
@@ -608,8 +627,9 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
                     this.selectedSlot = -1;
                 }
 
-                var data = this.menu.getData();
-                data.setSelectedCard(this.selectedSlot).sendToServer(this.menu.interactionHand).saveData(data.get());
+                SkillsRecordData data = this.menu.getData();
+                data.setSelectedCard(this.selectedSlot).save();
+                PayloadHandler.sendToServer(new SkillsRecordPayload.SelectCard(this.selectedSlot));
                 return true;
             }
         }
@@ -716,102 +736,70 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
     private void createChallengesText(NonNullList<Slot> slots) {
         ItemStack stack = slots.get(this.selectedSlot).getItem();
-        MiningSkillCardData cardData = MiningSkillCardData.loadData(stack);
+        MiningSkillCardData cardData = MiningSkillCardData.load(stack);
         ChallengesManager manager = ChallengesManager.INSTANCE;
 
         int currentValues = 0;
         int requiredValues = 0;
-        for (MiningSkillCardData.ChallengeHolder challengeHolder : cardData.getChallenges()) {
-            List<ItemStack> itemList = new ArrayList<>(List.of(ItemStack.EMPTY));
-            ChallengesData challengesData = manager.getAllChallenges().get(challengeHolder.getId());
-            String type = "null";
 
-            if (challengesData != null) {
-                itemList.clear();
-                type = challengesData.getChallengeType().getTypeName();
-                ChallengesManager.INSTANCE.utilizeTargetedBlocks(challengesData).forEach(block -> itemList.add(new ItemStack(block)));
-                currentValues += challengeHolder.getCurrentPoints();
-                requiredValues += challengeHolder.getRequiredPoints();
+        for(MiningSkillCardData.Challenge challenge : cardData.getChallenges()) {
+            List<ItemStack> itemList = new ArrayList<>(List.of(ItemStack.EMPTY));
+            ChallengeData challengeData = manager.getAllChallenges().get(challenge.getId());
+            if (challengeData != null) {
+                itemList = ChallengesManager.INSTANCE.utilizeTargetedBlocks(challengeData).stream().map(Block::asItem).map(Item::getDefaultInstance).toList();
+                currentValues += challenge.getCurrentPoints();
+                requiredValues += challenge.getRequiredPoints();
             }
 
             ItemStack displayItem = itemList.get(Mth.floor(itemCycle) % itemList.size());
-            var hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(displayItem));
-            Style questStyle = Style.EMPTY.withHoverEvent(hoverEvent).withItalic(true).withColor(new Color(0xBC9F7D).getRGB());
+            HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(displayItem));
+            Style questStyle = Style.EMPTY.withHoverEvent(hoverEvent).withItalic(true).withColor((new Color(12361597)).getRGB());
             if (itemList.size() > 1) {
-                questStyle = questStyle.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, "[cycle]"));
+                questStyle = questStyle.withClickEvent(new ClickEvent(net.minecraft.network.chat.ClickEvent.Action.OPEN_FILE, "[cycle]"));
             }
 
-            Component title = ComponentHelper.limitComponent(Component.literal("》").append(Component.translatable("challenge.ultimine_addition.title", challengeHolder.getOrder()).setStyle(Style.EMPTY.withColor(new Color(0xFAF1C1).getRGB()))).append("《").withColor(new Color(0x7A7A7A).getRGB()), this.textScreen.getWidth());
-            Component description = createChallengeDescription(type, questStyle, itemList, itemCycle);
+            Component title = ComponentHelper.limitComponent(Component.literal("》").append(Component.translatable("challenge.ultimine_addition.title", challenge.getOrder()).setStyle(Style.EMPTY.withColor((new Color(16445889)).getRGB()))).append("《").withColor((new Color(8026746)).getRGB()), this.textScreen.getWidth());
+            List<Component> descriptions = manager.createChallengeDescription(challenge.getId(), Style.EMPTY.withColor(ChatFormatting.GRAY), itemCycle, questStyle);
             Style descStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GRAY);
             Style counterStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GOLD);
-
-            boolean isConsumeNeeded = challengesData != null && challengesData.getChallengeType().isConsuming() && !this.menu.getData().isConsumeMode() && !cardData.isChallengeAccomplished(challengeHolder.getId());
+            boolean isConsumeNeeded = challengeData != null && challengeData.challengeType().isConsuming() && !this.menu.getData().isConsumeMode() && !cardData.isChallengeAccomplished(challenge.getId());
             if (isConsumeNeeded) {
                 HoverEvent hover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("challenge.ultimine_addition.consume.info").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
                 counterStyle = Style.EMPTY.withHoverEvent(hover).withColor(ChatFormatting.RED);
-
-            } else if (challengesData != null && challengesData.getChallengeType().isConsuming() && this.menu.getData().isConsumeMode() && !cardData.isChallengeAccomplished(challengeHolder.getId())) {
+            } else if (challengeData != null && challengeData.challengeType().isConsuming() && this.menu.getData().isConsumeMode() && !cardData.isChallengeAccomplished(challenge.getId())) {
                 HoverEvent hover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("✖ ").append(Component.translatable("challenge.ultimine_addition.consume")).withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
                 counterStyle = Style.EMPTY.withItalic(true).withHoverEvent(hover).withColor(ChatFormatting.LIGHT_PURPLE);
-
-            } else if (cardData.isChallengeAccomplished(challengeHolder.getId())) {
+            } else if (cardData.isChallengeAccomplished(challenge.getId())) {
                 counterStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GREEN);
             }
 
             List<FormattedCharSequence> result = new ArrayList<>(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(title, this.textScreen.getWidth(), title.getStyle())));
-            result.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(description, this.textScreen.getWidth(), descStyle)));
 
-            FormattedCharSequence counter = FormattedCharSequence.composite(FormattedCharSequence.forward("➤ ", counterStyle), FormattedCharSequence.forward(("%s/%s".formatted(challengeHolder.getCurrentPoints(), challengeHolder.getRequiredPoints())), counterStyle.withStrikethrough(isConsumeNeeded)));
+            for(Component description : descriptions) {
+                result.addAll(Language.getInstance().getVisualOrder(this.font.getSplitter().splitLines(description, this.textScreen.getWidth(), descStyle)));
+            }
 
-            FormattedCharSequence buttons;
+            FormattedCharSequence counter = FormattedCharSequence.composite(FormattedCharSequence.forward("➤ ", counterStyle), FormattedCharSequence.forward("%s/%s".formatted(challenge.getCurrentPoints(), challenge.getRequiredPoints()), counterStyle.withStrikethrough(isConsumeNeeded)));
             HoverEvent pinHover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("gui.ultimine_addition.skills_record.pin.click").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-            FormattedCharSequence pinButton = FormattedCharSequence.forward("◎", Style.EMPTY
-                    .withColor(challengeHolder.isPinned() ? ChatFormatting.YELLOW : ChatFormatting.GRAY)
-                    .withStrikethrough(!challengeHolder.isPinned())
-                    .withHoverEvent(pinHover)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, "[pin]<>%s".formatted(challengeHolder.getId().toString())))
-            );
-
-            DataResult<JsonElement> dataResult = MiningSkillCardData.ChallengeHolder.CODEC.encodeStart(JsonOps.INSTANCE, challengeHolder);
+            FormattedCharSequence pinButton = FormattedCharSequence.forward("◎", Style.EMPTY.withColor(challenge.isPinned() ? ChatFormatting.YELLOW : ChatFormatting.GRAY).withStrikethrough(!challenge.isPinned()).withHoverEvent(pinHover).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, "[pin]<>%s".formatted(challenge.getId().toString()))));
+            DataResult<JsonElement> dataResult = MiningSkillCardData.Challenge.CODEC.encodeStart(JsonOps.INSTANCE, challenge);
             HoverEvent editHover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("gui.ultimine_addition.skills_record.edit.click").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-            FormattedCharSequence editButton = FormattedCharSequence.forward("✎", Style.EMPTY
-                    .withColor(ChatFormatting.LIGHT_PURPLE)
-                    .withHoverEvent(editHover)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, "[edit]<>%s".formatted(dataResult.getOrThrow())))
-            );
+            FormattedCharSequence editButton = FormattedCharSequence.forward("✎", Style.EMPTY.withColor(ChatFormatting.LIGHT_PURPLE).withHoverEvent(editHover).withClickEvent(new ClickEvent(net.minecraft.network.chat.ClickEvent.Action.OPEN_FILE, "[edit]<>%s".formatted(dataResult.getOrThrow()))));
+            FormattedCharSequence buttons = FormattedCharSequence.composite(FormattedCharSequence.forward(" [", Style.EMPTY.withColor(Color.GRAY.getRGB())), pinButton);
+            if (ConfigHandler.CLIENT.SR_EDIT_MODE.get() && this.menu.getPlayer().hasPermissions(2)) {
+                buttons = FormattedCharSequence.composite(buttons, FormattedCharSequence.forward("]-[", Style.EMPTY.withColor(Color.GRAY.getRGB())), editButton);
+            }
 
-            buttons = FormattedCharSequence.composite(
-                    FormattedCharSequence.forward(" [", Style.EMPTY.withColor(Color.GRAY.getRGB())),
-                    pinButton
-            );
-
-            if (ConfigHandler.CLIENT.SR_EDIT_MODE.get() && this.menu.getPlayer().hasPermissions(Commands.LEVEL_GAMEMASTERS))
-                buttons = FormattedCharSequence.composite(
-                        buttons,
-                        FormattedCharSequence.forward("]-[", Style.EMPTY.withColor(Color.GRAY.getRGB())),
-                        editButton
-                );
-
-            buttons = FormattedCharSequence.composite(
-                    buttons,
-                    FormattedCharSequence.forward("]", Style.EMPTY.withColor(Color.GRAY.getRGB()))
-            );
-
+            buttons = FormattedCharSequence.composite(buttons, FormattedCharSequence.forward("]", Style.EMPTY.withColor(Color.GRAY.getRGB())));
             result.add(FormattedCharSequence.composite(counter, buttons));
-            if (!this.textScreen.isEmpty()) this.textScreen.add(FormattedCharSequence.EMPTY).addAll(result);
-            else this.textScreen.addAll(result);
+            if (!this.textScreen.isEmpty()) {
+                this.textScreen.add(FormattedCharSequence.EMPTY).addAll(result);
+            } else {
+                this.textScreen.addAll(result);
+            }
         }
-        this.calculateProgression(currentValues, requiredValues);
-    }
 
-    public static Component createChallengeDescription(String challengeType, Style style, List<ItemStack> items, float cycle) {
-        ItemStack displayItem = items.get(Mth.floor(cycle) % items.size());
-        Component info;
-        if (items.size() > 1) {
-            info = Component.translatable("challenge.ultimine_addition.various_blocks", Component.literal(displayItem.getHoverName().getString()).withStyle(style));
-        } else info = Component.literal(items.getFirst().getHoverName().getString()).withStyle(style);
-        return Component.translatable("challenge.ultimine_addition.%s".formatted(challengeType), info);
+        this.calculateProgression(currentValues, requiredValues);
     }
 
     private void calculateProgression(int currentValues, int requiredValues) {
@@ -831,10 +819,6 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         return collection;
     }
 
-    public static float getItemCycle() {
-        return itemCycle;
-    }
-
     public enum OverlayColor {
         DEFAULT(new Color(255, 255, 255)),
         RED(new Color(255, 116, 116)),
@@ -851,20 +835,20 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             this.color = color;
         }
 
-        public float getAlpha() {
-            return new ColorUtils(color.getRGB()).getAlpha();
+        public float alpha() {
+            return new ColorUtils(color.getRGB()).alpha();
         }
 
-        public float getRed() {
-            return new ColorUtils(color.getRGB()).getRed();
+        public float red() {
+            return new ColorUtils(color.getRGB()).red();
         }
 
-        public float getGreen() {
-            return new ColorUtils(color.getRGB()).getGreen();
+        public float green() {
+            return new ColorUtils(color.getRGB()).green();
         }
 
-        public float getBlue() {
-            return new ColorUtils(color.getRGB()).getBlue();
+        public float blue() {
+            return new ColorUtils(color.getRGB()).blue();
         }
 
         public OverlayColor next() {

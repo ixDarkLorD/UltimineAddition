@@ -12,15 +12,19 @@ import net.minecraft.world.phys.AABB;
 public class PayloadHandler {
     public static void init() {
         NetworkHelper.registerC2S(SkillsRecordPayload.Open.TYPE, SkillsRecordPayload.Open.STREAM_CODEC, SkillsRecordPayload.Open::handle);
-        NetworkHelper.registerC2S(SkillsRecordPayload.SyncData.C2S_TYPE, SkillsRecordPayload.SyncData.STREAM_CODEC, SkillsRecordPayload.SyncData::handle);
+        NetworkHelper.registerC2S(SkillsRecordPayload.SelectCard.TYPE, SkillsRecordPayload.SelectCard.STREAM_CODEC, SkillsRecordPayload.SelectCard::handle);
+        NetworkHelper.registerC2S(SkillsRecordPayload.ToggleConsumeMode.TYPE, SkillsRecordPayload.ToggleConsumeMode.STREAM_CODEC, SkillsRecordPayload.ToggleConsumeMode::handle);
+        NetworkHelper.registerC2S(SkillsRecordPayload.PinChallenge.TYPE, SkillsRecordPayload.PinChallenge.STREAM_CODEC, SkillsRecordPayload.PinChallenge::handle);
+        NetworkHelper.registerC2S(SkillsRecordPayload.EditChallenge.TYPE, SkillsRecordPayload.EditChallenge.STREAM_CODEC, SkillsRecordPayload.EditChallenge::handle);
         NetworkHelper.registerC2S(UpdateItemShapePayload.TYPE, UpdateItemShapePayload.STREAM_CODEC, UpdateItemShapePayload::handle);
-        NetworkHelper.registerS2C(SkillsRecordPayload.SyncData.S2C_TYPE, SkillsRecordPayload.SyncData.STREAM_CODEC, SkillsRecordPayload.SyncData::handle);
+        NetworkHelper.registerS2C(SkillsRecordPayload.SyncData.TYPE, SkillsRecordPayload.SyncData.STREAM_CODEC, SkillsRecordPayload.SyncData::handle);
         NetworkHelper.registerS2C(MinerCertificatePayload.TYPE, MinerCertificatePayload.STREAM_CODEC, MinerCertificatePayload::handle);
         NetworkHelper.registerS2C(MiningSkillCardPayload.TYPE, MiningSkillCardPayload.STREAM_CODEC, MiningSkillCardPayload::handle);
         NetworkHelper.registerS2C(MiningSkillCardPayload.SyncBrewing.TYPE, MiningSkillCardPayload.SyncBrewing.STREAM_CODEC, MiningSkillCardPayload.SyncBrewing::handle);
         NetworkHelper.registerS2C(SyncChallengesPayload.TYPE, SyncChallengesPayload.STREAM_CODEC, SyncChallengesPayload::handle);
         NetworkHelper.registerS2C(PlayerAbilityPayload.TYPE, PlayerAbilityPayload.STREAM_CODEC, PlayerAbilityPayload::handle);
-        NetworkHelper.registerS2C(ConfigSyncPayload.TYPE, ConfigSyncPayload.STREAM_CODEC, ConfigSyncPayload::handle);
+        NetworkHelper.registerS2C(SyncConfigPayload.TYPE, SyncConfigPayload.STREAM_CODEC, SyncConfigPayload::handle);
+        NetworkHelper.registerS2C(PlayConsumeEffectPayload.TYPE, PlayConsumeEffectPayload.STREAM_CODEC, PlayConsumeEffectPayload::handle);
     }
 
     public static <T extends CustomPacketPayload> void sendToServer(T payload) {

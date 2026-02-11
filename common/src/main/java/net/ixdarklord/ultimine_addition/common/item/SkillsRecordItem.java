@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
 import dev.architectury.registry.menu.MenuRegistry;
-import net.ixdarklord.coolcatlib.api.util.ComponentHelper;
+import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.client.gui.tooltip.SkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
@@ -68,9 +68,9 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
         if (this.isLegacyMode() || level.isClientSide()) return;
         if (entity instanceof ServerPlayer) {
-            if (!stack.has(SkillsRecordData.DATA_COMPONENT)) getData(stack).saveData(stack);
+            if (!stack.has(SkillsRecordData.DATA_COMPONENT)) getData(stack).save();
             if (getData(stack).getCardSlots().stream().filter(s -> !s.isEmpty()).toList().isEmpty() && getData(stack).isConsumeMode()) {
-                getData(stack).toggleConsumeMode().saveData(stack);
+                getData(stack).setConsumeMode(false).save();
             }
         }
     }
@@ -118,10 +118,10 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
     public boolean isConsumeChallengeExists(ItemStack stack) {
         AtomicBoolean result = new AtomicBoolean();
         getData(stack).getCardSlots().forEach(itemStack -> {
-            MiningSkillCardData cardData = MiningSkillCardData.loadData(itemStack);
+            MiningSkillCardData cardData = MiningSkillCardData.load(itemStack);
             if (!cardData.getChallenges().stream().filter(challengeData -> {
                 var data = ChallengesManager.INSTANCE.getAllChallenges().get(challengeData.getId());
-                if (data != null) return data.getChallengeType().isConsuming();
+                if (data != null) return data.challengeType().isConsuming();
                 else return false;
             }).toList().isEmpty())
                 result.set(true);
@@ -131,6 +131,6 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
 
     @Override
     public SkillsRecordData getData(ItemStack stack) {
-        return SkillsRecordData.loadData(stack);
+        return SkillsRecordData.load(stack);
     }
 }

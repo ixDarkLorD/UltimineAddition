@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.integration.jei;
 
 import mezz.jei.api.gui.handlers.IGlobalGuiHandler;
-import net.ixdarklord.coolcatlib.api.util.RenderUtils;
+import net.ixdarklord.coolcatlib.api.client.utils.RenderUtils;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;

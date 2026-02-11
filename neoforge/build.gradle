@@ -15,7 +15,7 @@ loom {
 
 dependencies {
     modApi libs.architectury.neoforge.get()
-    modApi "net.ixdarklord.coolcatlib:neoforge:1.21-${coolcatlib_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-neoforge:1.21-${coolcatlib_version}"
 
     modCompileOnly "${libs.curios.neoforge.get()}:api"
     modRuntimeOnly libs.curios.neoforge.get()

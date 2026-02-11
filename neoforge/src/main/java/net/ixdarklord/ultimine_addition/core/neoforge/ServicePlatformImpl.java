@@ -8,7 +8,7 @@ import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ModConfig;
 
-public class ServicePlatformImpl implements ServicePlatform {
+public final class ServicePlatformImpl implements ServicePlatform {
     public static ServicePlatform get() {
         return new ServicePlatformImpl();
     }

@@ -22,7 +22,7 @@ public class JEIIntegration implements IModPlugin {
 
     @Override
     public @NotNull ResourceLocation getPluginUid() {
-        return FTBUltimineAddition.rl("jei_integration");
+        return FTBUltimineAddition.id("jei_integration");
     }
 
     @Override
@@ -43,7 +43,6 @@ public class JEIIntegration implements IModPlugin {
 
     @Override
     public void registerRecipes(@NotNull IRecipeRegistration registration) {
-        registration.addRecipes(RecipeTypes.CRAFTING, ItemStorageDataRecipeCategory.getAdjustedCraftingRecipe());
         registration.addRecipes(ItemStorageDataRecipeCategory.RECIPE_TYPE, ItemStorageDataRecipeCategory.getItemStorageDataRecipes());
 
         final List<MiningSkillCardItem> skillCardItems = List.of(

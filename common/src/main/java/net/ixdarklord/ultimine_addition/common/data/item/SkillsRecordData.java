@@ -3,12 +3,11 @@ package net.ixdarklord.ultimine_addition.common.data.item;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.architectury.utils.Env;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.ixdarklord.coolcatlib.api.data.ItemDataComponent;
 import net.ixdarklord.ultimine_addition.client.handler.ClientHandler;
-import net.ixdarklord.ultimine_addition.common.data.DataHandler;
-import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
+import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSavedData;
 import net.ixdarklord.ultimine_addition.common.item.PenItem;
@@ -25,10 +24,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -36,6 +35,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -50,95 +50,97 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
-public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
-    public static final Codec<SkillsRecordData> CODEC;
-    public static final StreamCodec<RegistryFriendlyByteBuf, SkillsRecordData> STREAM_CODEC;
-    public static final DataComponentType<SkillsRecordData> DATA_COMPONENT;
+public final class SkillsRecordData extends ItemDataComponent<SkillsRecordData> {
+    public static final Codec<SkillsRecordData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            UUIDUtil.CODEC.optionalFieldOf("UUID", UUID.randomUUID()).forGetter(SkillsRecordData::getUUID),
+            ItemStack.OPTIONAL_CODEC.listOf().xmap(itemStacks -> new SimpleContainer(itemStacks.toArray(ItemStack[]::new)), SimpleContainer::getItems).fieldOf("Contents").forGetter(SkillsRecordData::getContainer),
+            Codec.INT.optionalFieldOf("SelectedCard", -1).forGetter(SkillsRecordData::getSelectedCard),
+            Codec.BOOL.optionalFieldOf("ConsumeMode", false).forGetter(SkillsRecordData::isConsumeMode)
+    ).apply(instance, SkillsRecordData::new));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, Map<Integer, MiningSkillCardData>> CARD_DATA_STREAM_CODEC =
+            ByteBufCodecs.map((i) -> new TreeMap<>(), ByteBufCodecs.INT, MiningSkillCardData.STREAM_CODEC);
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, SkillsRecordData> STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public @NotNull SkillsRecordData decode(RegistryFriendlyByteBuf buf) {
+            return new SkillsRecordData(
+                    buf.readUUID(),
+                    new SimpleContainer(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf).toArray(ItemStack[]::new)),
+                    buf.readInt(),
+                    buf.readBoolean(),
+                    SkillsRecordData.CARD_DATA_STREAM_CODEC.decode(buf));
+        }
+
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, SkillsRecordData data) {
+            buf.writeUUID(data.uuid);
+            ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(buf, data.getContainer().getItems());
+            buf.writeInt(data.selectedCard);
+            buf.writeBoolean(data.consumeMode);
+            SkillsRecordData.CARD_DATA_STREAM_CODEC.encode(buf, data.cachedCardData);
+        }
+    };
+
+    public static final DataComponentType<SkillsRecordData> DATA_COMPONENT =
+            DataComponentType.<SkillsRecordData>builder().persistent(CODEC).networkSynchronized(STREAM_CODEC).build();
 
     private final UUID uuid;
     private SimpleContainer container;
     private int selectedCard;
     private boolean consumeMode;
-    private final Map<Integer, List<ResourceLocation>> pinnedChallenges = new TreeMap<>();
-
-    private SkillsRecordData() {
-        this(UUID.randomUUID(), new SimpleContainer(SkillsRecordMenu.CONTAINER_SIZE), -1, false);
-    }
+    private final Map<Integer, MiningSkillCardData> cachedCardData;
 
     private SkillsRecordData(UUID uuid, SimpleContainer container, int selectedCard, boolean consumeMode) {
+        this(uuid, container, selectedCard, consumeMode, new TreeMap<>());
+    }
+
+    private SkillsRecordData(UUID uuid, SimpleContainer container, int selectedCard, boolean consumeMode, Map<Integer, MiningSkillCardData> cachedCardData) {
+        super(DATA_COMPONENT);
         this.uuid = uuid;
         this.container = container;
         this.selectedCard = selectedCard;
         this.consumeMode = consumeMode;
+        this.cachedCardData = cachedCardData;
     }
 
     public static SkillsRecordData create() {
-        return new SkillsRecordData();
+        return new SkillsRecordData(UUID.randomUUID(), new SimpleContainer(6), -1, false);
     }
 
-    public static SkillsRecordData loadData(ItemStack stack) {
-        return stack.getOrDefault(DATA_COMPONENT, create()).setDataHolder(stack);
+    public static SkillsRecordData load(ItemStack stack) {
+        return stack.getOrDefault(DATA_COMPONENT, create()).setStack(stack);
     }
 
-    @Override
-    public void saveData(ItemStack stack) {
-        stack.set(DATA_COMPONENT, this);
-        super.saveData(stack);
+    public static boolean hasData(@NotNull ItemStack stack) {
+        return !stack.isEmpty() && stack.getItem() instanceof SkillsRecordItem && stack.has(DATA_COMPONENT);
     }
 
-    static {
-        CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                UUIDUtil.CODEC.optionalFieldOf("UUID", UUID.randomUUID()).forGetter(SkillsRecordData::getUUID),
-                ItemStack.OPTIONAL_CODEC.listOf().xmap(itemStacks -> new SimpleContainer(itemStacks.toArray(ItemStack[]::new)), SimpleContainer::getItems).fieldOf("Contents").forGetter(SkillsRecordData::getContainer),
-                Codec.INT.optionalFieldOf("SelectedCard", -1).forGetter(SkillsRecordData::getSelectedCard),
-                Codec.BOOL.optionalFieldOf("ConsumeMode", false).forGetter(SkillsRecordData::isConsumeMode)
-        ).apply(instance, SkillsRecordData::new));
-
-        STREAM_CODEC = new StreamCodec<>() {
-            @Override
-            public @NotNull SkillsRecordData decode(RegistryFriendlyByteBuf buf) {
-                return new SkillsRecordData(
-                        buf.readUUID(),
-                        new SimpleContainer(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf).toArray(ItemStack[]::new)),
-                        buf.readInt(),
-                        buf.readBoolean())
-                        .decodePinnedChallenges(buf);
-            }
-
-            @Override
-            public void encode(RegistryFriendlyByteBuf buf, SkillsRecordData data) {
-                buf.writeUUID(data.uuid);
-                ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(buf, data.getContainer().getItems());
-                buf.writeInt(data.selectedCard);
-                buf.writeBoolean(data.consumeMode);
-                data.encodePinnedChallenges(buf);
-            }
-        };
-        DATA_COMPONENT = DataComponentType.<SkillsRecordData>builder().persistent(CODEC).networkSynchronized(STREAM_CODEC).build();
-    }
-
-    public Pair<Boolean, Boolean> initTaskValidator(BlockState state, BlockPos pos, ServerPlayer player, ChallengesData.Type challengeType) {
+    public Pair<Boolean, Boolean> initTaskValidator(BlockState state, BlockPos pos, ServerPlayer player, ChallengeData.Type challengeType) {
         boolean b1 = false;
         boolean b2 = false;
-        for (int i = 0; i < getCardSlots().size(); i++) {
-            ItemStack stack = getCardSlots().get(i);
-            if (stack == ItemStack.EMPTY) continue;
-            var pair = this.validateTask(stack, state, pos, player, challengeType);
-            if (pair.getFirst()) {
-                b1 = true;
-            }
-            if (pair.getSecond()) {
-                b2 = true;
+
+        for(int i = 0; i < this.getCardSlots().size(); ++i) {
+            Optional<MiningSkillCardData> dataOpt = this.getCardData(i);
+            if (dataOpt.isPresent()) {
+                Pair<Boolean, Boolean> pair = this.validateTask(dataOpt.get(), state, pos, player, challengeType);
+                if (pair.getFirst()) {
+                    b1 = true;
+                }
+
+                if (pair.getSecond()) {
+                    b2 = true;
+                }
             }
         }
+
         return Pair.of(b1, b2);
     }
 
-    private Pair<Boolean, Boolean> validateTask(ItemStack stack, BlockState state, BlockPos pos, ServerPlayer player, ChallengesData.Type challengeType) {
+    private Pair<Boolean, Boolean> validateTask(MiningSkillCardData cardData, BlockState state, BlockPos pos, ServerPlayer player, ChallengeData.Type challengeType) {
         AtomicReference<Pair<Boolean, Boolean>> isConsumed = new AtomicReference<>(Pair.of(false, false));
         try {
             AtomicInteger i = new AtomicInteger();
-            MiningSkillCardData cardData = MiningSkillCardData.loadData(stack);
             cardData.getChallenges().forEach((identifier) -> {
                 if (i.get() == 0) {
                     var savedData = IneligibleBlocksSavedData.getOrCreate((ServerLevel) player.level());
@@ -152,7 +154,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                     boolean isMissingRequiredItems = hasCorrectGamemode && (getAllSlots().get(4).isEmpty() || getAllSlots().get(5).isEmpty());
                     boolean notEnoughInk = hasCorrectGamemode && inkChamber == 0;
                     boolean isChallengeAccomplished = cardData.isChallengeAccomplished(identifier.getId());
-                    boolean isCorrectAction = challengeData.getChallengeType().equals(challengeType) || challengeData.getChallengeType().equals(challengeType.getConsumeVersion());
+                    boolean isCorrectAction = challengeData.challengeType().equals(challengeType) || challengeData.challengeType().equals(challengeType.getConsumeVersion());
                     boolean isValidBlock = blocks.contains(state.getBlock());
                     boolean isCorrectTool = !hasCorrectGamemode || ChallengesManager.INSTANCE.isCorrectTool(player, challengeData);
                     boolean isBlockPlacedByEntity = ConfigHandler.SERVER.IS_PLACED_BY_ENTITY_CONDITION.get() && hasCorrectGamemode && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY) && savedData.isBlockPlacedByEntity(pos);
@@ -186,15 +188,14 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
                         });
                     }
                     if (!isMissingRequiredItems && !notEnoughInk && !isChallengeAccomplished && isCorrectAction && isValidBlock && isCorrectTool && !isBlockPlacedByEntity) {
-                        if (challengeData.getChallengeType().isConsuming()) {
+                        if (challengeData.challengeType().isConsuming()) {
                             if (consumeMode) {
-                                cardData.addAmount(identifier.getId(), 1).saveData(stack);
+                                cardData.addAmount(identifier.getId(), 1).save();
                                 if (hasCorrectGamemode) consumeContents();
                                 isConsumed.set(Pair.of(true, true));
-                                player.level().removeBlock(pos, false);
                             }
                         } else {
-                            cardData.addAmount(identifier.getId(), 1).saveData(stack);
+                            cardData.addAmount(identifier.getId(), 1).save();
                             if (hasCorrectGamemode) consumeContents();
                             isConsumed.set(Pair.of(true, false));
                         }
@@ -207,22 +208,9 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         return isConsumed.get();
     }
 
-    @Environment(EnvType.CLIENT)
-    public SkillsRecordData togglePinned(int slot, ResourceLocation challengeId, SkillsRecordMenu menu) {
-        if (this.pinnedChallenges.containsKey(slot)) {
-            if (!this.pinnedChallenges.get(slot).contains(challengeId)) {
-                this.pinnedChallenges.get(slot).add(challengeId);
-            }
-        } else this.pinnedChallenges.put(slot, new ArrayList<>(List.of(challengeId)));
-
-        ItemStack itemStack = getCardSlots().get(slot);
-        MiningSkillCardData data = MiningSkillCardData.loadData(itemStack);
-        Optional<MiningSkillCardData.ChallengeHolder> challengeData = data.getChallenge(challengeId);
-        if (challengeData.isPresent()) {
-            challengeData.get().togglePinned();
-            data.saveData(itemStack);
-        }
-        return sendToServer(menu.interactionHand);
+    public SkillsRecordData togglePinned(int cardSlot, ResourceLocation challengeId) {
+        this.getCardData(cardSlot).ifPresent((cardData) -> cardData.togglePinned(challengeId).save());
+        return this;
     }
 
     private void consumeContents() {
@@ -230,7 +218,7 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         ItemStack paper = getPaperSlot();
 
         if (pen.getItem() instanceof PenItem item) {
-            item.getData(pen).removeAmount(1).saveData(pen);
+            item.getData(pen).removeAmount(1).save();
         }
         if (paper.getItem() == Items.PAPER) {
             boolean chance = ThreadLocalRandom.current().nextDouble() < ConfigHandler.SERVER.PAPER_CONSUMPTION_RATE.get();
@@ -238,11 +226,38 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         }
     }
 
+    public void invalidateCard(int slot) {
+        this.cachedCardData.remove(slot);
+    }
+
+    public Optional<MiningSkillCardData> getCardData(int slot) {
+        if (slot >= 0 && slot < this.getCardSlots().size()) {
+            ItemStack stack = this.getCardSlots().get(slot);
+            if (stack.isEmpty()) {
+                this.invalidateCard(slot);
+                return Optional.empty();
+            } else {
+                MiningSkillCardData cached = this.cachedCardData.get(slot);
+                if (cached != null && cached.getUUID().equals(MiningSkillCardData.load(stack).getUUID())) {
+                    return Optional.of(cached.setStack(stack));
+                } else {
+                    MiningSkillCardData newData = MiningSkillCardData.load(stack);
+                    this.cachedCardData.put(slot, newData);
+                    return Optional.of(newData);
+                }
+            }
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public NonNullList<ItemStack> getCardSlots() {
         NonNullList<ItemStack> items = NonNullList.withSize(4, ItemStack.EMPTY);
+
         for (int i = 0; i < items.size(); i++) {
             items.set(i, container.getItem(i));
         }
+
         return items;
     }
 
@@ -293,65 +308,44 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         return this;
     }
 
-    public SkillsRecordData toggleConsumeMode() {
-        this.consumeMode ^= true;
+    public SkillsRecordData setConsumeMode(boolean trigger) {
+        this.consumeMode = trigger;
+        return this;
+    }
+
+    public SkillsRecordData sendToClient(ServerPlayer player, @Nullable InteractionHand hand) {
+        return this.sendToClient(player, ItemUtils.getSlotIndex(hand));
+    }
+
+    public SkillsRecordData sendToClient(ServerPlayer player, int slotIndex) {
+        PayloadHandler.sendToPlayer(new SkillsRecordPayload.SyncData(slotIndex, this), player);
+
+        for(int i = 0; i < this.getCardSlots().size(); ++i) {
+            Optional<MiningSkillCardData> cardData = this.getCardData(i);
+            cardData.ifPresent(MiningSkillCardData::onServerUpdate);
+        }
+
+        return this;
+    }
+
+    public SkillsRecordData onClientUpdate() {
+        for(int i = 0; i < this.getCardSlots().size(); ++i) {
+            Optional<MiningSkillCardData> dataOpt = this.getCardData(i);
+            dataOpt.ifPresent(MiningSkillCardData::onClientUpdate);
+        }
+
+        this.updateClientOffhand();
         return this;
     }
 
     @Environment(EnvType.CLIENT)
-    private void updateOffhand(InteractionHand interactionHand) {
-        if (interactionHand == InteractionHand.OFF_HAND) {
-            ItemStack itemStack1 = this.get().copy();
-            this.saveData(itemStack1);
-            ClientHandler.getPlayer().getInventory().offhand.set(0, itemStack1);
+    private void updateClientOffhand() {
+        if (ClientHandler.getPlayer().containerMenu instanceof SkillsRecordMenu menu) {
+            if (menu.interactionHand == InteractionHand.OFF_HAND) {
+                ClientHandler.getPlayer().setItemSlot(EquipmentSlot.OFFHAND, this.stack);
+            }
+
         }
-    }
-
-    public SkillsRecordData sendToClient(ServerPlayer player, @Nullable InteractionHand hand) {
-        return sendToClient(player, ItemUtils.getSlotIndex(hand));
-    }
-
-    public SkillsRecordData sendToClient(ServerPlayer player, int slotIndex) {
-        PayloadHandler.sendToPlayer(new SkillsRecordPayload.SyncData(Env.CLIENT, slotIndex, this), player);
-        return this;
-    }
-
-    public SkillsRecordData sendToServer(@Nullable InteractionHand hand) {
-        this.updateOffhand(hand);
-        return sendToServer(ItemUtils.getSlotIndex(hand));
-    }
-
-    public SkillsRecordData sendToServer(int slotIndex) {
-        PayloadHandler.sendToServer(new SkillsRecordPayload.SyncData(Env.SERVER, slotIndex, this));
-        return this;
-    }
-
-    public SkillsRecordData syncData(ServerPlayer player) {
-        if (player.containerMenu instanceof SkillsRecordMenu skillsRecordMenu) {
-            this.pinnedChallenges.forEach((slot, challengeList) -> {
-                ItemStack cardStack = skillsRecordMenu.getCardSlots().get(slot).getItem();
-                MiningSkillCardData cardData = MiningSkillCardData.loadData(cardStack);
-                challengeList.forEach(location -> {
-                    Optional<MiningSkillCardData.ChallengeHolder> challengeData = cardData.getChallenge(location);
-                    if (challengeData.isPresent()) {
-                        challengeData.get().togglePinned();
-                        cardData.saveData(cardStack);
-                    }
-                });
-            });
-        }
-        return this;
-    }
-
-    private void encodePinnedChallenges(RegistryFriendlyByteBuf buf) {
-        buf.writeMap(this.pinnedChallenges,
-                FriendlyByteBuf::writeInt,
-                (buffer, locationList) -> buf.writeCollection(locationList, FriendlyByteBuf::writeResourceLocation));
-    }
-
-    private SkillsRecordData decodePinnedChallenges(RegistryFriendlyByteBuf buf) {
-        this.pinnedChallenges.putAll(buf.readMap(FriendlyByteBuf::readInt, buffer -> buf.readList(FriendlyByteBuf::readResourceLocation)));
-        return this;
     }
 
     @Override
@@ -360,12 +354,11 @@ public class SkillsRecordData extends DataHandler<SkillsRecordData, ItemStack> {
         return Objects.equals(uuid, that.uuid)
                 && ContainerUtils.equals(container, that.container)
                 && selectedCard == that.selectedCard
-                && consumeMode == that.consumeMode
-                && Objects.equals(pinnedChallenges, that.pinnedChallenges);
+                && consumeMode == that.consumeMode;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, selectedCard, consumeMode, pinnedChallenges) + ContainerUtils.hashCode(container);
+        return Objects.hash(uuid, selectedCard, consumeMode) + ContainerUtils.hashCode(container);
     }
 }

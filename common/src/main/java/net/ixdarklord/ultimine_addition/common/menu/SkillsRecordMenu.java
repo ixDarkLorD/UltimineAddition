@@ -10,7 +10,7 @@ import net.ixdarklord.ultimine_addition.common.menu.slot.PaperSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.PenSlot;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,6 +19,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -27,10 +29,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData> {
+public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData> implements ContainerListener {
     public static final int CONTAINER_SIZE = 6;
     public static final int[] CARD_SLOTS = {0, 1, 2, 3};
-    private final ItemStack stack;
     private final Player player;
     private final Inventory playerInventory;
     private final SimpleContainer container;
@@ -45,26 +46,29 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
         if (!(stack.getItem() instanceof SkillsRecordItem))
             throw new IllegalArgumentException("Invalid item! This container only accepts Skills Record.");
 
-        this.stack = stack;
         this.player = player;
         this.playerInventory = playerInventory;
-        this.container = createData().getContainer();
-        this.container.addListener(SkillsRecordMenu.this::slotsChanged);
+        this.container = SkillsRecordData.load(stack).getContainer();
         this.interactionHand = interactionHand;
 
         addSlotBox(container, 0, 8, 107, 4, 22, 1, 0);
         addSlot(new PenSlot(container, 4, 129, 107));
         addSlot(new PaperSlot(container, 5, 151, 107));
         layoutPlayerInventorySlots(16, 140);
+        this.addSlotListener(this);
     }
 
     @Override
-    public void slotsChanged(Container container) {
-        super.slotsChanged(container);
-        if (player instanceof ServerPlayer sPlayer) {
-            getData().sendToClient(sPlayer, this.interactionHand).saveData(stack);
+    public void slotChanged(AbstractContainerMenu menu, int slotIndex, ItemStack stack) {
+        if (slotIndex < 6) {
+            if (this.player instanceof ServerPlayer serverPlayer) {
+                SkillsRecordData data = this.getData();
+                data.sendToClient(serverPlayer, this.interactionHand).save();
+            }
         }
     }
+
+    public void dataChanged(AbstractContainerMenu containerMenu, int slotIndex, int value) {}
 
     @Override
     public @NotNull ItemStack quickMoveStack(@NotNull Player player, int index) {
@@ -98,7 +102,7 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return ItemStack.isSameItem(this.getInteractionHand().map(player::getItemInHand).orElseGet(() -> ServicePlatform.get().slotAPI().getSkillsRecordItem(player)), stack);
+        return !ItemUtils.getSkillsRecord(this.getPlayer(), this.interactionHand).isEmpty();
     }
 
     public Player getPlayer() {
@@ -164,16 +168,13 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
         return 0;
     }
 
-    public SkillsRecordData getData() {
-        return createData().insertContainer(container);
-    }
-
     public Optional<InteractionHand> getInteractionHand() {
         return Optional.ofNullable(interactionHand);
     }
 
     @Override
-    public SkillsRecordData createData() {
-        return SkillsRecordData.loadData(stack);
+    public SkillsRecordData getData() {
+        ItemStack stack = ItemUtils.getSkillsRecord(this.getPlayer(), this.interactionHand);
+        return SkillsRecordData.load(stack).insertContainer(this.container);
     }
 }

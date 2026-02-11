@@ -2,6 +2,7 @@ package net.ixdarklord.ultimine_addition.core;
 
 import dev.ftb.mods.ftbultimine.api.restriction.RestrictionHandler;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
+import dev.ftb.mods.ftbultimine.api.util.CanUltimineResult;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
 import dev.ftb.mods.ftbultimine.integration.IntegrationHandler;
 import dev.ftb.mods.ftbultimine.integration.ranks.FTBRanksIntegration;
@@ -32,6 +33,10 @@ import static dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig.MAX_BLOCKS
 public class FTBUltimineIntegration implements RestrictionHandler {
     public static FTBUltimineIntegration INSTANCE = new FTBUltimineIntegration();
     private static boolean isButtonPressed;
+
+    public CanUltimineResult ultimineBlockReason(Player player) {
+        return this.canUltimine(player) ? CanUltimineResult.ALLOWED : CanUltimineResult.prevent("info.ultimine_addition.ability_locked");
+    }
 
     @Override
     public boolean canUltimine(Player player) {
@@ -141,7 +146,7 @@ public class FTBUltimineIntegration implements RestrictionHandler {
 
     public static int getMaxBlocks(ServerPlayer player) {
         if (!ConfigHandler.SERVER.CARD_TIER_BASED_MAX_BLOCKS.get()) {
-            return IntegrationHandler.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
+            return IntegrationHandler.ranksMod ? FTBRanksIntegration.getMaxBlocks(player, MAX_BLOCKS.get()) : MAX_BLOCKS.get();
         }
 
         List<MobEffectInstance> instances = new ArrayList<>(player.getActiveEffects().stream().filter(mobEffectInstance -> mobEffectInstance.getEffect().value() instanceof MineGoJuiceEffect).toList());
@@ -171,7 +176,7 @@ public class FTBUltimineIntegration implements RestrictionHandler {
                 } catch (IllegalArgumentException ignored) {}
             }
         }
-        return IntegrationHandler.ranksMod ? FTBRanksIntegration.getMaxBlocks(player) : MAX_BLOCKS.get();
+        return IntegrationHandler.ranksMod ? FTBRanksIntegration.getMaxBlocks(player, MAX_BLOCKS.get()) : MAX_BLOCKS.get();
     }
 
     public static List<Shape> getShapesList() {

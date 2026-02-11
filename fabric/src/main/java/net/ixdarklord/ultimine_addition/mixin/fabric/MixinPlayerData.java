@@ -10,13 +10,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = Player.class)
-public abstract class PlayerDataMixin implements IPlayerData {
+@Mixin(Player.class)
+public abstract class MixinPlayerData implements IPlayerData {
     @Unique
     private PlayerAbilityData ultimineData;
 
     @Override
-    public PlayerAbilityData ua$getUltimineData() {
+    public PlayerAbilityData getUltimineData$UA() {
         if (this.ultimineData == null) {
             this.ultimineData = PlayerAbilityData.create();
         }
@@ -25,18 +25,11 @@ public abstract class PlayerDataMixin implements IPlayerData {
 
     @Inject(method = "addAdditionalSaveData", at = @At(value = "HEAD"))
     public void writeUltimineData(CompoundTag compound, CallbackInfo ci) {
-        if (ua$getUltimineData() != null) {
-            CompoundTag NBT = new CompoundTag();
-            ua$getUltimineData().saveData(NBT);
-            if (!NBT.isEmpty()) compound.put(ua$getUltimineData().getNBTBase(), NBT);
-        }
+        this.getUltimineData$UA().save(compound);
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At(value = "HEAD"))
     public void readUltimineData(CompoundTag compound, CallbackInfo ci) {
-        if (compound.contains(ua$getUltimineData().getNBTBase(), 10)) {
-            CompoundTag NBT = compound.getCompound(ua$getUltimineData().getNBTBase());
-            ua$getUltimineData().loadData(NBT);
-        }
+        this.getUltimineData$UA().load(compound);
     }
 }

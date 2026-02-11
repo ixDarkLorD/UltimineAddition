@@ -1,8 +1,8 @@
 apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/common.gradle"
 
 dependencies {
-    modApi libs.architectury.common.get()
-    modApi "net.ixdarklord.coolcatlib:common:1.21-${coolcatlib_version}"
+    modApi(libs.architectury.common.get())
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-common:1.21-${coolcatlib_version}"
     modApi libs.forgeconfigapiport.common.get()
     modApi libs.jei.libs.common.get()
     modApi libs.jei.api.common.get()

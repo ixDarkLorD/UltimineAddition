@@ -4,8 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.ixdarklord.ultimine_addition.common.data.item.ItemStorageData;
-import net.ixdarklord.ultimine_addition.common.item.StorageDataAbstractItem;
+import net.ixdarklord.ultimine_addition.common.data.item.StorageItemData;
+import net.ixdarklord.ultimine_addition.common.item.StorageItem;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.DataIngredient;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
@@ -47,8 +47,8 @@ public class ItemStorageDataRecipe extends CustomRecipe {
         int sameItems = 0;
 
         for (int i = 0; i < items.size(); ++i) {
-            if (input.getItem(i).getItem() instanceof StorageDataAbstractItem item) {
-                var data = ItemStorageData.loadData(this.storageName, item.getMaxCapacity(), input.getItem(i));
+            if (input.getItem(i).getItem() instanceof StorageItem item) {
+                var data = StorageItemData.load(this.storageName, item.getMaxCapacity(), input.getItem(i));
                 sorterList.add(new ItemUtils.ItemSorter(input.getItem(i), i, data.getCapacity()));
                 sameItems++;
             }
@@ -58,8 +58,8 @@ public class ItemStorageDataRecipe extends CustomRecipe {
 
         for (int i = 1; i < sorterList.size(); i++) {
             ItemStack stack = sorterList.get(i).item().copy();
-            var item = (StorageDataAbstractItem) stack.getItem();
-            ItemStorageData.loadData(this.storageName, item.getMaxCapacity(), stack).setCapacity(0).saveData(stack);
+            var item = (StorageItem) stack.getItem();
+            StorageItemData.load(this.storageName, item.getMaxCapacity(), stack).setCapacity(0).save();
             items.set(sorterList.get(i).slotId(), stack);
         }
         return items;
@@ -72,8 +72,8 @@ public class ItemStorageDataRecipe extends CustomRecipe {
         List<ItemUtils.ItemSorter> sorterList = new ArrayList<>();
         for (ItemStack itemStack : input.items()) {
             ItemStack stack = itemStack.copy();
-            if (stack.getItem() instanceof StorageDataAbstractItem item) {
-                var data = ItemStorageData.loadData(this.storageName, item.getMaxCapacity(), stack);
+            if (stack.getItem() instanceof StorageItem item) {
+                var data = StorageItemData.load(this.storageName, item.getMaxCapacity(), stack);
                 sorterList.add(new ItemUtils.ItemSorter(stack, 0, data.getCapacity()));
                 capacity += data.getCapacity();
                 matchedValue++;
@@ -89,12 +89,12 @@ public class ItemStorageDataRecipe extends CustomRecipe {
         sorterList.sort((o1, o2) -> Integer.compare(o2.order(), o1.order()));
         if (sorterList.size() > 1)
             for (int i = 1; i < sorterList.size(); i++) {
-                var data = ItemStorageData.loadData(this.storageName, 0, sorterList.get(i).item());
+                var data = StorageItemData.load(this.storageName, 0, sorterList.get(i).item());
                 if (data.getCapacity() == 0) return false;
             }
 
         int size = input.items().stream().filter(stack -> !stack.isEmpty()).toList().size();
-        var data = ItemStorageData.loadData(this.storageName, 0, sorterList.getFirst().item());
+        var data = StorageItemData.load(this.storageName, 0, sorterList.getFirst().item());
         boolean isValid = matchedValue >= 2 && size == matchedValue;
         boolean isOverflow = capacity > data.getMaxCapacity();
         return isValid && !isOverflow;
@@ -107,13 +107,13 @@ public class ItemStorageDataRecipe extends CustomRecipe {
             if (stack.isEmpty()) continue;
 
             if (stack.is(this.result.getItem())) {
-                amount += ItemStorageData.loadData(this.storageName, 0, stack).getCapacity();
+                amount += StorageItemData.load(this.storageName, 0, stack).getCapacity();
             } else for (DataIngredient ingredient : this.ingredients) {
                 if (ingredient.test(stack)) amount += ingredient.getAmount();
             }
         }
         ItemStack stack = this.result.copy();
-        ItemStorageData.loadData(this.storageName, ((StorageDataAbstractItem) stack.getItem()).getMaxCapacity(), stack).setCapacity(amount).saveData(stack);
+        StorageItemData.load(this.storageName, ((StorageItem) stack.getItem()).getMaxCapacity(), stack).setCapacity(amount).save();
         return stack;
     }
 

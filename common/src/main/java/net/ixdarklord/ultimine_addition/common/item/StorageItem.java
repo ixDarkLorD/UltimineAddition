@@ -1,13 +1,13 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.ultimine_addition.common.data.item.ItemStorageData;
+import net.ixdarklord.ultimine_addition.common.data.item.StorageItemData;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
-public abstract class StorageDataAbstractItem extends DataAbstractItem<ItemStorageData> {
+public abstract class StorageItem extends DataAbstractItem<StorageItemData> {
     protected final String storageName;
     protected final int maxCapacity;
-    public StorageDataAbstractItem(Properties properties, ItemStorageData storageData, ComponentType componentType) {
+    public StorageItem(Properties properties, StorageItemData storageData, ComponentType componentType) {
         super(properties, componentType);
         this.storageName = storageData.getStorageName();
         this.maxCapacity = storageData.getMaxCapacity();
@@ -32,7 +32,7 @@ public abstract class StorageDataAbstractItem extends DataAbstractItem<ItemStora
     }
 
     @Override
-    public ItemStorageData getData(ItemStack stack) {
-        return ItemStorageData.loadData(storageName, maxCapacity, stack);
+    public StorageItemData getData(ItemStack stack) {
+        return StorageItemData.load(storageName, maxCapacity, stack);
     }
 }

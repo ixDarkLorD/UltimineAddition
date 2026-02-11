@@ -1,6 +1,6 @@
-package net.ixdarklord.ultimine_addition.client.gui.screens;
+package net.ixdarklord.ultimine_addition.client.event;
 
-import net.ixdarklord.coolcatlib.api.util.ColorUtils;
+import net.ixdarklord.coolcatlib.api.utils.ColorUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
@@ -27,7 +27,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 
-public class ItemTooltipEvents {
+public final class ItemTooltipEvents {
     public static void init(ItemStack stack, List<Component> components, Item.TooltipContext ignored, TooltipFlag ignored1) {
         if (stack.has(Registration.SELECTED_SHAPE_COMPONENT.get())) {
             insertSelectedShapeInfo(stack, components);
@@ -63,7 +63,7 @@ public class ItemTooltipEvents {
     private static void insertSelectedShapeInfo(ItemStack stack, List<Component> components) {
         SelectedShapeData shapeData = stack.get(Registration.SELECTED_SHAPE_COMPONENT.get());
         double ratio = Mth.clamp((Mth.sin(Util.getMillis() / 160F) + 1.0) / 2.0, 0.0, 1.0);
-        Color color = ColorUtils.blendColors(new Color(0xA0DA3E), new Color(0xA0DA3E).brighter(), ratio);
+        Color color = ColorUtils.blend(new Color(0xA0DA3E), new Color(0xA0DA3E).brighter(), ratio);
         Component shapeName = Objects.requireNonNull(shapeData).shape().getDisplayName()
                 .withColor(color.getRGB());
 

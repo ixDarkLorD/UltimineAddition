@@ -13,7 +13,7 @@ public class BlockToolModificationEvent {
 
 
     public interface ToolModification {
-        CompoundEventResult<BlockState> modify(BlockState originalState, BlockState finalState, @NotNull UseOnContext context, ToolAction toolAction, boolean simulate);
+        CompoundEventResult<BlockState> modify(BlockState originalState, @NotNull UseOnContext context, ToolAction toolAction, boolean simulate);
     }
 
 }

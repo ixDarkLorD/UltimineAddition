@@ -16,18 +16,17 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.ixdarklord.coolcatlib.api.util.ComponentHelper;
-import net.ixdarklord.coolcatlib.api.util.MouseHelper;
-import net.ixdarklord.ultimine_addition.common.data.item.ItemStorageData;
-import net.ixdarklord.ultimine_addition.common.item.StorageDataAbstractItem;
+import net.ixdarklord.coolcatlib.api.client.utils.MouseHelper;
+import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import net.ixdarklord.ultimine_addition.common.data.item.StorageItemData;
+import net.ixdarklord.ultimine_addition.common.item.StorageItem;
 import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.DataIngredient;
-import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -39,9 +38,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
@@ -89,29 +86,14 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
             NonNullList<DataIngredient> items = NonNullList.create();
             items.add(DataIngredient.of(i.getAmount(), i.getItems()));
             result.add(new ItemStorageDataRecipe(recipe.getGroup(), recipe.getCategory(), recipe.getResultItem(), recipe.getStorageName(), items));
-            if (recipe.getResultItem().getItem() instanceof StorageDataAbstractItem item) {
+            if (recipe.getResultItem().getItem() instanceof StorageItem item) {
                 ItemStack penStack = recipe.getResultItem().copy();
-                ItemStorageData data = item.getData(penStack);
-                data.saveData(penStack);
+                StorageItemData data = item.getData(penStack);
+                data.save();
                 result.add(new ItemStorageDataRecipe(recipe.getGroup(), recipe.getCategory(), penStack, recipe.getStorageName(), items));
             }
         }));
         return result;
-    }
-
-    public static List<RecipeHolder<CraftingRecipe>> getAdjustedCraftingRecipe() {
-        ClientLevel level = Minecraft.getInstance().level;
-        assert level != null;
-        RecipeManager rm = level.getRecipeManager();
-        return rm.getAllRecipesFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING).stream()
-                .filter(holder -> holder.value().getResultItem(level.registryAccess()).getItem() instanceof StorageDataAbstractItem)
-                .peek(holder -> {
-                    ItemStack itemStack = holder.value().getResultItem(level.registryAccess());
-                    if (itemStack.getItem() instanceof StorageDataAbstractItem item) {
-                        item.getData(itemStack).saveData(itemStack);
-                    }
-                })
-                .toList();
     }
 
     @Override
@@ -123,7 +105,6 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
     public @NotNull Component getTitle() {
         return this.title;
     }
-
 
     @SuppressWarnings("removal")
     @Override

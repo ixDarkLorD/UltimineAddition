@@ -16,26 +16,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record ConfigSyncPayload(boolean forceChanges,
+public record SyncConfigPayload(boolean forceChanges,
                                 boolean shouldPreserve,
                                 Map<List<String>, ConfigValueWrapper<?>> changes) implements CustomPacketPayload {
-    public static final Type<ConfigSyncPayload> TYPE = new Type<>(FTBUltimineAddition.rl("config_sync"));
+    public static final Type<SyncConfigPayload> TYPE = new Type<>(FTBUltimineAddition.id("sync_config"));
 
-    public static final StreamCodec<FriendlyByteBuf, ConfigSyncPayload> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<FriendlyByteBuf, SyncConfigPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL,
-            ConfigSyncPayload::forceChanges,
+            SyncConfigPayload::forceChanges,
             ByteBufCodecs.BOOL,
-            ConfigSyncPayload::shouldPreserve,
+            SyncConfigPayload::shouldPreserve,
             ByteBufCodecs.map(
                     HashMap::new,
                     ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
                     ConfigValueWrapper.CODEC
             ),
-            ConfigSyncPayload::changes,
-            ConfigSyncPayload::new
+            SyncConfigPayload::changes,
+            SyncConfigPayload::new
     );
 
-    public ConfigSyncPayload(boolean shouldPreserve, boolean forceChanges, ModConfigSpec.ConfigValue<?>... configValues) {
+    public SyncConfigPayload(boolean shouldPreserve, boolean forceChanges, ModConfigSpec.ConfigValue<?>... configValues) {
         this(forceChanges, shouldPreserve, ConfigHandler.toMap(configValues));
     }
 
@@ -44,7 +44,7 @@ public record ConfigSyncPayload(boolean forceChanges,
         return TYPE;
     }
 
-    public static void handle(ConfigSyncPayload message, NetworkManager.PacketContext context) {
+    public static void handle(SyncConfigPayload message, NetworkManager.PacketContext context) {
         context.queue(() -> {
             Map<List<String>, ConfigValueWrapper<?>> originalValues = new HashMap<>();
 

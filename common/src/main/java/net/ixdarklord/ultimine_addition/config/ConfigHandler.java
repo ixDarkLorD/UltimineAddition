@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.config;
 
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
-import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesInfoPanel;
+import net.ixdarklord.ultimine_addition.client.gui.components.Panel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.ShapeSelectorScreen;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -9,7 +9,7 @@ import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
-import net.ixdarklord.ultimine_addition.network.payloads.ConfigSyncPayload;
+import net.ixdarklord.ultimine_addition.network.payloads.SyncConfigPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -32,7 +32,7 @@ public final class ConfigHandler {
         public static final ModConfigSpec.EnumValue<SkillsRecordScreen.OverlayColor> BACKGROUND_COLOR;
         public static final ModConfigSpec.ConfigValue<Boolean> ANIMATIONS_MODE;
         public static final ModConfigSpec.IntValue PROGRESS_BAR;
-        public static final ModConfigSpec.EnumValue<ChallengesInfoPanel.Panel.Position> CHALLENGES_PANEL_POSITION;
+        public static final ModConfigSpec.EnumValue<Panel.Align> CHALLENGES_PANEL_ALIGNMENT;
         public static final ModConfigSpec.BooleanValue SR_EDIT_MODE;
         public static final ModConfigSpec.BooleanValue MSC_RENDERER;
         public static final ModConfigSpec.BooleanValue TEXT_SCREEN_SHADOW;
@@ -74,10 +74,9 @@ public final class ConfigHandler {
                             "2: Disabled entirely.")
                     .defineInRange("progress_bar_mode", 0, 0, 2);
 
-            CHALLENGES_PANEL_POSITION = BUILDER
-                    .comment("Determines the position of the Challenges panel on the screen.",
-                            "Choose from predefined positions (e.g., LEFT, RIGHT).")
-                    .defineEnum("challenges_panel_pos", ChallengesInfoPanel.Panel.Position.LEFT);
+            CHALLENGES_PANEL_ALIGNMENT = BUILDER
+                    .comment("Determines the alignment of the challenges panel on the screen.")
+                    .defineEnum("challenges_panel_alignment", Panel.Align.LEFT);
 
             MSC_RENDERER = BUILDER
                     .comment("Enables or disables the Mining Skill Card Renderer.",
@@ -141,7 +140,7 @@ public final class ConfigHandler {
         }
 
         public static void syncConfigToClient(boolean initialSync, ServerPlayer player) {
-            PayloadHandler.sendToPlayer(new ConfigSyncPayload(initialSync, true, SYNCED_CONFIGS), player);
+            PayloadHandler.sendToPlayer(new SyncConfigPayload(initialSync, true, SYNCED_CONFIGS), player);
         }
     }
 

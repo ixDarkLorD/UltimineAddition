@@ -1,8 +1,8 @@
-package net.ixdarklord.ultimine_addition.client.gui.components;
+package net.ixdarklord.ultimine_addition.client.gui.hud;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.ixdarklord.coolcatlib.api.util.ChatFormattingUtils;
+import net.ixdarklord.coolcatlib.api.utils.ChatFormattingUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
@@ -34,12 +34,12 @@ public class MinerCertificateStatus {
 
         ItemStack stack = ItemUtils.findItemInHand(player, ModItems.MINER_CERTIFICATE);
         if (stack.isEmpty()) return;
-        MinerCertificateData data = MinerCertificateData.loadData(stack);
+        MinerCertificateData data = MinerCertificateData.load(stack);
         Optional<MinerCertificateData.Legacy> optional = data.getLegacy();
         if (data.isAccomplished() || optional.isEmpty()) return;
 
         MinerCertificateData.Legacy legacy = optional.get();
-        Component values = Component.literal(String.valueOf(legacy.getMinedBlocks())).withStyle(ChatFormattingUtils.get3LevelChatFormatting(legacy.getMinedBlocks(), legacy.getRequiredAmount()))
+        Component values = Component.literal(String.valueOf(legacy.getMinedBlocks())).withStyle(ChatFormattingUtils.getProgressColor(legacy.getMinedBlocks(), legacy.getRequiredAmount()))
                 .append(Component.literal("/"))
                 .append(Component.literal(String.valueOf(legacy.getRequiredAmount())));
         MutableComponent component = Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest", values);

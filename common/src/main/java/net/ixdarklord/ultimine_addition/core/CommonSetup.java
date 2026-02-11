@@ -1,5 +1,7 @@
 package net.ixdarklord.ultimine_addition.core;
 
+import dev.architectury.utils.Env;
+import dev.architectury.utils.EnvExecutor;
 import dev.ftb.mods.ftbultimine.api.restriction.RegisterRestrictionHandlerEvent;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.event.EventHandler;
@@ -12,6 +14,7 @@ public class CommonSetup {
         CustomMSCApi.init();
         ConfigHandler.register();
         Registration.register();
+        EnvExecutor.runInEnv(Env.CLIENT, () -> ClientSetup::init);
     }
 
     public static void setup() {

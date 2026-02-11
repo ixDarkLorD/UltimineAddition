@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.datagen.challenge.builder;
 
 import com.mojang.datafixers.util.Pair;
-import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
+import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.resources.ResourceLocation;
@@ -19,7 +19,7 @@ public class ChallengesBuilder {
     private final ResourceLocation id;
     private final MiningSkillCardItem.Type forCardType;
     private MiningSkillCardItem.Tier forCardTier;
-    private ChallengesData.Type challengeType;
+    private ChallengeData.Type challengeType;
     private Pair<Integer, Integer> requiredAmount;
     private ItemStack requiredSpecificTool;
     private final List<String> targetedBlocks = new ArrayList<>();
@@ -37,7 +37,7 @@ public class ChallengesBuilder {
         return this;
     }
 
-    public ChallengesBuilder forType(ChallengesData.Type challengeType) {
+    public ChallengesBuilder forType(ChallengeData.Type challengeType) {
         this.challengeType = challengeType;
         return this;
     }
@@ -71,7 +71,7 @@ public class ChallengesBuilder {
 
     public void save(Consumer<Result> consumer) {
         this.ensureValid();
-        ChallengesData data = new ChallengesData(this.forCardType, this.forCardTier, this.challengeType, this.requiredAmount, this.requiredSpecificTool, this.targetedBlocks);
+        ChallengeData data = new ChallengeData(this.forCardType, this.forCardTier, this.challengeType, this.requiredAmount, this.requiredSpecificTool, this.targetedBlocks);
         consumer.accept(new Result(this.id, data));
     }
 
@@ -80,8 +80,8 @@ public class ChallengesBuilder {
         if (this.targetedBlocks.isEmpty()) throw new IllegalStateException("There is no targeted blocks to accomplish this challenge " + this.id);
         if (this.requiredSpecificTool == null) this.requiredSpecificTool = ItemStack.EMPTY;
         if (this.forCardTier == null) this.forCardTier = MiningSkillCardItem.Tier.Unlearned;
-        if (this.requiredAmount.getFirst() <= 0 && this.requiredAmount.getFirst() <= 0) this.requiredAmount = Pair.of(1, 1);
+        if (this.requiredAmount.getFirst() <= 0) this.requiredAmount = Pair.of(1, 1);
     }
 
-    public record Result(ResourceLocation id, ChallengesData data) {}
+    public record Result(ResourceLocation id, ChallengeData data) {}
 }

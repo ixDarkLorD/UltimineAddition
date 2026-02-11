@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.platform.Platform;
+import net.ixdarklord.coolcatlib.api.data.ItemDataComponent;
 import net.ixdarklord.ultimine_addition.client.gui.toasts.ChallengesToast;
-import net.ixdarklord.ultimine_addition.common.data.DataHandler;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
@@ -30,24 +30,42 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
-public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemStack> {
-    public static final Codec<MiningSkillCardData> CODEC;
-    public static final StreamCodec<RegistryFriendlyByteBuf, MiningSkillCardData> STREAM_CODEC;
-    public static final DataComponentType<MiningSkillCardData> DATA_COMPONENT;
+public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCardData> {
+    public static final Codec<MiningSkillCardData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            UUIDUtil.CODEC.optionalFieldOf("UUID", UUID.randomUUID()).forGetter(MiningSkillCardData::getUUID),
+            MiningSkillCardItem.Tier.CODEC.fieldOf("Tier").forGetter(MiningSkillCardData::getTier),
+            ItemStack.SIMPLE_ITEM_CODEC.fieldOf("DisplayItem").forGetter(MiningSkillCardData::getDisplayItem),
+            ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("PotionPoints", 0).forGetter(MiningSkillCardData::getPotionPoints),
+            Challenge.CODEC.listOf().optionalFieldOf("Challenges", Lists.newArrayList()).forGetter(MiningSkillCardData::getChallenges)
+    ).apply(instance, MiningSkillCardData::new));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, MiningSkillCardData> STREAM_CODEC = StreamCodec.composite(
+            UUIDUtil.STREAM_CODEC, MiningSkillCardData::getUUID,
+            MiningSkillCardItem.Tier.STREAM_CODEC, MiningSkillCardData::getTier,
+            ItemStack.STREAM_CODEC, MiningSkillCardData::getDisplayItem,
+            ByteBufCodecs.INT, MiningSkillCardData::getPotionPoints,
+            Challenge.STREAM_CODEC.apply(ByteBufCodecs.list()), MiningSkillCardData::getChallenges,
+            Challenge.STREAM_CODEC.apply(ByteBufCodecs.list()), data -> data.finishedChallenges,
+            MiningSkillCardData::new
+    );
+
+    public static final DataComponentType<MiningSkillCardData> DATA_COMPONENT =
+            DataComponentType.<MiningSkillCardData>builder().persistent(CODEC).networkSynchronized(STREAM_CODEC).build();
 
     @NotNull
     private final UUID uuid;
     private MiningSkillCardItem.Tier tier;
     private ItemStack displayItem;
     private int potionPoints;
-    private final List<ChallengeHolder> challenges;
-    private final List<ChallengeHolder> finishedChallenges;
+    private final List<Challenge> challenges;
+    private final List<Challenge> finishedChallenges;
 
-    private MiningSkillCardData(@NotNull UUID uuid, MiningSkillCardItem.Tier tier, ItemStack displayItem, int potionPoints, List<ChallengeHolder> challenges) {
+    private MiningSkillCardData(@NotNull UUID uuid, MiningSkillCardItem.Tier tier, ItemStack displayItem, int potionPoints, List<Challenge> challenges) {
         this(uuid, tier, displayItem, potionPoints, challenges, Lists.newArrayList());
     }
 
-    private MiningSkillCardData(@NotNull UUID uuid, MiningSkillCardItem.Tier tier, ItemStack displayItem, int potionPoints, List<ChallengeHolder> challenges, List<ChallengeHolder> finishedChallenges) {
+    private MiningSkillCardData(@NotNull UUID uuid, MiningSkillCardItem.Tier tier, ItemStack displayItem, int potionPoints, List<Challenge> challenges, List<Challenge> finishedChallenges) {
+        super(DATA_COMPONENT);
         this.uuid = uuid;
         this.tier = tier;
         this.displayItem = displayItem;
@@ -60,68 +78,41 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return new MiningSkillCardData(UUID.randomUUID(), MiningSkillCardItem.Tier.Unlearned, type.getDefaultDisplayItem().getDefaultInstance(), 0, Lists.newArrayList());
     }
 
-    public static MiningSkillCardData loadData(ItemStack stack) {
-        MiningSkillCardItem.Type type = stack.getItem() instanceof MiningSkillCardItem ? ((MiningSkillCardItem) stack.getItem()).getType() : MiningSkillCardItem.Type.EMPTY;
-        return stack.getOrDefault(DATA_COMPONENT, create(type)).setDataHolder(stack);
-    }
-
     @ApiStatus.Internal
     public static ItemStack createForCreativeTab(MiningSkillCardItem cardItem, MiningSkillCardItem.Tier tier) {
-        ItemStack card = cardItem.getDefaultInstance();
+        ItemStack stack = cardItem.getDefaultInstance();
         MiningSkillCardData data = new MiningSkillCardData(UUID.fromString("00000000-0000-0000-0000-000000000000"), tier, cardItem.getType().getDefaultDisplayItem().getDefaultInstance(), 0, Lists.newArrayList());
-        data.saveData(card);
-        return card;
+        data.stack = stack;
+        data.save();
+        return stack;
     }
 
-    @Override
-    public void saveData(ItemStack stack) {
-        stack.set(DATA_COMPONENT, this);
-        super.saveData(stack);
+    public static MiningSkillCardData load(ItemStack stack) {
+        MiningSkillCardItem.Type type = stack.getItem() instanceof MiningSkillCardItem ? ((MiningSkillCardItem) stack.getItem()).getType() : MiningSkillCardItem.Type.EMPTY;
+        return stack.getOrDefault(DATA_COMPONENT, create(type)).setStack(stack);
     }
 
-    public MiningSkillCardData sendToClient(ServerPlayer player, int slotIndex) {
-        PayloadHandler.sendToPlayer(new MiningSkillCardPayload(slotIndex, this), player);
+    public static boolean hasData(@NotNull ItemStack stack) {
+        return !stack.isEmpty() && stack.getItem() instanceof MiningSkillCardItem && stack.has(DATA_COMPONENT);
+    }
+
+    public MiningSkillCardData onClientUpdate() {
+        for(Challenge finishedChallenge : this.finishedChallenges) {
+            ChallengesToast.run(finishedChallenge, this.stack);
+        }
+
         this.finishedChallenges.clear();
         return this;
     }
 
-    static {
-        CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                UUIDUtil.CODEC.optionalFieldOf("UUID", UUID.randomUUID()).forGetter(MiningSkillCardData::getUUID),
-                MiningSkillCardItem.Tier.CODEC.fieldOf("Tier").forGetter(MiningSkillCardData::getTier),
-                ItemStack.SIMPLE_ITEM_CODEC.fieldOf("DisplayItem").forGetter(MiningSkillCardData::getDisplayItem),
-                ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("PotionPoints", 0).forGetter(MiningSkillCardData::getPotionPoints),
-                ChallengeHolder.CODEC.listOf().optionalFieldOf("Challenges", Lists.newArrayList()).forGetter(MiningSkillCardData::getChallenges)
-        ).apply(instance, MiningSkillCardData::new));
-
-        STREAM_CODEC = StreamCodec.composite(
-                UUIDUtil.STREAM_CODEC, MiningSkillCardData::getUUID,
-                MiningSkillCardItem.Tier.STREAM_CODEC, MiningSkillCardData::getTier,
-                ItemStack.STREAM_CODEC, MiningSkillCardData::getDisplayItem,
-                ByteBufCodecs.INT, MiningSkillCardData::getPotionPoints,
-                ChallengeHolder.STREAM_CODEC.apply(ByteBufCodecs.list()), MiningSkillCardData::getChallenges,
-                ChallengeHolder.STREAM_CODEC.apply(ByteBufCodecs.list()), data -> data.finishedChallenges,
-                MiningSkillCardData::new
-        );
-
-        DATA_COMPONENT = DataComponentType.<MiningSkillCardData>builder().persistent(CODEC).networkSynchronized(STREAM_CODEC).build();
-    }
-
-    @Override
-    public MiningSkillCardData clientUpdate() {
-        for (ChallengeHolder finishedChallenge : this.finishedChallenges)
-            ChallengesToast.run(finishedChallenge, dataHolder);
+    public MiningSkillCardData onServerUpdate() {
+        this.finishedChallenges.clear();
         return this;
     }
 
-
-    public @NotNull UUID getUUID() {
-        return uuid;
-    }
-
     public MiningSkillCardData initChallenges() {
-        if (!(this.dataHolder.getItem() instanceof MiningSkillCardItem)) {
-            LOGGER.error("You've tried to initiate challenges on item can't accept it: {}", this.dataHolder.getDescriptionId());
+        if (!(this.stack.getItem() instanceof MiningSkillCardItem)) {
+            LOGGER.error("You've tried to initiate challenges on item can't accept it: {}", this.stack.getDescriptionId());
             return this;
         }
 
@@ -132,7 +123,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
 
         AtomicInteger slotId = new AtomicInteger(1);
         AtomicInteger quantity = new AtomicInteger();
-        MiningSkillCardItem.Type type = ((MiningSkillCardItem) dataHolder.getItem()).getType();
+        MiningSkillCardItem.Type type = ((MiningSkillCardItem) stack.getItem()).getType();
         quantity.set(ConfigHandler.SERVER.CARD_CHALLENGES_AMOUNT.getValue(tier));
 
         if (tier != MiningSkillCardItem.Tier.Unlearned && tier != MiningSkillCardItem.Tier.Mastered)
@@ -140,7 +131,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
 
         challenges.clear();
         ChallengesManager.INSTANCE.getRandomChallenges(quantity.get(), type, this.tier).forEach((location, data) -> {
-            challenges.add(new ChallengeHolder(location, slotId.get(), data.getRequiredAmount()));
+            challenges.add(new Challenge(location, slotId.get(), data.getRequiredAmount()));
             slotId.getAndIncrement();
         });
         return this;
@@ -149,9 +140,9 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
     public boolean validateChallenges() {
         if (this.tier == MiningSkillCardItem.Tier.Mastered) return false;
 
-        MiningSkillCardItem.Type type = ((MiningSkillCardItem) dataHolder.getItem()).getType();
+        MiningSkillCardItem.Type type = ((MiningSkillCardItem) stack.getItem()).getType();
         if (!this.challenges.isEmpty()) {
-            Collection<ChallengeHolder> removedChallenges = new TreeSet<>();
+            Collection<Challenge> removedChallenges = new TreeSet<>();
             this.challenges.forEach((challengeData) -> {
                 if (!ChallengesManager.INSTANCE.getAllChallenges().containsKey(challengeData.id)) {
                     removedChallenges.add(challengeData);
@@ -163,7 +154,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
                 do {
                     ChallengesManager.INSTANCE.getRandomChallenges(1, type, this.tier).forEach((location, data) -> {
                         if (this.challenges.stream().filter(challengeData1 -> challengeData1.id.equals(location)).toList().isEmpty()) {
-                            this.challenges.add(new ChallengeHolder(location, challengeData.order, data.getRequiredAmount()));
+                            this.challenges.add(new Challenge(location, challengeData.order, data.getRequiredAmount()));
                             if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
                                 LOGGER.debug("Changing the invalid challenge! id:\"{}\" to: id:\"{}\"", challengeData.id, location);
                             }
@@ -185,7 +176,7 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
     }
 
     public MiningSkillCardData addAmount(ResourceLocation challengeId, int value) {
-        Optional<ChallengeHolder> challengeData = this.getChallenge(challengeId);
+        Optional<Challenge> challengeData = this.getChallenge(challengeId);
         if (challengeData.isEmpty()) return this;
 
         int currentAmount = challengeData.get().currentPoints;
@@ -196,29 +187,25 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
     }
 
     public void accomplishChallenge(ResourceLocation challengeId) {
-        Optional<ChallengeHolder> challengeData = this.getChallenge(challengeId);
+        Optional<Challenge> challengeData = this.getChallenge(challengeId);
         if (challengeData.isEmpty()) return;
         setAmount(challengeId, challengeData.get().requiredPoints);
     }
 
     public MiningSkillCardData setAmount(ResourceLocation challengeId, int value) {
-        Optional<ChallengeHolder> challengeData = this.getChallenge(challengeId);
+        Optional<Challenge> challengeData = this.getChallenge(challengeId);
         if (challengeData.isEmpty()) return this;
 
-        int requiredAmount = challengeData.get().requiredPoints;
-        challengeData.get().setCurrentPoints(Math.min(value, requiredAmount));
-
-        if (this.isAllChallengesCompleted()) {
-            this.tier = this.tier.next();
-            this.initChallenges();
-            this.finishedChallenges.add(new ChallengeHolder());
-        } else this.checkChallengeAccomplishment(challengeData.get());
+        Challenge challenge = challengeData.get();
+        int requiredAmount = challenge.requiredPoints;
+        challenge.currentPoints = Math.min(value, requiredAmount);
+        this.checkChallengeAccomplishment(challenge);
         return this;
     }
 
-    private void checkChallengeAccomplishment(ChallengeHolder challengeHolder) {
-        if (challengeHolder.currentPoints >= challengeHolder.requiredPoints && !this.finishedChallenges.contains(challengeHolder))
-            this.finishedChallenges.add(challengeHolder);
+    public MiningSkillCardData togglePinned(ResourceLocation challengeId) {
+        this.getChallenge(challengeId).ifPresent((challenge) -> challenge.isPinned ^= true);
+        return this;
     }
 
     public void setPotionPoints(int value) {
@@ -243,30 +230,45 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return this.displayItem;
     }
 
-    public Optional<ChallengeHolder> getChallenge(ResourceLocation challengeId) {
-        for (ChallengeHolder challenge : this.challenges) {
+    public Optional<Challenge> getChallenge(ResourceLocation challengeId) {
+        for (Challenge challenge : this.challenges) {
             if (challenge.id.equals(challengeId))
                 return Optional.of(challenge);
         }
         return Optional.empty();
     }
 
-    public boolean isChallengeAccomplished(ResourceLocation challengeId) {
-        Optional<ChallengeHolder> challengeData = this.getChallenge(challengeId);
-        return challengeData.filter(data -> data.currentPoints >= data.requiredPoints).isPresent();
-    }
+    private void checkChallengeAccomplishment(Challenge challenge) {
+        if (this.isAllChallengesCompleted()) {
+            this.tier = this.tier.next();
+            this.initChallenges();
+            this.finishedChallenges.add(new Challenge());
+        } else {
+            if (this.isChallengeAccomplished(challenge) && !this.finishedChallenges.contains(challenge)) {
+                this.finishedChallenges.add(challenge);
+            }
 
-    private boolean isAllChallengesCompleted() {
-        int allCurrentValues = 0;
-        int allRequiredValues = 0;
-        for (ChallengeHolder challenge : this.challenges) {
-            allCurrentValues += challenge.currentPoints;
-            allRequiredValues += challenge.requiredPoints;
         }
-        return allCurrentValues >= allRequiredValues;
     }
 
-    public List<ChallengeHolder> getChallenges() {
+    public boolean isChallengeAccomplished(Challenge challenge) {
+        return this.isChallengeAccomplished(challenge.id);
+    }
+
+    public boolean isChallengeAccomplished(ResourceLocation challengeId) {
+        Optional<Challenge> challengeData = this.getChallenge(challengeId);
+        return challengeData.filter((data) -> data.currentPoints >= data.requiredPoints).isPresent();
+    }
+
+    public boolean isAllChallengesCompleted() {
+        return this.getChallenges().stream().allMatch(this::isChallengeAccomplished);
+    }
+
+    public @NotNull UUID getUUID() {
+        return this.uuid;
+    }
+
+    public List<Challenge> getChallenges() {
         return this.challenges;
     }
 
@@ -290,6 +292,11 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         return this.uuid.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"));
     }
 
+    public MiningSkillCardData sendToClient(ServerPlayer player, int slotIndex) {
+        PayloadHandler.sendToPlayer(new MiningSkillCardPayload(slotIndex, this), player);
+        return this.onServerUpdate();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -298,13 +305,12 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
                 && tier == that.tier
                 && ItemStack.isSameItemSameComponents(this.displayItem, that.displayItem)
                 && potionPoints == that.potionPoints
-                && challenges.equals(that.challenges)
-                && finishedChallenges.equals(that.finishedChallenges);
+                && challenges.equals(that.challenges);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, tier, potionPoints, challenges, finishedChallenges) + ItemStack.hashItemAndComponents(displayItem);
+        return Objects.hash(uuid, tier, potionPoints, challenges) + ItemStack.hashItemAndComponents(displayItem);
     }
 
     @Override
@@ -318,22 +324,22 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
                 '}';
     }
 
-    public static class ChallengeHolder implements Comparable<ChallengeHolder> {
-        public static final Codec<ChallengeHolder> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                ResourceLocation.CODEC.fieldOf("Id").forGetter(ChallengeHolder::getId),
-                ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("Order", 0).forGetter(ChallengeHolder::getOrder),
-                ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("CurrentPoints", 0).forGetter(ChallengeHolder::getCurrentPoints),
-                ExtraCodecs.NON_NEGATIVE_INT.fieldOf("RequiredPoints").forGetter(ChallengeHolder::getRequiredPoints),
-                Codec.BOOL.optionalFieldOf("IsPinned", false).forGetter(ChallengeHolder::isPinned)
-        ).apply(instance, ChallengeHolder::new));
+    public static class Challenge implements Comparable<Challenge> {
+        public static final Codec<Challenge> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                ResourceLocation.CODEC.fieldOf("Id").forGetter(Challenge::getId),
+                ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("Order", 0).forGetter(Challenge::getOrder),
+                ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("CurrentPoints", 0).forGetter(Challenge::getCurrentPoints),
+                ExtraCodecs.NON_NEGATIVE_INT.fieldOf("RequiredPoints").forGetter(Challenge::getRequiredPoints),
+                Codec.BOOL.optionalFieldOf("IsPinned", false).forGetter(Challenge::isPinned)
+        ).apply(instance, Challenge::new));
 
-        public static final StreamCodec<FriendlyByteBuf, ChallengeHolder> STREAM_CODEC = StreamCodec.composite(
-                ResourceLocation.STREAM_CODEC, ChallengeHolder::getId,
-                ByteBufCodecs.INT, ChallengeHolder::getOrder,
-                ByteBufCodecs.INT, ChallengeHolder::getCurrentPoints,
-                ByteBufCodecs.INT, ChallengeHolder::getRequiredPoints,
-                ByteBufCodecs.BOOL, ChallengeHolder::isPinned,
-                ChallengeHolder::new
+        public static final StreamCodec<FriendlyByteBuf, Challenge> STREAM_CODEC = StreamCodec.composite(
+                ResourceLocation.STREAM_CODEC, Challenge::getId,
+                ByteBufCodecs.INT, Challenge::getOrder,
+                ByteBufCodecs.INT, Challenge::getCurrentPoints,
+                ByteBufCodecs.INT, Challenge::getRequiredPoints,
+                ByteBufCodecs.BOOL, Challenge::isPinned,
+                Challenge::new
         );
 
         private final ResourceLocation id;
@@ -342,29 +348,24 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         private final int requiredPoints;
         private boolean isPinned;
 
-        private ChallengeHolder() {
+        private Challenge() {
             this(ResourceLocation.parse("completed"), 0, 1);
         }
 
-        private ChallengeHolder(ResourceLocation id, int order, int requiredPoints) {
+        private Challenge(ResourceLocation id, int order, int requiredPoints) {
             this(id, order, 0, requiredPoints);
         }
 
-        private ChallengeHolder(ResourceLocation id, int order, int currentPoints, int requiredPoints) {
+        private Challenge(ResourceLocation id, int order, int currentPoints, int requiredPoints) {
             this(id, order, currentPoints, requiredPoints, false);
         }
 
-        private ChallengeHolder(ResourceLocation id, int order, int currentPoints, int requiredPoints, boolean isPinned) {
+        private Challenge(ResourceLocation id, int order, int currentPoints, int requiredPoints, boolean isPinned) {
             this.id = id;
             this.order = order;
             this.currentPoints = currentPoints;
             this.requiredPoints = requiredPoints;
             this.isPinned = isPinned;
-        }
-
-        @Override
-        public int compareTo(@NotNull MiningSkillCardData.ChallengeHolder other) {
-            return Integer.compare(this.order, other.order);
         }
 
         public ResourceLocation getId() {
@@ -373,14 +374,6 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
 
         public int getOrder() {
             return order;
-        }
-
-        public void togglePinned() {
-            isPinned ^= true;
-        }
-
-        public void setCurrentPoints(int currentPoints) {
-            this.currentPoints = currentPoints;
         }
 
         public boolean isPinned() {
@@ -396,9 +389,14 @@ public class MiningSkillCardData extends DataHandler<MiningSkillCardData, ItemSt
         }
 
         @Override
+        public int compareTo(@NotNull MiningSkillCardData.Challenge other) {
+            return Integer.compare(this.order, other.order);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof ChallengeHolder that)) return false;
+            if (!(o instanceof Challenge that)) return false;
             return id.equals(that.id)
                     && order == that.order
                     && currentPoints == that.currentPoints

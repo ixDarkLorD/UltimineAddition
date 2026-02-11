@@ -7,8 +7,8 @@ import dev.architectury.event.events.common.BlockEvent;
 import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbultimine.FTBUltimine;
-import net.ixdarklord.coolcatlib.api.util.SlotReference;
-import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
+import net.ixdarklord.coolcatlib.api.utils.SlotReference;
+import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
@@ -17,10 +17,13 @@ import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.PlayConsumeEffectPayload;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.ixdarklord.ultimine_addition.util.ToolAction;
 import net.ixdarklord.ultimine_addition.util.ToolActions;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -48,19 +51,23 @@ public class MSCEvents {
                 List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
                 if (slots.isEmpty()) return EventResult.pass();
                 for (SlotReference.Player slot : slots) {
-                    SkillsRecordData data = SkillsRecordData.loadData(slot.getItem());
-                    Pair<Boolean, Boolean> taskProcess = data.initTaskValidator(state, pos, player, ChallengesData.Type.BREAK_BLOCK);
+                    SkillsRecordData data = SkillsRecordData.load(slot.get());
+                    Pair<Boolean, Boolean> taskProcess = data.initTaskValidator(state, pos, player, ChallengeData.Type.BREAK_BLOCK);
                     if (taskProcess.getFirst()) {
-                        data.sendToClient(player, slot.getIndex()).saveData(slot.getItem());
+                        data.sendToClient(player, slot.getIndex()).save();
+                    }
+                    if (taskProcess.getSecond()) {
+                        player.level().removeBlock(pos, false);
+                        PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(pos, state), player.serverLevel(), pos, 128);
                     }
                 }
             }
             return EventResult.pass();
         });
 
-        BlockToolModificationEvent.EVENT.register((originalState, finalState, context, toolAction, simulate) -> {
+        BlockToolModificationEvent.EVENT.register((originalState, context, toolAction, simulate) -> {
             if (context.getPlayer() instanceof ServerPlayer player && !FTBUltimine.instance.getOrCreatePlayerData(player).isPressed()) {
-                return onBlockToolModificationEvent(originalState, finalState, context, toolAction, simulate);
+                return onBlockToolModificationEvent(originalState, context, toolAction, simulate);
             }
             return CompoundEventResult.pass();
         });
@@ -70,22 +77,22 @@ public class MSCEvents {
         if (!ConfigHandler.SERVER.CARD_MASTERED_EFFECT.get()) return;
         List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || (stack.getItem() instanceof MiningSkillCardItem item && item.getType() != MiningSkillCardItem.Type.EMPTY), false);
         List<MiningSkillCardData> dataList = slots.stream()
-                .map(SlotReference.Player::getItem)
+                .map(SlotReference.Player::get)
                 .flatMap(itemStack -> {
                     Stream<ItemStack> stream = Stream.of(itemStack);
                     if (!itemStack.is(ModItems.SKILLS_RECORD)) return stream;
 
-                    SkillsRecordData recordData = SkillsRecordData.loadData(itemStack);
+                    SkillsRecordData recordData = SkillsRecordData.load(itemStack);
                     List<ItemStack> list = recordData.getCardSlots().stream().filter(stack -> !stack.isEmpty()).toList();
                     return list.isEmpty() ? stream : list.stream();
                 })
-                .map(MiningSkillCardData::loadData)
+                .map(MiningSkillCardData::load)
                 .filter(data -> data.getTier() == MiningSkillCardItem.Tier.Mastered)
-                .filter(distinctByKey(data -> BuiltInRegistries.ITEM.getKey(data.get().getItem()) + ":" + data.getTier().name()))
+                .filter(distinctByKey(data -> BuiltInRegistries.ITEM.getKey(data.getStack().getItem()) + ":" + data.getTier().name()))
                 .toList();
 
         for (MiningSkillCardData data : dataList) {
-            MiningSkillCardItem item = (MiningSkillCardItem) data.get().getItem();
+            MiningSkillCardItem item = (MiningSkillCardItem) data.getStack().getItem();
             MineGoJuiceEffect.giveEffect(player, item.getType());
         }
     }
@@ -104,34 +111,34 @@ public class MSCEvents {
                 return false;
 
             boolean needSync = false;
-            MiningSkillCardData oldCardData = MiningSkillCardData.loadData(itemStack);
+            MiningSkillCardData oldCardData = MiningSkillCardData.load(itemStack);
             if (oldCardData.isCreativeItem()) {
-                MiningSkillCardData newCardData = MiningSkillCardData.create(cardItem.getType()).setDataHolder(itemStack);
-                newCardData.setTier(oldCardData.getTier()).initChallenges().saveData(itemStack);
+                MiningSkillCardData newCardData = MiningSkillCardData.create(cardItem.getType()).setStack(itemStack);
+                newCardData.setTier(oldCardData.getTier()).initChallenges().save();
                 FTBUltimineAddition.LOGGER.debug("[Data Tracker] Card UUID have been changed! {}", "[O: %s | N: %s]".formatted(oldCardData.getUUID(), newCardData.getUUID()));
                 needSync = true;
             }
-            if (MiningSkillCardData.loadData(itemStack).validateChallenges())
+            if (MiningSkillCardData.load(itemStack).validateChallenges())
                 needSync = true;
             return needSync;
         };
 
         for (SlotReference.Player slot : slots) {
-            if (slot.getItem().is(ModItems.SKILLS_RECORD)) {
-                SkillsRecordData recordData = SkillsRecordData.loadData(slot.getItem());
+            if (slot.get().is(ModItems.SKILLS_RECORD)) {
+                SkillsRecordData recordData = SkillsRecordData.load(slot.get());
                 boolean needSync = false;
                 for (ItemStack stack : recordData.getCardSlots()) {
                     if (validateCardFunction.apply(stack)) needSync = true;
                 }
                 if (needSync)
-                    recordData.sendToClient(player, slot.getIndex()).saveData(slot.getItem());
+                    recordData.sendToClient(player, slot.getIndex()).save();
             } else {
-                validateCardFunction.apply(slot.getItem());
+                validateCardFunction.apply(slot.get());
             }
         }
     }
 
-    public static CompoundEventResult<BlockState> onBlockToolModificationEvent(BlockState originalState, BlockState finalState, @NotNull UseOnContext context, ToolAction toolAction, boolean simulate) {
+    public static CompoundEventResult<BlockState> onBlockToolModificationEvent(BlockState originalState, @NotNull UseOnContext context, ToolAction toolAction, boolean simulate) {
         ServerPlayer player = (ServerPlayer) context.getPlayer();
         if (player == null) return CompoundEventResult.pass();
         if (PlayerHooks.isFake(player)) return CompoundEventResult.pass();
@@ -139,16 +146,16 @@ public class MSCEvents {
             List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
             if (slots.isEmpty()) return CompoundEventResult.pass();
             for (SlotReference.Player slot : slots) {
-                var data = SkillsRecordData.loadData(slot.getItem());
+                var data = SkillsRecordData.load(slot.get());
                 Pair<Boolean, Boolean> taskProcess = Pair.of(false, false);
                 if (toolAction == ToolActions.AXE_STRIP) {
-                    taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengesData.Type.STRIP_BLOCK);
+                    taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengeData.Type.STRIP_BLOCK);
 
                 } else if (toolAction == ToolActions.SHOVEL_FLATTEN) {
-                    taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengesData.Type.FLATTEN_BLOCK);
+                    taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengeData.Type.FLATTEN_BLOCK);
 
                 } else if (toolAction == ToolActions.HOE_TILL && context.getLevel().getBlockState(context.getClickedPos().above()).isAir()) {
-                    taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengesData.Type.TILLING_BLOCK);
+                    taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengeData.Type.TILLING_BLOCK);
                 }
 
                 if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get()) {
@@ -156,8 +163,9 @@ public class MSCEvents {
                 }
 
                 if (taskProcess.getFirst()) {
-                    data.saveData(slot.getItem());
+                    data.save();
                     if (taskProcess.getSecond()) {
+                        PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(context.getClickedPos(), originalState), (ServerLevel)context.getLevel(), context.getClickedPos(), 128);
                         return CompoundEventResult.interruptTrue(Blocks.AIR.defaultBlockState());
                     }
                 }

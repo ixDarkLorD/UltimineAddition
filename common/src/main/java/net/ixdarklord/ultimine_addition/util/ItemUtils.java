@@ -1,10 +1,11 @@
 package net.ixdarklord.ultimine_addition.util;
 
 import com.google.common.collect.Lists;
-import net.ixdarklord.coolcatlib.api.util.SlotReference;
+import net.ixdarklord.coolcatlib.api.utils.SlotReference;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.minecraft.core.Direction;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -12,6 +13,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.SlotRange;
 import net.minecraft.world.inventory.SlotRanges;
 import net.minecraft.world.item.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -21,10 +24,26 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class ItemUtils {
     public record ItemSorter(ItemStack item, int slotId, int order){}
+
+    public static Optional<BlockState> getAxeStrippingState(BlockState originalState) {
+        Block block = AxeItem.STRIPPABLES.get(originalState.getBlock());
+        return block == null ? Optional.empty() : Optional.of(block.defaultBlockState().setValue(RotatedPillarBlock.AXIS, (Direction.Axis)originalState.getValue(RotatedPillarBlock.AXIS)));
+    }
+
+    public static Optional<BlockState> getShovelFlatteningState(BlockState originalState) {
+        BlockState state = ShovelItem.FLATTENABLES.get(originalState.getBlock());
+        return Optional.ofNullable(state);
+    }
+
+    public static Optional<BlockState> getHoeTillingState(BlockState originalState) {
+        TillResult tillResult = TillResult.getTillResult(originalState.getBlock());
+        return tillResult == null ? Optional.empty() : Optional.of(tillResult.resultState());
+    }
 
     public static ItemStack getItemInHand(Player player, boolean checkBoth) {
         ItemStack stack = ItemStack.EMPTY;
@@ -33,8 +52,7 @@ public class ItemUtils {
         else if (checkBoth)
             stack = player.getOffhandItem();
 
-        if (stack.getItem() != Items.AIR) return stack;
-        return ItemStack.EMPTY;
+        return stack.getItem() != Items.AIR ? stack : ItemStack.EMPTY;
     }
 
     public static ItemStack findItemInHand(Player player, Item item) {
@@ -46,6 +64,7 @@ public class ItemUtils {
         if (ServicePlatform.get().slotAPI().isModLoaded() && stack.getItem() != item) {
             stack = ServicePlatform.get().slotAPI().getSkillsRecordItem(player);
         }
+
         return stack.getItem() == item ? stack : ItemStack.EMPTY;
     }
 
@@ -57,6 +76,10 @@ public class ItemUtils {
             case null -> {}
         }
         return index;
+    }
+
+    public static ItemStack getSkillsRecord(Player player, @Nullable InteractionHand hand) {
+        return hand == null ? ServicePlatform.get().slotAPI().getSkillsRecordItem(player) : player.getSlot(getSlotIndex(hand)).get();
     }
 
     public static List<SlotReference.Player> getSlotReferences(Player player, Item item, boolean onlyInventory) {
@@ -86,12 +109,12 @@ public class ItemUtils {
             ItemStack stack = ServicePlatform.get().slotAPI().getSkillsRecordItem(player);
             if (predicate.test(stack)) result.add(new SlotReference.Player(null, -1) {
                 @Override
-                public @NotNull ItemStack getItem() {
+                public @NotNull ItemStack get() {
                     return ServicePlatform.get().slotAPI().getSkillsRecordItem(player);
                 }
 
                 @Override
-                public boolean setItem(ItemStack item) {
+                public boolean set(ItemStack item) {
                     throw new UnsupportedOperationException("You can't set an item in the %s slot.".formatted(ServicePlatform.get().slotAPI().getAPIName()));
                 }
             });

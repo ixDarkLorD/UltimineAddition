@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.datagen.challenge;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
-import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
+import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.datagen.challenge.builder.ChallengesBuilder;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
@@ -20,7 +20,7 @@ import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.T
 
 public abstract class ChallengeProvider implements DataProvider {
     private final PackOutput output;
-    private final Map<ResourceLocation, ChallengesData> data = new TreeMap<>();
+    private final Map<ResourceLocation, ChallengeData> data = new TreeMap<>();
 
     protected abstract void buildChallenges(Consumer<ChallengesBuilder.Result> consumer);
 
@@ -43,22 +43,22 @@ public abstract class ChallengeProvider implements DataProvider {
         int i = 0;
         for (var data : data.entrySet()) {
             AtomicReference<JsonObject> JSONProperties = new AtomicReference<>(new JsonObject());
-            ChallengesData.CODEC.encodeStart(JsonOps.INSTANCE, data.getValue()).result().ifPresent(json -> JSONProperties.set(json.getAsJsonObject()));
+            ChallengeData.CODEC.encodeStart(JsonOps.INSTANCE, data.getValue()).result().ifPresent(json -> JSONProperties.set(json.getAsJsonObject()));
             futures[i++] = DataProvider.saveStable(cache, JSONProperties.get(), pathProvider(data.getValue()).json(data.getKey()));
         }
 
         return CompletableFuture.allOf(futures);
     }
 
-    private PackOutput.PathProvider pathProvider(ChallengesData value) {
+    private PackOutput.PathProvider pathProvider(ChallengeData value) {
         String path = "";
-        if (value.getForCardType().equals(PICKAXE)) {
+        if (value.forCardType().equals(PICKAXE)) {
             path = "/pickaxe";
-        } else if (value.getForCardType().equals(AXE)) {
+        } else if (value.forCardType().equals(AXE)) {
             path = "/axe";
-        } else if (value.getForCardType().equals(SHOVEL)) {
+        } else if (value.forCardType().equals(SHOVEL)) {
             path = "/shovel";
-        } else if (value.getForCardType().equals(HOE)) {
+        } else if (value.forCardType().equals(HOE)) {
             path = "/hoe";
         }
         return output.createPathProvider(PackOutput.Target.DATA_PACK, "challenges" + path);

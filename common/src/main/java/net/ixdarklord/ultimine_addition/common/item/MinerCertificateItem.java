@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.coolcatlib.api.util.ComponentHelper;
+import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
@@ -44,7 +44,7 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
             if (isAccomplished(stack)) {
                 this.playParticleAndSound(player);
                 Registration.ULTIMINE_OBTAIN_TRIGGER.get().trigger((ServerPlayer) player);
-                getData(stack).playCelebration(true).sendClientMessage(player).sendToClient(ItemUtils.getSlotIndex(usedHand), (ServerPlayer) player).saveData(stack);
+                getData(stack).playCelebration(true).sendClientMessage(player).sendToClient(ItemUtils.getSlotIndex(usedHand), (ServerPlayer) player).save();
                 ServicePlatform.get().players().setPlayerUltimineCapability(player, true);
                 if (!player.isCreative()) stack.shrink(1);
                 return InteractionResultHolder.success(stack);
@@ -104,6 +104,6 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
 
     @Override
     public MinerCertificateData getData(ItemStack stack) {
-        return MinerCertificateData.loadData(stack);
+        return MinerCertificateData.load(stack);
     }
 }

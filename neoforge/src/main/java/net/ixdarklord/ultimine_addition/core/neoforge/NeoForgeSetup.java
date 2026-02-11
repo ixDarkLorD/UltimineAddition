@@ -33,7 +33,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import java.util.function.Supplier;
 
 @Mod(FTBUltimineAddition.MOD_ID)
-public class NeoForgeSetup {
+public final class NeoForgeSetup {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
             DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, FTBUltimineAddition.MOD_ID);
 
@@ -45,14 +45,14 @@ public class NeoForgeSetup {
     );
 
     public NeoForgeSetup(IEventBus bus) {
-        CommonSetup.init();
         CONDITION_CODECS.register("legacy_mode", () -> LegacyModeCondition.CODEC);
         CONDITION_CODECS.register(bus);
         ATTACHMENT_TYPES.register(bus);
+        CommonSetup.init();
     }
 
-    @EventBusSubscriber(modid = FTBUltimineAddition.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
-    private static class EventBus {
+    @EventBusSubscriber(modid = FTBUltimineAddition.MOD_ID)
+    private static class Events {
         @SubscribeEvent
         private static void onCommonSetup(FMLCommonSetupEvent event) {
             event.enqueueWork(CommonSetup::setup);
@@ -117,9 +117,9 @@ public class NeoForgeSetup {
 
         @SubscribeEvent
         public static void onBlockToolModification(BlockEvent.BlockToolModificationEvent event) {
-            CompoundEventResult<BlockState> result = BlockToolModificationEvent.EVENT.invoker().modify(event.getState(), event.getFinalState(), event.getContext(), ToolAction.get(event.getItemAbility().name()), event.isSimulated());
+            CompoundEventResult<BlockState> result = BlockToolModificationEvent.EVENT.invoker().modify(event.getState(), event.getContext(), ToolAction.get(event.getItemAbility().name()), event.isSimulated());
             if (result.isPresent()) {
-                if (result.isFalse()) {
+                if (result.isTrue()) {
                     event.setCanceled(true);
                 }
                 if (result.object() != null) {

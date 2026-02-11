@@ -4,9 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.handler.codec.CodecException;
-import net.ixdarklord.coolcatlib.api.util.ChatFormattingUtils;
-import net.ixdarklord.coolcatlib.api.util.CodecUtils;
-import net.ixdarklord.coolcatlib.api.util.ComponentHelper;
+import net.ixdarklord.coolcatlib.api.utils.ChatFormattingUtils;
+import net.ixdarklord.coolcatlib.api.utils.CodecUtils;
+import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.handler.ItemRendererHandler;
@@ -64,7 +64,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         if (entity instanceof ServerPlayer) {
             if (!stack.has(MiningSkillCardData.DATA_COMPONENT)) {
                 if (getData(stack).getChallenges().isEmpty())
-                    getData(stack).initChallenges().saveData(stack);
+                    getData(stack).initChallenges().save();
             }
         }
     }
@@ -86,7 +86,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
 
         MiningSkillCardData data = stack.get(MiningSkillCardData.DATA_COMPONENT);
         if (type != EMPTY && data != null && !data.isCreativeItem() && data.getTier() != Tier.Unlearned && data.getTier() != Tier.Mastered) {
-            ChatFormatting[] formatting = ChatFormattingUtils.get3LevelChatFormatting(data.getPotionPoints(), data.getMaxPotionPoints());
+            ChatFormatting formatting = ChatFormattingUtils.getProgressColor(data.getPotionPoints(), data.getMaxPotionPoints());
             component = Component.translatable("tooltip.ultimine_addition.skill_card.potion_point", Component.literal(String.valueOf(data.getPotionPoints())).withStyle(formatting));
             tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
         }
@@ -126,7 +126,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
 
     @Override
     public MiningSkillCardData getData(ItemStack stack) {
-        return MiningSkillCardData.loadData(stack);
+        return MiningSkillCardData.load(stack);
     }
 
     public Type getType() {
@@ -134,7 +134,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     }
 
     public static boolean isTierEqual(ItemStack stack, Tier tier) {
-        return MiningSkillCardData.loadData(stack).getTier() == tier;
+        return MiningSkillCardData.load(stack).getTier() == tier;
     }
 
     public static class Type {
@@ -204,7 +204,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         }
 
         public ResourceLocation getRegistryId() {
-            return FTBUltimineAddition.rl("mining_skill_card_%s".formatted(id));
+            return FTBUltimineAddition.id("mining_skill_card_%s".formatted(id));
         }
 
         public List<String> getRequiredTools() {

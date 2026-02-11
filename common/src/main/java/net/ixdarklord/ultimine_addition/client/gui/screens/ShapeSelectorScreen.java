@@ -5,8 +5,8 @@ import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
-import net.ixdarklord.coolcatlib.api.util.ColorUtils;
-import net.ixdarklord.coolcatlib.api.util.RenderUtils;
+import net.ixdarklord.coolcatlib.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatlib.api.utils.ColorUtils;
 import net.ixdarklord.ultimine_addition.client.gui.components.ColoredButton;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
 import net.ixdarklord.ultimine_addition.common.menu.ShapeSelectorMenu;
@@ -205,16 +205,16 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        guiGraphics.setColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+        guiGraphics.setColor(color.red(), color.green(), color.blue(), color.alpha());
         guiGraphics.blit(BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         guiGraphics.setColor(1F, 1F, 1F, 1F);
     }
 
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        Color color = ColorUtils.blendColors(new Color(0, 0, 0), this.color.convert(), 0.75);
+        Color color = ColorUtils.blend(new Color(0, 0, 0), this.color.convert(), 0.25);
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, color.getRGB(), false);
-        guiGraphics.fill(this.inventoryLabelX - 1, this.inventoryLabelY - 1, this.inventoryLabelX + this.font.width(this.playerInventoryTitle), this.inventoryLabelY + this.font.lineHeight, ColorUtils.RGBToRGBA(color.getRGB(), 0.5F));
+        guiGraphics.fill(this.inventoryLabelX - 1, this.inventoryLabelY - 1, this.inventoryLabelX + this.font.width(this.playerInventoryTitle), this.inventoryLabelY + this.font.lineHeight, ColorUtils.rgbToRgba(color.getRGB(), 0.5F));
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
     }
 
@@ -290,7 +290,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         protected void renderSelection(GuiGraphics guiGraphics, int top, int width, int height, int outerColor, int innerColor) {
             int i = this.getX() + (this.width - width) / 2;
             ScreenRectangle rectangle = new ScreenRectangle(i, top - 1, width, height + 2);
-            RenderUtils.renderHollowRectangle(guiGraphics, rectangle, 1, outerColor);
+            RenderUtils.drawHollowRect(guiGraphics, rectangle, 1, outerColor);
         }
 
         @Override
@@ -309,7 +309,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 RenderSystem.enableBlend();
                 guiGraphics.blitSprite(SCROLLER_BACKGROUND_SPRITE, i, this.getY(), 6, this.getHeight());
                 ColorUtils color = new ColorUtils(ShapeSelectorScreen.this.color.convert().brighter().getRGB());
-                guiGraphics.setColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+                guiGraphics.setColor(color.red(), color.green(), color.blue(), color.alpha());
                 guiGraphics.blitSprite(SCROLLER_SPRITE, i, k, 6, j);
                 guiGraphics.setColor(1F, 1F, 1F, 1F);
                 RenderSystem.disableBlend();
@@ -351,16 +351,16 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 Color borderColor = new Color(0xB5B5B5);
 
                 if (!isAllowed()) {
-                    bgColor = ColorUtils.blendColors(bgColor.darker(), new Color(0x701111), 0.4);
-                    borderColor = ColorUtils.blendColors(borderColor, new Color(0x701111), 0.4);
+                    bgColor = ColorUtils.blend(bgColor.darker(), new Color(0x701111), 0.4);
+                    borderColor = ColorUtils.blend(borderColor, new Color(0x701111), 0.4);
                 } else if (isShapeSelected()) {
-                    bgColor = ColorUtils.blendColors(bgColor.darker(), new Color(0xA0DA3E), 0.4);
-                    borderColor = ColorUtils.blendColors(borderColor, new Color(0xA0DA3E), 0.4);
+                    bgColor = ColorUtils.blend(bgColor.darker(), new Color(0xA0DA3E), 0.4);
+                    borderColor = ColorUtils.blend(borderColor, new Color(0xA0DA3E), 0.4);
                 }
 
                 float alpha = (isAllowed() && isHovered) || isShapeSelected() ? 0.8F : 0.5F;
-                guiGraphics.fill(left, top, left + width, top + height, ColorUtils.RGBToRGBA(bgColor.getRGB(), alpha));
-                RenderUtils.renderHollowRectangle(guiGraphics, new ScreenRectangle(left, top, width, height), 1, borderColor.getRGB());
+                guiGraphics.fill(left, top, left + width, top + height, ColorUtils.rgbToRgba(bgColor.getRGB(), alpha));
+                RenderUtils.drawHollowRect(guiGraphics, new ScreenRectangle(left, top, width, height), 1, borderColor.getRGB());
             }
 
             @Override
@@ -373,7 +373,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 if (isShapeSelected()) {
                     guiGraphics.drawString(font, Component.literal("➤"), left + 3, top + (height / 2) - 4, color.getRGB());
                 }
-                RenderUtils.renderScrollingString(guiGraphics, ticks, font, shape.getDisplayName().copy().withStyle(style), false, left + spacing, top, width - spacing, height, 3, color.getRGB());
+                RenderUtils.drawScrollingString(guiGraphics, ticks, font, this.shape.getDisplayName().copy().withStyle(style), false, new ScreenRectangle(left + spacing, top, width - spacing, height), 3, color.getRGB(), true);
             }
 
             public @NotNull Component getNarration() {

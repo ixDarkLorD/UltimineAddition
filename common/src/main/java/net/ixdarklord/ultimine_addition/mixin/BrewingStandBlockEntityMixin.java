@@ -36,7 +36,7 @@ abstract class BrewingStandBlockEntityMixin {
                 // Consume potion points
                 MiningSkillCardData data = item.getData(stack);
                 int oldPoints = data.getPotionPoints();
-                data.consumePotionPoint(1).saveData(stack);
+                data.consumePotionPoint(1).save();
                 items.set(INGREDIENT_SLOT, stack);
 
                 // Sync data to client

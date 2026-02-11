@@ -82,7 +82,7 @@ public class MCRecipe extends ShapelessRecipe {
             if (!inputs.isEmpty()) {
                 item.getData(stack).setDisplayItem(inputs.getFirst());
             }
-            item.getData(stack).initChallenges().saveData(stack);
+            item.getData(stack).initChallenges().save();
         }
         return stack;
     }

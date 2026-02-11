@@ -6,7 +6,7 @@ import net.ixdarklord.ultimine_addition.integration.curios.CuriosIntegration;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-public class ServicePlatformSlotAPIImpl implements ServicePlatform.SlotAPI {
+public final class ServicePlatformSlotAPIImpl implements ServicePlatform.SlotAPI {
     @Override
     public String getAPIName() {
         return "curios";

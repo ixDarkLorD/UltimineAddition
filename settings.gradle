@@ -11,6 +11,6 @@ pluginManagement {
 
 include('common')
 include(project_loaders.split(","))
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/settings.gradle"
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v2/settings.gradle"
 
 

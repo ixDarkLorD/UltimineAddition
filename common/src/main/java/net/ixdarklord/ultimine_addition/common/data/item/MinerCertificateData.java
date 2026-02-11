@@ -2,15 +2,15 @@ package net.ixdarklord.ultimine_addition.common.data.item;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.ixdarklord.coolcatlib.api.util.ChatFormattingUtils;
-import net.ixdarklord.ultimine_addition.client.handler.ClientMinerCertificateHandler;
-import net.ixdarklord.ultimine_addition.common.data.DataHandler;
+import net.ixdarklord.coolcatlib.api.data.ItemDataComponent;
+import net.ixdarklord.coolcatlib.api.utils.ChatFormattingUtils;
+import net.ixdarklord.ultimine_addition.client.handler.ClientHandler;
 import net.ixdarklord.ultimine_addition.common.item.MinerCertificateItem;
-import net.ixdarklord.ultimine_addition.network.PayloadHandler;
-import net.ixdarklord.ultimine_addition.network.payloads.MinerCertificatePayload;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.MinerCertificatePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,104 +19,87 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class MinerCertificateData extends DataHandler<MinerCertificateData, ItemStack> {
-    public static final Codec<MinerCertificateData> CODEC;
-    public static final StreamCodec<RegistryFriendlyByteBuf, MinerCertificateData> STREAM_CODEC;
-    public static final DataComponentType<MinerCertificateData> DATA_COMPONENT;
+public final class MinerCertificateData extends ItemDataComponent<MinerCertificateData> {
+    public static final Codec<MinerCertificateData> CODEC =
+            RecordCodecBuilder.create((instance) -> instance.group(
+                    Codec.BOOL.fieldOf("IsAccomplished").forGetter(MinerCertificateData::isAccomplished),
+                    MinerCertificateData.Legacy.CODEC.optionalFieldOf("Legacy").forGetter(MinerCertificateData::getLegacy))
+                    .apply(instance, (isAccomplished, legacyOpt) -> new MinerCertificateData(isAccomplished, legacyOpt.orElse(null))));
 
-    private Optional<Legacy> legacy;
+    public static final StreamCodec<RegistryFriendlyByteBuf, MinerCertificateData> STREAM_CODEC = new StreamCodec<>() {
+        public @NotNull MinerCertificateData decode(RegistryFriendlyByteBuf buf) {
+            return new MinerCertificateData(buf.readBoolean(), buf.readOptional(Legacy.STREAM_CODEC).orElse(null))
+                    .completeSound(buf.readBoolean())
+                    .playCelebration(buf.readBoolean());
+        }
+
+        public void encode(RegistryFriendlyByteBuf buf, MinerCertificateData data) {
+            buf.writeBoolean(data.isAccomplished);
+            buf.writeOptional(data.getLegacy(), MinerCertificateData.Legacy.STREAM_CODEC);
+            buf.writeBoolean(data.completeSound);
+            buf.writeBoolean(data.isCelebration);
+        }
+    };
+
+    public static final DataComponentType<MinerCertificateData> DATA_COMPONENT =
+            DataComponentType.<MinerCertificateData>builder().persistent(CODEC).networkSynchronized(STREAM_CODEC).build();
+
+    private @Nullable Legacy legacy;
     private boolean isAccomplished;
     private boolean isCelebration;
     private boolean completeSound;
 
-    private MinerCertificateData() {
-        this(Optional.empty(), false);
-    }
-
-    private MinerCertificateData(Optional<Legacy> legacy, boolean isAccomplished) {
-        this.legacy = legacy;
-        this.legacy.ifPresent(l -> l.data = this);
+    private MinerCertificateData(boolean isAccomplished, @Nullable Legacy legacy) {
+        super(DATA_COMPONENT);
         this.isAccomplished = isAccomplished;
+        this.legacy = legacy;
+        this.getLegacy().ifPresent((l) -> l.data = this);
     }
 
     public static MinerCertificateData create() {
-        return new MinerCertificateData();
+        return new MinerCertificateData(false, null);
     }
 
-    public static MinerCertificateData loadData(ItemStack stack) {
-        return stack.getOrDefault(DATA_COMPONENT, create()).setDataHolder(stack);
+    public static MinerCertificateData load(ItemStack stack) {
+        return stack.getOrDefault(DATA_COMPONENT, create()).setStack(stack);
     }
 
-    @Override
-    public void saveData(ItemStack stack) {
-        stack.set(DATA_COMPONENT, this);
-        super.saveData(stack);
-    }
-
-    public MinerCertificateData sendToClient(int slotIndex, ServerPlayer player) {
-        PayloadHandler.sendToPlayer(new MinerCertificatePayload(slotIndex, this), player);
-        return this;
-    }
-
-    static {
-        CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Legacy.CODEC.optionalFieldOf("Legacy").forGetter(MinerCertificateData::getLegacy),
-                Codec.BOOL.optionalFieldOf("IsAccomplished", false).forGetter(MinerCertificateData::isAccomplished)
-        ).apply(instance, MinerCertificateData::new));
-
-        STREAM_CODEC = new StreamCodec<>() {
-            @Override
-            public @NotNull MinerCertificateData decode(RegistryFriendlyByteBuf buf) {
-                return new MinerCertificateData(buf.readOptional(Legacy.STREAM_CODEC), buf.readBoolean())
-                        .completeSound(buf.readBoolean())
-                        .playCelebration(buf.readBoolean());
-            }
-
-            @Override
-            public void encode(RegistryFriendlyByteBuf buf, MinerCertificateData data) {
-                buf.writeOptional(data.legacy, Legacy.STREAM_CODEC);
-                buf.writeBoolean(data.isAccomplished);
-                buf.writeBoolean(data.completeSound);
-                buf.writeBoolean(data.isCelebration);
-            }
-        };
-
-        DATA_COMPONENT = DataComponentType.<MinerCertificateData>builder().persistent(CODEC).networkSynchronized(STREAM_CODEC).build();
+    public static boolean hasData(@NotNull ItemStack stack) {
+        return !stack.isEmpty() && stack.getItem() instanceof MinerCertificateItem && stack.has(DATA_COMPONENT);
     }
 
     public void tick(int slotIndex, ServerPlayer player) {
-        if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY && this.legacy.isEmpty()) {
-            int min = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getMin();
-            int max = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getMax();
-            this.legacy = Optional.of(new Legacy(RandomSource.create().nextIntBetweenInclusive(min, max)));
-            this.saveData(this.get());
-        }
-
-        if (this.legacy.isPresent()) {
-            if (!this.isAccomplished && this.legacy.get().getMinedBlocks() == this.legacy.get().getRequiredAmount()) {
-                this.completeSound(true).setAccomplished(true).sendToClient(slotIndex, player).saveData(this.get());
+        if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+            if (this.legacy == null) {
+                int min = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getMin();
+                int max = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getMax();
+                this.legacy = new Legacy(RandomSource.create().nextIntBetweenInclusive(min, max));
+                this.save();
             }
-        } else if (!isAccomplished) {
-            this.completeSound(true).setAccomplished(true).sendToClient(slotIndex, player).saveData(this.get());
+        } else if (this.legacy != null) {
+            this.legacy = null;
+            this.save();
         }
-    }
 
-    public Optional<Legacy> getLegacy() {
-        return legacy;
-    }
-
-    public boolean isAccomplished() {
-        return this.isAccomplished;
+        if (this.legacy != null) {
+            if (!this.isAccomplished && this.legacy.getMinedBlocks() == this.legacy.getRequiredAmount()) {
+                this.completeSound(true).setAccomplished(true).sendToClient(slotIndex, player).save();
+            }
+        } else if (!this.isAccomplished) {
+            this.completeSound(true).setAccomplished(true).sendToClient(slotIndex, player).save();
+        }
     }
 
     public MinerCertificateData setAccomplished(boolean state) {
@@ -134,17 +117,31 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
         return this;
     }
 
-    @Override
-    public MinerCertificateData clientUpdate() {
-        if (Objects.requireNonNull(this.get()).getItem() instanceof MinerCertificateItem && this.completeSound) {
-            ClientMinerCertificateHandler.playClientSound();
-        }
-        if (Objects.requireNonNull(this.get()).getItem() instanceof MinerCertificateItem && this.isCelebration) {
-            ClientMinerCertificateHandler.playAnimation(this.get());
-        }
+    public Optional<Legacy> getLegacy() {
+        return Optional.ofNullable(this.legacy);
+    }
+
+    public boolean isAccomplished() {
+        return this.isAccomplished;
+    }
+
+    public MinerCertificateData sendToClient(int slotIndex, ServerPlayer player) {
+        PayloadHandler.sendToPlayer(new MinerCertificatePayload(slotIndex, this.getStack(), this), player);
         return this;
     }
 
+    public MinerCertificateData onClientUpdate() {
+        if (this.completeSound) {
+            ClientHandler.playSound(SoundEvents.NOTE_BLOCK_BELL.value(), 1.0F, 1.0F);
+            ClientHandler.playSound(SoundEvents.BOOK_PAGE_TURN, 1.0F, 1.0F);
+        }
+
+        if (this.isCelebration) {
+            ClientHandler.playAnimation(this.getStack());
+        }
+
+        return this;
+    }
 
     public MinerCertificateData sendClientMessage(Player player) {
         if (!ServicePlatform.get().players().isPlayerUltimineCapable(player))
@@ -156,14 +153,16 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MinerCertificateData data)) return false;
-        return isAccomplished == data.isAccomplished && isCelebration == data.isCelebration && completeSound == data.completeSound && Objects.equals(legacy, data.legacy);
+        if (!(o instanceof MinerCertificateData that)) {
+            return false;
+        } else {
+            return this.isAccomplished == that.isAccomplished && Objects.equals(this.legacy, that.legacy);
+        }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(legacy, isAccomplished, isCelebration, completeSound);
+        return Objects.hash(isAccomplished, legacy);
     }
 
     public static class Legacy {
@@ -204,7 +203,7 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
         }
 
         public void createInfoComponent(List<Component> tooltipComponents, boolean isShiftPressed) {
-            if (!data.get().has(DATA_COMPONENT)) {
+            if (!data.getStack().has(DATA_COMPONENT)) {
                 if (isShiftPressed)
                     tooltipComponents.add(Component.translatable("tooltip.ultimine_addition.certificate.legacy.info"));
                 return;
@@ -217,7 +216,7 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
                     tooltipComponents.add(1, createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.opened").withStyle(ChatFormatting.GOLD)));
             } else {
                 if (!data.isAccomplished) {
-                    ChatFormatting[] formatting = ChatFormattingUtils.get3LevelChatFormatting(minedBlocks, requiredAmount);
+                    ChatFormatting formatting = ChatFormattingUtils.getProgressColor(minedBlocks, requiredAmount);
                     Component component = Component.literal(String.valueOf(minedBlocks)).withStyle(formatting);
                     tooltipComponents.add(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest.info", requiredAmount).withStyle(ChatFormatting.DARK_AQUA));
                     tooltipComponents.add(Component.literal("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest", component).withStyle(ChatFormatting.GRAY)));
@@ -228,6 +227,17 @@ public class MinerCertificateData extends DataHandler<MinerCertificateData, Item
         @SuppressWarnings("UnnecessaryUnicodeEscape")
         private Component createBrackets(Component component) {
             return Component.literal("『").withStyle(ChatFormatting.DARK_GRAY).append(component).append(Component.literal("\u300F").withStyle(ChatFormatting.DARK_GRAY));
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Legacy legacy)) return false;
+            return minedBlocks == legacy.minedBlocks && requiredAmount == legacy.requiredAmount;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(minedBlocks, requiredAmount);
         }
     }
 }

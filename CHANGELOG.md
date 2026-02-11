@@ -2,6 +2,40 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v2101.1.2.3 Release - Feb 11, 2026
+### 🐛 Bug Fixes & Improvements
+- Updated compatibility with FTB Ultimine 2101.1.13.
+- Resolved issues caused by the latest FTB Ultimine update to ensure stable functionality.
+
+## v2101.1.2.2 Release - Nov 22, 2025
+### ✨ New Features
+- Added a new visual effect when a block is being consumed by a challenge.
+- Added a consume-mode indicator inside the Challenges Panel for clearer visibility.
+
+### 🐛 Bug Fixes & Improvements
+- [UA-45] Fixed an issue where stripping wood blocks would cause a crash.
+
+## v2101.1.2.1 Release - Nov 3, 2025
+### 🐛 Bug Fixes & Improvements
+- The "Consume Mode" button is now functioning correctly and is properly synchronized.
+- The "Consume Mode" button will now be visually dimmed when it is disabled.
+- Resolved an issue where the keybind for opening "Skills Record" was not functioning correctly.
+
+## v2101.1.2.0 Release - Nov 2, 2025
+### ⚙️ Refactoring
+- Renamed and reorganized several classes.
+- Updated version formatting from X.X.X to MCVR.X.X.X to clearly distinguish between Minecraft release versions.
+
+### 🐛 Bug Fixes & Improvements
+- [UA-44] Fixed a crash that occurred during the mod's initialization phase.
+
+### ✨ New Feature
+- Overhauled the Pin Challenge Panel for improved functionality and design.
+
+<div style="display: flex; gap: 10px;">
+<img src="https://i.imgur.com/kMiVBjX.png" width="300"  alt=""/>
+</div>
+
 ## v1.1.6 Release - June 8, 2025
 ### 🐛 Bug Fixes & Improvements
 - The mod is now compatible with the new update for **FTBUltimine** (`2101.1.3`); it will no longer crash.
@@ -32,10 +66,15 @@ This file is for listing all the changes to this project
 - Fixed an issue where the active ultimine shape on an item wasn't visible in tooltips.
 
 ## v1.1.0 Release - March 27, 2025
-### ✨ New Feature
-- A new item (**Shape Selector**) – Assign any Ultimine mining shape to a specific tool. Perfect for customizing your favorite pickaxe, shovel, or other mining tools!
 ### 🐛 Bug Fixes & Improvements
 - Placing a large number of blocks at once (e.g., with Building Gadgets or Construction Wands) may cause significant lag or performance issues.
+
+### ✨ New Feature
+- A new item (**Shape Selector**) – Assign any Ultimine mining shape to a specific tool. Perfect for customizing your favorite pickaxe, shovel, or other mining tools!
+
+<div style="display: flex; gap: 10px;">
+<img src="https://i.imgur.com/n7942YT.png" width="300"  alt=""/>
+</div>
 
 ## v1.0.3 Release - March 19, 2025
 ### ✨ New Feature

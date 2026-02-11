@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.datagen;
 
+import net.ixdarklord.coolcatlib.api.datagen.NeoForgeLanguageWrapper;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.advancement.AdvancementGenerator;
 import net.ixdarklord.ultimine_addition.datagen.challenge.ChallengeGenerator;
@@ -19,7 +20,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 import java.util.concurrent.CompletableFuture;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = FTBUltimineAddition.MOD_ID)
+@EventBusSubscriber(modid = FTBUltimineAddition.MOD_ID)
 public class DataGeneration {
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event) {
@@ -36,7 +37,7 @@ public class DataGeneration {
         generator.addProvider(event.includeServer(), new ChallengeGenerator(output, lookupProvider));
         generator.addProvider(event.includeServer(), new RecipeGenerator(output, lookupProvider));
         generator.addProvider(event.includeClient(), new ItemModelGenerator(output, existingFileHelper));
-        generator.addProvider(event.includeClient(), new LanguageGenerator(output, "en_us"));
+        generator.addProvider(event.includeClient(), new NeoForgeLanguageWrapper(output, FTBUltimineAddition.MOD_ID, "en_us", new LanguageGenerator()));
         generator.addProvider(event.includeClient(), new ParticleGenerator(output));
     }
 }

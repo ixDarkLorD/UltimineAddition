@@ -14,7 +14,7 @@ import net.neoforged.neoforge.common.ItemAbility;
 
 import java.util.List;
 
-public class ServicePlatformPlayersImpl implements ServicePlatform.Players {
+public final class ServicePlatformPlayersImpl implements ServicePlatform.Players {
     @Override
     public boolean isPlayerUltimineCapable(Player player) {
         return player.hasData(NeoForgeSetup.PLAYER_ABILITY_DATA)

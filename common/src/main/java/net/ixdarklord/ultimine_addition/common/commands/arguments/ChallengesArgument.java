@@ -1,4 +1,4 @@
-package net.ixdarklord.ultimine_addition.common.command.arguments;
+package net.ixdarklord.ultimine_addition.common.commands.arguments;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.datafixers.util.Pair;
-import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesData;
+import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ResourceLocationException;
@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class ChallengesArgument implements ArgumentType<Pair<ResourceLocation, ChallengesData>> {
+public class ChallengesArgument implements ArgumentType<Pair<ResourceLocation, ChallengeData>> {
     private static final Collection<String> EXAMPLES = Arrays.asList("ultimine_addition:test_id", "ultimine_addition:breaking_block", "ultimine_addition:pickaxe/gathering_stones");
     public static final DynamicCommandExceptionType ERROR_UNKNOWN_CHALLENGE = new DynamicCommandExceptionType((entry) ->
             Component.translatable("argument.ultimine_addition.challenge.unknown", entry));
@@ -30,12 +30,12 @@ public class ChallengesArgument implements ArgumentType<Pair<ResourceLocation, C
         return new ChallengesArgument();
     }
 
-    public static Pair<ResourceLocation, ChallengesData> getData(CommandContext<CommandSourceStack> pContext, String pName) {
+    public static Pair<ResourceLocation, ChallengeData> getData(CommandContext<CommandSourceStack> pContext, String pName) {
         return pContext.getArgument(pName, Pair.class);
     }
 
     @Override
-    public Pair<ResourceLocation, ChallengesData> parse(StringReader reader) throws CommandSyntaxException {
+    public Pair<ResourceLocation, ChallengeData> parse(StringReader reader) throws CommandSyntaxException {
         var id = read(reader);
         if (ChallengesManager.INSTANCE.getAllChallenges().containsKey(id))
             return Pair.of(id, ChallengesManager.INSTANCE.getAllChallenges().get(id));
@@ -50,7 +50,7 @@ public class ChallengesArgument implements ArgumentType<Pair<ResourceLocation, C
         String string = reader.getString().substring(i, reader.getCursor());
 
         try {
-            return string.contains(":") ? ResourceLocation.parse(string) : FTBUltimineAddition.rl(string);
+            return string.contains(":") ? ResourceLocation.parse(string) : FTBUltimineAddition.id(string);
         } catch (ResourceLocationException var4) {
             reader.setCursor(i);
             throw ResourceLocation.ERROR_INVALID.createWithContext(reader);

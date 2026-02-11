@@ -1,6 +1,5 @@
 package net.ixdarklord.ultimine_addition.core.fabric;
 
-import net.ixdarklord.ultimine_addition.common.data.player.IPlayerData;
 import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.PlayerAbilityPayload;
@@ -16,12 +15,12 @@ public final class ServicePlatformPlayersImpl implements ServicePlatform.Players
 
     @Override
     public boolean isPlayerUltimineCapable(Player player) {
-        return ((IPlayerData) player).ua$getUltimineData().getAbility();
+        return player.getUltimineData$UA().getAbility();
     }
 
     @Override
     public void setPlayerUltimineCapability(Player player, boolean state) {
-        PlayerAbilityData data = ((IPlayerData) player).ua$getUltimineData().setAbility(state);
+        PlayerAbilityData data = player.getUltimineData$UA().setAbility(state);
         if (player instanceof ServerPlayer serverPlayer) {
             PayloadHandler.sendToPlayer(new PlayerAbilityPayload(data.getAbility()), serverPlayer);
         }

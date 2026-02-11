@@ -43,7 +43,7 @@ public class MiningSkillsCardInterpreter implements ISubtypeInterpreter<ItemStac
     public @NotNull String getLegacyStringSubtypeInfo(ItemStack stack, UidContext uidContext) {
         if (!stack.has(MiningSkillCardData.DATA_COMPONENT)) return "";
         StringBuilder builder = new StringBuilder(stack.getItem().getDescriptionId());
-        var data = MiningSkillCardData.loadData(stack);
+        var data = MiningSkillCardData.load(stack);
         switch (data.getTier()) {
             case Unlearned -> builder.append(".unlearned");
             case Novice -> builder.append(".novice");

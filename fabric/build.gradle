@@ -15,7 +15,7 @@ loom {
 
 dependencies {
     modApi libs.architectury.fabric.get()
-    modApi "net.ixdarklord.coolcatlib:fabric:1.21-${coolcatlib_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-fabric:1.21-${coolcatlib_version}"
     modApi libs.forgeconfigapiport.fabric.get()
 
     modCompileOnlyApi libs.jei.api.fabric.get()

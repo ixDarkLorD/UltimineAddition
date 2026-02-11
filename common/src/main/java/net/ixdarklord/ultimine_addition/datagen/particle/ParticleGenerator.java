@@ -12,12 +12,12 @@ public class ParticleGenerator extends ParticleProvider {
     @Override
     protected void addParticles() {
         add(Registration.CELEBRATE_PARTICLE.get(),
-                FTBUltimineAddition.rl("celebrate"),
-                FTBUltimineAddition.rl("diamond_pickaxe"),
-                FTBUltimineAddition.rl("diamond_axe"),
-                FTBUltimineAddition.rl("celebrate"),
-                FTBUltimineAddition.rl("diamond_shovel"),
-                FTBUltimineAddition.rl("diamond_hoe"),
-                FTBUltimineAddition.rl("celebrate"));
+                FTBUltimineAddition.id("celebrate"),
+                FTBUltimineAddition.id("diamond_pickaxe"),
+                FTBUltimineAddition.id("diamond_axe"),
+                FTBUltimineAddition.id("celebrate"),
+                FTBUltimineAddition.id("diamond_shovel"),
+                FTBUltimineAddition.id("diamond_hoe"),
+                FTBUltimineAddition.id("celebrate"));
     }
 }

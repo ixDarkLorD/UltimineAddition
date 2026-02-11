@@ -22,7 +22,7 @@ public class ItemModelGenerator extends ItemModelProvider {
         handheldItem(ModItems.PEN);
         simpleItem(ModItems.MINER_CERTIFICATE)
                 .override()
-                .predicate(FTBUltimineAddition.rl("opened"), 1.0f)
+                .predicate(FTBUltimineAddition.id("opened"), 1.0f)
                 .model(getItemModelName(ModItems.MINER_CERTIFICATE, "_opened"))
                 .end();
         simpleItem(ModItems.MINER_CERTIFICATE, "_opened");
@@ -83,23 +83,23 @@ public class ItemModelGenerator extends ItemModelProvider {
         simpleItem(ModItems.MINING_SKILL_CARD_EMPTY);
         simpleItem(ModItems.MINING_SKILL_CARD_PICKAXE, "_unlearned", false)
                 .override()
-                .predicate(FTBUltimineAddition.rl("is_custom_renderer"), 1.0f)
-                .model(new ModelFile.UncheckedModelFile(FTBUltimineAddition.rl("item/custom_renderer/mining_skill_card")))
+                .predicate(FTBUltimineAddition.id("is_custom_renderer"), 1.0f)
+                .model(new ModelFile.UncheckedModelFile(FTBUltimineAddition.id("item/custom_renderer/mining_skill_card")))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_1"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_1"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_PICKAXE, "_1"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_2"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_2"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_PICKAXE, "_2"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_3"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_3"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_PICKAXE, "_3"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_maxed"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_maxed"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_PICKAXE, "_mastered"))
                 .end();
         simpleItem(ModItems.MINING_SKILL_CARD_PICKAXE, "_1");
@@ -109,23 +109,23 @@ public class ItemModelGenerator extends ItemModelProvider {
 
         simpleItem(ModItems.MINING_SKILL_CARD_AXE, "_unlearned", false)
                 .override()
-                .predicate(FTBUltimineAddition.rl("is_custom_renderer"), 1.0f)
-                .model(new ModelFile.UncheckedModelFile(FTBUltimineAddition.rl("item/custom_renderer/mining_skill_card")))
+                .predicate(FTBUltimineAddition.id("is_custom_renderer"), 1.0f)
+                .model(new ModelFile.UncheckedModelFile(FTBUltimineAddition.id("item/custom_renderer/mining_skill_card")))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_1"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_1"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_AXE, "_1"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_2"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_2"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_AXE, "_2"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_3"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_3"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_AXE, "_3"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_maxed"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_maxed"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_AXE, "_mastered"))
                 .end();
         simpleItem(ModItems.MINING_SKILL_CARD_AXE, "_1");
@@ -135,23 +135,23 @@ public class ItemModelGenerator extends ItemModelProvider {
 
         simpleItem(ModItems.MINING_SKILL_CARD_SHOVEL, "_unlearned", false)
                 .override()
-                .predicate(FTBUltimineAddition.rl("is_custom_renderer"), 1.0f)
-                .model(new ModelFile.UncheckedModelFile(FTBUltimineAddition.rl("item/custom_renderer/mining_skill_card")))
+                .predicate(FTBUltimineAddition.id("is_custom_renderer"), 1.0f)
+                .model(new ModelFile.UncheckedModelFile(FTBUltimineAddition.id("item/custom_renderer/mining_skill_card")))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_1"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_1"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_SHOVEL, "_1"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_2"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_2"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_SHOVEL, "_2"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_3"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_3"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_SHOVEL, "_3"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_maxed"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_maxed"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_SHOVEL, "_mastered"))
                 .end();
         simpleItem(ModItems.MINING_SKILL_CARD_SHOVEL, "_1");
@@ -161,23 +161,23 @@ public class ItemModelGenerator extends ItemModelProvider {
 
         simpleItem(ModItems.MINING_SKILL_CARD_HOE, "_unlearned", false)
                 .override()
-                .predicate(FTBUltimineAddition.rl("is_custom_renderer"), 1.0f)
-                .model(new ModelFile.UncheckedModelFile(FTBUltimineAddition.rl("item/custom_renderer/mining_skill_card")))
+                .predicate(FTBUltimineAddition.id("is_custom_renderer"), 1.0f)
+                .model(new ModelFile.UncheckedModelFile(FTBUltimineAddition.id("item/custom_renderer/mining_skill_card")))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_1"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_1"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_HOE, "_1"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_2"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_2"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_HOE, "_2"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_3"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_3"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_HOE, "_3"))
                 .end()
                 .override()
-                .predicate(FTBUltimineAddition.rl("tier_maxed"), 1.0f)
+                .predicate(FTBUltimineAddition.id("tier_maxed"), 1.0f)
                 .model(getItemModelName(ModItems.MINING_SKILL_CARD_HOE, "_mastered"))
                 .end();
         simpleItem(ModItems.MINING_SKILL_CARD_HOE, "_1");
@@ -185,15 +185,15 @@ public class ItemModelGenerator extends ItemModelProvider {
         simpleItem(ModItems.MINING_SKILL_CARD_HOE, "_3");
         simpleItem(ModItems.MINING_SKILL_CARD_HOE, "_mastered");
 
-        specialRendererItem(FTBUltimineAddition.rl("item/custom_renderer/mining_skill_card"));
-        simpleItem(FTBUltimineAddition.rl("item/custom_renderer/mining_skill_card"), "_unlearned");
-        simpleItem(FTBUltimineAddition.rl("item/custom_renderer/mining_skill_card"), "_1");
-        simpleItem(FTBUltimineAddition.rl("item/custom_renderer/mining_skill_card"), "_2");
-        simpleItem(FTBUltimineAddition.rl("item/custom_renderer/mining_skill_card"), "_3");
-        simpleItem(FTBUltimineAddition.rl("item/custom_renderer/mining_skill_card"), "_mastered");
+        specialRendererItem(FTBUltimineAddition.id("item/custom_renderer/mining_skill_card"));
+        simpleItem(FTBUltimineAddition.id("item/custom_renderer/mining_skill_card"), "_unlearned");
+        simpleItem(FTBUltimineAddition.id("item/custom_renderer/mining_skill_card"), "_1");
+        simpleItem(FTBUltimineAddition.id("item/custom_renderer/mining_skill_card"), "_2");
+        simpleItem(FTBUltimineAddition.id("item/custom_renderer/mining_skill_card"), "_3");
+        simpleItem(FTBUltimineAddition.id("item/custom_renderer/mining_skill_card"), "_mastered");
     }
 
     private ModelFile.UncheckedModelFile getItemModelName(Item item, String suffix) {
-        return new ModelFile.UncheckedModelFile(FTBUltimineAddition.rl("item/" + Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(item)).getPath() + suffix));
+        return new ModelFile.UncheckedModelFile(FTBUltimineAddition.id("item/" + Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(item)).getPath() + suffix));
     }
 }

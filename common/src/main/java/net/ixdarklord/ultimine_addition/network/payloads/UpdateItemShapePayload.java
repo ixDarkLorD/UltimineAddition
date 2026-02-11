@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public record UpdateItemShapePayload(String shapeId) implements CustomPacketPayload {
-    public static final Type<UpdateItemShapePayload> TYPE = new Type<>(FTBUltimineAddition.rl("update_item_shape"));
+    public static final Type<UpdateItemShapePayload> TYPE = new Type<>(FTBUltimineAddition.id("update_item_shape"));
 
     public static final StreamCodec<ByteBuf, UpdateItemShapePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, UpdateItemShapePayload::shapeId,

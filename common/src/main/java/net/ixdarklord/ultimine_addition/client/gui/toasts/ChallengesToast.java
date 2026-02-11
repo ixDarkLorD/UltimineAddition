@@ -19,11 +19,11 @@ public class ChallengesToast extends SimpleToast {
     private final Icon icon;
     private final SoundInstance sound;
 
-    public static void run(MiningSkillCardData.ChallengeHolder challengeHolder, ItemStack stack) {
-        Minecraft.getInstance().getToasts().addToast(new ChallengesToast(challengeHolder, stack));
+    public static void run(MiningSkillCardData.Challenge challenge, ItemStack stack) {
+        Minecraft.getInstance().getToasts().addToast(new ChallengesToast(challenge, stack));
     }
 
-    public ChallengesToast(MiningSkillCardData.ChallengeHolder challengeIdentifier, ItemStack stack) {
+    public ChallengesToast(MiningSkillCardData.Challenge challengeIdentifier, ItemStack stack) {
         this.icon = ItemIcon.getItemIcon(stack);
         if (challengeIdentifier.getId().equals(ResourceLocation.parse("completed"))) {
             title = Component.translatable("toast.ultimine_addition.challenge.all_completed");

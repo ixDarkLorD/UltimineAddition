@@ -77,7 +77,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
         for (ItemStack itemStack : stacks) {
             if (itemStack.is(stack.getItem())) {
                 if (this.tier.isPresent()) {
-                    var cardData = MiningSkillCardData.loadData(stack);
+                    var cardData = MiningSkillCardData.load(stack);
                     return this.tier.get().equals(cardData.getTier());
                 } else return true;
             }
@@ -239,7 +239,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
             for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
                 ItemStack stack = new ItemStack(item);
                 if (this.tier.isPresent() && stack.getItem() instanceof MiningSkillCardItem cardItem) {
-                    cardItem.getData(stack).setTier(this.tier.get()).saveData(stack);
+                    cardItem.getData(stack).setTier(this.tier.get()).save();
                 }
                 list.add(stack);
             }
@@ -265,7 +265,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
 
         public Collection<ItemStack> getItems() {
             if (this.tier.isPresent() && this.stack.getItem() instanceof MiningSkillCardItem cardItem) {
-                cardItem.getData(this.stack).setTier(this.tier.get()).saveData(this.stack);
+                cardItem.getData(this.stack).setTier(this.tier.get()).save();
             }
             return Collections.singleton(this.stack);
         }

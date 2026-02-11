@@ -30,6 +30,12 @@
   ],
   "accessWidener" : "${modid}.accesswidener",
 
+  "custom": {
+    "loom:injected_interfaces": {
+      "net/minecraft/class_1657": ["net/ixdarklord/ultimine_addition/common/data/player/IPlayerData"]
+    }
+  },
+
   "depends": {
     "java": ">=17",
     "minecraft": ">=${mc_version} <=${max_mc_version}",
