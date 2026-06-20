@@ -2,13 +2,64 @@
 This file is for listing all the changes to this project
 <hr>
 
-## v1.3.2 Release | Mar 5, 2024
+## v2001.1.5.3 Release - Jun 20, 2026
+
+### 🐛 Bug Fixes & Improvements
+
+- Updated compatibility with FTB Ultimine 2001.1.8.
+- Resolved issues caused by the latest FTB Ultimine update to ensure stable functionality.
+
+## v2001.1.5.2 Release - Nov 23, 2025
+
+### ✨ New Features
+
+- Added a new visual effect when a block is being consumed by a challenge.
+- Added a consume-mode indicator inside the Challenges Panel for clearer visibility.
+
+## v2001.1.5.1 Release - Nov 3, 2025
+
+### 🐛 Bug Fixes & Improvements
+
+- The "Consume Mode" button is now functioning correctly and is properly synchronized.
+- The "Consume Mode" button will now be visually dimmed when it is disabled.
+
+## v2001.1.5.0 Release - Nov 2, 2025
+
+### ⚙️ Refactoring
+
+- Renamed and reorganized several classes.
+- Updated version formatting from X.X.X to MCVR.X.X.X to clearly distinguish between Minecraft release versions.
+
+### 🐛 Bug Fixes & Improvements
+
+- [UA-43] Fixed the compatibility with the latest version of FTBUltimine.
+
+### ✨ New Feature
+
+- A new item (**Shape Selector**) – Backported from the latest version 1.21.1.
+- Overhauled the Pin Challenge Panel for improved functionality and design.
+
+<div style="display: flex; gap: 10px;">
+<img src="https://i.imgur.com/n7942YT.png" width="300"  alt=""/>
+<img src="https://i.imgur.com/kMiVBjX.png" width="300"  alt=""/>
+</div>
+
+## v1.4.0 Release - Jun 22, 2024
+
+### Added
+
+- Two New Buttons in Skills Record Configuration.
+  <br></br>
+
+<hr>
+
+## v1.3.2 Release - Mar 5, 2024
 ### Fixed
 - [UA-22] The tool-checking method of Challenges is not functioning correctly.
   <br></br>
 <hr>
 
-## v1.3.1 Release | Mar 4, 2024
+## v1.3.1 Release - Mar 4, 2024
 ### Changed
 - Now, the Mine-GO Juice effect has a strict behavior! `Previously, if you had at least one of the Mine-GO Juice effects, you could use any tool with ultimine ability regardless of whether it was the perfect tool for the block.`
 ### Fixed
@@ -16,7 +67,7 @@ This file is for listing all the changes to this project
   <br></br>
 <hr>
 
-## v1.3.0 Release | Feb 16, 2024
+## v1.3.0 Release - Feb 16, 2024
 ### Adding
 - Mining Skill Card Now can activate the ultimine ability upon leveling to mastered. "With the option to turn it off"
 - Now, the challenges panel has its color synced to the Skills Record screen.
@@ -29,19 +80,19 @@ This file is for listing all the changes to this project
   <br></br>
 <hr>
 
-## v1.2.4 Release | Feb 6, 2024
+## v1.2.4 Release - Feb 6, 2024
 ### Fixed
 - [UA-17] The Skills Record doesn't register any point toward mined blocks if it's in th Curios slot.
   <br></br>
 <hr>
 
-## v1.2.3 Release | Feb 5, 2024
+## v1.2.3 Release - Feb 5, 2024
 ### Fixed
 - [UA-16] Chunks not loading properly.
   <br></br>
 <hr>
 
-## v1.2.2 Release | Jan 21, 2024
+## v1.2.2 Release - Jan 21, 2024
 ### Fixed
 - [UA-13] Skills Record inventory randomly getting cleared.
 - [UA-14] Skills Record data gets deleted at Mainhand.
@@ -49,39 +100,39 @@ This file is for listing all the changes to this project
   <br></br>
 <hr>
 
-## v1.2.1 Release | Jan 18, 2024
+## v1.2.1 Release - Jan 18, 2024
 ### Fixed
 - [UA-12] Incompatibility with DefaultSettings.
   <br></br>
 <hr>
 
-## v1.2.0b Release | Jan 7, 2024
+## v1.2.0b Release - Jan 7, 2024
 ### Fixed
 - [UA-11] Compatibility with the new version (v2001.1.4) of the FTB Ultimine.
   <br></br>
 <hr>
 
-## v1.2.0a Release | Dec 28, 2023
+## v1.2.0a Release - Dec 28, 2023
 ### Fixed
 - Crash issue related to mining skill card occurred when playstyle switched into legacy.
 - Not copying player ultimine ability after exiting The End.
   <br></br>
 <hr>
 
-## v1.2.0 Release | Dec 27, 2023
+## v1.2.0 Release - Dec 27, 2023
 ### Adding
 - Adding Playstyle Mode option `If you prefer the old style of the mod, Now you can change it back as before.`
 - Adding Villager Trade and Price option for the Mining Skill Card `There will be an option for which villager level should the card appear and change the price.`
   <br></br>
 <hr>
 
-## v1.1.2 Release | Dec 21, 2023
+## v1.1.2 Release - Dec 21, 2023
 ### Added
 - New Custom Mining Skill Card API `You can create your Custom Mining Skill Card through configs.` Check out the Wiki!
   <br></br>
 <hr>
 
-## v1.1.1 Release | Dec 2, 2023
+## v1.1.1 Release - Dec 2, 2023
 ### Added
 - Curios and Trinkets Integration `Now... you can insert the Skills Record in the curios/trinkets menu.`
 ### Fixed
@@ -89,13 +140,13 @@ This file is for listing all the changes to this project
   <br></br>
 <hr>
 
-## v1.1.0-Hotfix Release | Nov 12, 2023
+## v1.1.0-Hotfix Release - Nov 12, 2023
 ### Fixed
 - [UA9] Fixed the Tools Validator methods to recognize tools that doesn't have the tag.
   <br></br>
 <hr>
 
-## v1.1.0 Release | Nov 11, 2023
+## v1.1.0 Release - Nov 11, 2023
 ### Added
 - Adding Arabic Translation
 - Progression Display `You can now pin any challenges you want on the screen.`
@@ -108,18 +159,18 @@ This file is for listing all the changes to this project
   <br></br>
 <hr>
 
-## v0.1.1a Beta | Oct 13, 2023
+## v0.1.1a Beta - Oct 13, 2023
 ### Fixed
 - [Forge] issue within OnDatapackSyncEvent method
   <br></br>
 <hr>
 
-## v0.1.1 Beta | Oct 11, 2023
+## v0.1.1 Beta - Oct 11, 2023
 - Fixing issue related to packet
   <br></br>
 <hr>
 
-## v0.1.0 Beta | Oct 9, 2023
+## v0.1.0 Beta - Oct 9, 2023
 ### It's an early release
 `Don't hesitate to submit a report if you have faced an issue.`
 - Port to 1.20.1

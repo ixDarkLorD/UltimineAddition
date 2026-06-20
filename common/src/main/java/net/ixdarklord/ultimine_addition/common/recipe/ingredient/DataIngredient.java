@@ -28,224 +28,231 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public final class DataIngredient implements Predicate<ItemStack> {
-    public static final DataIngredient EMPTY = new DataIngredient(Stream.empty());
-    private final Value[] values;
-    @Nullable
-    private ItemStack[] itemStacks;
-    private int amount;
-    @Nullable
-    private IntList stackingIds;
+   public static final DataIngredient EMPTY = new DataIngredient(Stream.empty());
+   private final Value[] values;
+   private @Nullable ItemStack[] itemStacks;
+   private int amount;
+   private @Nullable IntList stackingIds;
 
-    private DataIngredient(Stream<? extends Value> stream) {
-        this.values = stream.toArray(Value[]::new);
-    }
+   private DataIngredient(Stream<? extends Value> stream) {
+      this.values = stream.toArray((x$0) -> new Value[x$0]);
+   }
 
-    public ItemStack[] getItems() {
-        this.dissolve();
-        return this.itemStacks;
-    }
+   public ItemStack[] getItems() {
+      this.dissolve();
+      return this.itemStacks;
+   }
 
-    public int getAmount() {
-        this.dissolve();
-        return this.amount;
-    }
+   public int getAmount() {
+      this.dissolve();
+      return this.amount;
+   }
 
-    private void dissolve() {
-        if (this.itemStacks == null) {
-            this.itemStacks = Arrays.stream(this.values).flatMap((value) ->
-                    value.getItems().stream()).distinct().toArray(ItemStack[]::new);
-        }
-        this.amount = Arrays.stream(this.values).map(Value::getAmount).toList().get(0);
+   private void dissolve() {
+      if (this.itemStacks == null) {
+         this.itemStacks = Arrays.stream(this.values).flatMap((value) -> value.getItems().stream()).distinct().toArray((x$0) -> new ItemStack[x$0]);
+      }
 
-    }
+      this.amount = Arrays.stream(this.values).map(Value::getAmount).toList().get(0);
+   }
 
-    public boolean test(@Nullable ItemStack stack) {
-        if (stack == null) return false;
-        this.dissolve();
-        if (this.itemStacks.length == 0) return stack.isEmpty();
+   public boolean test(@Nullable ItemStack stack) {
+      if (stack == null) {
+         return false;
+      } else {
+         this.dissolve();
+         if (this.itemStacks.length == 0) {
+            return stack.isEmpty();
+         } else {
+            ItemStack[] stacks = this.itemStacks;
 
-        ItemStack[] stacks = this.itemStacks;
-        for (ItemStack itemStack : stacks) {
-            if (itemStack.is(stack.getItem())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public IntList getStackingIds() {
-        if (this.stackingIds == null) {
-            this.dissolve();
-            this.stackingIds = new IntArrayList(this.itemStacks.length);
-            ItemStack[] var1 = this.itemStacks;
-
-            for (ItemStack itemStack : var1) {
-                this.stackingIds.add(StackedContents.getStackingIndex(itemStack));
+            for (ItemStack itemStack : stacks) {
+               if (itemStack.is(stack.getItem())) {
+                  return true;
+               }
             }
 
-            this.stackingIds.sort(IntComparators.NATURAL_COMPARATOR);
-        }
+            return false;
+         }
+      }
+   }
 
-        return this.stackingIds;
-    }
+   public IntList getStackingIds() {
+      if (this.stackingIds == null) {
+         this.dissolve();
+         this.stackingIds = new IntArrayList(this.itemStacks.length);
+         ItemStack[] itemStack2 = this.itemStacks;
 
-    public void toNetwork(FriendlyByteBuf buffer) {
-        this.dissolve();
-        buffer.writeInt(this.amount);
-        buffer.writeCollection(Arrays.asList(this.itemStacks), FriendlyByteBuf::writeItem);
-    }
+         for (ItemStack itemStack : itemStack2) {
+            this.stackingIds.add(StackedContents.getStackingIndex(itemStack));
+         }
 
-    public JsonElement toJson() {
-        if (this.values.length == 1) {
-            return this.values[0].serialize();
-        } else {
-            JsonArray jsonArray = new JsonArray();
-            for (Value value : this.values) {
-                jsonArray.add(value.serialize());
-            }
+         this.stackingIds.sort(IntComparators.NATURAL_COMPARATOR);
+      }
 
-            return jsonArray;
-        }
-    }
+      return this.stackingIds;
+   }
 
-    public boolean isEmpty() {
-        return this.values.length == 0 && (this.itemStacks == null || this.itemStacks.length == 0) && (this.stackingIds == null || this.stackingIds.isEmpty());
-    }
+   public void toNetwork(FriendlyByteBuf buffer) {
+      this.dissolve();
+      buffer.writeInt(this.amount);
+      buffer.writeCollection(Arrays.asList(this.itemStacks), FriendlyByteBuf::writeItem);
+   }
 
-    private static DataIngredient fromValues(Stream<? extends Value> stream) {
-        DataIngredient DataIngredient = new DataIngredient(stream);
-        return DataIngredient.values.length == 0 ? EMPTY : DataIngredient;
-    }
+   public JsonElement toJson() {
+      if (this.values.length == 1) {
+         return this.values[0].serialize();
+      } else {
+         JsonArray jsonArray = new JsonArray();
 
-    public static DataIngredient of() {
-        return EMPTY;
-    }
+         for (Value value : this.values) {
+            jsonArray.add(value.serialize());
+         }
 
-    public static DataIngredient of(int amount, ItemLike... items) {
-        return of(amount, Arrays.stream(items).map(ItemStack::new));
-    }
+         return jsonArray;
+      }
+   }
 
-    public static DataIngredient of(int amount, ItemStack... stacks) {
-        return of(amount, Arrays.stream(stacks));
-    }
+   public boolean isEmpty() {
+      return this.values.length == 0 && (this.itemStacks == null || this.itemStacks.length == 0) && (this.stackingIds == null || this.stackingIds.isEmpty());
+   }
 
-    public static DataIngredient of(int amount, Stream<ItemStack> stacks) {
-        return fromValues(stacks.filter((itemStack) -> !itemStack.isEmpty()).map(stack -> new ItemValue(stack, amount)));
-    }
+   private static DataIngredient fromValues(Stream<? extends Value> stream) {
+      DataIngredient DataIngredient = new DataIngredient(stream);
+      return DataIngredient.values.length == 0 ? EMPTY : DataIngredient;
+   }
 
-    public static DataIngredient of(TagKey<Item> tag, int amount) {
-        return fromValues(Stream.of(new TagValue(tag, amount)));
-    }
+   public static DataIngredient of() {
+      return EMPTY;
+   }
 
-    public static NonNullList<Ingredient> toNormal(NonNullList<DataIngredient> inputs) {
-        NonNullList<Ingredient> result = NonNullList.create();
-        result.addAll(inputs.stream().map(ingredient -> {
-            ItemStack[] items = Arrays.stream(ingredient.getItems()).peek(stack ->
-                    stack.getOrCreateTag().putInt("amount", ingredient.getAmount()))
-                    .toArray(ItemStack[]::new);
-            return Ingredient.of(items);
-        }).toList());
-        return result;
-    }
+   public static DataIngredient of(int amount, ItemLike... items) {
+      return of(amount, Arrays.stream(items).map(ItemStack::new));
+   }
 
-    public static DataIngredient fromNetwork(FriendlyByteBuf buffer) {
-        int amount = buffer.readInt();
-        return fromValues(buffer.readList(FriendlyByteBuf::readItem).stream().map(stack -> new ItemValue(stack, amount)));
-    }
+   public static DataIngredient of(int amount, ItemStack... stacks) {
+      return of(amount, Arrays.stream(stacks));
+   }
 
-    public static DataIngredient fromJson(@Nullable JsonElement json) {
-        if (json != null && !json.isJsonNull()) {
-            if (json.isJsonObject()) {
-                return fromValues(Stream.of(valueFromJson(json.getAsJsonObject())));
-            } else if (json.isJsonArray()) {
-                JsonArray jsonArray = json.getAsJsonArray();
-                if (jsonArray.isEmpty()) {
-                    throw new JsonSyntaxException("Item array cannot be empty, at least one item must be defined");
-                } else {
-                    return fromValues(StreamSupport.stream(jsonArray.spliterator(), false).map((jsonElement) ->
-                            valueFromJson(GsonHelper.convertToJsonObject(jsonElement, "item"))));
-                }
+   public static DataIngredient of(int amount, Stream<ItemStack> stacks) {
+      return fromValues(stacks.filter((itemStack) -> !itemStack.isEmpty()).map((stack) -> new ItemValue(stack, amount)));
+   }
+
+   public static DataIngredient of(TagKey<Item> tag, int amount) {
+      return fromValues(Stream.of(new TagValue(tag, amount)));
+   }
+
+   public static NonNullList<Ingredient> toNormal(NonNullList<DataIngredient> inputs) {
+      NonNullList<Ingredient> result = NonNullList.create();
+      result.addAll(inputs.stream().map((ingredient) -> {
+         ItemStack[] items = Arrays.stream(ingredient.getItems()).peek((stack) -> stack.getOrCreateTag().putInt("amount", ingredient.getAmount())).toArray((x$0) -> new ItemStack[x$0]);
+         return Ingredient.of(items);
+      }).toList());
+      return result;
+   }
+
+   public static DataIngredient fromNetwork(FriendlyByteBuf buffer) {
+      int amount = buffer.readInt();
+      return fromValues(buffer.readList(FriendlyByteBuf::readItem).stream().map((stack) -> new ItemValue(stack, amount)));
+   }
+
+   public static DataIngredient fromJson(@Nullable JsonElement json) {
+      if (json != null && !json.isJsonNull()) {
+         if (json.isJsonObject()) {
+            return fromValues(Stream.of(valueFromJson(json.getAsJsonObject())));
+         } else if (json.isJsonArray()) {
+            JsonArray jsonArray = json.getAsJsonArray();
+            if (jsonArray.isEmpty()) {
+               throw new JsonSyntaxException("Item array cannot be empty, at least one item must be defined");
             } else {
-                throw new JsonSyntaxException("Expected item to be object or array of objects");
+               return fromValues(StreamSupport.stream(jsonArray.spliterator(), false).map((jsonElement) -> valueFromJson(GsonHelper.convertToJsonObject(jsonElement, "item"))));
             }
-        } else {
-            throw new JsonSyntaxException("Item cannot be null");
-        }
-    }
+         } else {
+            throw new JsonSyntaxException("Expected item to be object or array of objects");
+         }
+      } else {
+         throw new JsonSyntaxException("Item cannot be null");
+      }
+   }
 
-    private static Value valueFromJson(JsonObject json) {
-        if (json.has("item") && json.has("tag")) {
-            throw new JsonParseException("An DataIngredient entry is either a tag or an item, not both");
-        } else if (json.has("item")) {
-            Item item = ShapedRecipe.itemFromJson(json);
-            int amount = GsonHelper.getAsInt(json, "amount");
-            return new ItemValue(new ItemStack(item), amount);
-        } else if (json.has("tag")) {
-            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
-            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, resourceLocation);
-            int amount = GsonHelper.getAsInt(json, "amount");
-            return new TagValue(tagKey, amount);
-        } else {
-            throw new JsonParseException("An DataIngredient entry needs either a tag or an item");
-        }
-    }
+   private static Value valueFromJson(JsonObject json) {
+      if (json.has("item") && json.has("tag")) {
+         throw new JsonParseException("An DataIngredient entry is either a tag or an item, not both");
+      } else if (json.has("item")) {
+         Item item = ShapedRecipe.itemFromJson(json);
+         int amount = GsonHelper.getAsInt(json, "amount");
+         return new ItemValue(new ItemStack(item), amount);
+      } else if (json.has("tag")) {
+         ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
+         TagKey<Item> tagKey = TagKey.create(Registries.ITEM, resourceLocation);
+         int amount = GsonHelper.getAsInt(json, "amount");
+         return new TagValue(tagKey, amount);
+      } else {
+         throw new JsonParseException("An DataIngredient entry needs either a tag or an item");
+      }
+   }
 
-    interface Value {
-        Collection<ItemStack> getItems();
-        int getAmount();
+   static class TagValue implements Value {
+      private final TagKey<Item> tag;
+      private final int amount;
 
-        JsonObject serialize();
-    }
-    static class TagValue implements Value {
-        private final TagKey<Item> tag;
-        private final int amount;
+      TagValue(TagKey<Item> tagKey, int amount) {
+         this.tag = tagKey;
+         this.amount = amount;
+      }
 
-        TagValue(TagKey<Item> tagKey, int amount) {
-            this.tag = tagKey;
-            this.amount = amount;
-        }
+      public Collection<ItemStack> getItems() {
+         List<ItemStack> list = Lists.newArrayList();
 
-        public Collection<ItemStack> getItems() {
-            List<ItemStack> list = Lists.newArrayList();
-            for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
-                list.add(new ItemStack(holder));
-            }
-            return list;
-        }
+         for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
+            list.add(new ItemStack(holder));
+         }
 
-        public int getAmount() {
-            return this.amount;
-        }
+         return list;
+      }
 
-        public JsonObject serialize() {
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("tag", this.tag.location().toString());
-            jsonObject.addProperty("amount", getAmount());
-            return jsonObject;
-        }
-    }
-    static class ItemValue implements Value {
-        private final ItemStack stack;
-        private final int amount;
+      public int getAmount() {
+         return this.amount;
+      }
 
-        ItemValue(ItemStack stack, int amount) {
-            this.stack = stack;
-            this.amount = amount;
-        }
+      public JsonObject serialize() {
+         JsonObject jsonObject = new JsonObject();
+         jsonObject.addProperty("tag", this.tag.location().toString());
+         jsonObject.addProperty("amount", this.getAmount());
+         return jsonObject;
+      }
+   }
 
-        public Collection<ItemStack> getItems() {
-            return Collections.singleton(this.stack);
-        }
+   static class ItemValue implements Value {
+      private final ItemStack stack;
+      private final int amount;
 
-        public int getAmount() {
-            return this.amount;
-        }
+      ItemValue(ItemStack stack, int amount) {
+         this.stack = stack;
+         this.amount = amount;
+      }
 
-        public JsonObject serialize() {
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("item", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.stack.getItem())).toString());
-            jsonObject.addProperty("amount", getAmount());
-            return jsonObject;
-        }
-    }
+      public Collection<ItemStack> getItems() {
+         return Collections.singleton(this.stack);
+      }
+
+      public int getAmount() {
+         return this.amount;
+      }
+
+      public JsonObject serialize() {
+         JsonObject jsonObject = new JsonObject();
+         jsonObject.addProperty("item", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.stack.getItem())).toString());
+         jsonObject.addProperty("amount", this.getAmount());
+         return jsonObject;
+      }
+   }
+
+   interface Value {
+      Collection<ItemStack> getItems();
+
+      int getAmount();
+
+      JsonObject serialize();
+   }
 }

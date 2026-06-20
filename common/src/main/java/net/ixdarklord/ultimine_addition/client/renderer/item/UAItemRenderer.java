@@ -11,14 +11,12 @@ import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public abstract class UAItemRenderer extends BlockEntityWithoutLevelRenderer {
-
     public UAItemRenderer() {
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
     }
 
-    public abstract void render(ItemStack itemStack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource multiBufferSource, int light, int overlay);
+    public abstract void render(ItemStack itemStack, ItemDisplayContext itemDisplayContext, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int i2);
 
-    @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         this.render(stack, displayContext, poseStack, buffer, packedLight, packedOverlay);
     }

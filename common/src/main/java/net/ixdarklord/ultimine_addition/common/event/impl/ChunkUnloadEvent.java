@@ -7,8 +7,9 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import org.jetbrains.annotations.Nullable;
 
 public class ChunkUnloadEvent {
-    public static final Event<UnloadData> EVENT = EventFactory.createLoop();
+    public static final Event<UnloadData> EVENT = EventFactory.createLoop(new UnloadData[0]);
+
     public interface UnloadData {
-        void Unload(ChunkAccess chunk, @Nullable ServerLevel level);
+        void Unload(ChunkAccess chunkAccess, @Nullable ServerLevel serverLevel);
     }
 }

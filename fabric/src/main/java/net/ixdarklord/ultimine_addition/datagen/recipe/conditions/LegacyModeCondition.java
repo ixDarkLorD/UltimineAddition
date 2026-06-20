@@ -1,49 +1,44 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe.conditions;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.ixdarklord.coolcat_lib.common.crafting.ICondition;
-import net.ixdarklord.coolcat_lib.common.crafting.IConditionSerializer;
-import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 
-public class LegacyModeCondition implements ICondition {
-    private final boolean state;
+public record LegacyModeCondition(boolean value) implements ConditionJsonProvider {
+   public static final ResourceLocation ID = FTBUltimineAddition.id("legacy_mode");
+   public static final MapCodec<LegacyModeCondition> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(Codec.BOOL.fieldOf("value").forGetter(LegacyModeCondition::value)).apply(instance, LegacyModeCondition::new));
 
-    public LegacyModeCondition(boolean state) {
-        this.state = state;
-    }
+   public static void register() {
+      ResourceConditions.register(ID, (object) -> {
+         boolean expectedValue = GsonHelper.getAsBoolean(object, "value", false);
+         boolean isLegacyMode = ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
+         return isLegacyMode == expectedValue;
+      });
+   }
 
-    @Override
-    public ResourceLocation getID() {
-        return Serializer.NAME;
-    }
+   public ResourceLocation getConditionId() {
+      return ID;
+   }
 
-    @Override
-    public boolean test(IContext context) {
-        boolean isLegacyMode = ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
-        return isLegacyMode == state;
-    }
+   public void writeParameters(JsonObject jsonObject) {
+      DataResult<JsonElement> result = CODEC.codec().encodeStart(JsonOps.INSTANCE, this);
+      result.result().ifPresent((element) -> {
+         if (element.isJsonObject()) {
+            JsonObject encoded = element.getAsJsonObject();
+            encoded.entrySet().forEach((entry) -> jsonObject.add(entry.getKey(), entry.getValue()));
+         }
 
-    public static class Serializer implements IConditionSerializer<LegacyModeCondition> {
-        private static final ResourceLocation NAME = UltimineAddition.getLocation("legacy_mode");
-        public static final Serializer INSTANCE = new Serializer();
-
-        @Override
-        public void write(JsonObject json, LegacyModeCondition value) {
-            json.addProperty("state", value.state);
-        }
-
-        @Override
-        public LegacyModeCondition read(JsonObject json) {
-            return new LegacyModeCondition(GsonHelper.getAsBoolean(json, "state"));
-        }
-
-        @Override
-        public ResourceLocation getID() {
-            return NAME;
-        }
-    }
+      });
+   }
 }

@@ -13,8 +13,10 @@ public class AdvancementProvider extends net.minecraft.data.advancements.Advance
     public AdvancementProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, List<AdvancementGenerator> subProviders) {
         super(output, registries, subProviders.stream().map(AdvancementGenerator::toSubProvider).toList());
     }
+
     public interface AdvancementGenerator {
-        void generate(HolderLookup.Provider registries, Consumer<Advancement> saver);
+        void generate(HolderLookup.Provider provider, Consumer<Advancement> consumer);
+
         default AdvancementSubProvider toSubProvider() {
             return this::generate;
         }

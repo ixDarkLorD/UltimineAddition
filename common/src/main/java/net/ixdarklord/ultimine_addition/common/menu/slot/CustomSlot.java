@@ -5,11 +5,11 @@ import net.minecraft.world.inventory.Slot;
 
 public class CustomSlot extends Slot {
     private boolean isActive = true;
+
     public CustomSlot(Container container, int slotID, int x, int y) {
         super(container, slotID, x, y);
     }
 
-    @Override
     public boolean isActive() {
         return this.isActive;
     }

@@ -1,47 +1,36 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe.conditions;
 
 import com.google.gson.JsonObject;
-import net.ixdarklord.ultimine_addition.common.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.common.config.PlaystyleMode;
-import net.ixdarklord.ultimine_addition.core.UltimineAddition;
+import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 
-public class LegacyModeCondition implements ICondition {
-    private final boolean state;
-
-    public LegacyModeCondition(boolean state) {
-        this.state = state;
-    }
-
-    @Override
+public record LegacyModeCondition(boolean value) implements ICondition {
     public ResourceLocation getID() {
-        return Serializer.NAME;
+        return LegacyModeCondition.Serializer.NAME;
     }
 
-    @Override
-    public boolean test(IContext context) {
+    public boolean test(ICondition.IContext context) {
         boolean isLegacyMode = ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
-        return isLegacyMode == state;
+        return isLegacyMode == this.value;
     }
 
     public static class Serializer implements IConditionSerializer<LegacyModeCondition> {
-        private static final ResourceLocation NAME = UltimineAddition.getLocation("legacy_mode");
+        private static final ResourceLocation NAME = FTBUltimineAddition.id("legacy_mode");
         public static final Serializer INSTANCE = new Serializer();
 
-        @Override
         public void write(JsonObject json, LegacyModeCondition value) {
-            json.addProperty("state", value.state);
+            json.addProperty("value", value.value);
         }
 
-        @Override
         public LegacyModeCondition read(JsonObject json) {
-            return new LegacyModeCondition(GsonHelper.getAsBoolean(json, "state"));
+            return new LegacyModeCondition(GsonHelper.getAsBoolean(json, "value"));
         }
 
-        @Override
         public ResourceLocation getID() {
             return NAME;
         }

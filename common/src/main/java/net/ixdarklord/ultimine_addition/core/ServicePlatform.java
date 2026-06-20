@@ -5,40 +5,35 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
-@SuppressWarnings("unused")
-public class ServicePlatform {
+public interface ServicePlatform {
     @ExpectPlatform
-    public static void registerConfig() {
+    static ServicePlatform get() {
         throw new AssertionError();
     }
 
-    public static class SlotAPI {
-        @ExpectPlatform
-        public static boolean isModLoaded() {
-            throw new AssertionError();
-        }
-        @ExpectPlatform
-        public static ItemStack getSkillsRecordItem(Player player) {
-            throw new AssertionError();
-        }
+    void registerConfig();
+
+    SlotAPI slotAPI();
+
+    Players players();
+
+    interface Players {
+        boolean isPlayerUltimineCapable(Player player);
+
+        void setPlayerUltimineCapability(Player player, boolean flag);
+
+        boolean isCorrectToolForBlock(ItemStack itemStack, BlockState blockState);
+
+        boolean isToolPaxel(ItemStack itemStack);
+
+        double getBlockReachAttribute(Player player);
     }
 
-    public static class Players {
-        @ExpectPlatform
-        public static boolean isPlayerUltimineCapable(Player player) {
-            throw new AssertionError();
-        }
-        @ExpectPlatform
-        public static void setPlayerUltimineCapability(Player player, boolean state) {
-            throw new AssertionError();
-        }
-        @ExpectPlatform
-        public static double getReachAttribute(Player player) {
-            throw new AssertionError();
-        }
-        @ExpectPlatform
-        public static boolean isCorrectToolForBlock(ItemStack stack, BlockState blockState) {
-            throw new AssertionError();
-        }
+    interface SlotAPI {
+        String getAPIName();
+
+        boolean isModLoaded();
+
+        ItemStack getSkillsRecordItem(Player player);
     }
 }

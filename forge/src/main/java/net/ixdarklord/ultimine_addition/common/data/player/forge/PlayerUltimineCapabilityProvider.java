@@ -13,35 +13,30 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class PlayerUltimineCapabilityProvider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
-    public static Capability<PlayerAbilityData> CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {});
+   public static Capability<PlayerAbilityData> CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {
+   });
+   private PlayerAbilityData capability = null;
+   private final LazyOptional<PlayerAbilityData> optional = LazyOptional.of(this::createCapability);
 
-    private PlayerAbilityData capability = null;
-    private final LazyOptional<PlayerAbilityData> optional = LazyOptional.of(this::createCapability);
+   private PlayerAbilityData createCapability() {
+      if (this.capability == null) {
+         this.capability = PlayerAbilityData.create();
+      }
 
-    private PlayerAbilityData createCapability() {
-        if (this.capability == null) {
-            this.capability = new PlayerAbilityData();
-        }
-        return this.capability;
-    }
+      return this.capability;
+   }
 
-    @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CAPABILITY) {
-            return optional.cast();
-        }
-        return LazyOptional.empty();
-    }
+   public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+      return cap == CAPABILITY ? this.optional.cast() : LazyOptional.empty();
+   }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag NBT = new CompoundTag();
-        createCapability().saveData(NBT);
-        return NBT;
-    }
+   public CompoundTag serializeNBT() {
+      CompoundTag NBT = new CompoundTag();
+      this.createCapability().save(NBT);
+      return NBT;
+   }
 
-    @Override
-    public void deserializeNBT(CompoundTag NBT) {
-        createCapability().loadData(NBT);
-    }
+   public void deserializeNBT(CompoundTag NBT) {
+      this.createCapability().load(NBT);
+   }
 }
