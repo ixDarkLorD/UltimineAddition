@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(BrewingStandBlockEntity.class)
-abstract class BrewingStandBlockEntityMixin {
+public abstract class BrewingStandBlockEntityMixin {
 
     @Shadow @Final private static int INGREDIENT_SLOT;
 

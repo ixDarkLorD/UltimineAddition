@@ -1,9 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.event;
 
-import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
-import dev.architectury.event.events.client.ClientGuiEvent;
-import dev.architectury.event.events.client.ClientTickEvent;
-import dev.architectury.event.events.client.ClientTooltipEvent;
+import dev.architectury.event.events.client.*;
 import net.ixdarklord.ultimine_addition.client.commands.SkillsRecordDebugCommand;
 import net.ixdarklord.ultimine_addition.client.gui.hud.MinerCertificateStatus;
 import net.ixdarklord.ultimine_addition.client.gui.hud.ChallengesPanelManager;
@@ -18,6 +15,7 @@ public final class ClientEventHandler {
     public static void register() {
         ClientTooltipEvent.ITEM.register(ItemTooltipEvents::init);
         ClientGuiEvent.RENDER_HUD.register(ChallengesPanelManager.INSTANCE::render);
+        ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(ChallengesPanelManager.INSTANCE::cleanup);
         ClientGuiEvent.RENDER_HUD.register(MinerCertificateStatus.INSTANCE::render);
         ClientTickEvent.CLIENT_POST.register((instance) -> {
             FTBUltimineIntegration.keyEvent(instance.player);

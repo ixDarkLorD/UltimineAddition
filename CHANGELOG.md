@@ -2,6 +2,11 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v2101.1.2.4 Release - Jun 20, 2026
+### 🐛 Bug Fixes & Improvements
+- Updated compatibility with FTB Ultimine 2101.1.15.
+- Resolved issues caused by the latest FTB Ultimine update to ensure stable functionality.
+
 ## v2101.1.2.3 Release - Feb 11, 2026
 ### 🐛 Bug Fixes & Improvements
 - Updated compatibility with FTB Ultimine 2101.1.13.

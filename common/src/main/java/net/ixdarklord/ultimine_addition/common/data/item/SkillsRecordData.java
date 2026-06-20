@@ -55,7 +55,7 @@ public final class SkillsRecordData extends ItemDataComponent<SkillsRecordData> 
             UUIDUtil.CODEC.optionalFieldOf("UUID", UUID.randomUUID()).forGetter(SkillsRecordData::getUUID),
             ItemStack.OPTIONAL_CODEC.listOf().xmap(itemStacks -> new SimpleContainer(itemStacks.toArray(ItemStack[]::new)), SimpleContainer::getItems).fieldOf("Contents").forGetter(SkillsRecordData::getContainer),
             Codec.INT.optionalFieldOf("SelectedCard", -1).forGetter(SkillsRecordData::getSelectedCard),
-            Codec.BOOL.optionalFieldOf("ConsumeMode", false).forGetter(SkillsRecordData::isConsumeMode)
+            Codec.BOOL.optionalFieldOf("ConsumeMode", false).forGetter(SkillsRecordData::isConsumeModeActive)
     ).apply(instance, SkillsRecordData::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, Map<Integer, MiningSkillCardData>> CARD_DATA_STREAM_CODEC =
@@ -105,7 +105,7 @@ public final class SkillsRecordData extends ItemDataComponent<SkillsRecordData> 
     }
 
     public static SkillsRecordData create() {
-        return new SkillsRecordData(UUID.randomUUID(), new SimpleContainer(6), -1, false);
+        return new SkillsRecordData(UUID.randomUUID(), new SimpleContainer(SkillsRecordMenu.CONTAINER_SIZE), -1, false);
     }
 
     public static SkillsRecordData load(ItemStack stack) {
@@ -120,7 +120,7 @@ public final class SkillsRecordData extends ItemDataComponent<SkillsRecordData> 
         boolean b1 = false;
         boolean b2 = false;
 
-        for(int i = 0; i < this.getCardSlots().size(); ++i) {
+        for (int i = 0; i < this.getCardSlots().size(); ++i) {
             Optional<MiningSkillCardData> dataOpt = this.getCardData(i);
             if (dataOpt.isPresent()) {
                 Pair<Boolean, Boolean> pair = this.validateTask(dataOpt.get(), state, pos, player, challengeType);
@@ -273,7 +273,7 @@ public final class SkillsRecordData extends ItemDataComponent<SkillsRecordData> 
         return getAllSlots().get(5);
     }
 
-    public boolean isConsumeMode() {
+    public boolean isConsumeModeActive() {
         return consumeMode;
     }
 
@@ -320,7 +320,7 @@ public final class SkillsRecordData extends ItemDataComponent<SkillsRecordData> 
     public SkillsRecordData sendToClient(ServerPlayer player, int slotIndex) {
         PayloadHandler.sendToPlayer(new SkillsRecordPayload.SyncData(slotIndex, this), player);
 
-        for(int i = 0; i < this.getCardSlots().size(); ++i) {
+        for (int i = 0; i < this.getCardSlots().size(); ++i) {
             Optional<MiningSkillCardData> cardData = this.getCardData(i);
             cardData.ifPresent(MiningSkillCardData::onServerUpdate);
         }
@@ -329,7 +329,7 @@ public final class SkillsRecordData extends ItemDataComponent<SkillsRecordData> 
     }
 
     public SkillsRecordData onClientUpdate() {
-        for(int i = 0; i < this.getCardSlots().size(); ++i) {
+        for (int i = 0; i < this.getCardSlots().size(); ++i) {
             Optional<MiningSkillCardData> dataOpt = this.getCardData(i);
             dataOpt.ifPresent(MiningSkillCardData::onClientUpdate);
         }

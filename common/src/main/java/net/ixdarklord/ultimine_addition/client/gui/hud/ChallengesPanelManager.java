@@ -15,9 +15,11 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -27,6 +29,10 @@ public final class ChallengesPanelManager {
     private final Map<Panel.Key, Panel> panelMap = new TreeMap<>();
     private Panel.Align panelAlign;
     private final int panelPadding = 4;
+
+    public void cleanup(@Nullable LocalPlayer ignored) {
+        panelMap.clear();
+    }
 
     public void render(GuiGraphics guiGraphics, DeltaTracker ignored) {
         if (COMMON.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
@@ -50,7 +56,7 @@ public final class ChallengesPanelManager {
                 this.alignPanels(window);
 
                 for(Panel panel : this.panelMap.values()) {
-                    panel.render(guiGraphics, stack);
+                    panel.render(guiGraphics);
                 }
 
             }
@@ -90,7 +96,11 @@ public final class ChallengesPanelManager {
     }
 
     private void slideOutPanels(Collection<Panel> panels) {
-        panels.stream().filter(Panel::isAssignedToRemove).map(Panel::getAnimatedComponent).filter(AnimatedComponent::isForward).forEach((component) -> component.play(true));
+        panels.stream()
+                .filter(Panel::isAssignedToRemove)
+                .map(Panel::getAnimatedComponent)
+                .filter(AnimatedComponent::isForward)
+                .forEach((component) -> component.play(true));
     }
 
     private void createPanels(SkillsRecordData recordData) {
@@ -220,18 +230,21 @@ public final class ChallengesPanelManager {
             } else {
                 data.getCardData(key.slotIndex()).ifPresent((cardData) -> {
                     panel.setTitle(cardData.getStack().getHoverName());
+
                     cardData.getChallenges().forEach((challenge) -> {
                         if (challenge.isPinned()) {
                             panel.addInfo(challenge);
                         }
                     });
+
                     panel.getInfos().forEach((info) -> cardData.getChallenge(info.getChallengeId()).ifPresent((challenge) -> {
                         if (challenge.isPinned()) {
                             info.setCurrentValue(challenge.getCurrentPoints());
                             info.setRequiredValue(challenge.getRequiredPoints());
                         }
-
                     }));
+
+                    panel.setConsumeMode(data.isConsumeModeActive());
                 });
             }
         });

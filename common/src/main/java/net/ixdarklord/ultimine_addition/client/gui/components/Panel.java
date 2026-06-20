@@ -21,8 +21,6 @@ import net.ixdarklord.coolcatlib.api.utils.MathUtils;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
-import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
-import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler.CLIENT;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
@@ -39,7 +37,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class Panel implements LayoutElement {
@@ -63,6 +60,7 @@ public class Panel implements LayoutElement {
     private int height;
     private Component title = Component.empty();
     private final Set<Info> infos = new TreeSet<>();
+    private boolean consumeMode = false;
     private final AnimatedComponent animatedComponent;
     private boolean assignedToRemove = false;
     private float time;
@@ -93,41 +91,37 @@ public class Panel implements LayoutElement {
         this.animatedComponent.update();
     }
 
-    public void render(GuiGraphics guiGraphics, ItemStack stack) {
-        if (stack.getItem() instanceof SkillsRecordItem && SkillsRecordData.hasData(stack)) {
-            SkillsRecordData data = SkillsRecordData.load(stack);
-            this.update();
-            if (this.active) {
-                SkillsRecordScreen.OverlayColor overlayColor = CLIENT.BACKGROUND_COLOR.get();
-                if (!this.notifyPanel) {
-                    RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
-                    guiGraphics.blitSprite(SLOT_INDICATOR_TEXTURE, this.x + 5, this.y, 51, 10);
-                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                    int spacing = 13 * this.slot;
-                    double value = MathUtils.cycledBetweenValues(0.0F, 1.0F, 0.8F, this.time / 20.0F, false);
-                    Color color = ColorUtils.blend(new Color(9036329), new Color(6991904), CLIENT.ANIMATIONS_MODE.get() ? value : (double)0.0F);
-                    guiGraphics.fill(this.x + 8 + spacing, this.y + 3, this.x + 14 + spacing, this.y + 9, color.getRGB());
-                }
-
+    public void render(GuiGraphics guiGraphics) {
+        this.update();
+        if (this.active) {
+            SkillsRecordScreen.OverlayColor overlayColor = CLIENT.BACKGROUND_COLOR.get();
+            if (!this.notifyPanel) {
                 RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
-                guiGraphics.blitSprite(TITLE_TEXTURE, this.x, this.y + (!this.notifyPanel ? 10 : 0), this.getWidth(), 15);
+                guiGraphics.blitSprite(SLOT_INDICATOR_TEXTURE, this.x + 5, this.y, 51, 10);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                if (!this.notifyPanel) {
-                    TRANSLUCENT_TRANSPARENCY.setupRenderState();
-                    RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
-                    guiGraphics.blitSprite(DESCRIPTION_TEXTURE, this.x, this.y + 22, this.getWidth(), this.infos.isEmpty() ? 0 : this.getInfoHeight() + 8);
-                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                    TRANSLUCENT_TRANSPARENCY.clearRenderState();
-                }
+                int spacing = 13 * this.slot;
+                double value = MathUtils.cycledBetweenValues(0.0F, 1.0F, 0.8F, this.time / 20.0F, false);
+                Color color = ColorUtils.blend(new Color(9036329), new Color(6991904), CLIENT.ANIMATIONS_MODE.get() ? value : (double)0.0F);
+                guiGraphics.fill(this.x + 8 + spacing, this.y + 3, this.x + 14 + spacing, this.y + 9, color.getRGB());
+            }
 
+            RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
+            guiGraphics.blitSprite(TITLE_TEXTURE, this.x, this.y + (!this.notifyPanel ? 10 : 0), this.getWidth(), 15);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            if (!this.notifyPanel) {
+                TRANSLUCENT_TRANSPARENCY.setupRenderState();
+                RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
+                guiGraphics.blitSprite(DESCRIPTION_TEXTURE, this.x, this.y + 22, this.getWidth(), this.infos.isEmpty() ? 0 : this.getInfoHeight() + 8);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                RenderUtils.drawScrollingString(guiGraphics, (int)(this.time * 8.0F), this.mc.font, this.title, true, new ScreenRectangle(this.x, this.y + (!this.notifyPanel ? 13 : 3), this.getWidth(), 9), 8, Color.WHITE.getRGB(), true);
-                this.updateInfoLayout();
+                TRANSLUCENT_TRANSPARENCY.clearRenderState();
+            }
 
-                for(Info info : this.getInfos()) {
-                    info.render(guiGraphics, this.time, data, overlayColor);
-                }
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderUtils.drawScrollingString(guiGraphics, (int)(this.time * 8.0F), this.mc.font, this.title, true, new ScreenRectangle(this.x, this.y + (!this.notifyPanel ? 13 : 3), this.getWidth(), 9), 8, Color.WHITE.getRGB(), true);
+            this.updateInfoLayout();
 
+            for(Info info : this.getInfos()) {
+                info.render(guiGraphics, this.time, overlayColor);
             }
         }
     }
@@ -205,6 +199,10 @@ public class Panel implements LayoutElement {
 
     public void removeInfo(Info info) {
         this.infos.removeIf(info::equals);
+    }
+
+    public void setConsumeMode(boolean state) {
+        this.consumeMode = state;
     }
 
     public boolean isActive() {
@@ -320,7 +318,7 @@ public class Panel implements LayoutElement {
             this.requiredValue = requiredValue;
         }
 
-        public void render(GuiGraphics guiGraphics, float time, SkillsRecordData recordData, SkillsRecordScreen.OverlayColor overlayColor) {
+        public void render(GuiGraphics guiGraphics, float time, SkillsRecordScreen.OverlayColor overlayColor) {
             this.width = this.parent.getWidth() - PADDING;
             Minecraft mc = Minecraft.getInstance();
             Font font = mc.font;
@@ -343,19 +341,20 @@ public class Panel implements LayoutElement {
 
             for(Component line : descriptionLines) {
                 int lineCount = font.split(line, this.width + 25).size();
-                Objects.requireNonNull(font);
                 descHeight += (int)(9.0F * DESC_SCALE * (float)lineCount);
             }
 
             this.height = titleHeight + idHeight + descHeight + progressTextHeight + BAR_TOP_PADDING + BAR_HEIGHT + TOTAL_PADDING + 1;
             float progress = this.requiredValue > 0 ? (float)this.currentValue / (float)this.requiredValue : 0.0F;
             int percent = (int)(progress * 100.0F);
+
             pose.pushPose();
             pose.translate((float)(this.x + BAR_SIDE_PADDING), (float)this.y, 0.0F);
             pose.scale(0.9F, 0.9F, 1.0F);
             Component title = Component.translatable("challenge.ultimine_addition.title", this.order).withStyle(ChatFormatting.BOLD);
             guiGraphics.drawString(font, title, 0, 0, 16777215, true);
             pose.popPose();
+
             pose.pushPose();
             pose.translate((float)(this.x + 2), (float)(this.y + titleHeight + 2), 0.0F);
             pose.scale(0.8F, 0.8F, 1.0F);
@@ -364,6 +363,7 @@ public class Panel implements LayoutElement {
             guiGraphics.drawString(font, Component.literal("\ud83d\udcdd"), 1, -1, Color.WHITE.getRGB(), true);
             RenderUtils.drawScrollingString(guiGraphics, (int)(time * 16.0F), font, idLine, false, new ScreenRectangle(10, 0, cWidth, idHeight), new ScreenRectangle(this.x + 10, this.y + titleHeight, cWidth, titleHeight), 16777215, true);
             pose.popPose();
+
             int descStartY = this.y + 4 + titleHeight + idHeight;
             guiGraphics.fill(this.x + 4, descStartY, this.x + 5, descStartY + descHeight + 1, ColorUtils.rgbToRgba(Color.BLACK, 0.25F));
             guiGraphics.fill(this.x + 3, descStartY - 1, this.x + 4, descStartY + descHeight, Color.LIGHT_GRAY.getRGB());
@@ -386,9 +386,9 @@ public class Panel implements LayoutElement {
             pose.translate((float)(this.x + 4), (float)progressY, 0.0F);
             pose.scale(0.9F, 0.9F, 1.0F);
             boolean isConsuming = ChallengesManager.INSTANCE.getChallengeData(this.getChallengeId()).map((data) -> data.challengeType().isConsuming()).orElse(false);
-            String symbol = this.currentValue < this.requiredValue && isConsuming && !recordData.isConsumeMode() ? "✘" : "»";
+            String symbol = this.currentValue < this.requiredValue && isConsuming && !parent.consumeMode ? "✘" : "»";
             ChatFormatting baseFormat = this.currentValue >= this.requiredValue ? ChatFormatting.GREEN : ChatFormatting.GOLD;
-            ChatFormatting finalFormating = this.currentValue < this.requiredValue && isConsuming ? (recordData.isConsumeMode() ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.RED) : baseFormat;
+            ChatFormatting finalFormating = this.currentValue < this.requiredValue && isConsuming ? (parent.consumeMode ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.RED) : baseFormat;
             Component progressText = Component.literal(String.format("%s %d%% (%d/%d)", symbol, percent, this.currentValue, this.requiredValue)).withStyle(finalFormating);
             guiGraphics.drawString(font, progressText, 0, 0, 16766720, false);
             pose.popPose();
@@ -403,7 +403,6 @@ public class Panel implements LayoutElement {
             if (filledWidth < BAR_WIDTH) {
                 guiGraphics.fill(filledWidth, 0, filledWidth + 1, 3, barColor.darker().darker().darker().getRGB());
             }
-
             pose.popPose();
         }
 

@@ -4,8 +4,7 @@ import dev.ftb.mods.ftbultimine.api.restriction.RestrictionHandler;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import dev.ftb.mods.ftbultimine.api.util.CanUltimineResult;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
-import dev.ftb.mods.ftbultimine.integration.IntegrationHandler;
-import dev.ftb.mods.ftbultimine.integration.ranks.FTBRanksIntegration;
+import dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig;
 import dev.ftb.mods.ftbultimine.shape.ShapeRegistry;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -24,11 +23,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
 
-import static dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig.MAX_BLOCKS;
+import static net.ixdarklord.ultimine_addition.config.ConfigHandler.SERVER.CARD_TIER_MAX_BLOCKS;
 
 public class FTBUltimineIntegration implements RestrictionHandler {
     public static FTBUltimineIntegration INSTANCE = new FTBUltimineIntegration();
@@ -145,38 +145,40 @@ public class FTBUltimineIntegration implements RestrictionHandler {
     }
 
     public static int getMaxBlocks(ServerPlayer player) {
-        if (!ConfigHandler.SERVER.CARD_TIER_BASED_MAX_BLOCKS.get()) {
-            return IntegrationHandler.ranksMod ? FTBRanksIntegration.getMaxBlocks(player, MAX_BLOCKS.get()) : MAX_BLOCKS.get();
+        if (ConfigHandler.SERVER.CARD_TIER_BASED_MAX_BLOCKS.get()) {
+            List<MobEffectInstance> instances = new ArrayList<>(player.getActiveEffects().stream().filter((mobEffectInstance) -> mobEffectInstance.getEffect() instanceof MineGoJuiceEffect).toList());
+            if (!ServicePlatform.get().players().isPlayerUltimineCapable(player) && !instances.isEmpty()) {
+                instances.sort(Comparator.comparingInt(MobEffectInstance::getAmplifier).reversed());
+                if (ItemUtils.isItemInHandCustomCardValid(player)) {
+                    instances.removeIf((instance) -> {
+                        ItemStack stack = ItemUtils.getItemInHand(player, true);
+                        Item item = stack.getItem();
+                        if (item instanceof MiningSkillCardItem cardItem) {
+                            return ((MineGoJuiceEffect) instance.getEffect()).getType() != cardItem.getType();
+                        } else {
+                            return false;
+                        }
+                    });
+                } else if (ItemUtils.isItemInHandPickaxe(player)) {
+                    instances.removeIf((instance) -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.PICKAXE);
+                } else if (ItemUtils.isItemInHandAxe(player)) {
+                    instances.removeIf((instance) -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.AXE);
+                } else if (ItemUtils.isItemInHandShovel(player)) {
+                    instances.removeIf((instance) -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.SHOVEL);
+                } else if (ItemUtils.isItemInHandHoe(player)) {
+                    instances.removeIf((instance) -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.HOE);
+                }
+
+                if (!instances.isEmpty()) {
+                    try {
+                        return CARD_TIER_MAX_BLOCKS.getValue(MiningSkillCardItem.Tier.fromInt(Math.min(instances.getFirst().getAmplifier() + 1, CARD_TIER_MAX_BLOCKS.getDefaultMapValue().size() - 1)));
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                }
+            }
         }
 
-        List<MobEffectInstance> instances = new ArrayList<>(player.getActiveEffects().stream().filter(mobEffectInstance -> mobEffectInstance.getEffect().value() instanceof MineGoJuiceEffect).toList());
-        if (!ServicePlatform.get().players().isPlayerUltimineCapable(player) && !instances.isEmpty()) {
-            instances.sort(Comparator.comparingInt(MobEffectInstance::getAmplifier).reversed());
-
-            if (ItemUtils.isItemInHandCustomCardValid(player)) {
-                instances.removeIf(instance -> {
-                    ItemStack stack = ItemUtils.getItemInHand(player, true);
-                    if (stack.getItem() instanceof MiningSkillCardItem cardItem)
-                        return ((MineGoJuiceEffect) instance.getEffect()).getType() != cardItem.getType();
-                    return false;
-                });
-            } else if (ItemUtils.isItemInHandPickaxe(player)) {
-                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect().value()).getType() != MiningSkillCardItem.Type.PICKAXE);
-            } else if (ItemUtils.isItemInHandAxe(player)) {
-                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect().value()).getType() != MiningSkillCardItem.Type.AXE);
-            } else if (ItemUtils.isItemInHandShovel(player)) {
-                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect().value()).getType() != MiningSkillCardItem.Type.SHOVEL);
-            } else if (ItemUtils.isItemInHandHoe(player)) {
-                instances.removeIf(instance -> ((MineGoJuiceEffect) instance.getEffect().value()).getType() != MiningSkillCardItem.Type.HOE);
-            }
-
-            if (!instances.isEmpty()) {
-                try {
-                    return ConfigHandler.SERVER.CARD_TIER_MAX_BLOCKS.getValue(MiningSkillCardItem.Tier.fromInt(instances.getFirst().getAmplifier()+1));
-                } catch (IllegalArgumentException ignored) {}
-            }
-        }
-        return IntegrationHandler.ranksMod ? FTBRanksIntegration.getMaxBlocks(player, MAX_BLOCKS.get()) : MAX_BLOCKS.get();
+        return FTBUltimineServerConfig.getMaxBlocks(player);
     }
 
     public static List<Shape> getShapesList() {

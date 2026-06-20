@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(ShapeRegistry.class)
-abstract class ShapeRegistryMixin implements ShapeRegistryAccessor {
+public abstract class ShapeRegistryMixin implements ShapeRegistryAccessor {
     @Shadow @Final private List<Shape> shapesList;
 
     @Shadow private Shape defaultShape;

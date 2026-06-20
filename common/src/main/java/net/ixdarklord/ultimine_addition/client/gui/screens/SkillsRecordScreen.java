@@ -201,7 +201,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
                     this.saveValuesToConfig();
                 }));
 
-        this.consumeButton = this.addRenderableWidget(new StateSwitchingButton(this.leftPos + 174, this.topPos + 106, 10, 18, this.menu.getData().isConsumeMode()) {
+        this.consumeButton = this.addRenderableWidget(new StateSwitchingButton(this.leftPos + 174, this.topPos + 106, 10, 18, this.menu.getData().isConsumeModeActive()) {
 
             @Override
             public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
@@ -230,7 +230,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
                 }
 
                 if (this.isActive() && this.isHovered()) {
-                    Component state = SkillsRecordScreen.this.menu.getData().isConsumeMode() ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
+                    Component state = SkillsRecordScreen.this.menu.getData().isConsumeModeActive() ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
                     Component info = Component.literal("➤ ").withStyle(ChatFormatting.GRAY).append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.WHITE));
                     guiGraphics.renderTooltip(SkillsRecordScreen.this.font, info, mouseX, mouseY);
                 }
@@ -762,11 +762,11 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             List<Component> descriptions = manager.createChallengeDescription(challenge.getId(), Style.EMPTY.withColor(ChatFormatting.GRAY), itemCycle, questStyle);
             Style descStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GRAY);
             Style counterStyle = Style.EMPTY.withItalic(true).withColor(ChatFormatting.GOLD);
-            boolean isConsumeNeeded = challengeData != null && challengeData.challengeType().isConsuming() && !this.menu.getData().isConsumeMode() && !cardData.isChallengeAccomplished(challenge.getId());
+            boolean isConsumeNeeded = challengeData != null && challengeData.challengeType().isConsuming() && !this.menu.getData().isConsumeModeActive() && !cardData.isChallengeAccomplished(challenge.getId());
             if (isConsumeNeeded) {
                 HoverEvent hover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("challenge.ultimine_addition.consume.info").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
                 counterStyle = Style.EMPTY.withHoverEvent(hover).withColor(ChatFormatting.RED);
-            } else if (challengeData != null && challengeData.challengeType().isConsuming() && this.menu.getData().isConsumeMode() && !cardData.isChallengeAccomplished(challenge.getId())) {
+            } else if (challengeData != null && challengeData.challengeType().isConsuming() && this.menu.getData().isConsumeModeActive() && !cardData.isChallengeAccomplished(challenge.getId())) {
                 HoverEvent hover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("✖ ").append(Component.translatable("challenge.ultimine_addition.consume")).withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
                 counterStyle = Style.EMPTY.withItalic(true).withHoverEvent(hover).withColor(ChatFormatting.LIGHT_PURPLE);
             } else if (cardData.isChallengeAccomplished(challenge.getId())) {

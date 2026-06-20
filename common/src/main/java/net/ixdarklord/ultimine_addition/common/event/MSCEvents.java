@@ -19,6 +19,7 @@ import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.PlayConsumeEffectPayload;
+import net.ixdarklord.ultimine_addition.network.payloads.SkillsRecordPayload;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.ixdarklord.ultimine_addition.util.ToolAction;
 import net.ixdarklord.ultimine_addition.util.ToolActions;
@@ -46,27 +47,25 @@ public class MSCEvents {
             cardBonusEffect(player);
         });
 
-        BlockEvent.BREAK.register((level, pos, state, pl, xp) -> {
-            if (pl instanceof ServerPlayer player) {
-                List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
-                if (slots.isEmpty()) return EventResult.pass();
-                for (SlotReference.Player slot : slots) {
-                    SkillsRecordData data = SkillsRecordData.load(slot.get());
-                    Pair<Boolean, Boolean> taskProcess = data.initTaskValidator(state, pos, player, ChallengeData.Type.BREAK_BLOCK);
-                    if (taskProcess.getFirst()) {
-                        data.sendToClient(player, slot.getIndex()).save();
-                    }
-                    if (taskProcess.getSecond()) {
-                        player.level().removeBlock(pos, false);
-                        PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(pos, state), player.serverLevel(), pos, 128);
-                    }
+        BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
+            List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
+            if (slots.isEmpty()) return EventResult.pass();
+            for (SlotReference.Player slot : slots) {
+                SkillsRecordData data = SkillsRecordData.load(slot.get());
+                Pair<Boolean, Boolean> taskProcess = data.initTaskValidator(state, pos, player, ChallengeData.Type.BREAK_BLOCK);
+                if (taskProcess.getFirst()) {
+                    data.sendToClient(player, slot.getIndex()).save();
+                }
+                if (taskProcess.getSecond()) {
+                    player.level().removeBlock(pos, false);
+                    PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(pos, state), player.serverLevel(), pos, 128);
                 }
             }
             return EventResult.pass();
         });
 
         BlockToolModificationEvent.EVENT.register((originalState, context, toolAction, simulate) -> {
-            if (context.getPlayer() instanceof ServerPlayer player && !FTBUltimine.instance.getOrCreatePlayerData(player).isPressed()) {
+            if (context.getPlayer() instanceof ServerPlayer player && !FTBUltimine.getInstance().getOrCreatePlayerData(player).isPressed()) {
                 return onBlockToolModificationEvent(originalState, context, toolAction, simulate);
             }
             return CompoundEventResult.pass();
@@ -138,13 +137,14 @@ public class MSCEvents {
         }
     }
 
-    public static CompoundEventResult<BlockState> onBlockToolModificationEvent(BlockState originalState, @NotNull UseOnContext context, ToolAction toolAction, boolean simulate) {
+    public static CompoundEventResult<BlockState> onBlockToolModificationEvent(BlockState originalState, @NotNull UseOnContext context, ToolAction toolAction, boolean ignoredSimulate) {
         ServerPlayer player = (ServerPlayer) context.getPlayer();
         if (player == null) return CompoundEventResult.pass();
         if (PlayerHooks.isFake(player)) return CompoundEventResult.pass();
         if (!context.getLevel().isClientSide()) {
             List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
             if (slots.isEmpty()) return CompoundEventResult.pass();
+
             for (SlotReference.Player slot : slots) {
                 var data = SkillsRecordData.load(slot.get());
                 Pair<Boolean, Boolean> taskProcess = Pair.of(false, false);
@@ -164,6 +164,8 @@ public class MSCEvents {
 
                 if (taskProcess.getFirst()) {
                     data.save();
+                    PayloadHandler.sendToPlayer(new SkillsRecordPayload.SyncData(slot.getIndex(), data), player);
+
                     if (taskProcess.getSecond()) {
                         PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(context.getClickedPos(), originalState), (ServerLevel)context.getLevel(), context.getClickedPos(), 128);
                         return CompoundEventResult.interruptTrue(Blocks.AIR.defaultBlockState());

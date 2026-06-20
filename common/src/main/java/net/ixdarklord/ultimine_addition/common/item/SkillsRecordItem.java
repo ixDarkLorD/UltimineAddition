@@ -69,7 +69,7 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
         if (this.isLegacyMode() || level.isClientSide()) return;
         if (entity instanceof ServerPlayer) {
             if (!stack.has(SkillsRecordData.DATA_COMPONENT)) getData(stack).save();
-            if (getData(stack).getCardSlots().stream().filter(s -> !s.isEmpty()).toList().isEmpty() && getData(stack).isConsumeMode()) {
+            if (getData(stack).getCardSlots().stream().filter(s -> !s.isEmpty()).toList().isEmpty() && getData(stack).isConsumeModeActive()) {
                 getData(stack).setConsumeMode(false).save();
             }
         }
@@ -86,7 +86,7 @@ public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
             return;
         }
         if (isConsumeChallengeExists(stack)) {
-            Component state = getData(stack).isConsumeMode() ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
+            Component state = getData(stack).isConsumeModeActive() ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
             tooltipComponents.add(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.GRAY)));
         }
         if (!getData(stack).getPenSlot().isEmpty()) {

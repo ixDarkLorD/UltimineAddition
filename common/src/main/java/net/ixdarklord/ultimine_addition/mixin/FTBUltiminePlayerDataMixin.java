@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.util.UUID;
 
 @Mixin(value = FTBUltiminePlayerData.class)
-abstract class FTBUltiminePlayerDataMixin {
+public abstract class FTBUltiminePlayerDataMixin {
     @Shadow private int shapeIndex;
 
     @Shadow @Final private UUID playerId;
