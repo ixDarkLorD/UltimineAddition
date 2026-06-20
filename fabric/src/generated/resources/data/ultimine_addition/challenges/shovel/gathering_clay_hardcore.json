@@ -1,0 +1,15 @@
+{
+  "challenge_type": {
+    "consume_block": true,
+    "id": "break_block"
+  },
+  "for_card_tier": 3,
+  "for_card_type": "shovel",
+  "required_amount": {
+    "max": 256,
+    "min": 128
+  },
+  "targeted_blocks": [
+    "minecraft:clay"
+  ]
+}

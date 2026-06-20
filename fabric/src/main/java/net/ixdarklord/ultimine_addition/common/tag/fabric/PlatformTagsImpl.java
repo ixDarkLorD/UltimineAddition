@@ -1,0 +1,71 @@
+package net.ixdarklord.ultimine_addition.common.tag.fabric;
+
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBlockTags;
+import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
+
+public final class PlatformTagsImpl implements PlatformTags {
+    public static @NotNull PlatformTags get() {
+        return new PlatformTagsImpl();
+    }
+
+    public @NotNull TagKey<Item> SLIME() {
+        return this.createCommonTag(Registries.ITEM, "slime");
+    }
+
+    public @NotNull TagKey<Block> STONES() {
+        return this.createCommonTag(Registries.BLOCK, "stones");
+    }
+
+    public @NotNull TagKey<Block> COBBLESTONES() {
+        return this.createCommonTag(Registries.BLOCK, "cobblestones");
+    }
+
+    public @NotNull TagKey<Block> OBSIDIAN() {
+        return this.createCommonTag(Registries.BLOCK, "obsidian");
+    }
+
+    public @NotNull TagKey<Block> ORES() {
+        return ConventionalBlockTags.ORES;
+    }
+
+    public @NotNull TagKey<Block> COAL_ORES() {
+        return this.createCommonTag(Registries.BLOCK, "ores/coal");
+    }
+
+    public @NotNull TagKey<Block> IRON_ORES() {
+        return this.createCommonTag(Registries.BLOCK, "ores/iron");
+    }
+
+    public @NotNull TagKey<Block> COPPER_ORES() {
+        return this.createCommonTag(Registries.BLOCK, "ores/copper");
+    }
+
+    public @NotNull TagKey<Block> GOLD_ORES() {
+        return this.createCommonTag(Registries.BLOCK, "ores/gold");
+    }
+
+    public @NotNull TagKey<Block> LAPIS_ORES() {
+        return this.createCommonTag(Registries.BLOCK, "ores/lapis");
+    }
+
+    public @NotNull TagKey<Block> REDSTONE_ORES() {
+        return this.createCommonTag(Registries.BLOCK, "ores/redstone");
+    }
+
+    public @NotNull TagKey<Block> DIAMOND_ORES() {
+        return this.createCommonTag(Registries.BLOCK, "ores/diamond");
+    }
+
+    public @NotNull TagKey<Block> EMERALD_ORES() {
+        return this.createCommonTag(Registries.BLOCK, "ores/emerald");
+    }
+
+    public @NotNull TagKey<Block> QUARTZ_ORES() {
+        return ConventionalBlockTags.QUARTZ_ORES;
+    }
+}

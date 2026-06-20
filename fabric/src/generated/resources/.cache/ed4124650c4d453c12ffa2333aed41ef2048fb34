@@ -1,0 +1,6 @@
+// 1.20.1	2026-06-20T10:27:53.0850392	FTB Ultimine Addition/Tags for minecraft:item
+ae63090c29bc848a0d9f25201cd7ed80eb253b2c data\c\tags\items\slime.json
+d7df7db143589f8e7cb903b0a89831995a45d8f1 data\ultimine_addition\tags\items\more_valuable_pigment.json
+4b1d7a61fa7302065a7cd601479b1891001bc191 data\ultimine_addition\tags\items\mining_skill_card.json
+22430133b570477f26a6e12917a6af6894b91f00 data\ultimine_addition\tags\items\less_valuable_pigment.json
+890ad4c2f7fc713907e7c9573d31d725eef3a207 data\ultimine_addition\tags\items\legacy_disabled_items.json

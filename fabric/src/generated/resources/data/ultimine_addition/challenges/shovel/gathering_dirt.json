@@ -1,0 +1,15 @@
+{
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  },
+  "for_card_tier": 0,
+  "for_card_type": "shovel",
+  "required_amount": {
+    "max": 128,
+    "min": 64
+  },
+  "targeted_blocks": [
+    "#minecraft:dirt"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "ultimine_addition:mining_skill_card_empty",
+    "ultimine_addition:mining_skill_card_pickaxe",
+    "ultimine_addition:mining_skill_card_axe",
+    "ultimine_addition:mining_skill_card_shovel",
+    "ultimine_addition:mining_skill_card_hoe"
+  ]
+}

@@ -1,0 +1,13 @@
+// 1.20.1	2026-06-20T10:27:53.0860993	FTB Ultimine Addition/Tags for minecraft:block
+fd3a22d4d83a3d90cb966f22ff5c4810bb17f8d2 data\ultimine_addition\tags\blocks\deny_is_placed_by_entity.json
+e29131297beebf484f49e78d8726e4889cb94834 data\c\tags\blocks\ores\coal.json
+04bf8ddbf4df911f4e8d8025846c45bfb4f63e3b data\c\tags\blocks\stones.json
+8fac15e21b0d5a3f555469c75bb41aa2a2dde72f data\c\tags\blocks\ores\emerald.json
+0904409e23bc056199739d3e6254796684f95571 data\c\tags\blocks\ores\redstone.json
+eebf2e570846d666cbc982caf74e7661b3d016ee data\c\tags\blocks\obsidian.json
+6cfc8455161ceda8ffed9b5fa798745d9ddf27ee data\c\tags\blocks\ores\copper.json
+f736653edb18e75e72dc09c7f697070a1eae9e05 data\c\tags\blocks\ores\diamond.json
+0308f340979f1e90341239047a67c4e483df2579 data\c\tags\blocks\cobblestones.json
+66489b9ad487ee37938d76df049c6b53226a9497 data\c\tags\blocks\ores\lapis.json
+510dc2d6ce78663d55a4c3a920bb396689538f4d data\c\tags\blocks\ores\gold.json
+a3cc8153aadd33b36074d57164b516e01335f46c data\c\tags\blocks\ores\iron.json

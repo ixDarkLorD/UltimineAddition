@@ -1,0 +1,5 @@
+// 1.20.1	2026-06-20T06:47:28.8664179	Tags for minecraft:item mod id ultimine_addition
+47275060cd426bee0e95375063ec04025f0f054b data/ultimine_addition/tags/items/legacy_disabled_items.json
+de8a25a85e173a57d1fd456b58b5bccbddc415ea data/ultimine_addition/tags/items/less_valuable_pigment.json
+e029f667af63ebf2b9ba0552aed1c0fcd89e9491 data/ultimine_addition/tags/items/mining_skill_card.json
+3e6f48bc5d9f98bfd824b905f9d5f95cb24407d8 data/ultimine_addition/tags/items/more_valuable_pigment.json

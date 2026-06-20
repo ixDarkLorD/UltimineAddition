@@ -1,0 +1,24 @@
+{
+  "values": [
+    "minecraft:black_dye",
+    "minecraft:red_dye",
+    "minecraft:green_dye",
+    "minecraft:blue_dye",
+    {
+      "id": "#forge:dyes/black",
+      "required": false
+    },
+    {
+      "id": "#forge:dyes/red",
+      "required": false
+    },
+    {
+      "id": "#forge:dyes/green",
+      "required": false
+    },
+    {
+      "id": "#forge:dyes/blue",
+      "required": false
+    }
+  ]
+}

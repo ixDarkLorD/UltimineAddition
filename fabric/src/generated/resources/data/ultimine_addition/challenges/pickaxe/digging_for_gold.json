@@ -1,0 +1,15 @@
+{
+  "challenge_type": {
+    "consume_block": false,
+    "id": "break_block"
+  },
+  "for_card_tier": 1,
+  "for_card_type": "pickaxe",
+  "required_amount": {
+    "max": 64,
+    "min": 32
+  },
+  "targeted_blocks": [
+    "#c:ores/gold"
+  ]
+}

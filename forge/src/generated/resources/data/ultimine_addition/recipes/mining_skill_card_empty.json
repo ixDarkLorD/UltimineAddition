@@ -1,0 +1,30 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "ultimine_addition:legacy_mode",
+          "value": false
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shapeless",
+        "category": "misc",
+        "group": "ultimine_addition",
+        "ingredients": [
+          {
+            "item": "ultimine_addition:mining_skill_card_empty"
+          },
+          {
+            "item": "ultimine_addition:card_blueprint"
+          }
+        ],
+        "result": {
+          "count": 2,
+          "item": "ultimine_addition:mining_skill_card_empty"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "challenge_type": {
+    "consume_block": true,
+    "id": "break_block"
+  },
+  "for_card_tier": 2,
+  "for_card_type": "axe",
+  "required_amount": {
+    "max": 80,
+    "min": 40
+  },
+  "targeted_blocks": [
+    "minecraft:stripped_dark_oak_log"
+  ]
+}
