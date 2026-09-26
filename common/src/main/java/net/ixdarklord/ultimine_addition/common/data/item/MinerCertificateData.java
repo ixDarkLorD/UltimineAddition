@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.data.item;
 
+import java.util.function.Consumer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.coolcatlib.api.data.ItemDataComponent;
@@ -145,9 +146,9 @@ public final class MinerCertificateData extends ItemDataComponent<MinerCertifica
 
     public MinerCertificateData sendClientMessage(Player player) {
         if (!ServicePlatform.get().players().isPlayerUltimineCapable(player))
-            player.displayClientMessage(Component.translatable("info.ultimine_addition.obtain").withStyle(ChatFormatting.GOLD), true);
+            player.sendOverlayMessage(Component.translatable("info.ultimine_addition.obtain").withStyle(ChatFormatting.GOLD));
         else
-            player.displayClientMessage(Component.translatable("info.ultimine_addition.obtained_already").withStyle(ChatFormatting.RED), true);
+            player.sendOverlayMessage(Component.translatable("info.ultimine_addition.obtained_already").withStyle(ChatFormatting.RED));
         return this;
     }
 
@@ -202,25 +203,25 @@ public final class MinerCertificateData extends ItemDataComponent<MinerCertifica
             this.minedBlocks = Math.min(this.minedBlocks + sum, requiredAmount);
         }
 
-        public void createInfoComponent(List<Component> tooltipComponents, boolean isShiftPressed) {
+        public void createInfoComponent(Consumer<Component> tooltipComponents, boolean isShiftPressed) {
             if (!data.getStack().has(DATA_COMPONENT)) {
                 if (isShiftPressed)
-                    tooltipComponents.add(Component.translatable("tooltip.ultimine_addition.certificate.legacy.info"));
+                    tooltipComponents.accept(Component.translatable("tooltip.ultimine_addition.certificate.legacy.info"));
                 return;
             }
 
             if (!isShiftPressed) {
                 if (!data.isAccomplished)
-                    tooltipComponents.add(1, createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.sealed").withStyle(ChatFormatting.GRAY)));
+                    tooltipComponents.accept(createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.sealed").withStyle(ChatFormatting.GRAY)));
                 else
-                    tooltipComponents.add(1, createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.opened").withStyle(ChatFormatting.GOLD)));
+                    tooltipComponents.accept(createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.opened").withStyle(ChatFormatting.GOLD)));
             } else {
                 if (!data.isAccomplished) {
                     ChatFormatting formatting = ChatFormattingUtils.getProgressColor(minedBlocks, requiredAmount);
                     Component component = Component.literal(String.valueOf(minedBlocks)).withStyle(formatting);
-                    tooltipComponents.add(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest.info", requiredAmount).withStyle(ChatFormatting.DARK_AQUA));
-                    tooltipComponents.add(Component.literal("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest", component).withStyle(ChatFormatting.GRAY)));
-                } else tooltipComponents.add(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest.congrats", minedBlocks).withStyle(ChatFormatting.GREEN));
+                    tooltipComponents.accept(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest.info", requiredAmount).withStyle(ChatFormatting.DARK_AQUA));
+                    tooltipComponents.accept(Component.literal("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest", component).withStyle(ChatFormatting.GRAY)));
+                } else tooltipComponents.accept(Component.translatable("tooltip.ultimine_addition.certificate.legacy.quest.congrats", minedBlocks).withStyle(ChatFormatting.GREEN));
             }
         }
 

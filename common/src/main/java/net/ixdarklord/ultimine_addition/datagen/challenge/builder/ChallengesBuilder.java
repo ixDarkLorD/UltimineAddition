@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -16,19 +16,19 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class ChallengesBuilder {
-    private final ResourceLocation id;
+    private final Identifier id;
     private final MiningSkillCardItem.Type forCardType;
     private MiningSkillCardItem.Tier forCardTier;
     private ChallengeData.Type challengeType;
     private Pair<Integer, Integer> requiredAmount;
     private ItemStack requiredSpecificTool;
     private final List<String> targetedBlocks = new ArrayList<>();
-    private ChallengesBuilder(ResourceLocation id, MiningSkillCardItem.Type forCardType) {
+    private ChallengesBuilder(Identifier id, MiningSkillCardItem.Type forCardType) {
         this.id = id;
         this.forCardType = forCardType;
     }
 
-    public static ChallengesBuilder create(ResourceLocation id, MiningSkillCardItem.Type forCardType) {
+    public static ChallengesBuilder create(Identifier id, MiningSkillCardItem.Type forCardType) {
         return new ChallengesBuilder(id, forCardType);
     }
 
@@ -83,5 +83,5 @@ public class ChallengesBuilder {
         if (this.requiredAmount.getFirst() <= 0) this.requiredAmount = Pair.of(1, 1);
     }
 
-    public record Result(ResourceLocation id, ChallengeData data) {}
+    public record Result(Identifier id, ChallengeData data) {}
 }

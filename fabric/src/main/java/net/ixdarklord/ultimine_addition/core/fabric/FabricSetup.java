@@ -1,7 +1,9 @@
 package net.ixdarklord.ultimine_addition.core.fabric;
 
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
+import dev.ftb.mods.ftbultimine.api.fabric.FTBUltimineEvents;
 import dev.architectury.event.events.common.EntityEvent;
-import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
+import fuzs.forgeconfigapiport.fabric.api.v5.ModConfigEvents;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
@@ -22,6 +24,7 @@ public class FabricSetup implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        FTBUltimineEvents.REGISTER_RESTRICTION_HANDLER.register(data -> data.register(FTBUltimineIntegration.INSTANCE));
         CommonSetup.init();
         CommonSetup.setup();
         ResourceConditions.register(LegacyModeCondition.RESOURCE_CONDITION_TYPE);
@@ -29,21 +32,21 @@ public class FabricSetup implements ModInitializer {
     }
 
     private void initEvents() {
-        NeoForgeModConfigEvents.loading(FTBUltimineAddition.MOD_ID).register(config ->
+        ModConfigEvents.loading(FTBUltimineAddition.MOD_ID).register(config ->
                 ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
                         new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
                         ConfigLifecycleEvent.ConfigUpdateType.LOADING
                 )
         );
 
-        NeoForgeModConfigEvents.reloading(FTBUltimineAddition.MOD_ID).register(config ->
+        ModConfigEvents.reloading(FTBUltimineAddition.MOD_ID).register(config ->
                 ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
                         new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
                         ConfigLifecycleEvent.ConfigUpdateType.RELOADING
                 )
         );
 
-        NeoForgeModConfigEvents.unloading(FTBUltimineAddition.MOD_ID).register(config ->
+        ModConfigEvents.unloading(FTBUltimineAddition.MOD_ID).register(config ->
                 ConfigLifecycleEvent.EVENT.invoker().onConfigUpdate(
                         new ConfigInfo(config.getModId(), config.getType().extension(), config.getSpec(), config.getFileName()),
                         ConfigLifecycleEvent.ConfigUpdateType.UNLOADING

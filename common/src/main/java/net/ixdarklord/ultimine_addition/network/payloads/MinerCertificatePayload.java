@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.network.payloads;
 
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import dev.architectury.networking.NetworkManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -24,8 +25,7 @@ public record MinerCertificatePayload(int slotIndex, ItemStack backupStack, Mine
     public static void handle(MinerCertificatePayload message, NetworkManager.PacketContext context) {
         context.queue(() -> {
             Player player = context.getPlayer();
-            SlotAccess slot = player.getSlot(message.slotIndex);
-            ItemStack stack = slot.get();
+            ItemStack stack = ItemUtils.getSlotItem(player, message.slotIndex);
             if (stack.isEmpty()) {
                 message.data.setStack(message.backupStack).onClientUpdate();
             } else {

@@ -2,6 +2,25 @@
 This file is for listing all the changes to this project
 <hr>
 
+## Unreleased (Minecraft 26.1.2 port)
+### ✨ New Features
+- Redesigned the Skills Record's card viewer: the selected card's tiers and challenges are shown on a map you can pan (drag) and zoom (mouse wheel or `+`/`-`). Completed tiers, the current tier's live progress and locked tiers are all visible.
+- Clicking a challenge opens its details (description, target blocks, progress, completion date) with Pin and Edit actions.
+- The card viewer can be expanded into a large draggable window.
+- Mining Skill Cards now keep a history of the tiers they completed and when each challenge was finished. The history follows the card between Skills Records.
+
+### 🐛 Bug Fixes & Improvements
+- Skills Record contents are now stored in the world save and linked to the item by UUID; existing Skills Records are migrated automatically the first time they are loaded.
+- Cards without a saved UUID no longer share one.
+- The server now checks permissions before applying challenge edits from the Skills Record.
+- The Skills Record window is larger, giving the card viewer more room.
+- The challenge details show a progress bar and the target blocks as items.
+- Removed the "Progression Bar" option and its "Show Progression Bar" keybind; progress is shown in the card viewer instead.
+- Removed the Skills Record scroller; the card viewer now uses its space.
+- Redesigned the card viewer's look: shaped tier and challenge nodes, animated connections and background, hover and reveal animations (follows the Animations option). The expanded viewer uses the Skills Record's frame.
+- Challenges of locked tiers are hidden until the tier is unlocked.
+- Fixed the mouse wheel not scrolling the Shape Selector's shape list.
+
 ## v2101.1.2.4 Release - Jun 20, 2026
 ### 🐛 Bug Fixes & Improvements
 - Updated compatibility with FTB Ultimine 2101.1.15.

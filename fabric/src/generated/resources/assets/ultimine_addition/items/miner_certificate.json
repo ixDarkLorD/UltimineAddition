@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "ultimine_addition:item/miner_certificate"
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "ultimine_addition:item/miner_certificate_opened"
+    },
+    "property": "ultimine_addition:certificate_opened"
+  }
+}

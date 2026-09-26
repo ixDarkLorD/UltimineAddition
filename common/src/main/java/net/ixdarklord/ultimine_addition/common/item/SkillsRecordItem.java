@@ -1,7 +1,16 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import dev.architectury.registry.menu.MenuRegistry;
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import net.ixdarklord.coolcatlib.api.item.ComponentItem;
+import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
+import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.client.gui.tooltip.SkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
@@ -10,13 +19,10 @@ import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -25,112 +31,94 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
-public class SkillsRecordItem extends DataAbstractItem<SkillsRecordData> {
+public class SkillsRecordItem extends ComponentItem {
     public static final Component TITLE = Component.translatable("item.ultimine_addition.skills_record");
     public SkillsRecordItem(Properties properties) {
         super(properties, ComponentType.TOOLS);
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, @NotNull InteractionHand usedHand) {
+    public @NotNull InteractionResult use(Level level, Player player, @NotNull InteractionHand usedHand) {
         final ItemStack stack = player.getItemInHand(usedHand);
-        if (level.isClientSide()) return new InteractionResultHolder<>(InteractionResult.PASS, stack);
+        if (level.isClientSide()) return InteractionResult.PASS;
 
         if (player.isShiftKeyDown()) {
-            return new InteractionResultHolder<>(InteractionResult.PASS, stack);
+            return InteractionResult.PASS;
         }
 
         if (this.isLegacyMode()) {
-            player.displayClientMessage(Component.translatable("info.ultimine_addition.legacy_mode").withStyle(ChatFormatting.RED), false);
-            return new InteractionResultHolder<>(InteractionResult.PASS, stack);
+            player.sendSystemMessage(Component.translatable("info.ultimine_addition.legacy_mode").withStyle(ChatFormatting.RED));
+            return InteractionResult.PASS;
         }
 
-        if (stack.has(SkillsRecordData.DATA_COMPONENT)) {
-            MenuRegistry.openExtendedMenu((ServerPlayer) player,
-                    new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, stack, usedHand), TITLE),
-                    buf -> {
-                        ItemStack.STREAM_CODEC.encode(new RegistryFriendlyByteBuf(buf, ((ServerPlayer) player).serverLevel().registryAccess()), stack);
-                        buf.writeBoolean(true);
-                        buf.writeEnum(usedHand);
-            });
-        }
-
-        return new InteractionResultHolder<>(InteractionResult.PASS, stack);
+        SkillsRecordMenu.open((ServerPlayer) player, stack, usedHand);
+        return InteractionResult.PASS;
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
-        if (this.isLegacyMode() || level.isClientSide()) return;
-        if (entity instanceof ServerPlayer) {
-            if (!stack.has(SkillsRecordData.DATA_COMPONENT)) getData(stack).save();
-            if (getData(stack).getCardSlots().stream().filter(s -> !s.isEmpty()).toList().isEmpty() && getData(stack).isConsumeModeActive()) {
-                getData(stack).setConsumeMode(false).save();
-            }
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot) {
+        if (this.isLegacyMode() || !(entity instanceof ServerPlayer)) return;
+        // Links new stacks and moves pre-SavedData contents into the storage.
+        SkillsRecordData data = SkillsRecordData.get(stack, level);
+        if (data.isConsumeModeActive() && !data.hasCards()) {
+            data.setConsumeMode(false).save();
         }
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-        super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        super.appendHoverText(stack, context, display, tooltipComponents, isAdvanced);
         if (isShiftButtonNotPressed(tooltipComponents)) return;
-        if (!stack.has(SkillsRecordData.DATA_COMPONENT)) {
+        if (!SkillsRecordLink.isLinked(stack)) {
             Component component = Component.translatable("tooltip.ultimine_addition.skills_record.info").withStyle(ChatFormatting.GRAY);
-            List<Component> components = ComponentHelper.splitComponent(component, getSplitterLength());
-            tooltipComponents.addAll(components);
+            ComponentHelper.splitComponent(component, getSplitterLength()).forEach(tooltipComponents);
             return;
         }
-        if (isConsumeChallengeExists(stack)) {
-            Component state = getData(stack).isConsumeModeActive() ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
-            tooltipComponents.add(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.GRAY)));
+
+        Optional<SkillsRecordData> dataOpt = SkillsRecordData.getClient(stack);
+        if (dataOpt.isEmpty()) {
+            tooltipComponents.accept(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.skills_record.loading").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)));
+            return;
         }
-        if (!getData(stack).getPenSlot().isEmpty()) {
-            tooltipComponents.add(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber",
-                    (getData(stack).getPenSlot().getItem() instanceof PenItem item)
-                            ? item.getData(getData(stack).getPenSlot()).getCapacity()
-                            : 0
-            ).withStyle(ChatFormatting.GRAY)));
+
+        SkillsRecordData data = dataOpt.get();
+        if (isConsumeChallengeExists(data)) {
+            Component state = data.isConsumeModeActive() ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN) : Component.translatable("options.off").withStyle(ChatFormatting.RED);
+            tooltipComponents.accept(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("gui.ultimine_addition.skills_record.consume", state).withStyle(ChatFormatting.GRAY)));
         }
-        tooltipComponents.add(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.skills_record.contents").withStyle(ChatFormatting.GRAY)));
-        tooltipComponents.add(Component.literal(FTBUltimineAddition.MOD_ID + ".tooltip_image"));
+        if (!data.getPenSlot().isEmpty()) {
+            tooltipComponents.accept(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber", data.getInkAmount()).withStyle(ChatFormatting.GRAY)));
+        }
+        tooltipComponents.accept(Component.literal("§8• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("tooltip.ultimine_addition.skills_record.contents").withStyle(ChatFormatting.GRAY)));
+        tooltipComponents.accept(Component.literal(FTBUltimineAddition.MOD_ID + ".tooltip_image"));
     }
 
     @Override
     public @NotNull Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
-        NonNullList<ItemStack> nonNullList = NonNullList.create();
-        Stream<ItemStack> itemStackStream = getData(stack).getAllSlots().stream();
-        Objects.requireNonNull(nonNullList);
-        itemStackStream.forEach(nonNullList::add);
-        if (stack.has(SkillsRecordData.DATA_COMPONENT)) {
-            if (!isShiftButtonNotPressed(null)) {
-                return Optional.of(new SkillsRecordTooltip(nonNullList));
-            }
-        }
-        return Optional.empty();
+        if (isShiftButtonNotPressed(null)) return Optional.empty();
+        return SkillsRecordData.getClient(stack).map(data -> new SkillsRecordTooltip(NonNullList.of(ItemStack.EMPTY, data.getAllSlots().toArray(ItemStack[]::new))));
     }
 
+    public static boolean isConsumeChallengeExists(SkillsRecordData data) {
+        for (int i = 0; i < SkillsRecordData.CARD_SLOTS; i++) {
+            Optional<MiningSkillCardData> card = data.getCardData(i);
+            if (card.isEmpty()) continue;
+            for (MiningSkillCardData.Challenge challenge : card.get().getChallenges()) {
+                ChallengeData challengeData = ChallengesManager.INSTANCE.getAllChallenges().get(challenge.getId());
+                if (challengeData != null && challengeData.challengeType().isConsuming()) return true;
+            }
+        }
+        return false;
+    }
 
-    public boolean isConsumeChallengeExists(ItemStack stack) {
-        AtomicBoolean result = new AtomicBoolean();
-        getData(stack).getCardSlots().forEach(itemStack -> {
-            MiningSkillCardData cardData = MiningSkillCardData.load(itemStack);
-            if (!cardData.getChallenges().stream().filter(challengeData -> {
-                var data = ChallengesManager.INSTANCE.getAllChallenges().get(challengeData.getId());
-                if (data != null) return data.challengeType().isConsuming();
-                else return false;
-            }).toList().isEmpty())
-                result.set(true);
-        });
-        return result.get();
+    public boolean isLegacyMode() {
+        return ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
     }
 
     @Override
-    public SkillsRecordData getData(ItemStack stack) {
-        return SkillsRecordData.load(stack);
+    public boolean appendToName() {
+        return true;
     }
 }

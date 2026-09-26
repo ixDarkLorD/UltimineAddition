@@ -1,20 +1,20 @@
 package net.ixdarklord.ultimine_addition.datagen.tag;
 
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.ItemTagsProvider;
+import net.neoforged.neoforge.common.data.ItemTagsProvider;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
 public class ItemTagGenerator extends ItemTagsProvider {
-    public ItemTagGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagLookup<Block>> blockTags) {
-        super(output, lookupProvider, blockTags);
+    public ItemTagGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, lookupProvider, FTBUltimineAddition.MOD_ID);
     }
 
     @Override

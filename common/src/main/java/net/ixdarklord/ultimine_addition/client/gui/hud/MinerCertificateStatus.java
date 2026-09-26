@@ -1,7 +1,5 @@
 package net.ixdarklord.ultimine_addition.client.gui.hud;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.ixdarklord.coolcatlib.api.utils.ChatFormattingUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
@@ -9,7 +7,7 @@ import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.player.LocalPlayer;
@@ -20,13 +18,12 @@ import net.minecraft.world.item.ItemStack;
 import java.awt.*;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
 public class MinerCertificateStatus {
     public static final MinerCertificateStatus INSTANCE = new MinerCertificateStatus();
 
     private MinerCertificateStatus() {}
 
-    public void render(GuiGraphics guiGraphics, DeltaTracker ignored) {
+    public void render(GuiGraphicsExtractor guiGraphics, DeltaTracker ignored) {
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
         LocalPlayer player = minecraft.player;
@@ -55,7 +52,7 @@ public class MinerCertificateStatus {
             y -= 8;
 
         ScreenRectangle rectangle = new ScreenRectangle(x, y, textWidth, 9);
-        TooltipRenderUtil.renderTooltipBackground(guiGraphics, rectangle.left(), rectangle.top(), rectangle.width(), rectangle.height(), 0);
-        guiGraphics.drawString(font, component, x, y, Color.WHITE.getRGB());
+        TooltipRenderUtil.extractTooltipBackground(guiGraphics, rectangle.left(), rectangle.top(), rectangle.width(), rectangle.height(), null);
+        guiGraphics.text(font, component, x, y, Color.WHITE.getRGB());
     }
 }

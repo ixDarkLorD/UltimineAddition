@@ -32,12 +32,12 @@
 
   "custom": {
     "loom:injected_interfaces": {
-      "net/minecraft/class_1657": ["net/ixdarklord/ultimine_addition/common/data/player/IPlayerData"]
+      "net/minecraft/world/entity/player/Player": ["net/ixdarklord/ultimine_addition/common/data/player/IPlayerData"]
     }
   },
 
   "depends": {
-    "java": ">=17",
+    "java": ">=${versions.java.get()}",
     "minecraft": ">=${mc_version} <=${max_mc_version}",
     "fabricloader": ">=${min_fabric_version}",
     "fabric-api": ">=${min_fabric_api_version}",

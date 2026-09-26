@@ -1,17 +1,22 @@
 package net.ixdarklord.ultimine_addition.datagen.advancement;
 
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Item;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.core.HolderGetter;
 import net.ixdarklord.ultimine_addition.common.advancement.UltimineObtainTrigger;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementType;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.KilledTrigger;
+import net.minecraft.advancements.criterion.InventoryChangeTrigger;
+import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.criterion.KilledTrigger;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
@@ -34,6 +39,7 @@ public class AdvancementGenerator extends AdvancementProvider {
     public static class Contents implements AdvancementGenerator {
         @Override
         public void generate(HolderLookup.Provider registries, Consumer<AdvancementHolder> consumer) {
+            HolderGetter<Item> items = registries.lookupOrThrow(Registries.ITEM);
             AdvancementHolder root = Advancement.Builder.advancement().display(
                             ModItems.MINER_CERTIFICATE,
                             Component.translatable(String.format("itemGroup.%s.tab", FTBUltimineAddition.MOD_ID)),
@@ -41,7 +47,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             FTBUltimineAddition.getGuiTexture("advancement/adv_background", "png"),
                             AdvancementType.TASK,
                             false, false, false)
-                    .addCriterion("has_early_items", InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(Items.DIRT, Items.STONE).of(ItemTags.LOGS).build()))
+                    .addCriterion("has_early_items", InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(items, Items.DIRT, Items.STONE).of(items, ItemTags.LOGS).build()))
                     .addCriterion("killed_by_something", KilledTrigger.TriggerInstance.entityKilledPlayer())
                     .addCriterion("killed_something", KilledTrigger.TriggerInstance.playerKilledEntity())
                     .requirements(AdvancementRequirements.Strategy.OR)
@@ -50,7 +56,7 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder amethyst = Advancement.Builder.advancement().parent(root).display(
                             Items.AMETHYST_SHARD,
                             Component.translatable(String.format("advancement.%s.amethyst_gathering", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.obtain", FTBUltimineAddition.MOD_ID), Items.AMETHYST_SHARD.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.obtain", FTBUltimineAddition.MOD_ID), Component.translatable(Items.AMETHYST_SHARD.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
@@ -61,7 +67,7 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder cardBlueprint = Advancement.Builder.advancement().parent(amethyst).display(
                             ModItems.CARD_BLUEPRINT,
                             Component.translatable(String.format("advancement.%s.craft.card_blueprint", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), ModItems.CARD_BLUEPRINT.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.CARD_BLUEPRINT.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
@@ -73,7 +79,7 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder shapeSelector = Advancement.Builder.advancement().parent(cardBlueprint).display(
                             ModItems.SHAPE_SELECTOR,
                             Component.translatable(String.format("advancement.%s.craft.shape_selector", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), ModItems.SHAPE_SELECTOR.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.SHAPE_SELECTOR.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
@@ -85,7 +91,7 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder slime = Advancement.Builder.advancement().parent(root).display(
                             Items.SLIME_BALL,
                             Component.translatable(String.format("advancement.%s.obtain.slime_balls", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.obtain", FTBUltimineAddition.MOD_ID), Items.SLIME_BALL.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.obtain", FTBUltimineAddition.MOD_ID), Component.translatable(Items.SLIME_BALL.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
@@ -96,7 +102,7 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder pen = Advancement.Builder.advancement().parent(slime).display(
                             ModItems.PEN,
                             Component.translatable(String.format("advancement.%s.craft.pen", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), ModItems.PEN.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.PEN.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
@@ -108,11 +114,11 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder emptyCard = Advancement.Builder.advancement().parent(root).display(
                             ModItems.MINING_SKILL_CARD_EMPTY,
                             Component.translatable(String.format("advancement.%s.obtain.card.empty", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.obtain", FTBUltimineAddition.MOD_ID), ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.obtain", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.MINING_SKILL_CARD_EMPTY.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
-                    .addCriterion("trade_for_empty_card", tradedWithVillager(ItemPredicate.Builder.item().of(ModItems.MINING_SKILL_CARD_EMPTY).build()))
+                    .addCriterion("trade_for_empty_card", tradedWithVillager(ItemPredicate.Builder.item().of(items, ModItems.MINING_SKILL_CARD_EMPTY).build()))
                     .addCriterion("has_empty_card", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.MINING_SKILL_CARD_EMPTY))
                     .requirements(AdvancementRequirements.Strategy.OR)
                     .save(consumer, FTBUltimineAddition.id("empty_card").toString());
@@ -120,7 +126,7 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder skillsRecord = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.SKILLS_RECORD,
                             Component.translatable(String.format("advancement.%s.craft.skills_record", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), ModItems.SKILLS_RECORD.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.SKILLS_RECORD.getDescriptionId())),
                             null,
                             AdvancementType.GOAL,
                             true, true, false)
@@ -131,7 +137,7 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder pickaxeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_PICKAXE,
                             Component.translatable(String.format("advancement.%s.craft.card.pickaxe", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), ModItems.MINING_SKILL_CARD_PICKAXE.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.MINING_SKILL_CARD_PICKAXE.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
@@ -142,7 +148,7 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder axeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_AXE,
                             Component.translatable(String.format("advancement.%s.craft.card.axe", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), ModItems.MINING_SKILL_CARD_AXE.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.MINING_SKILL_CARD_AXE.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
@@ -153,7 +159,7 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder shovelCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_SHOVEL,
                             Component.translatable(String.format("advancement.%s.craft.card.shovel", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), ModItems.MINING_SKILL_CARD_SHOVEL.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.MINING_SKILL_CARD_SHOVEL.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
@@ -164,7 +170,7 @@ public class AdvancementGenerator extends AdvancementProvider {
             AdvancementHolder hoeCard = Advancement.Builder.advancement().parent(emptyCard).display(
                             ModItems.MINING_SKILL_CARD_HOE,
                             Component.translatable(String.format("advancement.%s.craft.card.hoe", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), ModItems.MINING_SKILL_CARD_HOE.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.MINING_SKILL_CARD_HOE.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
@@ -173,13 +179,11 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .save(consumer, FTBUltimineAddition.id("hoe_card").toString());
 
             AdvancementHolder ultiminePower = Advancement.Builder.advancement().parent(skillsRecord).display(
-                            Util.make(() -> {
-                                ItemStack stack = ModItems.MINER_CERTIFICATE.getDefaultInstance();
-                                MinerCertificateData.load(stack).setAccomplished(true).save();
-                                return stack;
-                            }),
+                            new ItemStackTemplate(ModItems.MINER_CERTIFICATE, DataComponentPatch.builder()
+                                    .set(MinerCertificateData.DATA_COMPONENT, MinerCertificateData.create().setAccomplished(true))
+                                    .build()),
                             Component.translatable(String.format("advancement.%s.ultimine_ability", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.ultimine_ability.desc", FTBUltimineAddition.MOD_ID), ModItems.MINER_CERTIFICATE.getDefaultInstance().getHoverName()),
+                            Component.translatable(String.format("advancement.%s.ultimine_ability.desc", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.MINER_CERTIFICATE.getDescriptionId())),
                             null,
                             AdvancementType.CHALLENGE,
                             true, true, false)

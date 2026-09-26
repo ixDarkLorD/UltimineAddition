@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.network.payloads;
 
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import dev.architectury.networking.NetworkManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -23,7 +24,7 @@ public record MiningSkillCardPayload(int slotIndex, MiningSkillCardData data) im
     public static void handle(MiningSkillCardPayload message, NetworkManager.PacketContext context) {
         context.queue(() -> {
             Player player = context.getPlayer();
-            ItemStack stack = player.getSlot(message.slotIndex).get();
+            ItemStack stack = ItemUtils.getSlotItem(player, message.slotIndex);
             if (stack.isEmpty())
                 throw new IllegalArgumentException("The assigned slot index does not contain the mining skill card item!");
 

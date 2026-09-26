@@ -1,5 +1,8 @@
 package net.ixdarklord.ultimine_addition.core.neoforge;
 
+import net.neoforged.neoforge.common.NeoForge;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
+import dev.ftb.mods.ftbultimine.api.neoforge.FTBUltimineEvent;
 import com.mojang.serialization.MapCodec;
 import dev.architectury.event.CompoundEventResult;
 import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
@@ -41,13 +44,14 @@ public final class NeoForgeSetup {
             DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, FTBUltimineAddition.MOD_ID);
 
     public static final Supplier<AttachmentType<PlayerAbilityData>> PLAYER_ABILITY_DATA = ATTACHMENT_TYPES.register(
-            "player_ability", () -> AttachmentType.builder(PlayerAbilityData::create).serialize(PlayerAbilityData.CODEC).build()
+            "player_ability", () -> AttachmentType.builder(PlayerAbilityData::create).serialize(PlayerAbilityData.MAP_CODEC).build()
     );
 
     public NeoForgeSetup(IEventBus bus) {
         CONDITION_CODECS.register("legacy_mode", () -> LegacyModeCondition.CODEC);
         CONDITION_CODECS.register(bus);
         ATTACHMENT_TYPES.register(bus);
+        NeoForge.EVENT_BUS.addListener(FTBUltimineEvent.RegisterRestrictionHandler.class, event -> event.getEventData().register(FTBUltimineIntegration.INSTANCE));
         CommonSetup.init();
     }
 
@@ -91,7 +95,7 @@ public final class NeoForgeSetup {
         @SubscribeEvent
         private static void onTagsUpdate(TagsUpdatedEvent event) {
             DatapackEvents.TagUpdate.Cause cause = event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.CLIENT_PACKET_RECEIVED ? DatapackEvents.TagUpdate.Cause.CLIENT_PACKET_RECEIVED : DatapackEvents.TagUpdate.Cause.SERVER_DATA_LOAD;
-            DatapackEvents.TAG_UPDATE.invoker().init(event.getRegistryAccess(), cause, cause == DatapackEvents.TagUpdate.Cause.SERVER_DATA_LOAD || Minecraft.getInstance().getSingleplayerServer() == null);
+            DatapackEvents.TAG_UPDATE.invoker().init(event.getRegistries(), cause, cause == DatapackEvents.TagUpdate.Cause.SERVER_DATA_LOAD || Minecraft.getInstance().getSingleplayerServer() == null);
         }
 
         @SubscribeEvent

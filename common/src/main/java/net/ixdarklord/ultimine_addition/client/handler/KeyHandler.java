@@ -5,20 +5,18 @@ import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyHandler {
-    private static final String KEY_CATEGORY = String.format("key.category.%s.general", FTBUltimineAddition.MOD_ID);
-    public static KeyMapping KEY_SHOW_PROGRESSION_BAR = create(FTBUltimineAddition.id("show_progression_bar"), InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, KEY_CATEGORY);
+    private static final KeyMapping.Category KEY_CATEGORY = KeyMapping.Category.register(FTBUltimineAddition.id("general"));
     public static KeyMapping KEY_OPEN_SKILLS_RECORD = create(FTBUltimineAddition.id("open_skills_record"), InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, KEY_CATEGORY);
 
-    public static KeyMapping create(ResourceLocation id, InputConstants.Type type, int key, String category) {
+    public static KeyMapping create(Identifier id, InputConstants.Type type, int key, KeyMapping.Category category) {
         return new KeyMapping("key.%s.%s".formatted(id.getNamespace(), id.getPath()), type, key, category);
     }
 
     public static void register() {
-        KeyMappingRegistry.register(KEY_SHOW_PROGRESSION_BAR);
         if (ServicePlatform.get().slotAPI().isModLoaded())
             KeyMappingRegistry.register(KEY_OPEN_SKILLS_RECORD);
     }

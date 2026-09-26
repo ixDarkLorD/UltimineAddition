@@ -1,4 +1,4 @@
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/fabric.gradle"
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v3/fabric.gradle"
 
 loom {
     runs {
@@ -14,15 +14,16 @@ loom {
 }
 
 dependencies {
-    modApi libs.architectury.fabric.get()
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-fabric:1.21-${coolcatlib_version}"
-    modApi libs.forgeconfigapiport.fabric.get()
+    api libs.architectury.fabric
+    api "net.ixdarklord.coolcatlib:coolcatlib-fabric:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    api libs.forgeconfigapiport.fabric
 
-    modCompileOnlyApi libs.jei.api.fabric.get()
-    modRuntimeOnly libs.jei.fabric.get()
-    modCompileOnly libs.trinkets.fabric.get()
+    compileOnlyApi libs.jei.api.fabric
+    runtimeOnly libs.jei.fabric
+    compileOnly libs.trinkets
+    // Trinkets injects interfaces into vanilla classes, so dev runs need it on the runtime classpath too.
+    localRuntime libs.trinkets
 
-    modApi "dev.ftb.mods:ftb-ultimine-fabric:${ftbultimine_version}"
-    modApi "dev.ftb.mods:ftb-library-fabric:${ftblibrary_version}"
-    modImplementation "curse.maven:adapaxels-406691:5641012"
+    api "dev.ftb.mods:ftb-ultimine-fabric:${ftbultimine_version}"
+    api "dev.ftb.mods:ftb-library-fabric:${ftblibrary_version}"
 }

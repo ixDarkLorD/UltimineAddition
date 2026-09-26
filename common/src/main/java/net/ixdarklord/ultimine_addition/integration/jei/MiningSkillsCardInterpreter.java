@@ -9,7 +9,7 @@ import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -24,8 +24,8 @@ public class MiningSkillsCardInterpreter implements ISubtypeInterpreter<ItemStac
         registration.registerSubtypeInterpreter(ModItems.MINING_SKILL_CARD_HOE, new MiningSkillsCardInterpreter());
 
         for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
-            ResourceLocation location = ResourceLocation.parse(FTBUltimineAddition.MOD_ID + ":mining_skill_card_" + type.getId());
-            Item item = BuiltInRegistries.ITEM.get(location);
+            Identifier location = Identifier.parse(FTBUltimineAddition.MOD_ID + ":mining_skill_card_" + type.getId());
+            Item item = BuiltInRegistries.ITEM.getValue(location);
             if (item == Items.AIR) continue;
             registration.registerSubtypeInterpreter(item, new MiningSkillsCardInterpreter());
         }
@@ -39,18 +39,4 @@ public class MiningSkillsCardInterpreter implements ISubtypeInterpreter<ItemStac
                 : null;
     }
 
-    @Override
-    public @NotNull String getLegacyStringSubtypeInfo(ItemStack stack, UidContext uidContext) {
-        if (!stack.has(MiningSkillCardData.DATA_COMPONENT)) return "";
-        StringBuilder builder = new StringBuilder(stack.getItem().getDescriptionId());
-        var data = MiningSkillCardData.load(stack);
-        switch (data.getTier()) {
-            case Unlearned -> builder.append(".unlearned");
-            case Novice -> builder.append(".novice");
-            case Apprentice -> builder.append(".apprentice");
-            case Adept -> builder.append(".adept");
-            case Mastered -> builder.append(".mastered");
-        }
-        return builder.toString();
-    }
 }

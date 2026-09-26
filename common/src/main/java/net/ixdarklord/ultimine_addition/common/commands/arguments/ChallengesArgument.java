@@ -11,17 +11,17 @@ import com.mojang.datafixers.util.Pair;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.minecraft.ResourceLocationException;
+import net.minecraft.IdentifierException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class ChallengesArgument implements ArgumentType<Pair<ResourceLocation, ChallengeData>> {
+public class ChallengesArgument implements ArgumentType<Pair<Identifier, ChallengeData>> {
     private static final Collection<String> EXAMPLES = Arrays.asList("ultimine_addition:test_id", "ultimine_addition:breaking_block", "ultimine_addition:pickaxe/gathering_stones");
     public static final DynamicCommandExceptionType ERROR_UNKNOWN_CHALLENGE = new DynamicCommandExceptionType((entry) ->
             Component.translatable("argument.ultimine_addition.challenge.unknown", entry));
@@ -30,30 +30,30 @@ public class ChallengesArgument implements ArgumentType<Pair<ResourceLocation, C
         return new ChallengesArgument();
     }
 
-    public static Pair<ResourceLocation, ChallengeData> getData(CommandContext<CommandSourceStack> pContext, String pName) {
+    public static Pair<Identifier, ChallengeData> getData(CommandContext<CommandSourceStack> pContext, String pName) {
         return pContext.getArgument(pName, Pair.class);
     }
 
     @Override
-    public Pair<ResourceLocation, ChallengeData> parse(StringReader reader) throws CommandSyntaxException {
+    public Pair<Identifier, ChallengeData> parse(StringReader reader) throws CommandSyntaxException {
         var id = read(reader);
         if (ChallengesManager.INSTANCE.getAllChallenges().containsKey(id))
             return Pair.of(id, ChallengesManager.INSTANCE.getAllChallenges().get(id));
         throw ERROR_UNKNOWN_CHALLENGE.create(id.toString());
     }
 
-    public static ResourceLocation read(StringReader reader) throws CommandSyntaxException {
+    public static Identifier read(StringReader reader) throws CommandSyntaxException {
         int i = reader.getCursor();
-        while(reader.canRead() && ResourceLocation.isAllowedInResourceLocation(reader.peek())) {
+        while(reader.canRead() && Identifier.isAllowedInIdentifier(reader.peek())) {
             reader.skip();
         }
         String string = reader.getString().substring(i, reader.getCursor());
 
         try {
-            return string.contains(":") ? ResourceLocation.parse(string) : FTBUltimineAddition.id(string);
-        } catch (ResourceLocationException var4) {
+            return string.contains(":") ? Identifier.parse(string) : FTBUltimineAddition.id(string);
+        } catch (IdentifierException var4) {
             reader.setCursor(i);
-            throw ResourceLocation.ERROR_INVALID.createWithContext(reader);
+            throw Identifier.ERROR_INVALID.createWithContext(reader);
         }
     }
 

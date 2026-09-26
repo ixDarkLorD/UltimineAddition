@@ -13,7 +13,7 @@ import java.util.function.IntSupplier;
 @Mixin(value = FTBUltimine.class)
 public abstract class FTBUltimineMixin {
 
-    @Redirect(method = "blockBroken", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/config/FTBUltimineServerConfig;getMaxBlocks(Lnet/minecraft/server/level/ServerPlayer;)I"))
+    @Redirect(method = "handleBlockBreak", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/config/FTBUltimineServerConfig;getMaxBlocks(Lnet/minecraft/server/level/ServerPlayer;)I"))
     private int UA$Redirect$blockBroken(ServerPlayer player) {
         return FTBUltimineIntegration.getMaxBlocks(player);
     }

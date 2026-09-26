@@ -1,4 +1,4 @@
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/neoforge.gradle"
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v3/neoforge.gradle"
 
 loom {
     runs {
@@ -10,19 +10,26 @@ loom {
         server {
             runDir("../run/server")
         }
+        // NeoForge 26.1 split datagen into client/server runs; the client run generates everything.
+        data {
+            clientData()
+        }
     }
 }
 
 dependencies {
-    modApi libs.architectury.neoforge.get()
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-neoforge:1.21-${coolcatlib_version}"
+    api libs.architectury.neoforge
+    api "net.ixdarklord.coolcatlib:coolcatlib-neoforge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
 
-    modCompileOnly "${libs.curios.neoforge.get()}:api"
-    modRuntimeOnly libs.curios.neoforge.get()
+    compileOnly "${libs.curios.neoforge.get()}:api"
+    runtimeOnly libs.curios.neoforge
 
-    modCompileOnlyApi libs.jei.api.neoforge.get()
-    modRuntimeOnly libs.jei.neoforge.get()
+    compileOnlyApi libs.jei.api.neoforge
+    runtimeOnly libs.jei.neoforge
 
-    modApi "dev.ftb.mods:ftb-ultimine-neoforge:${ftbultimine_version}"
-    modApi "dev.ftb.mods:ftb-library-neoforge:${ftblibrary_version}"
+    // Configured (MrCrayfish): in-game config screens for dev runs. Not in the shared catalog; CurseForge file for 26.1.2 (v2.7.5).
+    localRuntime "curse.maven:configured-457570:7943180"
+
+    api "dev.ftb.mods:ftb-ultimine-neoforge:${ftbultimine_version}"
+    api "dev.ftb.mods:ftb-library-neoforge:${ftblibrary_version}"
 }

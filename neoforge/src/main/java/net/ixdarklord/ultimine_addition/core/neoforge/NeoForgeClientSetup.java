@@ -1,5 +1,8 @@
 package net.ixdarklord.ultimine_addition.core.neoforge;
 
+import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent;
+import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
+import net.ixdarklord.ultimine_addition.client.renderer.item.UAItemModels;
 import net.ixdarklord.ultimine_addition.client.gui.screens.ShapeSelectorScreen;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.particle.CelebrateParticle;
@@ -21,6 +24,16 @@ public final class NeoForgeClientSetup {
         @SubscribeEvent
         private static void onRegisterParticleProviders(RegisterParticleProvidersEvent event) {
             event.registerSpriteSet(Registration.CELEBRATE_PARTICLE.get(), CelebrateParticle.Provider::new);
+        }
+
+        @SubscribeEvent
+        private static void onRegisterItemModels(RegisterItemModelsEvent event) {
+            UAItemModels.registerModels(event::register);
+        }
+
+        @SubscribeEvent
+        private static void onRegisterConditionalItemModelProperties(RegisterConditionalItemModelPropertyEvent event) {
+            UAItemModels.registerConditionalProperties(event::register);
         }
 
         @SubscribeEvent

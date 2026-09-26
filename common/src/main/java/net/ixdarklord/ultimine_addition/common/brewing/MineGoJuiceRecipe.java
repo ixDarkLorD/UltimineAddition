@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.brewing;
 
+import net.ixdarklord.coolcatlib.api.brewing.IBrewingRecipe;
 import net.ixdarklord.coolcatlib.api.brewing.BrewingBuilder;
-import net.ixdarklord.coolcatlib.api.brewing.BrewingRecipe;
 import net.ixdarklord.coolcatlib.api.event.v1.server.RegisterBrewingRecipesEvent;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
@@ -14,7 +14,7 @@ import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -25,20 +25,21 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.NotNull;
 
-public class MineGoJuiceRecipe extends BrewingRecipe {
+public class MineGoJuiceRecipe implements IBrewingRecipe {
     private final Holder<Potion> input;
     private final Ingredient ingredient;
     private final Holder<Potion> output;
+    private final ItemStack outputStack;
 
     public MineGoJuiceRecipe(Holder<Potion> input, Item ingredient, Holder<Potion> output) {
         this(input, ingredient.getDefaultInstance(), output);
     }
 
     public MineGoJuiceRecipe(Holder<Potion> input, ItemStack itemStack, Holder<Potion> output) {
-        super(Ingredient.of(PotionContents.createItemStack(Items.POTION, input)), Ingredient.of(itemStack), PotionContents.createItemStack(Items.POTION, output));
         this.input = input;
-        this.ingredient = Ingredient.of(itemStack);
+        this.ingredient = Ingredient.of(itemStack.getItem());
         this.output = output;
+        this.outputStack = PotionContents.createItemStack(Items.POTION, output);
     }
 
     public static void register() {
@@ -53,9 +54,9 @@ public class MineGoJuiceRecipe extends BrewingRecipe {
             addTiers(builder, Registration.MINING_SKILL_CARD_HOE.get(), Registration.MINE_GO_JUICE_HOE_POTION.getId());
 
             for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
-                Item item = BuiltInRegistries.ITEM.get(type.getRegistryId());
+                Item item = BuiltInRegistries.ITEM.getValue(type.getRegistryId());
                 MiningSkillCardItem card = item instanceof MiningSkillCardItem ? (MiningSkillCardItem) item : null;
-                Potion potion = BuiltInRegistries.POTION.get(MineGoJuiceEffect.getId(type));
+                Potion potion = BuiltInRegistries.POTION.getValue(MineGoJuiceEffect.getId(type));
 
                 if (card == null || potion == null) continue;
                 addTiers(builder, card, MineGoJuiceEffect.getId(type));
@@ -64,21 +65,37 @@ public class MineGoJuiceRecipe extends BrewingRecipe {
     }
 
     private static Holder<Potion> getHolder(Potion potion) {
-        ResourceLocation location = BuiltInRegistries.POTION.getKey(potion);
+        Identifier location = BuiltInRegistries.POTION.getKey(potion);
         IllegalArgumentException exception = new IllegalArgumentException("unregistered potion: " + potion.getClass().getSimpleName());
         if (location == null) throw exception;
-        return BuiltInRegistries.POTION.getHolder(location).orElseThrow(() -> exception);
+        return BuiltInRegistries.POTION.get(location).orElseThrow(() -> exception);
     }
 
-    private static void addTiers(BrewingBuilder builder, @NotNull MiningSkillCardItem card, ResourceLocation output) {
+    private static void addTiers(BrewingBuilder builder, @NotNull MiningSkillCardItem card, Identifier output) {
         MiningSkillCardItem.Tier[] TIERS = {MiningSkillCardItem.Tier.Novice, MiningSkillCardItem.Tier.Apprentice, MiningSkillCardItem.Tier.Adept};
 
         for (int i = 0; i < TIERS.length; i++) {
             MiningSkillCardItem.Tier tier = TIERS[i];
             ItemStack itemStack = MiningSkillCardData.createForCreativeTab(card, tier);
-            Holder<Potion> potion = Registration.POTIONS.getRegistrar().getHolder(i > 0 ? ResourceLocation.parse(output + "_" + (i+1)) : output);
+            Holder<Potion> potion = Registration.POTIONS.getRegistrar().getHolder(i > 0 ? Identifier.parse(output + "_" + (i+1)) : output);
             builder.addRecipe(new MineGoJuiceRecipe(getHolder(Registration.KNOWLEDGE_POTION.get()), itemStack, potion));
         }
+    }
+
+    // Vanilla ingredients only match items now; the potion and card tier checks live in isInput/getOutput.
+    @Override
+    public @NotNull Ingredient input() {
+        return Ingredient.of(Items.POTION);
+    }
+
+    @Override
+    public @NotNull Ingredient ingredient() {
+        return this.ingredient;
+    }
+
+    @Override
+    public @NotNull ItemStack output() {
+        return this.outputStack;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.integration.jei;
 
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -48,7 +49,7 @@ public class MCRecipeTransferHandler implements IRecipeTransferHandler<CraftingM
     }
 
     @Override
-    public @NotNull RecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
+    public @NotNull IRecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
         return RecipeTypes.CRAFTING;
     }
 

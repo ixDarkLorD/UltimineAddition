@@ -34,11 +34,11 @@ public abstract class ShapeRegistryMixin implements ShapeRegistryAccessor {
 
     @Inject(method = "getShape", at = @At(value = "HEAD"), remap = false, cancellable = true)
     private void UA$Inject$GetShape(int idx, CallbackInfoReturnable<Shape> cir) {
-        cir.setReturnValue(FTBUltimineIntegration.getEnabledShapes(idx));
+        cir.setReturnValue(FTBUltimineIntegration.getEnabledShapes((ShapeRegistry) (Object) this, idx));
     }
 
     @ModifyReturnValue(method = "shapeCount", at = @At(value = "RETURN"), remap = false)
     private int UA$ModifyReturn$ShapeCount(int original) {
-        return FTBUltimineIntegration.getEnabledShapes().size();
+        return FTBUltimineIntegration.getEnabledShapes((ShapeRegistry) (Object) this).size();
     }
 }

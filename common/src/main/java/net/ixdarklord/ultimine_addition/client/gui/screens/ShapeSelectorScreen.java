@@ -1,9 +1,11 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
+import net.minecraft.util.ARGB;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.ActiveTextCollector;
+import net.minecraft.client.renderer.RenderPipelines;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatlib.api.client.utils.RenderUtils;
 import net.ixdarklord.coolcatlib.api.utils.ColorUtils;
@@ -17,10 +19,10 @@ import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.UpdateItemShapePayload;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractStringWidget;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
@@ -32,7 +34,7 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -47,9 +49,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
 public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMenu> {
-    private static final ResourceLocation BACKGROUND_TEXTURE = FTBUltimineAddition.getGuiTexture("container/shape_selector", "png");
+    private static final Identifier BACKGROUND_TEXTURE = FTBUltimineAddition.getGuiTexture("container/shape_selector", "png");
     private SkillsRecordScreen.OverlayColor color;
 
     private ColoredButton filterButton;
@@ -59,13 +60,13 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
     private ColorableImageButton clearButton;
 
     public ShapeSelectorScreen(ShapeSelectorMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, title);
-        this.imageWidth = 178;
-        this.imageHeight = 172;
+        super(menu, playerInventory, title, 178, 172);
     }
 
     @Override
     protected void init() {
+        // Set before the first frame: 26.1 draws the background before extractRenderState runs.
+        this.color = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
         super.init();
 
         this.titleLabelX = 6;
@@ -76,7 +77,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         this.filterButton = this.addWidget(new ColoredButton(this.leftPos + 165, this.topPos + 4, 9, 9, SkillsRecordScreen.CONFIGURATION_BUTTON_SPRITES,
                 button -> {
                     Filter filter = ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.get();
-                    ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.set(Screen.hasShiftDown() ? filter.previous() : filter.next());
+                    ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.set(Minecraft.getInstance().hasShiftDown() ? filter.previous() : filter.next());
                     ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.save();
                     this.selectBox.refreshList();
                 }, Component.empty(), tooltipInfo -> {
@@ -94,7 +95,11 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 Component.translatable("gui.ultimine_addition.shape_selector.insert"), this.font) {
 
             @Override
-            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            public void visitLines(ActiveTextCollector output) {
+            }
+
+            @Override
+            public void extractWidgetRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
                 Component component = this.getMessage();
                 Font font = this.getFont();
                 int width = this.getWidth();
@@ -108,13 +113,12 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 for (FormattedCharSequence sequence : sequences) {
                     int textWidth = font.width(sequence);
                     int centeredX = x + (width - textWidth) / 2;
-                    guiGraphics.drawString(font, sequence, centeredX, y, this.getColor());
+                    guiGraphics.text(font, sequence, centeredX, y, Color.LIGHT_GRAY.getRGB());
                     y += font.lineHeight;
                 }
 
             }
         });
-        this.emptyString.setColor(Color.LIGHT_GRAY.getRGB());
 
         this.selectBox = this.addRenderableWidget(new SelectBox(this.leftPos + 61, this.topPos + 16, 102, 54));
         this.selectBox.visible = false;
@@ -127,10 +131,10 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
         }) {
             @Override
-            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-                final ResourceLocation SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/confirm");
-                guiGraphics.blitSprite(SPRITE, this.getX() + 1, this.getY(), 18, 18);
+            public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+                super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
+                final Identifier SPRITE = Identifier.withDefaultNamespace("container/beacon/confirm");
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITE, this.getX() + 1, this.getY(), 18, 18);
             }
         });
 
@@ -139,10 +143,10 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
             PayloadHandler.sendToServer(new UpdateItemShapePayload(""));
         }) {
             @Override
-            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-                final ResourceLocation SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/cancel");
-                guiGraphics.blitSprite(SPRITE, this.getX() + 1, this.getY(), 18, 18);
+            public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+                super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
+                final Identifier SPRITE = Identifier.withDefaultNamespace("container/beacon/cancel");
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITE, this.getX() + 1, this.getY(), 18, 18);
             }
         });
 
@@ -170,17 +174,16 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.color = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
         this.update();
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        this.filterButton.render(guiGraphics, mouseX, mouseY, partialTick);
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+        this.filterButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        super.renderTooltip(guiGraphics, mouseX, mouseY);
+    protected void extractTooltip(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+        super.extractTooltip(guiGraphics, mouseX, mouseY);
         SelectBox.ShapeEntry entry = this.selectBox.getHovered();
         if (entry == null) return;
 
@@ -194,28 +197,38 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         }
 
         Minecraft mc = Objects.requireNonNull(minecraft);
-        if (mc.options.advancedItemTooltips && hasShiftDown()) {
+        if (mc.options.advancedItemTooltips && mc.hasShiftDown()) {
             if (!components.isEmpty()) components.add(Component.empty());
             components.add(Component.literal("Shape ID: ").append(entry.shape.getName().toString()).withStyle(ChatFormatting.GRAY));
         }
 
         if (!components.isEmpty())
-            guiGraphics.renderTooltip(font, components, Optional.empty(), mouseX, mouseY);
+            guiGraphics.setComponentTooltipForNextFrame(font, components, mouseX, mouseY);
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        guiGraphics.setColor(color.red(), color.green(), color.blue(), color.alpha());
-        guiGraphics.blit(BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        guiGraphics.setColor(1F, 1F, 1F, 1F);
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        // AbstractContainerScreen doesn't pass scrolling on to its widgets.
+        if (this.selectBox.visible && this.selectBox.isMouseOver(mouseX, mouseY)
+                && this.selectBox.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256,
+                ARGB.colorFromFloat(color.alpha(), color.red(), color.green(), color.blue()));
+    }
+
+    @Override
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         Color color = ColorUtils.blend(new Color(0, 0, 0), this.color.convert(), 0.25);
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, color.getRGB(), false);
+        guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, color.getRGB(), false);
         guiGraphics.fill(this.inventoryLabelX - 1, this.inventoryLabelY - 1, this.inventoryLabelX + this.font.width(this.playerInventoryTitle), this.inventoryLabelY + this.font.lineHeight, ColorUtils.rgbToRgba(color.getRGB(), 0.5F));
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
+        guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
     }
 
     public enum Filter {
@@ -234,6 +247,9 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
     }
 
     private class SelectBox extends ObjectSelectionList<SelectBox.ShapeEntry> {
+        // Empty space below each entry's box; rows are laid out back to back, so it's taken out of the row height.
+        private static final int ENTRY_GAP = 4;
+
         public SelectBox(int x, int y, int width, int height) {
             super(Minecraft.getInstance(), width, height, y, 20);
             this.setX(x);
@@ -250,7 +266,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 }
                 this.addEntry(new ShapeEntry(shape));
             }
-            this.clampScrollAmount();
+            this.refreshScrollAmount();
         }
 
         @Override
@@ -269,59 +285,49 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         }
 
         @Override
-        protected int getScrollbarPosition() {
+        protected int scrollBarX() {
             return this.getX() + width + 4;
         }
 
         @Override
-        public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-            super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
+        protected void extractListSeparators(GuiGraphicsExtractor guiGraphics) {
         }
 
         @Override
-        protected void renderListSeparators(GuiGraphics guiGraphics) {
+        protected void extractListBackground(GuiGraphicsExtractor guiGraphics) {
         }
 
         @Override
-        protected void renderListBackground(GuiGraphics guiGraphics) {
+        protected void extractSelection(GuiGraphicsExtractor guiGraphics, ShapeEntry entry, int outlineColor) {
+            ScreenRectangle rectangle = new ScreenRectangle(entry.getX(), entry.getY() - 1, entry.getWidth(), entry.boxHeight() + 2);
+            RenderUtils.drawHollowRect(guiGraphics, rectangle, 1, outlineColor);
         }
 
         @Override
-        protected void renderSelection(GuiGraphics guiGraphics, int top, int width, int height, int outerColor, int innerColor) {
-            int i = this.getX() + (this.width - width) / 2;
-            ScreenRectangle rectangle = new ScreenRectangle(i, top - 1, width, height + 2);
-            RenderUtils.drawHollowRect(guiGraphics, rectangle, 1, outerColor);
-        }
-
-        @Override
-        protected void renderDecorations(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-            if (this.scrollbarVisible()) {
-                int i = this.getScrollbarPosition();
-                int j = (int) ((float) (this.height * this.height) / (float) this.getMaxPosition());
-                j = Mth.clamp(j, 32, this.height - 8);
-                int k = (int) this.getScrollAmount() * (this.height - j) / this.getMaxScroll() + this.getY();
-                if (k < this.getY()) {
-                    k = this.getY();
-                }
-
-                final ResourceLocation SCROLLER_BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller_background");
-                final ResourceLocation SCROLLER_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller");
-                RenderSystem.enableBlend();
-                guiGraphics.blitSprite(SCROLLER_BACKGROUND_SPRITE, i, this.getY(), 6, this.getHeight());
-                ColorUtils color = new ColorUtils(ShapeSelectorScreen.this.color.convert().brighter().getRGB());
-                guiGraphics.setColor(color.red(), color.green(), color.blue(), color.alpha());
-                guiGraphics.blitSprite(SCROLLER_SPRITE, i, k, 6, j);
-                guiGraphics.setColor(1F, 1F, 1F, 1F);
-                RenderSystem.disableBlend();
+        protected void extractScrollbar(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+            if (this.scrollable()) {
+                final Identifier SCROLLER_BACKGROUND_SPRITE = Identifier.withDefaultNamespace("widget/scroller_background");
+                final Identifier SCROLLER_SPRITE = Identifier.withDefaultNamespace("widget/scroller");
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_BACKGROUND_SPRITE, this.scrollBarX(), this.getY(), 6, this.getHeight());
+                int color = ShapeSelectorScreen.this.color.convert().brighter().getRGB();
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_SPRITE, this.scrollBarX(), this.scrollBarY(), 6, this.scrollerHeight(), color);
             }
         }
 
-        @Environment(EnvType.CLIENT)
         private class ShapeEntry extends ObjectSelectionList.Entry<ShapeEntry> {
             private final Shape shape;
 
             private ShapeEntry(Shape shape) {
                 this.shape = shape;
+            }
+
+            private int boxHeight() {
+                return this.getHeight() - ENTRY_GAP;
+            }
+
+            @Override
+            public boolean isMouseOver(double mouseX, double mouseY) {
+                return new ScreenRectangle(this.getX(), this.getY(), this.getWidth(), this.boxHeight()).containsPoint((int) mouseX, (int) mouseY);
             }
 
             private boolean isAllowed() {
@@ -335,18 +341,22 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
             }
 
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
                 SoundManager handler = Minecraft.getInstance().getSoundManager();
                 if (!isAllowed()) {
                     handler.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS, .5F));
                     return false;
                 }
                 handler.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1F));
-                return super.mouseClicked(mouseX, mouseY, button);
+                return super.mouseClicked(event, doubleClick);
             }
 
             @Override
-            public void renderBack(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isHovered, float partialTick) {
+            public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean isHovered, float partialTick) {
+                int left = this.getX();
+                int top = this.getY();
+                int width = this.getWidth();
+                int height = this.boxHeight();
                 Color bgColor = new Color(0xBCBCBC);
                 Color borderColor = new Color(0xB5B5B5);
 
@@ -361,17 +371,14 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 float alpha = (isAllowed() && isHovered) || isShapeSelected() ? 0.8F : 0.5F;
                 guiGraphics.fill(left, top, left + width, top + height, ColorUtils.rgbToRgba(bgColor.getRGB(), alpha));
                 RenderUtils.drawHollowRect(guiGraphics, new ScreenRectangle(left, top, width, height), 1, borderColor.getRGB());
-            }
 
-            @Override
-            public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isHovered, float partialTick) {
                 Font font = SelectBox.this.minecraft.font;
                 Color color = isAllowed() ? Color.WHITE : new Color(0xD13E3E);
                 int ticks = (int) (Util.getMillis() / 10);
                 Style style = Style.EMPTY.withStrikethrough(!isAllowed());
                 int spacing = isShapeSelected() ? 9 : 0;
                 if (isShapeSelected()) {
-                    guiGraphics.drawString(font, Component.literal("➤"), left + 3, top + (height / 2) - 4, color.getRGB());
+                    guiGraphics.text(font, Component.literal("➤"), left + 3, top + (height / 2) - 4, color.getRGB());
                 }
                 RenderUtils.drawScrollingString(guiGraphics, ticks, font, this.shape.getDisplayName().copy().withStyle(style), false, new ScreenRectangle(left + spacing, top, width - spacing, height), 3, color.getRGB(), true);
             }

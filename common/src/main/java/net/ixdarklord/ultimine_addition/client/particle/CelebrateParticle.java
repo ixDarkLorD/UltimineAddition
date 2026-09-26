@@ -1,5 +1,7 @@
 package net.ixdarklord.ultimine_addition.client.particle;
 
+import net.minecraft.util.RandomSource;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -8,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class CelebrateParticle extends RisingParticle {
     private final SpriteSet sprites;
     protected CelebrateParticle(ClientLevel level, double xCord, double yCord, double zCord, double xd, double yd, double zd, SpriteSet spriteSet, SpriteSet sprites) {
-        super(level, xCord, yCord, zCord, xd, yd, zd);
+        super(level, xCord, yCord, zCord, xd, yd, zd, spriteSet.first());
         this.sprites = sprites;
         this.quadSize *= 0.85F;
         this.lifetime = (int)(16.0 / ((double)this.random.nextFloat() * 0.8 + 0.2)) + 2;
@@ -36,8 +38,8 @@ public class CelebrateParticle extends RisingParticle {
     }
 
     @Override
-    public @NotNull ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+    protected @NotNull SingleQuadParticle.Layer getLayer() {
+        return SingleQuadParticle.Layer.TRANSLUCENT;
     }
 
 
@@ -47,7 +49,7 @@ public class CelebrateParticle extends RisingParticle {
             this.sprites = spriteSet;
         }
 
-        public Particle createParticle(@NotNull SimpleParticleType type, @NotNull ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        public Particle createParticle(@NotNull SimpleParticleType type, @NotNull ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, @NotNull RandomSource random) {
             return new CelebrateParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprites, sprites);
         }
     }

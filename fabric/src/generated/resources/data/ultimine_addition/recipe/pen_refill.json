@@ -7,6 +7,7 @@
   ],
   "type": "ultimine_addition:item_storage_data",
   "category": "misc",
+  "group": "ultimine_addition",
   "ingredients": [
     {
       "increment_amount": 50,
@@ -18,7 +19,6 @@
     }
   ],
   "result": {
-    "count": 1,
     "id": "ultimine_addition:pen"
   },
   "storage_name": "ink_chamber"

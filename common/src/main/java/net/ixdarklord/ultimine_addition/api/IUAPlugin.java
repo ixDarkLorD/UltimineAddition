@@ -1,19 +1,19 @@
 package net.ixdarklord.ultimine_addition.api;
 
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;
 import java.util.HashSet;
 
 public interface IUAPlugin {
-    ResourceLocation getUid();
+    Identifier getUid();
     void register(Registration registration);
 
     class Registration {
         private final Collection<MiningSkillCardItem.Type> types = new HashSet<>();
-        private final ResourceLocation ID;
+        private final Identifier ID;
 
         public Registration(IUAPlugin plugin) {
             this.ID = plugin.getUid();

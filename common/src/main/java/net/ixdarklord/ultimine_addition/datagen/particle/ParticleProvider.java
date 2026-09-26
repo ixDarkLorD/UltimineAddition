@@ -8,7 +8,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 public abstract class ParticleProvider implements DataProvider {
     private final PackOutput.PathProvider pathProvider;
 
-    private final Map<String, List<ResourceLocation>> data = new TreeMap<>();
+    private final Map<String, List<Identifier>> data = new TreeMap<>();
     protected abstract void addParticles();
 
     public ParticleProvider(PackOutput output) {
@@ -46,7 +46,7 @@ public abstract class ParticleProvider implements DataProvider {
         return CompletableFuture.allOf(futures);
     }
 
-    public void add(SimpleParticleType particle, ResourceLocation... texture) {
+    public void add(SimpleParticleType particle, Identifier... texture) {
         var particleName = Objects.requireNonNull(Registration.PARTICLE_TYPES.getRegistrar().getId(particle)).getPath();
         if (data.containsKey(particleName)) {
             throw new IllegalStateException("Duplicate particle " + particleName);

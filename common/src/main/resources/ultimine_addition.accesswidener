@@ -1,12 +1,10 @@
-accessWidener v2 named
+accessWidener v2 official
 accessible field net/minecraft/world/item/AxeItem STRIPPABLES Ljava/util/Map;
 accessible field net/minecraft/world/item/ShovelItem FLATTENABLES Ljava/util/Map;
 accessible field net/minecraft/world/item/HoeItem TILLABLES Ljava/util/Map;
 accessible field net/minecraft/client/gui/Gui overlayMessageTime I
 accessible field net/minecraft/client/gui/Gui toolHighlightTimer I
 accessible field net/minecraft/world/effect/MobEffectInstance duration I
-accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V
-accessible field net/minecraft/data/models/model/ModelTemplate model Ljava/util/Optional;
-accessible method net/minecraft/data/models/model/ModelTemplate createMap (Lnet/minecraft/data/models/model/TextureMapping;)Ljava/util/Map;
-accessible method net/minecraft/client/gui/GuiGraphics renderTooltipInternal (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;)V
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
+accessible field net/minecraft/client/renderer/item/ItemModels ID_MAPPER Lnet/minecraft/util/ExtraCodecs$LateBoundIdMapper;
+accessible field net/minecraft/client/renderer/item/properties/conditional/ConditionalItemModelProperties ID_MAPPER Lnet/minecraft/util/ExtraCodecs$LateBoundIdMapper;

@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.core.neoforge;
 
+import net.minecraft.world.level.block.Blocks;
 import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.PlayerAbilityPayload;
@@ -51,20 +52,10 @@ public final class ServicePlatformPlayersImpl implements ServicePlatform.Players
         }
 
         // Solution #3
-        // Checking if the tool able to preform these actions
-        List<ItemAbility> ACTIONS = List.of(
-                ItemAbilities.PICKAXE_DIG,
-                ItemAbilities.AXE_DIG,
-                ItemAbilities.SHOVEL_DIG,
-                ItemAbilities.HOE_DIG
-        );
-
-        for (ItemAbility action : ACTIONS) {
-            if (!stack.canPerformAction(action)) {
-                return false;
-            }
-        }
-
-        return true;
+        // Checking if the tool is correct for these blocks (the per-tool dig abilities no longer exist)
+        return isCorrectToolForBlock(stack, Blocks.STONE.defaultBlockState()) &&
+                isCorrectToolForBlock(stack, Blocks.NOTE_BLOCK.defaultBlockState()) &&
+                isCorrectToolForBlock(stack, Blocks.DIRT.defaultBlockState()) &&
+                isCorrectToolForBlock(stack, Blocks.SPONGE.defaultBlockState());
     }
 }

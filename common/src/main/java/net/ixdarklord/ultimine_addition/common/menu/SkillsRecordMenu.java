@@ -2,7 +2,19 @@ package net.ixdarklord.ultimine_addition.common.menu;
 
 
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
-import net.ixdarklord.ultimine_addition.common.item.PenItem;
+import dev.architectury.registry.menu.MenuRegistry;
+import net.ixdarklord.ultimine_addition.common.data.record.CardHistory;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordClientCache;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.SimpleMenuProvider;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.menu.slot.CustomSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.MiningSkillCardSlot;
@@ -20,7 +32,6 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -29,46 +40,54 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData> implements ContainerListener {
+public class SkillsRecordMenu extends AbstractContainerMenu {
     public static final int CONTAINER_SIZE = 6;
     public static final int[] CARD_SLOTS = {0, 1, 2, 3};
     private final Player player;
     private final Inventory playerInventory;
+    private final SkillsRecordData data;
     private final SimpleContainer container;
     public final @Nullable InteractionHand interactionHand;
 
+    /** Client: the server sends the record's current state along with the open request. */
     public SkillsRecordMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buf) {
-        this(id, inventory, inventory.player, ItemStack.STREAM_CODEC.decode(buf), buf.readBoolean() ? buf.readEnum(InteractionHand.class) : null);
+        this(id, inventory, inventory.player,
+                SkillsRecordClientCache.accept(SkillsRecordData.STREAM_CODEC.decode(buf), OPEN_HISTORIES_CODEC.decode(buf)),
+                buf.readBoolean() ? buf.readEnum(InteractionHand.class) : null);
     }
 
-    public SkillsRecordMenu(int id, Inventory playerInventory, Player player, ItemStack stack, @Nullable InteractionHand interactionHand) {
+    private SkillsRecordMenu(int id, Inventory playerInventory, Player player, SkillsRecordData data, @Nullable InteractionHand interactionHand) {
         super(Registration.SKILLS_RECORD_CONTAINER.get(), id);
+        this.player = player;
+        this.playerInventory = playerInventory;
+        this.data = data;
+        this.container = data.getContainer();
+        this.interactionHand = interactionHand;
+
+        addSlotBox(container, 0, 8, 115, 4, 22, 1, 0);
+        addSlot(new PenSlot(container, 4, 125, 115));
+        addSlot(new PaperSlot(container, 5, 147, 115));
+        layoutPlayerInventorySlots(14, 148);
+    }
+
+    private static final StreamCodec<RegistryFriendlyByteBuf, Map<UUID, CardHistory>> OPEN_HISTORIES_CODEC =
+            ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, CardHistory.STREAM_CODEC);
+
+    /** Opens the menu for a record held in {@code hand}, or worn in the accessory slot when {@code hand} is null. */
+    public static void open(ServerPlayer player, ItemStack stack, @Nullable InteractionHand hand) {
         if (!(stack.getItem() instanceof SkillsRecordItem))
             throw new IllegalArgumentException("Invalid item! This container only accepts Skills Record.");
 
-        this.player = player;
-        this.playerInventory = playerInventory;
-        this.container = SkillsRecordData.load(stack).getContainer();
-        this.interactionHand = interactionHand;
-
-        addSlotBox(container, 0, 8, 107, 4, 22, 1, 0);
-        addSlot(new PenSlot(container, 4, 129, 107));
-        addSlot(new PaperSlot(container, 5, 151, 107));
-        layoutPlayerInventorySlots(16, 140);
-        this.addSlotListener(this);
+        SkillsRecordSavedData storage = SkillsRecordSavedData.get(player.level().getServer());
+        SkillsRecordData data = storage.resolve(stack);
+        MenuRegistry.openExtendedMenu(player, new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, data, hand), SkillsRecordItem.TITLE), buf -> {
+            RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
+            SkillsRecordData.STREAM_CODEC.encode(registryBuf, data);
+            OPEN_HISTORIES_CODEC.encode(registryBuf, storage.getHistoriesFor(data));
+            buf.writeBoolean(hand != null);
+            if (hand != null) buf.writeEnum(hand);
+        });
     }
-
-    @Override
-    public void slotChanged(AbstractContainerMenu menu, int slotIndex, ItemStack stack) {
-        if (slotIndex < 6) {
-            if (this.player instanceof ServerPlayer serverPlayer) {
-                SkillsRecordData data = this.getData();
-                data.sendToClient(serverPlayer, this.interactionHand).save();
-            }
-        }
-    }
-
-    public void dataChanged(AbstractContainerMenu containerMenu, int slotIndex, int value) {}
 
     @Override
     public @NotNull ItemStack quickMoveStack(@NotNull Player player, int index) {
@@ -102,7 +121,8 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return !ItemUtils.getSkillsRecord(this.getPlayer(), this.interactionHand).isEmpty();
+        // The record must still be where it was opened from (and not swapped for another one).
+        return this.data.getUUID().equals(SkillsRecordLink.getId(ItemUtils.getSkillsRecord(this.getPlayer(), this.interactionHand)));
     }
 
     public Player getPlayer() {
@@ -161,20 +181,14 @@ public class SkillsRecordMenu extends DataAbstractContainerMenu<SkillsRecordData
     }
 
     public int getInkAmount() {
-        ItemStack stack = getAllSlots().get(4).getItem();
-        if (stack.getItem() instanceof PenItem item) {
-            return item.getData(stack).getCapacity();
-        }
-        return 0;
+        return this.data.getInkAmount();
     }
 
     public Optional<InteractionHand> getInteractionHand() {
         return Optional.ofNullable(interactionHand);
     }
 
-    @Override
     public SkillsRecordData getData() {
-        ItemStack stack = ItemUtils.getSkillsRecord(this.getPlayer(), this.interactionHand);
-        return SkillsRecordData.load(stack).insertContainer(this.container);
+        return this.data;
     }
 }

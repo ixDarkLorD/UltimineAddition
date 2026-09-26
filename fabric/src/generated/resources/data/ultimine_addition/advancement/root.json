@@ -24,7 +24,6 @@
       "translate": "advancement.ultimine_addition.root.desc"
     },
     "icon": {
-      "count": 1,
       "id": "ultimine_addition:miner_certificate"
     },
     "show_toast": false,

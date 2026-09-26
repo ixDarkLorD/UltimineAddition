@@ -1,5 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
+import net.minecraft.server.permissions.Permissions;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -29,7 +31,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.SlotArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +45,7 @@ public final class CardsCommand {
                         .then(Commands.argument("slot_index", SlotArgument.slot())
                                 .then(attachChallengeActions(Commands.argument("card_holder", CardHolderArgument.allSlots()))));
 
-        RequiredArgumentBuilder<CommandSourceStack, Pair<ResourceLocation, ChallengeData>> challengeArg =
+        RequiredArgumentBuilder<CommandSourceStack, Pair<Identifier, ChallengeData>> challengeArg =
                 Commands.argument("challenge_id", ChallengesArgument.data())
                         .then(challengeInInventory);
 
@@ -65,7 +67,7 @@ public final class CardsCommand {
             tierArg.then(tierInApi);
         }
 
-        FTBUltimineAddition.withCommandPrompt(dispatcher, 2, (builder) -> builder.then(
+        FTBUltimineAddition.withCommandPrompt(dispatcher, Commands.LEVEL_GAMEMASTERS, (builder) -> builder.then(
                 Commands.literal("mining_skill_card")
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.literal("challenge")
@@ -84,7 +86,7 @@ public final class CardsCommand {
     private static int executeChallenge(CommandContext<CommandSourceStack> ctx, ChallengeModification modification) throws CommandSyntaxException {
         CommandSourceStack source = ctx.getSource();
         Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
-        Pair<ResourceLocation, ChallengeData> cData = ChallengesArgument.getData(ctx, "challenge_id");
+        Pair<Identifier, ChallengeData> cData = ChallengesArgument.getData(ctx, "challenge_id");
         CardLocation location = new CardLocation(ctx);
         int amount = 0;
         if (modification != CardsCommand.ChallengeModification.ACCOMPLISH) {
@@ -94,9 +96,9 @@ public final class CardsCommand {
         return updateChallengeValue(source, targets, cData, location, amount, modification);
     }
 
-    private static int updateChallengeValue(CommandSourceStack source, @NotNull Collection<ServerPlayer> targets, Pair<ResourceLocation, ChallengeData> cData, CardLocation location, int amount, ChallengeModification modification) {
+    private static int updateChallengeValue(CommandSourceStack source, @NotNull Collection<ServerPlayer> targets, Pair<Identifier, ChallengeData> cData, CardLocation location, int amount, ChallengeModification modification) {
         return executeForEach(source, targets, location, (ctx) -> {
-            ResourceLocation challengeId = cData.getFirst();
+            Identifier challengeId = cData.getFirst();
             MiningSkillCardData.Challenge challenge = ctx.cardData.getChallenge(challengeId).orElse(null);
             if (challenge == null) {
                 fail(source, "command.ultimine_addition.challenge.not_found", challengeId.toString());
@@ -136,7 +138,7 @@ public final class CardsCommand {
             for(ServerPlayer player : targets) {
                 ItemStack main = location.getItem(player);
                 if (!main.isEmpty() && (main.getItem() instanceof SkillsRecordItem || main.getItem() instanceof MiningSkillCardItem)) {
-                    SkillsRecordData recordData = main.getItem() instanceof SkillsRecordItem ? SkillsRecordData.load(main) : null;
+                    SkillsRecordData recordData = main.getItem() instanceof SkillsRecordItem ? SkillsRecordData.get(main, player.level()) : null;
                     Optional<MiningSkillCardData> dataOptional = recordData == null ? Optional.of(MiningSkillCardData.load(main)) : (location.isCardInsideSkillsRecord() ? recordData.getCardData(location.cardHolder) : Optional.empty());
                     if (dataOptional.isEmpty()) {
                         fail(source, "command.ultimine_addition.cards.not_found");
@@ -160,7 +162,7 @@ public final class CardsCommand {
     private static void saveData(ServerPlayer player, @Nullable SkillsRecordData recordData, MiningSkillCardData cardData, CardLocation location) {
         if (recordData != null) {
             cardData.save();
-            recordData.sendToClient(player, location.slotIndex).save();
+            recordData.save();
         } else {
             cardData.sendToClient(player, location.slotIndex).save();
         }
@@ -171,8 +173,8 @@ public final class CardsCommand {
         ServerPlayer self = source.getPlayer();
         if (player == self) {
             source.sendSuccess(() -> Component.translatable(baseKey + ".success", args).withStyle(ChatFormatting.DARK_AQUA), true);
-        } else if (!player.hasPermissions(2)) {
-            player.displayClientMessage(Component.translatable(baseKey + ".receiver", args).withStyle(ChatFormatting.GRAY), false);
+        } else if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+            player.sendSystemMessage(Component.translatable(baseKey + ".receiver", args).withStyle(ChatFormatting.GRAY));
         }
 
         if (targets.size() > 1 && player == self) {
@@ -219,7 +221,7 @@ public final class CardsCommand {
             if (this.slotIndex == -1) {
                 return ServicePlatform.get().slotAPI().isModLoaded() ? ServicePlatform.get().slotAPI().getSkillsRecordItem(player) : ItemStack.EMPTY;
             } else {
-                return player.getSlot(this.slotIndex).get();
+                return ItemUtils.getSlotItem(player, this.slotIndex);
             }
         }
 

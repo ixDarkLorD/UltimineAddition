@@ -1,5 +1,7 @@
 package net.ixdarklord.ultimine_addition.mixin.fabric;
 
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import net.ixdarklord.ultimine_addition.common.data.player.IPlayerData;
 import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
 import net.minecraft.nbt.CompoundTag;
@@ -24,12 +26,12 @@ public abstract class MixinPlayerData implements IPlayerData {
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At(value = "HEAD"))
-    public void writeUltimineData(CompoundTag compound, CallbackInfo ci) {
-        this.getUltimineData$UA().save(compound);
+    public void writeUltimineData(ValueOutput output, CallbackInfo ci) {
+        this.getUltimineData$UA().save(output);
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At(value = "HEAD"))
-    public void readUltimineData(CompoundTag compound, CallbackInfo ci) {
-        this.getUltimineData$UA().load(compound);
+    public void readUltimineData(ValueInput input, CallbackInfo ci) {
+        this.getUltimineData$UA().load(input);
     }
 }

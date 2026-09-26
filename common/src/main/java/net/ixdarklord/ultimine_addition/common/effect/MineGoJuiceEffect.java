@@ -4,7 +4,7 @@ import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -21,7 +21,7 @@ public class MineGoJuiceEffect extends MobEffect {
         return type;
     }
 
-    public static ResourceLocation getId(MiningSkillCardItem.Type type) {
+    public static Identifier getId(MiningSkillCardItem.Type type) {
         return FTBUltimineAddition.id("mine_go_juice_%s".formatted(type.getId()));
     }
 

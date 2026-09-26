@@ -8,21 +8,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "1": {
-      "item": "minecraft:diamond_pickaxe"
-    },
-    "2": {
-      "item": "minecraft:iron_axe"
-    },
-    "3": {
-      "item": "minecraft:golden_hoe"
-    },
-    "4": {
-      "item": "minecraft:stone_shovel"
-    },
-    "P": {
-      "item": "minecraft:paper"
-    }
+    "1": "minecraft:diamond_pickaxe",
+    "2": "minecraft:iron_axe",
+    "3": "minecraft:golden_hoe",
+    "4": "minecraft:stone_shovel",
+    "P": "minecraft:paper"
   },
   "pattern": [
     " 1 ",
@@ -30,7 +20,6 @@
     " 4 "
   ],
   "result": {
-    "count": 1,
     "id": "ultimine_addition:miner_certificate"
   }
 }

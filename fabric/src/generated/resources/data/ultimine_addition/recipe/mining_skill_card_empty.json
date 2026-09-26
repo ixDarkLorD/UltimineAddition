@@ -9,12 +9,8 @@
   "category": "misc",
   "group": "ultimine_addition",
   "ingredients": [
-    {
-      "item": "ultimine_addition:mining_skill_card_empty"
-    },
-    {
-      "item": "ultimine_addition:card_blueprint"
-    }
+    "ultimine_addition:mining_skill_card_empty",
+    "ultimine_addition:card_blueprint"
   ],
   "result": {
     "count": 2,

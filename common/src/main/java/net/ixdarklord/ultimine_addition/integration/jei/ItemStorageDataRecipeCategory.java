@@ -1,9 +1,10 @@
 package net.ixdarklord.ultimine_addition.integration.jei;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import mezz.jei.api.recipe.types.IRecipeType;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.world.item.Items;
+import mezz.jei.common.Internal;
+import org.joml.Matrix3x2fStack;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.ITickTimer;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -26,21 +27,14 @@ import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,7 +45,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorageDataRecipe> {
-    public static final ResourceLocation TEXTURES = FTBUltimineAddition.getGuiTexture("jei/item_storage_data_recipe", "png");
+    public static final Identifier TEXTURES = FTBUltimineAddition.getGuiTexture("jei/item_storage_data_recipe", "png");
     public static final RecipeType<ItemStorageDataRecipe> RECIPE_TYPE =
             RecipeType.create(FTBUltimineAddition.MOD_ID, "item_storage_data", ItemStorageDataRecipe.class);
     private final IDrawable background;
@@ -66,8 +60,8 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
 
     @NotNull
     public static List<ItemStack> getCatalysts() {
-        RecipeManager rm = Objects.requireNonNull(Minecraft.getInstance().level).getRecipeManager();
-        List<ItemStorageDataRecipe> recipes = new ArrayList<>(rm.getAllRecipesFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING).stream()
+        // The client no longer has a RecipeManager; JEI keeps the recipes synced from the server.
+        List<ItemStorageDataRecipe> recipes = new ArrayList<>(Internal.getClientSyncedRecipes().byType(net.minecraft.world.item.crafting.RecipeType.CRAFTING).stream()
                 .filter(recipe -> recipe.value() instanceof ItemStorageDataRecipe)
                 .map(recipe -> (ItemStorageDataRecipe) recipe.value())
                 .toList());
@@ -75,8 +69,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
     }
 
     public static List<ItemStorageDataRecipe> getItemStorageDataRecipes() {
-        RecipeManager rm = Objects.requireNonNull(Minecraft.getInstance().level).getRecipeManager();
-        List<ItemStorageDataRecipe> recipes = rm.getAllRecipesFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING).stream()
+        List<ItemStorageDataRecipe> recipes = Internal.getClientSyncedRecipes().byType(net.minecraft.world.item.crafting.RecipeType.CRAFTING).stream()
                 .filter(recipe -> recipe.value() instanceof ItemStorageDataRecipe)
                 .map(recipe -> (ItemStorageDataRecipe) recipe.value())
                 .toList();
@@ -97,7 +90,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
     }
 
     @Override
-    public @NotNull RecipeType<ItemStorageDataRecipe> getRecipeType() {
+    public @NotNull IRecipeType<ItemStorageDataRecipe> getRecipeType() {
         return RECIPE_TYPE;
     }
 
@@ -106,10 +99,14 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         return this.title;
     }
 
-    @SuppressWarnings("removal")
     @Override
-    public @NotNull IDrawable getBackground() {
-        return this.background;
+    public int getWidth() {
+        return this.background.getWidth();
+    }
+
+    @Override
+    public int getHeight() {
+        return this.background.getHeight();
     }
 
     @Override
@@ -117,14 +114,14 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         if (this.title.equals(Component.literal("Not Assigned!"))) {
             this.title = Component.translatable(String.format("jei.ultimine_addition.category.item_storage.%s", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(recipe.getResultItem().getItem())).getPath()));
         }
-        List<ItemStack> items = DataIngredient.toNormal(recipe.getDataIngredients()).stream().map(Ingredient::getItems).flatMap(Arrays::stream).toList();
+        List<ItemStack> items = DataIngredient.toDisplayStacks(recipe.getDataIngredients());
         builder.addSlot(RecipeIngredientRole.INPUT, 9, 5).addItemStack(recipe.getResultItem());
         builder.addSlot(RecipeIngredientRole.INPUT, 103, 5).addIngredients(VanillaTypes.ITEM_STACK, items);
     }
 
     @Override
     public void getTooltip(ITooltipBuilder tooltip, ItemStorageDataRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
-        int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt("amount");
+        int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getIntOr("amount", 0);
         Component component = Component.translatable(String.format("jei.ultimine_addition.recipe.item_storage.%s", recipe.getStorageName()), value);
         if (component.getString().length() >= 27 && MouseHelper.isMouseOver(mouseX, mouseY, 3, 28, 121, 12)) {
             tooltip.add(component);
@@ -137,15 +134,16 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
     }
 
     @Override
-    public void draw(@NotNull ItemStorageDataRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphics guiGraphics, double mouseX, double mouseY) {
+    public void draw(@NotNull ItemStorageDataRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphicsExtractor guiGraphics, double mouseX, double mouseY) {
+        this.background.draw(guiGraphics);
         new AnimatedCrafting(this.timer).draw(guiGraphics, 51, 0);
 
-        guiGraphics.pose().pushPose();
+        guiGraphics.pose().pushMatrix();
         Font font = Minecraft.getInstance().font;
-        int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt("amount");
+        int value = recipeSlotsView.getSlotViews().get(1).getDisplayedItemStack().orElse(ItemStack.EMPTY).getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getIntOr("amount", 0);
         Component component = ComponentHelper.limitComponent(Component.translatable(String.format("jei.ultimine_addition.recipe.item_storage.%s", recipe.getStorageName()), value), 27);
-        guiGraphics.drawString(font, component, 5, 30, Color.WHITE.getRGB());
-        guiGraphics.pose().popPose();
+        guiGraphics.text(font, component, 5, 30, Color.WHITE.getRGB());
+        guiGraphics.pose().popMatrix();
     }
 
     private record AnimatedCrafting(@Nullable ITickTimer timer, int maskTop, int maskBottom, int maskLeft,
@@ -155,13 +153,13 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         }
 
         @Override
-        public void draw(GuiGraphics guiGraphics, int x, int y) {
+        public void draw(GuiGraphicsExtractor guiGraphics, int x, int y) {
             this.draw(guiGraphics, x, y, this.maskTop, this.maskBottom, this.maskLeft, this.maskRight);
         }
 
         @Override
-        public void draw(GuiGraphics guiGraphics, int x, int y, int maskTop, int maskBottom, int maskLeft, int maskRight) {
-            PoseStack poseStack = guiGraphics.pose();
+        public void draw(GuiGraphicsExtractor guiGraphics, int x, int y, int maskTop, int maskBottom, int maskLeft, int maskRight) {
+            Matrix3x2fStack poseStack = guiGraphics.pose();
 
             if (maskLeft == 0 && maskRight == 0 && maskTop == 0 && maskBottom == 0) {
                 maskLeft = this.maskLeft;
@@ -184,46 +182,32 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
             int adjustedX = x + maskLeft;
             int adjustedY = y + maskTop;
 
-            // Crafting
-            poseStack.pushPose();
-            RenderSystem.enableBlend();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
-            float dynamicYOffset = (maskedHeight * 20F) / this.getHeight();
-            if (this.timer != null) {
-                poseStack.translate(adjustedX, adjustedY + dynamicYOffset + Math.cos(this.timer.getValue() / 20.0F), 100);
-            } else {
-                poseStack.translate(adjustedX, adjustedY + dynamicYOffset, 100);
-            }
-
-            poseStack.scale(scale, -scale, scale);
-            poseStack.mulPose(Axis.XP.rotationDegrees(30));
-            poseStack.mulPose(Axis.YP.rotationDegrees(45));
-
-            MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-            BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-            dispatcher.renderSingleBlock(Blocks.CRAFTING_TABLE.defaultBlockState(), poseStack, bufferSource,
-                    LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
-            bufferSource.endBatch();
-            poseStack.popPose();
+            // Crafting table (block rendering in GUIs is gone; draw its item icon, bobbing when animated)
+            poseStack.pushMatrix();
+            float itemScale = scale / 16.0F;
+            float bob = this.timer != null ? (float) Math.cos(this.timer.getValue() / 20.0F) : 0.0F;
+            poseStack.translate(adjustedX + (maskedWidth - 16 * itemScale) / 2.0F, adjustedY + (maskedHeight - 16 * itemScale) / 2.0F + bob);
+            poseStack.scale(itemScale, itemScale);
+            guiGraphics.fakeItem(new ItemStack(Items.CRAFTING_TABLE), 0, 0);
+            poseStack.popMatrix();
 
             // Plus Symbol
-            poseStack.pushPose();
+            poseStack.pushMatrix();
+            // Keep the plus sign above the crafting table.
+            guiGraphics.nextStratum();
             if (this.timer != null) {
-                poseStack.translate(adjustedX, adjustedY + Math.sin(this.timer.getValue() / 20.0F), 120);
+                poseStack.translate(adjustedX, adjustedY + (float) Math.sin(this.timer.getValue() / 20.0F));
             } else {
-                poseStack.translate(adjustedX, adjustedY, 120);
+                poseStack.translate(adjustedX, adjustedY);
             }
 
             float plusScaleX = ((float) maskedWidth / this.getWidth()) - 1.0F;
             float plusScaleY = ((float) maskedHeight / this.getHeight()) - 1.0F;
             float plusScale = Math.min(plusScaleX, plusScaleY);
-            poseStack.scale(1.0F + plusScale, 1.0F + plusScale, 1.0F);
+            poseStack.scale(1.0F + plusScale, 1.0F + plusScale);
 
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            guiGraphics.blit(TEXTURES, 14, 14, 0, 42, 12, 12, 256, 256);
-            poseStack.popPose();
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURES, 14, 14, 0.0F, 42.0F, 12, 12, 256, 256);
+            poseStack.popMatrix();
         }
 
         @Override

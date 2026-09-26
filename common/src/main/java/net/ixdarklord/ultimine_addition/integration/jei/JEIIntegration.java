@@ -10,7 +10,7 @@ import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ import java.util.List;
 public class JEIIntegration implements IModPlugin {
 
     @Override
-    public @NotNull ResourceLocation getPluginUid() {
+    public @NotNull Identifier getPluginUid() {
         return FTBUltimineAddition.id("jei_integration");
     }
 

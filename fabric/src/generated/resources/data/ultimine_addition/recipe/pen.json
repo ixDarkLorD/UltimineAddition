@@ -9,18 +9,10 @@
   "category": "misc",
   "group": "ultimine_addition",
   "key": {
-    "C": {
-      "item": "ultimine_addition:ink_chamber"
-    },
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "I": {
-      "item": "minecraft:iron_nugget"
-    },
-    "S": {
-      "tag": "c:slime"
-    }
+    "C": "ultimine_addition:ink_chamber",
+    "G": "minecraft:gold_ingot",
+    "I": "minecraft:iron_nugget",
+    "S": "#c:slime"
   },
   "pattern": [
     " GS",
@@ -28,7 +20,6 @@
     "IG "
   ],
   "result": {
-    "count": 1,
     "id": "ultimine_addition:pen"
   }
 }

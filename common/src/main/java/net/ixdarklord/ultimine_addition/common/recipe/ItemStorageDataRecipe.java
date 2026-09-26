@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.recipe;
 
+import net.minecraft.world.item.ItemStackTemplate;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -27,12 +28,15 @@ import java.util.List;
 public class ItemStorageDataRecipe extends CustomRecipe {
     final String group;
     final CraftingBookCategory category;
-    final ItemStack result;
+    final ItemStackTemplate result;
     final String storageName;
     final NonNullList<DataIngredient> ingredients;
 
     public ItemStorageDataRecipe(String group, CraftingBookCategory category, ItemStack result, String storageName, NonNullList<DataIngredient> ingredients) {
-        super(category);
+        this(group, category, ItemStackTemplate.fromNonEmptyStack(result), storageName, ingredients);
+    }
+
+    public ItemStorageDataRecipe(String group, CraftingBookCategory category, ItemStackTemplate result, String storageName, NonNullList<DataIngredient> ingredients) {
         this.group = group;
         this.category = category;
         this.result = result;
@@ -101,25 +105,34 @@ public class ItemStorageDataRecipe extends CustomRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+    public @NotNull ItemStack assemble(CraftingInput input) {
         int amount = 0;
         for (ItemStack stack : input.items()) {
             if (stack.isEmpty()) continue;
 
-            if (stack.is(this.result.getItem())) {
+            if (stack.is(this.result.item())) {
                 amount += StorageItemData.load(this.storageName, 0, stack).getCapacity();
             } else for (DataIngredient ingredient : this.ingredients) {
                 if (ingredient.test(stack)) amount += ingredient.getAmount();
             }
         }
-        ItemStack stack = this.result.copy();
+        ItemStack stack = this.result.create();
         StorageItemData.load(this.storageName, ((StorageItem) stack.getItem()).getMaxCapacity(), stack).setCapacity(amount).save();
         return stack;
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width * height >= this.ingredients.size();
+    public @NotNull String group() {
+        return this.group;
+    }
+
+    public String getGroup() {
+        return this.group;
+    }
+
+    @Override
+    public @NotNull CraftingBookCategory category() {
+        return this.category;
     }
 
     public CraftingBookCategory getCategory() {
@@ -127,7 +140,7 @@ public class ItemStorageDataRecipe extends CustomRecipe {
     }
 
     public ItemStack getResultItem() {
-        return result;
+        return result.create();
     }
 
     public @NotNull NonNullList<DataIngredient> getDataIngredients() {
@@ -139,15 +152,15 @@ public class ItemStorageDataRecipe extends CustomRecipe {
     }
 
     @Override
-    public @NotNull RecipeSerializer<?> getSerializer() {
+    public @NotNull RecipeSerializer<ItemStorageDataRecipe> getSerializer() {
         return Registration.ITEM_DATA_STORAGE_RECIPE_SERIALIZER.get();
     }
 
-    public static class Serializer implements RecipeSerializer<ItemStorageDataRecipe> {
+    public static class Serializer {
         public static final MapCodec<ItemStorageDataRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.STRING.optionalFieldOf("group", "").forGetter(ItemStorageDataRecipe::getGroup),
                 CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ItemStorageDataRecipe::category),
-                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(dataRecipe -> dataRecipe.result),
+                ItemStackTemplate.CODEC.fieldOf("result").forGetter(dataRecipe -> dataRecipe.result),
                 Codec.STRING.fieldOf("storage_name").forGetter(ItemStorageDataRecipe::getStorageName),
                 DataIngredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").flatXmap(list -> {
                     DataIngredient[] ingredients = list.stream().filter(ingredient -> !ingredient.isEmpty()).toArray(DataIngredient[]::new);
@@ -162,17 +175,7 @@ public class ItemStorageDataRecipe extends CustomRecipe {
         ).apply(instance, ItemStorageDataRecipe::new));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, ItemStorageDataRecipe> STREAM_CODEC = StreamCodec.of(ItemStorageDataRecipe.Serializer::toNetwork, ItemStorageDataRecipe.Serializer::fromNetwork);
-
-
-        @Override
-        public @NotNull MapCodec<ItemStorageDataRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public @NotNull StreamCodec<RegistryFriendlyByteBuf, ItemStorageDataRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
+        public static final RecipeSerializer<ItemStorageDataRecipe> INSTANCE = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
         private static @NotNull ItemStorageDataRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
             String group = buf.readUtf();
@@ -182,7 +185,7 @@ public class ItemStorageDataRecipe extends CustomRecipe {
             NonNullList<DataIngredient> nonnulllist = NonNullList.withSize(i, DataIngredient.EMPTY);
             nonnulllist.replaceAll(ignored -> DataIngredient.CONTENTS_STREAM_CODEC.decode(buf));
 
-            ItemStack stack = ItemStack.STREAM_CODEC.decode(buf);
+            ItemStackTemplate stack = ItemStackTemplate.STREAM_CODEC.decode(buf);
             String storageName = buf.readUtf();
             return new ItemStorageDataRecipe(group, category, stack, storageName, nonnulllist);
         }
@@ -196,7 +199,7 @@ public class ItemStorageDataRecipe extends CustomRecipe {
                 DataIngredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient);
             }
 
-            ItemStack.STREAM_CODEC.encode(buf, recipe.result);
+            ItemStackTemplate.STREAM_CODEC.encode(buf, recipe.result);
             buf.writeUtf(recipe.getStorageName());
         }
     }

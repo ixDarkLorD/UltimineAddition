@@ -2,30 +2,30 @@ package net.ixdarklord.ultimine_addition.client.gui.toasts;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
+import dev.ftb.mods.ftblibrary.client.gui.SimpleToast;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 
 public class ChallengesToast extends SimpleToast {
     private final Component title;
     private final Component desc;
-    private final Icon icon;
+    private final Icon<?> icon;
     private final SoundInstance sound;
 
     public static void run(MiningSkillCardData.Challenge challenge, ItemStack stack) {
-        Minecraft.getInstance().getToasts().addToast(new ChallengesToast(challenge, stack));
+        Minecraft.getInstance().getToastManager().addToast(new ChallengesToast(challenge, stack));
     }
 
     public ChallengesToast(MiningSkillCardData.Challenge challengeIdentifier, ItemStack stack) {
-        this.icon = ItemIcon.getItemIcon(stack);
-        if (challengeIdentifier.getId().equals(ResourceLocation.parse("completed"))) {
+        this.icon = ItemIcon.ofItemStack(stack);
+        if (challengeIdentifier.getId().equals(Identifier.parse("completed"))) {
             title = Component.translatable("toast.ultimine_addition.challenge.all_completed");
             desc = Component.translatable("toast.ultimine_addition.challenge.all_completed.info", stack.getHoverName());
             sound = SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
@@ -47,7 +47,7 @@ public class ChallengesToast extends SimpleToast {
     }
 
     @Override
-    public Icon getIcon() {
+    public Icon<?> getIcon() {
         return icon;
     }
 

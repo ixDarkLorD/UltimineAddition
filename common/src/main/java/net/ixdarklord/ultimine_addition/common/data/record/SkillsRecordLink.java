@@ -1,0 +1,58 @@
+package net.ixdarklord.ultimine_addition.common.data.record;
+
+import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * The only data a Skills Record item carries: the UUID of its entry in {@link SkillsRecordSavedData}.
+ * <p>
+ * Before the SavedData storage, the whole record (contents, selected card, consume mode) lived in this
+ * component under the same id. That layout still decodes into {@link #legacy()} so the server can move it
+ * into the SavedData the first time the item is loaded ({@link SkillsRecordSavedData#resolve}); the UUID
+ * may be missing in very old items, in which case a new one is assigned then.
+ */
+public record SkillsRecordLink(Optional<UUID> id, Optional<Legacy> legacy) {
+    public record Legacy(List<ItemStack> contents, int selectedCard, boolean consumeMode) {}
+
+    public static final Codec<SkillsRecordLink> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            UUIDUtil.CODEC.optionalFieldOf("UUID").forGetter(SkillsRecordLink::id),
+            ItemStack.OPTIONAL_CODEC.listOf().optionalFieldOf("Contents").forGetter(link -> link.legacy.map(Legacy::contents)),
+            Codec.INT.optionalFieldOf("SelectedCard", -1).forGetter(link -> link.legacy.map(Legacy::selectedCard).orElse(-1)),
+            Codec.BOOL.optionalFieldOf("ConsumeMode", false).forGetter(link -> link.legacy.map(Legacy::consumeMode).orElse(false))
+    ).apply(instance, (id, contents, selected, consume) ->
+            new SkillsRecordLink(id, contents.map(list -> new Legacy(list, selected, consume)))));
+
+    /** Clients only need the id; the contents come from the record sync. */
+    public static final StreamCodec<ByteBuf, SkillsRecordLink> STREAM_CODEC =
+            UUIDUtil.STREAM_CODEC.map(SkillsRecordLink::of, link -> link.id().orElse(Util.NIL_UUID));
+
+    public static final DataComponentType<SkillsRecordLink> DATA_COMPONENT =
+            DataComponentType.<SkillsRecordLink>builder().persistent(CODEC).networkSynchronized(STREAM_CODEC).build();
+
+    public static SkillsRecordLink of(UUID id) {
+        return new SkillsRecordLink(Optional.of(id), Optional.empty());
+    }
+
+    public static @Nullable UUID getId(ItemStack stack) {
+        if (stack.isEmpty() || !(stack.getItem() instanceof SkillsRecordItem)) return null;
+        SkillsRecordLink link = stack.get(DATA_COMPONENT);
+        return link == null ? null : link.id().filter(id -> !id.equals(Util.NIL_UUID)).orElse(null);
+    }
+
+    /** Whether the stack is a Skills Record that has been linked to a SavedData entry. */
+    public static boolean isLinked(ItemStack stack) {
+        return getId(stack) != null;
+    }
+}

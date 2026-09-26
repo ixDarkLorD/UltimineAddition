@@ -16,7 +16,7 @@ public final class PlatformTagsImpl implements PlatformTags {
     }
 
     public @NotNull TagKey<Item> SLIME() {
-        return Tags.Items.SLIMEBALLS;
+        return Tags.Items.SLIME_BALLS;
     }
 
     public @NotNull TagKey<Block> STONES() {

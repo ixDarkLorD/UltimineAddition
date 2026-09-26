@@ -8,7 +8,6 @@ public class EventHandler {
         IneligibleBlocksEvents.init();
         SyncEvents.init();
         CertificateEvents.init();
-        TradesEvent.init();
         CommandEvents.init();
         BrewingEvents.init();
     }

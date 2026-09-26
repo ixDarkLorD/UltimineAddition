@@ -6,6 +6,7 @@
     }
   ],
   "type": "ultimine_addition:mining_card_recipe",
+  "category": "misc",
   "group": "ultimine_addition",
   "ingredients": [
     {
@@ -29,7 +30,6 @@
     }
   ],
   "result": {
-    "count": 1,
     "id": "ultimine_addition:miner_certificate"
   }
 }

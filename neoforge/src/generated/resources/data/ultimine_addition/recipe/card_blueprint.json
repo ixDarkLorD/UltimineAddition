@@ -3,15 +3,9 @@
   "category": "misc",
   "group": "ultimine_addition",
   "key": {
-    "A": {
-      "item": "minecraft:amethyst_shard"
-    },
-    "L": {
-      "tag": "c:gems/lapis"
-    },
-    "P": {
-      "item": "minecraft:paper"
-    }
+    "A": "minecraft:amethyst_shard",
+    "L": "#c:gems/lapis",
+    "P": "minecraft:paper"
   },
   "pattern": [
     "ALA",
@@ -19,7 +13,6 @@
     "ALA"
   ],
   "result": {
-    "count": 1,
     "id": "ultimine_addition:card_blueprint"
   }
 }

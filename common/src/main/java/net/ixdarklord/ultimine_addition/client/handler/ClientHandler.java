@@ -1,7 +1,5 @@
 package net.ixdarklord.ultimine_addition.client.handler;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -18,28 +16,23 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientHandler {
-    @Environment(EnvType.CLIENT)
     public static Minecraft instance() {
         return Minecraft.getInstance();
     }
 
-    @Environment(EnvType.CLIENT)
     public static Player getPlayer() {
         return instance().player;
     }
 
-    @Environment(EnvType.CLIENT)
     public static void playSound(SoundEvent sound, float volume, float pitch) {
-        instance().getSoundManager().stop(sound.getLocation(), getPlayer().getSoundSource());
+        instance().getSoundManager().stop(sound.location(), getPlayer().getSoundSource());
         getPlayer().playSound(sound, volume, pitch);
     }
 
-    @Environment(EnvType.CLIENT)
     public static void playAnimation(ItemStack stack) {
         instance().gameRenderer.displayItemActivation(stack);
     }
 
-    @Environment(EnvType.CLIENT)
     public static void playConsumeModeEffect(BlockPos pos, BlockState state) {
         Minecraft mc = instance();
         ClientLevel level = mc.level;
@@ -47,12 +40,12 @@ public class ClientHandler {
             double x = (double)pos.getX() + (double)0.5F;
             double y = (double)pos.getY() + (double)0.5F;
             double z = (double)pos.getZ() + (double)0.5F;
-            mc.particleEngine.destroy(pos, state);
+            level.addDestroyBlockEffect(pos, state);
 
             for(int i = 0; i < 40; ++i) {
-                double ox = (level.random.nextDouble() - (double)0.5F) * 1.3;
-                double oy = (level.random.nextDouble() - (double)0.5F) * 1.3;
-                double oz = (level.random.nextDouble() - (double)0.5F) * 1.3;
+                double ox = (level.getRandom().nextDouble() - (double)0.5F) * 1.3;
+                double oy = (level.getRandom().nextDouble() - (double)0.5F) * 1.3;
+                double oz = (level.getRandom().nextDouble() - (double)0.5F) * 1.3;
                 double vx = -ox * 0.22;
                 double vy = -oy * 0.22;
                 double vz = -oz * 0.22;
@@ -70,7 +63,7 @@ public class ClientHandler {
             }
 
             for(Direction direction : Direction.values()) {
-                int i = ConstantInt.of(4).sample(level.random);
+                int i = ConstantInt.of(4).sample(level.getRandom());
 
                 for(int j = 0; j < i; ++j) {
                     ParticleUtils.spawnParticleOnFace(level, pos, direction, ParticleTypes.SMOKE, Vec3.ZERO.add(0.0F, 0.02, 0.0F), 0.5F);

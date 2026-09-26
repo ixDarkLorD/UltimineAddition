@@ -1,5 +1,8 @@
 package net.ixdarklord.ultimine_addition.common.event;
 
+import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.event.events.common.PlayerEvent;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSync;
 import com.mojang.datafixers.util.Pair;
 import dev.architectury.event.CompoundEventResult;
 import dev.architectury.event.EventResult;
@@ -45,20 +48,23 @@ public class MSCEvents {
             if (!(instance instanceof ServerPlayer player)) return;
             validateCards(player);
             cardBonusEffect(player);
+            SkillsRecordSync.tick(player);
         });
+        PlayerEvent.PLAYER_QUIT.register(SkillsRecordSync::forget);
+        LifecycleEvent.SERVER_STOPPED.register(server -> SkillsRecordSync.clear());
 
         BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
             List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
             if (slots.isEmpty()) return EventResult.pass();
             for (SlotReference.Player slot : slots) {
-                SkillsRecordData data = SkillsRecordData.load(slot.get());
+                SkillsRecordData data = SkillsRecordData.get(slot.get(), player.level());
                 Pair<Boolean, Boolean> taskProcess = data.initTaskValidator(state, pos, player, ChallengeData.Type.BREAK_BLOCK);
                 if (taskProcess.getFirst()) {
-                    data.sendToClient(player, slot.getIndex()).save();
+                    data.save();
                 }
                 if (taskProcess.getSecond()) {
                     player.level().removeBlock(pos, false);
-                    PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(pos, state), player.serverLevel(), pos, 128);
+                    PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(pos, state), player.level(), pos, 128);
                 }
             }
             return EventResult.pass();
@@ -81,7 +87,7 @@ public class MSCEvents {
                     Stream<ItemStack> stream = Stream.of(itemStack);
                     if (!itemStack.is(ModItems.SKILLS_RECORD)) return stream;
 
-                    SkillsRecordData recordData = SkillsRecordData.load(itemStack);
+                    SkillsRecordData recordData = SkillsRecordData.get(itemStack, player.level());
                     List<ItemStack> list = recordData.getCardSlots().stream().filter(stack -> !stack.isEmpty()).toList();
                     return list.isEmpty() ? stream : list.stream();
                 })
@@ -124,13 +130,13 @@ public class MSCEvents {
 
         for (SlotReference.Player slot : slots) {
             if (slot.get().is(ModItems.SKILLS_RECORD)) {
-                SkillsRecordData recordData = SkillsRecordData.load(slot.get());
+                SkillsRecordData recordData = SkillsRecordData.get(slot.get(), player.level());
                 boolean needSync = false;
                 for (ItemStack stack : recordData.getCardSlots()) {
                     if (validateCardFunction.apply(stack)) needSync = true;
                 }
                 if (needSync)
-                    recordData.sendToClient(player, slot.getIndex()).save();
+                    recordData.save();
             } else {
                 validateCardFunction.apply(slot.get());
             }
@@ -146,7 +152,7 @@ public class MSCEvents {
             if (slots.isEmpty()) return CompoundEventResult.pass();
 
             for (SlotReference.Player slot : slots) {
-                var data = SkillsRecordData.load(slot.get());
+                var data = SkillsRecordData.get(slot.get(), player.level());
                 Pair<Boolean, Boolean> taskProcess = Pair.of(false, false);
                 if (toolAction == ToolActions.AXE_STRIP) {
                     taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengeData.Type.STRIP_BLOCK);
@@ -164,7 +170,6 @@ public class MSCEvents {
 
                 if (taskProcess.getFirst()) {
                     data.save();
-                    PayloadHandler.sendToPlayer(new SkillsRecordPayload.SyncData(slot.getIndex(), data), player);
 
                     if (taskProcess.getSecond()) {
                         PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(context.getClickedPos(), originalState), (ServerLevel)context.getLevel(), context.getClickedPos(), 128);

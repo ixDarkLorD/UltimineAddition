@@ -1,5 +1,11 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe.builder;
 
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.data.recipes.RecipeUnlockAdvancementBuilder;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.recipe.MCRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
@@ -7,12 +13,12 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.advancements.criterion.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -29,7 +35,7 @@ public class MCRecipeBuilder implements RecipeBuilder {
     private final Item result;
     private final int count;
     private final NonNullList<MCIngredient> ingredients = NonNullList.create();
-    private final Map<String, Criterion<?>> criteria = new LinkedHashMap<>();
+    private final RecipeUnlockAdvancementBuilder advancementBuilder = new RecipeUnlockAdvancementBuilder();
     @Nullable
     private String group;
 
@@ -68,7 +74,7 @@ public class MCRecipeBuilder implements RecipeBuilder {
 
     @Override
     public @NotNull MCRecipeBuilder unlockedBy(String name, Criterion<?> criterion) {
-        this.criteria.put(name, criterion);
+        this.advancementBuilder.unlockedBy(name, criterion);
         return this;
     }
 
@@ -78,24 +84,19 @@ public class MCRecipeBuilder implements RecipeBuilder {
         return this;
     }
 
+    @Override
+    public @NotNull ResourceKey<Recipe<?>> defaultId() {
+        return ResourceKey.create(Registries.RECIPE, BuiltInRegistries.ITEM.getKey(this.result));
+    }
+
     public @NotNull Item getResult() {
         return this.result;
     }
 
     @Override
-    public void save(RecipeOutput recipeOutput, ResourceLocation id) {
-        this.ensureValid(id);
-        Advancement.Builder builder = recipeOutput.advancement().addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id)).rewards(AdvancementRewards.Builder.recipe(id)).requirements(AdvancementRequirements.Strategy.OR);
-        Objects.requireNonNull(builder);
-        this.criteria.forEach(builder::addCriterion);
-
-        MCRecipe recipe = new MCRecipe(Objects.requireNonNullElse(this.group, ""), RecipeBuilder.determineBookCategory(this.category), new ItemStack(this.result, this.count), this.ingredients);
-        recipeOutput.accept(id, recipe, builder.build(id.withPrefix("recipes/" + this.category.getFolderName() + "/")));
+    public void save(RecipeOutput recipeOutput, ResourceKey<Recipe<?>> id) {
+        MCRecipe recipe = new MCRecipe(Objects.requireNonNullElse(this.group, ""), RecipeBuilder.determineCraftingBookCategory(this.category), new ItemStackTemplate(this.result, this.count), this.ingredients);
+        recipeOutput.accept(id, recipe, this.advancementBuilder.build(recipeOutput, id, this.category));
     }
 
-    private void ensureValid(ResourceLocation id) {
-        if (this.criteria.isEmpty()) {
-            throw new IllegalStateException("No way of obtaining recipe " + id);
-        }
-    }
 }

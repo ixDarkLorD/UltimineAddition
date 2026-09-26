@@ -18,7 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -50,16 +50,16 @@ public class FTBUltimineIntegration implements RestrictionHandler {
 
         if (!ItemUtils.checkTargetedBlock(player)) return false;
 
-        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_PICKAXE.getId()).orElseThrow())) {
+        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.get(Registration.MINE_GO_JUICE_PICKAXE.getId()).orElseThrow())) {
             if (ItemUtils.isItemInHandPickaxe(player)) result = true;
         }
-        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_AXE.getId()).orElseThrow())) {
+        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.get(Registration.MINE_GO_JUICE_AXE.getId()).orElseThrow())) {
             if (ItemUtils.isItemInHandAxe(player)) result = true;
         }
-        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_SHOVEL.getId()).orElseThrow())) {
+        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.get(Registration.MINE_GO_JUICE_SHOVEL.getId()).orElseThrow())) {
             if (ItemUtils.isItemInHandShovel(player)) result = true;
         }
-        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_HOE.getId()).orElseThrow())) {
+        if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.get(Registration.MINE_GO_JUICE_HOE.getId()).orElseThrow())) {
             if (ItemUtils.isItemInHandHoe(player)) result = true;
         }
         return result;
@@ -85,24 +85,24 @@ public class FTBUltimineIntegration implements RestrictionHandler {
                                 if (i != toolNames.length-1)
                                     toolsList.append(", ");
                             }
-                            HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, toolsList);
+                            HoverEvent event = new HoverEvent.ShowText(toolsList);
                             Style style = toolNames.length > 1 ? Style.EMPTY.withUnderlined(true).withHoverEvent(event) : Style.EMPTY;
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.%s".formatted(toolPrefix)).withStyle(style);
                         }
                     } else if (ItemUtils.isItemInHandPickaxe(player)) {
-                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_PICKAXE.getId()).orElseThrow())) {
+                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.get(Registration.MINE_GO_JUICE_PICKAXE.getId()).orElseThrow())) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.pickaxe");
                         }
                     } else if (ItemUtils.isItemInHandAxe(player)) {
-                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_AXE.getId()).orElseThrow())) {
+                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.get(Registration.MINE_GO_JUICE_AXE.getId()).orElseThrow())) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.axe");
                         }
                     } else if (ItemUtils.isItemInHandShovel(player)) {
-                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_SHOVEL.getId()).orElseThrow())) {
+                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.get(Registration.MINE_GO_JUICE_SHOVEL.getId()).orElseThrow())) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.shovel");
                         }
                     } else if (ItemUtils.isItemInHandHoe(player)) {
-                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.getHolder(Registration.MINE_GO_JUICE_HOE.getId()).orElseThrow())) {
+                        if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.get(Registration.MINE_GO_JUICE_HOE.getId()).orElseThrow())) {
                             requiredTool = Component.translatable("info.ultimine_addition.required_skill.hoe");
                         }
                     } else if (!ItemUtils.isItemInHandTool(player)) {
@@ -111,12 +111,12 @@ public class FTBUltimineIntegration implements RestrictionHandler {
 
                     if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
                         if (requiredTool != null) {
-                            player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
-                            player.displayClientMessage(Component.literal("✖ ")
+                            player.sendSystemMessage(MSG.withStyle(ChatFormatting.RED));
+                            player.sendSystemMessage(Component.literal("✖ ")
                                     .append(Component.translatable("info.ultimine_addition.required_skill", requiredTool))
-                                    .withStyle(ChatFormatting.GRAY), false);
+                                    .withStyle(ChatFormatting.GRAY));
                         }
-                    } else player.displayClientMessage(MSG.withStyle(ChatFormatting.RED), false);
+                    } else player.sendSystemMessage(MSG.withStyle(ChatFormatting.RED));
                 }
                 isButtonPressed = true;
             }
@@ -136,7 +136,7 @@ public class FTBUltimineIntegration implements RestrictionHandler {
     private static boolean isPlayerHasCustomCardValidEffect(Player player) {
         List<MiningSkillCardItem.Type> types = getCustomCardTypes(player);
         for (MiningSkillCardItem.Type type : types) {
-            Optional<Holder.Reference<MobEffect>> mobEffect = BuiltInRegistries.MOB_EFFECT.getHolder(MineGoJuiceEffect.getId(type));
+            Optional<Holder.Reference<MobEffect>> mobEffect = BuiltInRegistries.MOB_EFFECT.get(MineGoJuiceEffect.getId(type));
             if (mobEffect.isEmpty()) continue;
             if (player.hasEffect(mobEffect.get()))
                 return true;
@@ -181,23 +181,37 @@ public class FTBUltimineIntegration implements RestrictionHandler {
         return FTBUltimineServerConfig.getMaxBlocks(player);
     }
 
+    // FTB Ultimine keeps separate client/server shape registries (with distinct Shape instances). The no-arg
+    // helpers use the server registry, which is populated on every environment.
     public static List<Shape> getShapesList() {
-        Object instance = ShapeRegistry.INSTANCE;
+        return getShapesList(ShapeRegistry.getInstance(false));
+    }
+
+    public static List<Shape> getShapesList(ShapeRegistry registry) {
+        Object instance = registry;
         return ((ShapeRegistryAccessor) instance).getShapesList();
     }
 
     public static Shape getDefaultShape() {
-        Object instance = ShapeRegistry.INSTANCE;
+        return getDefaultShape(ShapeRegistry.getInstance(false));
+    }
+
+    public static Shape getDefaultShape(ShapeRegistry registry) {
+        Object instance = registry;
         return ((ShapeRegistryAccessor) instance).getDefaultShape();
     }
 
     public static List<Shape> getEnabledShapes() {
-        return getShapesList().stream()
+        return getEnabledShapes(ShapeRegistry.getInstance(false));
+    }
+
+    public static List<Shape> getEnabledShapes(ShapeRegistry registry) {
+        return getShapesList(registry).stream()
                 .filter(shape -> !ConfigHandler.SERVER.BLACKLISTED_SHAPES.get().contains(shape.getName().toString()))
                 .toList();
     }
 
-    public static Shape getShape(ResourceLocation shapeId) {
+    public static Shape getShape(Identifier shapeId) {
         for (Shape shape : getShapesList()) {
             if (shape.getName().equals(shapeId)) {
                 return shape;
@@ -207,12 +221,17 @@ public class FTBUltimineIntegration implements RestrictionHandler {
     }
 
     public static Shape getEnabledShapes(int idx) {
+        return getEnabledShapes(ShapeRegistry.getInstance(false), idx);
+    }
+
+    public static Shape getEnabledShapes(ShapeRegistry registry, int idx) {
+        List<Shape> enabled = getEnabledShapes(registry);
         if (idx < 0) {
-            idx += getEnabledShapes().size();
-        } else if (idx >= getEnabledShapes().size()) {
-            idx -= getEnabledShapes().size();
+            idx += enabled.size();
+        } else if (idx >= enabled.size()) {
+            idx -= enabled.size();
         }
-        return idx >= 0 && idx < getEnabledShapes().size() ? getEnabledShapes().get(idx) : getDefaultShape();
+        return idx >= 0 && idx < enabled.size() ? enabled.get(idx) : getDefaultShape(registry);
     }
 
     public static boolean hasToolWithShape(Player player) {

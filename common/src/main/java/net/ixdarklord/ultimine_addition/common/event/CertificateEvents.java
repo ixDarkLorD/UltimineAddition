@@ -22,7 +22,7 @@ public class CertificateEvents {
         BlockEvent.BREAK.register((level, pos, state, pl, xp) -> {
             if (!(pl instanceof ServerPlayer player)) return EventResult.pass();
             if (!state.is(PlatformTags.get().ORES())) return EventResult.pass();
-            if (!player.isCreative() && IneligibleBlocksSavedData.getOrCreate(player.serverLevel()).isBlockPlacedByEntity(pos)) return EventResult.pass();
+            if (!player.isCreative() && IneligibleBlocksSavedData.getOrCreate(player.level()).isBlockPlacedByEntity(pos)) return EventResult.pass();
 
             List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.MINER_CERTIFICATE, true);
             if (slots.isEmpty()) return EventResult.pass();

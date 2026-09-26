@@ -1,5 +1,8 @@
 package net.ixdarklord.ultimine_addition.common.data.challenge;
 
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.core.UUIDUtil;
+import com.mojang.serialization.Codec;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.BlockPos;
@@ -8,7 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.Entity;
@@ -22,19 +25,26 @@ import java.util.*;
 import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
 public class IneligibleBlocksSavedData extends SavedData {
-    public static final String DATA_KEY = FTBUltimineAddition.MOD_ID + ".ineligible_blocks";
-    private final ServerLevel level;
-    private final Map<ChunkPos, List<BlockEntry>> chunkEntries; // Changed to Map<ChunkPos, List<BlockEntry>>
+    // Keeps the 1.21.1 NBT layout, wrapped in a codec as SavedData now requires.
+    public static final Codec<IneligibleBlocksSavedData> CODEC = CompoundTag.CODEC.xmap(
+            tag -> new IneligibleBlocksSavedData(deserializeChunkEntries(tag)),
+            IneligibleBlocksSavedData::serializeChunkEntries);
+    public static final SavedDataType<IneligibleBlocksSavedData> TYPE = new SavedDataType<>(
+            FTBUltimineAddition.id("ineligible_blocks"), IneligibleBlocksSavedData::new, CODEC, DataFixTypes.LEVEL);
+    private final Map<ChunkPos, List<BlockEntry>> chunkEntries;
 
-    public IneligibleBlocksSavedData(ServerLevel level, Map<ChunkPos, List<BlockEntry>> chunkEntries) {
-        this.level = level;
+    public IneligibleBlocksSavedData() {
+        this(new HashMap<>());
+    }
+
+    public IneligibleBlocksSavedData(Map<ChunkPos, List<BlockEntry>> chunkEntries) {
         this.chunkEntries = chunkEntries;
     }
 
     public void add(Entity entity, BlockInfo blockInfo) {
-        ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+        Identifier entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
         UUID entityUUID = entity.getUUID();
-        ChunkPos chunkPos = level.getChunk(blockInfo.pos).getPos();
+        ChunkPos chunkPos = ChunkPos.containing(blockInfo.pos);
 
         List<BlockEntry> blockEntryList = chunkEntries.computeIfAbsent(chunkPos, k -> new ArrayList<>());
 
@@ -55,13 +65,13 @@ public class IneligibleBlocksSavedData extends SavedData {
         }
 
         if (ConfigHandler.SERVER.INELIGIBLE_BLOCKS_LOGGER.get()) {
-            ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(blockInfo.blockState.getBlock());
+            Identifier blockId = BuiltInRegistries.BLOCK.getKey(blockInfo.blockState.getBlock());
             LOGGER.debug("[Ineligible Blocks] Block added at: {} with ID: {} by {}", blockInfo.pos, blockId, entityId);
         }
     }
 
     public void remove(BlockPos pos) {
-        ChunkPos chunkPos = level.getChunk(pos).getPos();
+        ChunkPos chunkPos = ChunkPos.containing(pos);
         List<BlockEntry> blockEntryList = chunkEntries.get(chunkPos);
         if (blockEntryList == null) return;
 
@@ -96,7 +106,7 @@ public class IneligibleBlocksSavedData extends SavedData {
         if (isDirty) {
             setDirty();
             if (ConfigHandler.SERVER.INELIGIBLE_BLOCKS_LOGGER.get() && removedBlockState != null) {
-                ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(removedBlockState.getBlock());
+                Identifier blockId = BuiltInRegistries.BLOCK.getKey(removedBlockState.getBlock());
                 LOGGER.debug("[Ineligible Blocks] Block removed at: {} with ID: {}", pos, blockId);
             }
         }
@@ -114,25 +124,7 @@ public class IneligibleBlocksSavedData extends SavedData {
     }
 
     public static IneligibleBlocksSavedData getOrCreate(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(getFactory(level), DATA_KEY);
-    }
-
-    public static Factory<IneligibleBlocksSavedData> getFactory(ServerLevel level) {
-        return new Factory<>(() -> create(level), (NBT, provider) -> load(level, NBT), DataFixTypes.LEVEL);
-    }
-
-    private static IneligibleBlocksSavedData create(ServerLevel level) {
-        return new IneligibleBlocksSavedData(level, new HashMap<>());
-    }
-
-    private static IneligibleBlocksSavedData load(ServerLevel level, CompoundTag NBT) {
-        return new IneligibleBlocksSavedData(level, deserializeChunkEntries(NBT));
-    }
-
-    @Override
-    public @NotNull CompoundTag save(CompoundTag NBT, HolderLookup.Provider registries) {
-        NBT.merge(serializeChunkEntries());
-        return NBT;
+        return level.getDataStorage().computeIfAbsent(TYPE);
     }
 
     private CompoundTag serializeChunkEntries() {
@@ -156,12 +148,12 @@ public class IneligibleBlocksSavedData extends SavedData {
 
     private static Map<ChunkPos, List<BlockEntry>> deserializeChunkEntries(CompoundTag tag) {
         Map<ChunkPos, List<BlockEntry>> chunkEntries = new HashMap<>();
-        ListTag entriesListTag = tag.getList("ChunkEntries", 10);
+        ListTag entriesListTag = tag.getListOrEmpty("ChunkEntries");
 
         for (int i = 0; i < entriesListTag.size(); i++) {
-            CompoundTag entryTag = entriesListTag.getCompound(i);
-            ChunkPos chunkPos = readChunkPos(entryTag.getCompound("ChunkPos"));
-            List<BlockEntry> blockEntryList = entryTag.getList("BlockEntries", 10).stream()
+            CompoundTag entryTag = entriesListTag.getCompoundOrEmpty(i);
+            ChunkPos chunkPos = readChunkPos(entryTag.getCompoundOrEmpty("ChunkPos"));
+            List<BlockEntry> blockEntryList = entryTag.getListOrEmpty("BlockEntries").stream()
                     .map(blockEntryTag -> BlockEntry.deserialize((CompoundTag) blockEntryTag))
                     .toList();
             chunkEntries.put(chunkPos, new ArrayList<>(blockEntryList));
@@ -172,13 +164,13 @@ public class IneligibleBlocksSavedData extends SavedData {
 
     private static CompoundTag writeChunkPos(ChunkPos chunkPos) {
         CompoundTag NBT = new CompoundTag();
-        NBT.putInt("X", chunkPos.x);
-        NBT.putInt("Z", chunkPos.z);
+        NBT.putInt("X", chunkPos.x());
+        NBT.putInt("Z", chunkPos.z());
         return NBT;
     }
 
     private static ChunkPos readChunkPos(CompoundTag tag) {
-        return new ChunkPos(tag.getInt("X"), tag.getInt("Z"));
+        return new ChunkPos(tag.getIntOr("X", 0), tag.getIntOr("Z", 0));
     }
 
     public void validateBlocks(ServerLevel level) {
@@ -226,13 +218,13 @@ public class IneligibleBlocksSavedData extends SavedData {
             for (BlockInfo info : placedBlocks) {
                 CompoundTag blockTag = new CompoundTag();
                 blockTag.put("State", NbtUtils.writeBlockState(info.blockState));
-                blockTag.put("Pos", NbtUtils.writeBlockPos(info.pos));
+                blockTag.store("Pos", BlockPos.CODEC, info.pos);
                 blocksList.add(blockTag);
             }
 
             CompoundTag placer = new CompoundTag();
             placer.putString("Id", placerData.entityId.toString());
-            placer.putUUID("UUID", placerData.entityUUID);
+            placer.store("UUID", UUIDUtil.CODEC, placerData.entityUUID);
 
             tag.put("Placer", placer);
             tag.put("Blocks", blocksList);
@@ -240,18 +232,18 @@ public class IneligibleBlocksSavedData extends SavedData {
         }
 
         public static BlockEntry deserialize(CompoundTag tag) {
-            CompoundTag placer = tag.getCompound("Placer");
-            ResourceLocation id = ResourceLocation.parse(placer.getString("Id"));
-            UUID uuid = placer.getUUID("UUID");
+            CompoundTag placer = tag.getCompoundOrEmpty("Placer");
+            Identifier id = Identifier.parse(placer.getStringOr("Id", ""));
+            UUID uuid = placer.read("UUID", UUIDUtil.CODEC).orElseThrow();
 
             List<BlockInfo> blockInfoList = new ArrayList<>();
-            ListTag blocksListTag = tag.getList("Blocks", 10);
+            ListTag blocksListTag = tag.getListOrEmpty("Blocks");
             for (int i = 0; i < blocksListTag.size(); i++) {
-                CompoundTag tag2 = blocksListTag.getCompound(i);
-                CompoundTag stateTag = tag2.getCompound("State");
+                CompoundTag tag2 = blocksListTag.getCompoundOrEmpty(i);
+                CompoundTag stateTag = tag2.getCompoundOrEmpty("State");
 
-                BlockState blockState = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), stateTag);
-                Optional<BlockPos> blockPos = NbtUtils.readBlockPos(tag2, "Pos");
+                BlockState blockState = NbtUtils.readBlockState(BuiltInRegistries.BLOCK, stateTag);
+                Optional<BlockPos> blockPos = tag2.read("Pos", BlockPos.CODEC);
                 blockPos.ifPresent(pos -> blockInfoList.add(new BlockInfo(pos, blockState)));
             }
 
@@ -259,10 +251,10 @@ public class IneligibleBlocksSavedData extends SavedData {
         }
     }
 
-    public record PlacerData(ResourceLocation entityId, UUID entityUUID) {
+    public record PlacerData(Identifier entityId, UUID entityUUID) {
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof PlacerData(ResourceLocation id, UUID uuid))) return false;
+            if (!(o instanceof PlacerData(Identifier id, UUID uuid))) return false;
             return Objects.equals(entityUUID, uuid) && Objects.equals(entityId, id);
         }
 
@@ -275,7 +267,7 @@ public class IneligibleBlocksSavedData extends SavedData {
     public record BlockInfo(BlockPos pos, BlockState blockState) {
         @Override
         public String toString() {
-            return "{\"State\": \"%s\", \"Pos\": \"%s\"}".formatted(NbtUtils.writeBlockState(blockState), NbtUtils.writeBlockPos(pos));
+            return "{\"State\": \"%s\", \"Pos\": \"%s\"}".formatted(NbtUtils.writeBlockState(blockState), pos.toShortString());
         }
 
         @Override

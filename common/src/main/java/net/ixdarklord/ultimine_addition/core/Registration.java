@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.core;
 
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
@@ -132,7 +133,7 @@ public class Registration {
                         output.accept(ModItems.CARD_BLUEPRINT);
                         for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
                             String name = "mining_skill_card_" + type.getId();
-                            Item item = BuiltInRegistries.ITEM.get(FTBUltimineAddition.id(name));
+                            Item item = BuiltInRegistries.ITEM.getValue(FTBUltimineAddition.id(name));
                             if (item instanceof MiningSkillCardItem cardItem) {
                                 output.accept(item);
                                 if (cardItem.getType() != MiningSkillCardItem.Type.EMPTY) {
@@ -170,7 +171,7 @@ public class Registration {
     public static final RegistrySupplier<MobEffect> MINE_GO_JUICE_HOE = MOB_EFFECTS.register("mine_go_juice_hoe", () -> ModMobEffects.MINE_GO_JUICE_HOE);
 
     // Potions
-    public static final RegistrySupplier<Potion> KNOWLEDGE_POTION = POTIONS.register("knowledge", Potion::new);
+    public static final RegistrySupplier<Potion> KNOWLEDGE_POTION = POTIONS.register("knowledge", () -> new Potion("knowledge"));
     public static final RegistrySupplier<Potion> MINE_GO_JUICE_PICKAXE_POTION = POTIONS.register("mine_go_juice_pickaxe", () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MineGoJuiceEffectInstance(MINE_GO_JUICE_PICKAXE, 0)));
     public static final RegistrySupplier<Potion> MINE_GO_JUICE_PICKAXE_POTION2 = POTIONS.register("mine_go_juice_pickaxe_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MineGoJuiceEffectInstance(MINE_GO_JUICE_PICKAXE, 1)));
     public static final RegistrySupplier<Potion> MINE_GO_JUICE_PICKAXE_POTION3 = POTIONS.register("mine_go_juice_pickaxe_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MineGoJuiceEffectInstance(MINE_GO_JUICE_PICKAXE, 2)));
@@ -189,11 +190,12 @@ public class Registration {
     public static final RegistrySupplier<MenuType<ShapeSelectorMenu>> SHAPE_SELECTOR_CONTAINER = CONTAINERS.register("shape_selector", () -> MenuRegistry.ofExtended((id, inv, buf) -> new ShapeSelectorMenu(id, inv)));
 
     // Recipe Serializer
-    public static final RegistrySupplier<ItemStorageDataRecipe.Serializer> ITEM_DATA_STORAGE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("item_storage_data", ItemStorageDataRecipe.Serializer::new);
-    public static final RegistrySupplier<MCRecipe.Serializer> MC_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("mining_card_recipe", MCRecipe.Serializer::new);
+    public static final RegistrySupplier<RecipeSerializer<ItemStorageDataRecipe>> ITEM_DATA_STORAGE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("item_storage_data", () -> ItemStorageDataRecipe.Serializer.INSTANCE);
+    public static final RegistrySupplier<RecipeSerializer<MCRecipe>> MC_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("mining_card_recipe", () -> MCRecipe.Serializer.INSTANCE);
 
     // Data Component
-    public static final RegistrySupplier<DataComponentType<SkillsRecordData>> SKILLS_RECORD_DATA = DATA_COMPONENT_TYPE.register("skills_record_data", () -> SkillsRecordData.DATA_COMPONENT);
+    // Same id as the pre-SavedData component, whose data it still reads for migration.
+    public static final RegistrySupplier<DataComponentType<SkillsRecordLink>> SKILLS_RECORD_DATA = DATA_COMPONENT_TYPE.register("skills_record_data", () -> SkillsRecordLink.DATA_COMPONENT);
     public static final RegistrySupplier<DataComponentType<MiningSkillCardData>> MINING_SKILL_CARD_DATA = DATA_COMPONENT_TYPE.register("mining_skill_card_data", () -> MiningSkillCardData.DATA_COMPONENT);
     public static final RegistrySupplier<DataComponentType<MinerCertificateData>> MINER_CERTIFICATE_DATA = DATA_COMPONENT_TYPE.register("miner_certificate_data", () -> MinerCertificateData.DATA_COMPONENT);
     public static final RegistrySupplier<DataComponentType<StorageItemData>> ITEM_STORAGE_DATA = DATA_COMPONENT_TYPE.register("item_storage_data", () -> StorageItemData.DATA_COMPONENT);

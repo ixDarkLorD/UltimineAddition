@@ -1,5 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.data.challenge;
 
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.util.ExtraCodecs;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -13,7 +15,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
@@ -34,17 +36,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.Type.*;
 import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
-public class ChallengesManager extends SimpleJsonResourceReloadListener {
+public class ChallengesManager extends SimpleJsonResourceReloadListener<JsonElement> {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     public static ChallengesManager INSTANCE = new ChallengesManager();
-    private Map<ResourceLocation, ChallengeData> challenges = new TreeMap<>();
+    private Map<Identifier, ChallengeData> challenges = new TreeMap<>();
 
     public ChallengesManager() {
-        super(GSON, "challenges");
+        super(ExtraCodecs.JSON, FileToIdConverter.json("challenges"));
     }
 
     @Override
-    protected void apply(@NotNull Map<ResourceLocation, JsonElement> object, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+    protected void apply(@NotNull Map<Identifier, JsonElement> object, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
         challenges.clear();
         object.forEach((location, json) -> {
             AtomicReference<ChallengeData> challenge = new AtomicReference<>();
@@ -57,18 +59,18 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
         });
     }
 
-    public Map<ResourceLocation, ChallengeData> getRandomChallenges(int quantity, MiningSkillCardItem.Type type, MiningSkillCardItem.Tier tier) {
+    public Map<Identifier, ChallengeData> getRandomChallenges(int quantity, MiningSkillCardItem.Type type, MiningSkillCardItem.Tier tier) {
         if (quantity > challenges.values().stream().filter(data -> (data.forCardType().equals(type) && data.forCardTier().isEligible(tier))).toList().size()) {
             String error = String.format("There aren't enough %s %s challenges for tier %s to add it to Mining Skill Card.", quantity, type.getId().toLowerCase(), tier.name().toLowerCase());
             throw new IllegalArgumentException(error);
         }
 
-        Map<ResourceLocation, ChallengeData> randomValues = new HashMap<>();
+        Map<Identifier, ChallengeData> randomValues = new HashMap<>();
         Random random = new Random();
         while (randomValues.size() < quantity) {
             int randomIndex = random.nextInt(challenges.size());
-            ResourceLocation[] keys = challenges.keySet().toArray(new ResourceLocation[0]);
-            ResourceLocation randomKey = keys[randomIndex];
+            Identifier[] keys = challenges.keySet().toArray(new Identifier[0]);
+            Identifier randomKey = keys[randomIndex];
             if (challenges.get(randomKey).forCardType().equals(type) && challenges.get(randomKey).forCardTier().isEligible(tier)) {
                 randomValues.put(randomKey, challenges.get(randomKey));
             }
@@ -82,16 +84,16 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
         return randomValues;
     }
 
-    public Optional<ChallengeData> getChallengeData(ResourceLocation id) {
+    public Optional<ChallengeData> getChallengeData(Identifier id) {
         return Optional.ofNullable(this.getAllChallenges().get(id));
     }
 
-    public Map<ResourceLocation, ChallengeData> getAllChallenges() {
+    public Map<Identifier, ChallengeData> getAllChallenges() {
         return this.challenges;
     }
 
     public void validateAllChallenges() {
-        List<ResourceLocation> markedToRemove = new ArrayList<>();
+        List<Identifier> markedToRemove = new ArrayList<>();
         challenges.forEach((location, challengesData) -> {
             AtomicBoolean isValid = new AtomicBoolean();
             var blocks = utilizeTargetedBlocks(challengesData);
@@ -116,11 +118,11 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
         for (String value : data.targetedBlocks()) {
             if (value.startsWith("#")) {
                 List<Block> blocks = new ArrayList<>();
-                BuiltInRegistries.BLOCK.getTag(TagKey.create(Registries.BLOCK, ResourceLocation.parse(value.replaceAll("#", "")))).ifPresent(holders ->
+                BuiltInRegistries.BLOCK.get(TagKey.create(Registries.BLOCK, Identifier.parse(value.replaceAll("#", "")))).ifPresent(holders ->
                         blocks.addAll(holders.stream().map(Holder::value).toList()));
                 if (!blocks.isEmpty()) list.addAll(blocks);
             } else {
-                Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(value));
+                Block block = BuiltInRegistries.BLOCK.getValue(Identifier.parse(value));
                 if (block != Blocks.AIR) list.add(block);
             }
         }
@@ -142,15 +144,15 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
         return false;
     }
 
-    public void setChallenges(Map<ResourceLocation, ChallengeData> dataMap) {
+    public void setChallenges(Map<Identifier, ChallengeData> dataMap) {
         this.challenges = dataMap;
     }
 
-    public List<Component> createChallengeDescription(ResourceLocation id, Style style) {
+    public List<Component> createChallengeDescription(Identifier id, Style style) {
         return this.createChallengeDescription(id, style, -1.0F, null);
     }
 
-    public List<Component> createChallengeDescription(ResourceLocation id, Style style, float cycle, Style cycleStyle) {
+    public List<Component> createChallengeDescription(Identifier id, Style style, float cycle, Style cycleStyle) {
         List<Component> components = Lists.newArrayList();
         ChallengeData data = this.challenges.get(id);
         if (data == null) {

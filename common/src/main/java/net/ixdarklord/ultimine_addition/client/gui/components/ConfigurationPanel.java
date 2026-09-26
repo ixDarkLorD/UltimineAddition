@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.client.gui.components;
 
+import net.minecraft.util.ARGB;
+import net.minecraft.client.renderer.RenderPipelines;
 import com.google.common.collect.Lists;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.AbstractDraggableWidget;
 import net.ixdarklord.coolcatlib.api.utils.ColorUtils;
@@ -10,24 +10,22 @@ import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.List;
 import java.util.function.Consumer;
 
-@Environment(EnvType.CLIENT)
 public class ConfigurationPanel extends AbstractDraggableWidget {
-    private static final ResourceLocation BACKGROUND_LOCATION = FTBUltimineAddition.id("container/skills_record/configuration/background");
+    private static final Identifier BACKGROUND_LOCATION = FTBUltimineAddition.id("container/skills_record/configuration/background");
     private static final int BUTTON_WIDTH = 45;
     private static final int BUTTON_HEIGHT = 14;
     private final List<ColoredButton> buttons = Lists.newArrayList();
@@ -39,7 +37,6 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
                 true
         );
         this.visible = false;
-        this.blitOffset = ItemRenderer.ITEM_COUNT_BLIT_OFFSET + 400F;
     }
 
     @Override
@@ -60,9 +57,9 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
     @Override
     protected void updateChildren() {
         super.updateChildren();
-        this.title.setPosition(this.x + 9, this.y + 16);
-        this.title.setSize(BUTTON_WIDTH + 2 + this.getWidthSpacing(), 11);
-        this.title.alignCenter();
+        // StringWidget no longer aligns text itself; center it within the title area.
+        int titleAreaWidth = BUTTON_WIDTH + 2 + this.getWidthSpacing();
+        this.title.setPosition(this.x + 9 + (titleAreaWidth - this.font.width(this.title.getMessage())) / 2, this.y + 16);
 
         for (AbstractButton button : this.getButtons()) {
             if (button instanceof ColorableImageButton imageButton)
@@ -71,10 +68,11 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
     }
 
     @Override
-    protected void renderBackground(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        guiGraphics.setColor(this.getBGColor().red(), this.getBGColor().green(), this.getBGColor().blue(), this.getBGColor().alpha());
-        guiGraphics.blitSprite(BACKGROUND_LOCATION, getRectangle().left(), getRectangle().top(), getRectangle().width(), getRectangle().height());
-        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    protected void renderBackground(GuiGraphicsExtractor guiGraphics, float partialTick, int mouseX, int mouseY) {
+        // Draw above the slot items (replaces the old z-offset).
+        guiGraphics.nextStratum();
+        SkillsRecordScreen.OverlayColor bg = this.getBGColor();
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND_LOCATION, getRectangle().left(), getRectangle().top(), getRectangle().width(), getRectangle().height(), ARGB.colorFromFloat(bg.alpha(), bg.red(), bg.green(), bg.blue()));
     }
 
     private int getButtonsTextLength() {
@@ -97,12 +95,9 @@ public class ConfigurationPanel extends AbstractDraggableWidget {
     public void addButton(Button.OnPress onPress, Component component, Consumer<TooltipInfo> consumer) {
         ColoredButton button = new ColoredButton(this.x, this.y + BUTTON_HEIGHT * getButtons().size(), BUTTON_WIDTH, BUTTON_HEIGHT, SkillsRecordScreen.BUTTON_SPRITES, onPress, component, consumer) {
             @Override
-            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-                TextColor color = this.getMessage().getStyle().getColor();
-                color = color == null ? TextColor.fromRgb(Color.WHITE.getRGB()) : color;
-                this.renderString(guiGraphics, font, color.getValue());
-                this.renderTooltip(guiGraphics, mouseX, mouseY);
+            public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+                super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
+                this.extractDefaultLabel(guiGraphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
             }
         };
 

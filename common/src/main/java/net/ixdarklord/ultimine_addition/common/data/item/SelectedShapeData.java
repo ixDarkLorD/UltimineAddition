@@ -19,9 +19,9 @@ public record SelectedShapeData(Shape shape) {
     }, shape1 -> shape1.getName().toString());
 
     public static final StreamCodec<FriendlyByteBuf, Shape> SHAPE_STREAM_CODEC = StreamCodec.of(
-            (buf, shape) -> buf.writeResourceLocation(shape.getName()),
+            (buf, shape) -> buf.writeIdentifier(shape.getName()),
             buf -> {
-                Shape shape = FTBUltimineIntegration.getShape(buf.readResourceLocation());
+                Shape shape = FTBUltimineIntegration.getShape(buf.readIdentifier());
                 if (shape == null) throw new CodecException("Shape is null!!");
                 return shape;
             });

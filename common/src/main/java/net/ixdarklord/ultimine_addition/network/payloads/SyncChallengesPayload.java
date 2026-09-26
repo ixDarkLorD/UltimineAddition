@@ -8,16 +8,16 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public record SyncChallengesPayload(Map<ResourceLocation, ChallengeData> dataMap) implements CustomPacketPayload {
+public record SyncChallengesPayload(Map<Identifier, ChallengeData> dataMap) implements CustomPacketPayload {
     public static final Type<SyncChallengesPayload> TYPE = new Type<>(FTBUltimineAddition.id("sync_challenges"));
-    private static final StreamCodec<RegistryFriendlyByteBuf, Map<ResourceLocation, ChallengeData>> CHALLENGES_STREAM_CODEC =
-            ByteBufCodecs.map(i -> new HashMap<>(), ResourceLocation.STREAM_CODEC, ChallengeData.STREAM_CODEC);
+    private static final StreamCodec<RegistryFriendlyByteBuf, Map<Identifier, ChallengeData>> CHALLENGES_STREAM_CODEC =
+            ByteBufCodecs.map(i -> new HashMap<>(), Identifier.STREAM_CODEC, ChallengeData.STREAM_CODEC);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncChallengesPayload> STREAM_CODEC = StreamCodec.composite(
             CHALLENGES_STREAM_CODEC, SyncChallengesPayload::dataMap,

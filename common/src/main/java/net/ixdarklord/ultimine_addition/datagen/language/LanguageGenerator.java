@@ -50,10 +50,9 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("tooltip.ultimine_addition.certificate.legacy.quest", "Destroyed Ores: %s");
         this.add("tooltip.ultimine_addition.skills_record.info", "A tool needed for upgrading mining skills card.");
         this.add("tooltip.ultimine_addition.skills_record.contents", "Contents:");
-        this.add("tooltip.ultimine_addition.skills_record.press.left_click", "Press Left Click Mouse to cycle through blocks.");
+        this.add("tooltip.ultimine_addition.skills_record.loading", "Loading contents...");
         this.add("tooltip.ultimine_addition.shape_selector.info", "Need a specific mining shape for your favorite tool? This is where you assign it!");
         this.add("tooltip.ultimine_addition.shape_selector.selected", "Active Ultimine Shape:");
-        this.add("tooltip.ultimine_addition.skill_card.component", "You can use this item to craft any other skill card type.");
         this.add("tooltip.ultimine_addition.skill_card.potion_point", "Potion Points: %s");
         this.add("tooltip.ultimine_addition.skill_card.tier", "Tier: %s");
         this.add("tooltip.ultimine_addition.skill_card.tier.unlearned", "Unlearned");
@@ -65,7 +64,6 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("tooltip.ultimine_addition.skill_card.info", "You have to put it in the Skills Record to discover the challenges given to you.");
         this.add("tooltip.ultimine_addition.pen.info", "It's a required tool for the Skills Record.");
         this.add("tooltip.ultimine_addition.pen.ink_chamber", "Ink Chamber: %s");
-        this.add("gui.ultimine_addition.ultimine_addition.sort", "Sort");
         this.add("gui.ultimine_addition.filter", "Filter");
         this.add("gui.ultimine_addition.filter.all", "All");
         this.add("gui.ultimine_addition.filter.only_enabled", "Only Enabled Shapes");
@@ -83,11 +81,8 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("gui.ultimine_addition.shape_selector.selected", "You have chosen this shape!");
         this.add("gui.ultimine_addition.shape_selector.blacklisted", "This shape is blacklisted!");
         this.add("gui.ultimine_addition.skills_record.configuration", "Configuration");
-        this.add("gui.ultimine_addition.skills_record.option.soon", "Coming Soon...");
         this.add("gui.ultimine_addition.skills_record.option.bg_color", "Background Color");
         this.add("gui.ultimine_addition.skills_record.option.animations", "Animations");
-        this.add("gui.ultimine_addition.skills_record.option.progression_bar", "Progression Bar");
-        this.add("gui.ultimine_addition.skills_record.option.hold_keybind", "Hold %s");
         this.add("gui.ultimine_addition.skills_record.option.panel_alignment", "Panel Alignment");
         this.add("gui.ultimine_addition.skills_record.option.panel_alignment.top_left", "Top Left");
         this.add("gui.ultimine_addition.skills_record.option.panel_alignment.top", "Top");
@@ -96,23 +91,33 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("gui.ultimine_addition.skills_record.option.panel_alignment.right", "Right");
         this.add("gui.ultimine_addition.skills_record.option.panel_alignment.bottom_left", "Bottom Left");
         this.add("gui.ultimine_addition.skills_record.option.panel_alignment.bottom_right", "Bottom Right");
-        this.add("gui.ultimine_addition.skills_record.option.panel_size", "Challenges Panel Size");
         this.add("gui.ultimine_addition.skills_record.consume", "Consume Mode: %s");
-        this.add("gui.ultimine_addition.skills_record.consume.no_cards", "No cards need this mode to be toggled.");
         this.add("gui.ultimine_addition.skills_record.example", "This is an example!");
         this.add("gui.ultimine_addition.skills_record.no_cards", "There is no card inserted!");
         this.add("gui.ultimine_addition.skills_record.select_card", "Select a card by right click it to discover the challenges.");
         this.add("gui.ultimine_addition.skills_record.no_challenges", "There are no challenges added yet!");
         this.add("gui.ultimine_addition.skills_record.completed_card", "Congratulations! You made it. You have completed all the challenges.");
-        this.add("gui.ultimine_addition.skills_record.progress", "Progress: %s");
         this.add("gui.ultimine_addition.skills_record.missing_items", "You can't accomplish any challenge! It would help if you had these items available:");
         this.add("gui.ultimine_addition.skills_record.not_enough_ink", "There is not enough ink in the pen! Please refill it.");
-        this.add("gui.ultimine_addition.skills_record.pin.click", "Click to Pin this Challenge");
         this.add("gui.ultimine_addition.skills_record.pin.panel", "There are %s+ more hidden panels");
-        this.add("gui.ultimine_addition.skills_record.edit.click", "Click to Edit this Challenge");
         this.add("gui.ultimine_addition.skills_record.edit.copy_id", "Click to Copy Challenge ID to Clipboard");
         this.add("gui.ultimine_addition.skills_record.edit.copy_success", "Copied Challenge ID to Clipboard!");
         this.add("gui.ultimine_addition.skills_record.edit.new_value", "Enter the new value.\nMax Value: %s");
+        this.add("gui.ultimine_addition.card_viewer.tier.completed", "Completed");
+        this.add("gui.ultimine_addition.card_viewer.tier.no_record", "No record");
+        this.add("gui.ultimine_addition.card_viewer.tier.skipped", "Skipped");
+        this.add("gui.ultimine_addition.card_viewer.tier.mastered", "Mastered!");
+        this.add("gui.ultimine_addition.card_viewer.tier.locked", "Locked");
+        this.add("gui.ultimine_addition.card_viewer.progress", "Progress: %s");
+        this.add("gui.ultimine_addition.card_viewer.completed", "Completed");
+        this.add("gui.ultimine_addition.card_viewer.completed_at", "Completed: %s");
+        this.add("gui.ultimine_addition.card_viewer.pinned", "Pinned to the HUD");
+        this.add("gui.ultimine_addition.card_viewer.click_for_details", "Click for details");
+        this.add("gui.ultimine_addition.card_viewer.pin", "Pin");
+        this.add("gui.ultimine_addition.card_viewer.unpin", "Unpin");
+        this.add("gui.ultimine_addition.card_viewer.edit", "Edit");
+        this.add("gui.ultimine_addition.card_viewer.expand", "Expand / Collapse");
+        this.add("gui.ultimine_addition.card_viewer.fit", "Fit to View");
         this.add("toast.ultimine_addition.challenge.completed", "Challenge Completed!");
         this.add("toast.ultimine_addition.challenge.completed.info", "You have completed Challenge %s in %s");
         this.add("toast.ultimine_addition.challenge.all_completed", "Congratulations!");
@@ -161,7 +166,6 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("info.ultimine_addition.required_skill.hoe", "Hoe");
         this.add("info.ultimine_addition.required_skill.all", "All Tools");
         this.add("argument.ultimine_addition.ultimine_shape.unknown", "Unknown ultimine shape '%s'");
-        this.add("argument.ultimine_addition.inventory.unknown", "Unknown inventory '%s'");
         this.add("argument.ultimine_addition.challenge.unknown", "Unknown challenge '%s'");
         this.add("argument.ultimine_addition.cards.tier.unknown", "Unknown card tier '%s'");
         this.add("command.ultimine_addition.skills_record.edit_mode.success", "You have successfully set the Skills Record's edit mode to %s!");
@@ -190,7 +194,6 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("command.ultimine_addition.ultimine_shape.clear", "Successfully cleared all the ultimine shapes from %s.");
         this.add("key.category.ultimine_addition.general", "FTB Ultimine Addition");
         this.add(KeyHandler.KEY_OPEN_SKILLS_RECORD, "Open Skills Record");
-        this.add(KeyHandler.KEY_SHOW_PROGRESSION_BAR, "Skills Record: Show Progression Bar");
     }
 
     private void addPickaxeChallenges() {

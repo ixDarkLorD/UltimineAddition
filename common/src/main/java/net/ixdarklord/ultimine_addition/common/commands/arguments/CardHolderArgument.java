@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.ParserUtils;
 import net.minecraft.commands.SharedSuggestionProvider;

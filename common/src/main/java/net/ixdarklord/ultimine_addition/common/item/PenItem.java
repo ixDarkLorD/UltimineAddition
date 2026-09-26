@@ -1,5 +1,10 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.data.item.StorageItemData;
@@ -21,22 +26,22 @@ public class PenItem extends StorageItem {
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
-        if (this.isLegacyMode() || level.isClientSide()) return;
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot) {
+        if (this.isLegacyMode()) return;
         if (!stack.has(StorageItemData.DATA_COMPONENT) && entity instanceof ServerPlayer)
             getData(stack).save();
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-        super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        super.appendHoverText(stack, context, display, tooltipComponents, isAdvanced);
         if (!(Minecraft.getInstance().screen instanceof SkillsRecordScreen) && !stack.has(StorageItemData.DATA_COMPONENT) && isShiftButtonNotPressed(tooltipComponents)) return;
         if (!stack.has(StorageItemData.DATA_COMPONENT)) {
             Component component = Component.translatable("tooltip.ultimine_addition.pen.info").withStyle(ChatFormatting.GRAY);
             List<Component> components = ComponentHelper.splitComponent(component, getSplitterLength());
-            tooltipComponents.addAll(components);
+            components.forEach(tooltipComponents);
             return;
         }
-        tooltipComponents.add(Component.literal("§8• ").append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber", getData(stack).getCapacity()).withStyle(ChatFormatting.GRAY)));
+        tooltipComponents.accept(Component.literal("§8• ").append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber", getData(stack).getCapacity()).withStyle(ChatFormatting.GRAY)));
     }
 }

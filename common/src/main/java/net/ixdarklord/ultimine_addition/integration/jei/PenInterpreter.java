@@ -18,13 +18,4 @@ public class PenInterpreter implements ISubtypeInterpreter<ItemStack> {
                 : null;
     }
 
-    @Override
-    public @NotNull String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
-        if (!stack.has(StorageItemData.DATA_COMPONENT)) return "";
-        StringBuilder stringBuilder = new StringBuilder(stack.getItem().getDescriptionId());
-        if (((PenItem)stack.getItem()).getData(stack).isFull()) {
-            stringBuilder.append(":full_capacity");
-        } else stringBuilder.append(":empty_capacity");
-        return stringBuilder.toString();
-    }
 }

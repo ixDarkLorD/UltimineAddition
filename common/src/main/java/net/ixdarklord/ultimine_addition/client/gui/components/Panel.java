@@ -1,9 +1,8 @@
 package net.ixdarklord.ultimine_addition.client.gui.components;
 
-import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
-import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import org.joml.Matrix3x2fStack;
+import net.minecraft.util.ARGB;
+import net.minecraft.client.renderer.RenderPipelines;
 import java.awt.Color;
 import java.util.List;
 import java.util.Objects;
@@ -26,30 +25,22 @@ import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
 public class Panel implements LayoutElement {
-    private static final ResourceLocation SLOT_INDICATOR_TEXTURE = FTBUltimineAddition.id("challenge_panel/slot_indicator");
-    private static final ResourceLocation TITLE_TEXTURE = FTBUltimineAddition.id("challenge_panel/title");
-    private static final ResourceLocation DESCRIPTION_TEXTURE = FTBUltimineAddition.id("challenge_panel/description");
-    public static final RenderStateShard.TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("translucent_transparency", () -> {
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA);
-    }, () -> {
-        RenderSystem.disableBlend();
-        RenderSystem.defaultBlendFunc();
-    });
+    private static final Identifier SLOT_INDICATOR_TEXTURE = FTBUltimineAddition.id("challenge_panel/slot_indicator");
+    private static final Identifier TITLE_TEXTURE = FTBUltimineAddition.id("challenge_panel/title");
+    private static final Identifier DESCRIPTION_TEXTURE = FTBUltimineAddition.id("challenge_panel/description");
     private final Minecraft mc;
     private final int slot;
     private final boolean notifyPanel;
@@ -91,32 +82,23 @@ public class Panel implements LayoutElement {
         this.animatedComponent.update();
     }
 
-    public void render(GuiGraphics guiGraphics) {
+    public void render(GuiGraphicsExtractor guiGraphics) {
         this.update();
         if (this.active) {
             SkillsRecordScreen.OverlayColor overlayColor = CLIENT.BACKGROUND_COLOR.get();
             if (!this.notifyPanel) {
-                RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
-                guiGraphics.blitSprite(SLOT_INDICATOR_TEXTURE, this.x + 5, this.y, 51, 10);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_INDICATOR_TEXTURE, this.x + 5, this.y, 51, 10, ARGB.colorFromFloat(overlayColor.alpha(), overlayColor.red(), overlayColor.green(), overlayColor.blue()));
                 int spacing = 13 * this.slot;
                 double value = MathUtils.cycledBetweenValues(0.0F, 1.0F, 0.8F, this.time / 20.0F, false);
                 Color color = ColorUtils.blend(new Color(9036329), new Color(6991904), CLIENT.ANIMATIONS_MODE.get() ? value : (double)0.0F);
                 guiGraphics.fill(this.x + 8 + spacing, this.y + 3, this.x + 14 + spacing, this.y + 9, color.getRGB());
             }
 
-            RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
-            guiGraphics.blitSprite(TITLE_TEXTURE, this.x, this.y + (!this.notifyPanel ? 10 : 0), this.getWidth(), 15);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, TITLE_TEXTURE, this.x, this.y + (!this.notifyPanel ? 10 : 0), this.getWidth(), 15, ARGB.colorFromFloat(overlayColor.alpha(), overlayColor.red(), overlayColor.green(), overlayColor.blue()));
             if (!this.notifyPanel) {
-                TRANSLUCENT_TRANSPARENCY.setupRenderState();
-                RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
-                guiGraphics.blitSprite(DESCRIPTION_TEXTURE, this.x, this.y + 22, this.getWidth(), this.infos.isEmpty() ? 0 : this.getInfoHeight() + 8);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                TRANSLUCENT_TRANSPARENCY.clearRenderState();
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, DESCRIPTION_TEXTURE, this.x, this.y + 22, this.getWidth(), this.infos.isEmpty() ? 0 : this.getInfoHeight() + 8, ARGB.colorFromFloat(overlayColor.alpha(), overlayColor.red(), overlayColor.green(), overlayColor.blue()));
             }
 
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderUtils.drawScrollingString(guiGraphics, (int)(this.time * 8.0F), this.mc.font, this.title, true, new ScreenRectangle(this.x, this.y + (!this.notifyPanel ? 13 : 3), this.getWidth(), 9), 8, Color.WHITE.getRGB(), true);
             this.updateInfoLayout();
 
@@ -302,7 +284,7 @@ public class Panel implements LayoutElement {
         private static final int PADDING = 4;
         private final Panel parent;
         private final int order;
-        private final ResourceLocation challengeId;
+        private final Identifier challengeId;
         private int currentValue;
         private int requiredValue;
         private int x;
@@ -310,7 +292,7 @@ public class Panel implements LayoutElement {
         private int width;
         private int height;
 
-        public Info(Panel parent, int order, ResourceLocation challengeId, int currentValue, int requiredValue) {
+        public Info(Panel parent, int order, Identifier challengeId, int currentValue, int requiredValue) {
             this.parent = parent;
             this.order = order;
             this.challengeId = challengeId;
@@ -318,11 +300,11 @@ public class Panel implements LayoutElement {
             this.requiredValue = requiredValue;
         }
 
-        public void render(GuiGraphics guiGraphics, float time, SkillsRecordScreen.OverlayColor overlayColor) {
+        public void render(GuiGraphicsExtractor guiGraphics, float time, SkillsRecordScreen.OverlayColor overlayColor) {
             this.width = this.parent.getWidth() - PADDING;
             Minecraft mc = Minecraft.getInstance();
             Font font = mc.font;
-            PoseStack pose = guiGraphics.pose();
+            Matrix3x2fStack pose = guiGraphics.pose();
             float TITLE_SCALE = 0.9F;
             float ID_SCALE = 0.8F;
             float DESC_SCALE = 0.8F;
@@ -348,62 +330,60 @@ public class Panel implements LayoutElement {
             float progress = this.requiredValue > 0 ? (float)this.currentValue / (float)this.requiredValue : 0.0F;
             int percent = (int)(progress * 100.0F);
 
-            pose.pushPose();
-            pose.translate((float)(this.x + BAR_SIDE_PADDING), (float)this.y, 0.0F);
-            pose.scale(0.9F, 0.9F, 1.0F);
+            pose.pushMatrix();
+            pose.translate((float)(this.x + BAR_SIDE_PADDING), (float)this.y);
+            pose.scale(0.9F, 0.9F);
             Component title = Component.translatable("challenge.ultimine_addition.title", this.order).withStyle(ChatFormatting.BOLD);
-            guiGraphics.drawString(font, title, 0, 0, 16777215, true);
-            pose.popPose();
+            guiGraphics.text(font, title, 0, 0, ARGB.opaque(16777215), true);
+            pose.popMatrix();
 
-            pose.pushPose();
-            pose.translate((float)(this.x + 2), (float)(this.y + titleHeight + 2), 0.0F);
-            pose.scale(0.8F, 0.8F, 1.0F);
+            pose.pushMatrix();
+            pose.translate((float)(this.x + 2), (float)(this.y + titleHeight + 2));
+            pose.scale(0.8F, 0.8F);
             Component idLine = Component.translatable("challenge.%s.%s.name".formatted(this.challengeId.getNamespace(), this.challengeId.getPath().replace("/", "."))).withStyle(ChatFormatting.AQUA);
             int cWidth = this.width - 12;
-            guiGraphics.drawString(font, Component.literal("\ud83d\udcdd"), 1, -1, Color.WHITE.getRGB(), true);
+            guiGraphics.text(font, Component.literal("\ud83d\udcdd"), 1, -1, Color.WHITE.getRGB(), true);
             RenderUtils.drawScrollingString(guiGraphics, (int)(time * 16.0F), font, idLine, false, new ScreenRectangle(10, 0, cWidth, idHeight), new ScreenRectangle(this.x + 10, this.y + titleHeight, cWidth, titleHeight), 16777215, true);
-            pose.popPose();
+            pose.popMatrix();
 
             int descStartY = this.y + 4 + titleHeight + idHeight;
             guiGraphics.fill(this.x + 4, descStartY, this.x + 5, descStartY + descHeight + 1, ColorUtils.rgbToRgba(Color.BLACK, 0.25F));
             guiGraphics.fill(this.x + 3, descStartY - 1, this.x + 4, descStartY + descHeight, Color.LIGHT_GRAY.getRGB());
-            pose.pushPose();
-            pose.translate((float)(this.x + 6), (float)descStartY, 0.0F);
-            pose.scale(0.8F, 0.8F, 1.0F);
+            pose.pushMatrix();
+            pose.translate((float)(this.x + 6), (float)descStartY);
+            pose.scale(0.8F, 0.8F);
             int descY = 0;
 
             for(Component line : descriptionLines) {
                 for(FormattedCharSequence s : font.split(line, this.width + 25)) {
-                    guiGraphics.drawString(font, s, 0, descY, Color.LIGHT_GRAY.getRGB(), true);
+                    guiGraphics.text(font, s, 0, descY, Color.LIGHT_GRAY.getRGB(), true);
                     Objects.requireNonNull(font);
                     descY += 9;
                 }
             }
 
-            pose.popPose();
+            pose.popMatrix();
             int progressY = 4 + descStartY + (int)((float)descY * 0.8F);
-            pose.pushPose();
-            pose.translate((float)(this.x + 4), (float)progressY, 0.0F);
-            pose.scale(0.9F, 0.9F, 1.0F);
+            pose.pushMatrix();
+            pose.translate((float)(this.x + 4), (float)progressY);
+            pose.scale(0.9F, 0.9F);
             boolean isConsuming = ChallengesManager.INSTANCE.getChallengeData(this.getChallengeId()).map((data) -> data.challengeType().isConsuming()).orElse(false);
             String symbol = this.currentValue < this.requiredValue && isConsuming && !parent.consumeMode ? "✘" : "»";
             ChatFormatting baseFormat = this.currentValue >= this.requiredValue ? ChatFormatting.GREEN : ChatFormatting.GOLD;
             ChatFormatting finalFormating = this.currentValue < this.requiredValue && isConsuming ? (parent.consumeMode ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.RED) : baseFormat;
             Component progressText = Component.literal(String.format("%s %d%% (%d/%d)", symbol, percent, this.currentValue, this.requiredValue)).withStyle(finalFormating);
-            guiGraphics.drawString(font, progressText, 0, 0, 16766720, false);
-            pose.popPose();
-            pose.pushPose();
-            pose.translate((float)(this.x + BAR_SIDE_PADDING), (float)(progressY + progressTextHeight + BAR_TOP_PADDING), 0.0F);
-            RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
-            guiGraphics.blitSprite(SkillsRecordScreen.PROGRESS_BAR_SPRITE, -1, -1, BAR_WIDTH + 2, 5);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            guiGraphics.text(font, progressText, 0, 0, ARGB.opaque(16766720), false);
+            pose.popMatrix();
+            pose.pushMatrix();
+            pose.translate((float)(this.x + BAR_SIDE_PADDING), (float)(progressY + progressTextHeight + BAR_TOP_PADDING));
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SkillsRecordScreen.PROGRESS_BAR_SPRITE, -1, -1, BAR_WIDTH + 2, 5, ARGB.colorFromFloat(overlayColor.alpha(), overlayColor.red(), overlayColor.green(), overlayColor.blue()));
             Color barColor = ColorUtils.multiBlend(progress, new Color(16721960), new Color(16750098), new Color(5832487));
             int filledWidth = (int)((float)BAR_WIDTH * progress);
             guiGraphics.fillGradient(0, 0, filledWidth, 3, barColor.getRGB(), barColor.darker().getRGB());
             if (filledWidth < BAR_WIDTH) {
                 guiGraphics.fill(filledWidth, 0, filledWidth + 1, 3, barColor.darker().darker().darker().getRGB());
             }
-            pose.popPose();
+            pose.popMatrix();
         }
 
         public void setX(int x) {
@@ -434,7 +414,7 @@ public class Panel implements LayoutElement {
             return this.order;
         }
 
-        public ResourceLocation getChallengeId() {
+        public Identifier getChallengeId() {
             return this.challengeId;
         }
 

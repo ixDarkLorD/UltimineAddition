@@ -1,5 +1,10 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -9,9 +14,6 @@ import net.ixdarklord.coolcatlib.api.utils.CodecUtils;
 import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
-import net.ixdarklord.ultimine_addition.client.handler.ItemRendererHandler;
-import net.ixdarklord.ultimine_addition.client.renderer.item.IItemRenderer;
-import net.ixdarklord.ultimine_addition.client.renderer.item.UAItemRenderer;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
@@ -23,12 +25,12 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -44,7 +46,7 @@ import java.util.List;
 
 import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.Type.EMPTY;
 
-public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> implements IItemRenderer {
+public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
     private final Type type;
     public MiningSkillCardItem(Type type, Properties properties) {
         super(properties, ComponentType.CRAFTING);
@@ -52,14 +54,13 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
-        ItemStack stack = player.getItemInHand(usedHand);
-        return InteractionResultHolder.pass(stack);
+    public @NotNull InteractionResult use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
+        return InteractionResult.PASS;
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
-        if (this.isLegacyMode() || level.isClientSide() || this.type == EMPTY) return;
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot) {
+        if (this.isLegacyMode() || this.type == EMPTY) return;
 
         if (entity instanceof ServerPlayer) {
             if (!stack.has(MiningSkillCardData.DATA_COMPONENT)) {
@@ -70,25 +71,25 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-        super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        super.appendHoverText(stack, context, display, tooltipComponents, isAdvanced);
         if (!(Minecraft.getInstance().screen instanceof SkillsRecordScreen) && this.isShiftButtonNotPressed(tooltipComponents)) return;
         MutableComponent component;
         if (getType() == EMPTY) {
             component = Component.translatable("tooltip.ultimine_addition.skill_card.info.empty").withStyle(ChatFormatting.GRAY);
             List<Component> components = ComponentHelper.splitComponent(component, getSplitterLength());
-            tooltipComponents.addAll(components);
+            components.forEach(tooltipComponents);
             return;
         }
 
         component = Component.translatable("tooltip.ultimine_addition.skill_card.tier", !stack.has(MiningSkillCardData.DATA_COMPONENT) ? Component.literal("§kNawaf") : getData(stack).getTier().getDisplayName());
-        tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
+        tooltipComponents.accept(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
 
         MiningSkillCardData data = stack.get(MiningSkillCardData.DATA_COMPONENT);
         if (type != EMPTY && data != null && !data.isCreativeItem() && data.getTier() != Tier.Unlearned && data.getTier() != Tier.Mastered) {
             ChatFormatting formatting = ChatFormattingUtils.getProgressColor(data.getPotionPoints(), data.getMaxPotionPoints());
             component = Component.translatable("tooltip.ultimine_addition.skill_card.potion_point", Component.literal(String.valueOf(data.getPotionPoints())).withStyle(formatting));
-            tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
+            tooltipComponents.accept(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
         }
 
         if (Minecraft.getInstance().screen instanceof SkillsRecordScreen screen &&
@@ -97,7 +98,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         if (data == null || data.getTier() != Tier.Mastered) {
             component = Component.translatable("tooltip.ultimine_addition.skill_card.info").withStyle(ChatFormatting.WHITE);
             List<Component> components = ComponentHelper.splitComponent(component, getSplitterLength());
-            tooltipComponents.addAll(components);
+            components.forEach(tooltipComponents);
         }
     }
 
@@ -117,11 +118,6 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     @Override
     public int getBarColor(ItemStack itemStack) {
         return Mth.hsvToRgb(Math.max(0.0F, (getBarWidth(itemStack) / 13.0F)) / 3.0F, 1.0F, 1.0F);
-    }
-
-    @Override
-    public UAItemRenderer createItemRenderer() {
-        return ItemRendererHandler.MiningSkillCardRenderer();
     }
 
     @Override
@@ -203,7 +199,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
             return id;
         }
 
-        public ResourceLocation getRegistryId() {
+        public Identifier getRegistryId() {
             return FTBUltimineAddition.id("mining_skill_card_%s".formatted(id));
         }
 
@@ -239,11 +235,11 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
             for (String value : requiredTools) {
                 if (value.startsWith("#")) {
                     List<Item> items = new ArrayList<>();
-                    BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, ResourceLocation.parse(value.replaceAll("#", "")))).ifPresent(holders ->
+                    BuiltInRegistries.ITEM.get(TagKey.create(Registries.ITEM, Identifier.parse(value.replaceAll("#", "")))).ifPresent(holders ->
                             items.addAll(holders.stream().map(Holder::value).toList()));
                     if (!items.isEmpty()) list.addAll(items);
                 } else {
-                    Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(value));
+                    Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(value));
                     if (item != Items.AIR) list.add(item);
                 }
             }

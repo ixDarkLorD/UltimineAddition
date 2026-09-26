@@ -13,7 +13,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.ParserUtils;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,7 +51,7 @@ public class UltimineShapeArgument implements ArgumentType<Shape> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        List<String> shapesId = FTBUltimineIntegration.getShapesList().stream().map(Shape::getName).map(ResourceLocation::toString).toList();
+        List<String> shapesId = FTBUltimineIntegration.getShapesList().stream().map(Shape::getName).map(Identifier::toString).toList();
         return SharedSuggestionProvider.suggest(shapesId, builder);
     }
 

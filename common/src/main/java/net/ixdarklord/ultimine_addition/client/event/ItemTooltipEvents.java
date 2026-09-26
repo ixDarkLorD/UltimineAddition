@@ -9,7 +9,7 @@ import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;

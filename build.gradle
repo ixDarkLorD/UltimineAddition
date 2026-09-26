@@ -1,5 +1,5 @@
 plugins {
-    alias libs.plugins.architectury.loom apply false
+    alias libs.plugins.architectury.loom.noremap apply false
     alias libs.plugins.architectury.plugin apply false
     alias libs.plugins.shadow apply false
     alias libs.plugins.modpublisher apply false
@@ -35,4 +35,10 @@ allprojects {
     }
 }
 
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/main.gradle"
+// The shared scripts apply "com.github.johnrengelman.shadow", which GradleUp's Shadow only keeps as a
+// marker ID, so the real plugin must be applied before them (see settings.gradle).
+subprojects {
+    apply plugin: "com.gradleup.shadow"
+}
+
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v3/main.gradle"

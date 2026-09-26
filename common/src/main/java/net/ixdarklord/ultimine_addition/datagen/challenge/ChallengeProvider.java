@@ -7,7 +7,7 @@ import net.ixdarklord.ultimine_addition.datagen.challenge.builder.ChallengesBuil
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -20,7 +20,7 @@ import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.T
 
 public abstract class ChallengeProvider implements DataProvider {
     private final PackOutput output;
-    private final Map<ResourceLocation, ChallengeData> data = new TreeMap<>();
+    private final Map<Identifier, ChallengeData> data = new TreeMap<>();
 
     protected abstract void buildChallenges(Consumer<ChallengesBuilder.Result> consumer);
 

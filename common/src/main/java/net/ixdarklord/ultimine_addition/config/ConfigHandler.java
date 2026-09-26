@@ -10,7 +10,7 @@ import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.SyncConfigPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +31,6 @@ public final class ConfigHandler {
         public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
         public static final ModConfigSpec.EnumValue<SkillsRecordScreen.OverlayColor> BACKGROUND_COLOR;
         public static final ModConfigSpec.ConfigValue<Boolean> ANIMATIONS_MODE;
-        public static final ModConfigSpec.IntValue PROGRESS_BAR;
         public static final ModConfigSpec.EnumValue<Panel.Align> CHALLENGES_PANEL_ALIGNMENT;
         public static final ModConfigSpec.BooleanValue SR_EDIT_MODE;
         public static final ModConfigSpec.BooleanValue MSC_RENDERER;
@@ -67,12 +66,6 @@ public final class ConfigHandler {
                             "Animations provide visual feedback for interactions.")
                     .define("animations_mode", true);
 
-            PROGRESS_BAR = BUILDER
-                    .comment("Controls the visibility mode of the progress bar:",
-                            "0: Always visible.",
-                            "1: Visible only when holding its keybind.",
-                            "2: Disabled entirely.")
-                    .defineInRange("progress_bar_mode", 0, 0, 2);
 
             CHALLENGES_PANEL_ALIGNMENT = BUILDER
                     .comment("Determines the alignment of the challenges panel on the screen.")
@@ -177,7 +170,7 @@ public final class ConfigHandler {
                     .defineList("blacklisted_shapes", Collections.emptyList(), String::new,
                             o -> o instanceof String s && FTBUltimineIntegration.getShapesList().stream()
                                     .map(Shape::getName)
-                                    .map(ResourceLocation::toString)
+                                    .map(Identifier::toString)
                                     .anyMatch(s1 -> s1.equals(s)));
 
             IS_PLACED_BY_ENTITY_CONDITION = BUILDER

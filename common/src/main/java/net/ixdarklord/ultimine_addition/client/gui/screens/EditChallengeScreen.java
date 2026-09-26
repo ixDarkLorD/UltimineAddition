@@ -1,6 +1,10 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.util.ARGB;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import org.joml.Matrix3x2fStack;
+import net.minecraft.client.renderer.RenderPipelines;
 import com.mojang.math.Axis;
 import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatlib.api.client.utils.RenderUtils;
@@ -11,8 +15,8 @@ import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.SkillsRecordPayload;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Util;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.Tooltip;
@@ -22,7 +26,7 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
@@ -32,9 +36,9 @@ import java.awt.*;
 import java.util.Optional;
 
 public class EditChallengeScreen extends Screen {
-    private static final ResourceLocation BACKGROUND_SPRITE = FTBUltimineAddition.id("container/skills_record/edit_challenge/background");
-    private static final ResourceLocation EQUAL_SPRITE = FTBUltimineAddition.id("container/skills_record/edit_challenge/equal");
-    private static final ResourceLocation ARROW_SPRITE = FTBUltimineAddition.id("container/skills_record/edit_challenge/arrow");
+    private static final Identifier BACKGROUND_SPRITE = FTBUltimineAddition.id("container/skills_record/edit_challenge/background");
+    private static final Identifier EQUAL_SPRITE = FTBUltimineAddition.id("container/skills_record/edit_challenge/equal");
+    private static final Identifier ARROW_SPRITE = FTBUltimineAddition.id("container/skills_record/edit_challenge/arrow");
     protected int imageWidth = 155;
     protected int imageHeight = 91;
     protected int leftPos;
@@ -63,7 +67,7 @@ public class EditChallengeScreen extends Screen {
             private boolean showSuccess = false;
 
             @Override
-            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            public void extractWidgetRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
                 Component component = Component.translatable("gui.ultimine_addition.skills_record.edit.copy_id").withStyle(ChatFormatting.GRAY);
                 Component successComponent = Component.translatable("gui.ultimine_addition.skills_record.edit.copy_success").withStyle(ChatFormatting.GREEN);
                 this.setTooltip(Tooltip.create(showSuccess ? successComponent : component));
@@ -78,8 +82,8 @@ public class EditChallengeScreen extends Screen {
             }
 
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (this.isHovered() && button == GLFW.GLFW_MOUSE_BUTTON_1) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+                if (this.isHovered() && event.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
                     assert EditChallengeScreen.this.minecraft != null;
                     EditChallengeScreen.this.minecraft.keyboardHandler.setClipboard(this.getMessage().getString());
                     this.playDownSound(EditChallengeScreen.this.minecraft.getSoundManager());
@@ -98,14 +102,10 @@ public class EditChallengeScreen extends Screen {
         this.newValueBox.setTooltip(Tooltip.create(Component.translatable("gui.ultimine_addition.skills_record.edit.new_value", this.challenge.getRequiredPoints())));
         this.newValueBox.insertText(String.valueOf(this.challenge.getCurrentPoints()));
         this.newValueBox.setMaxLength(String.valueOf(this.challenge.getRequiredPoints()).length());
-        this.newValueBox.setFilter(s -> {
-            try {
-                if (s.isEmpty()) return true;
-                Integer.parseInt(s);
-                return true;
-            } catch (NumberFormatException e) {
-                return false;
-            }
+        // EditBox has no input filter anymore; strip anything that isn't a digit.
+        this.newValueBox.setResponder(s -> {
+            String digits = s.replaceAll("[^0-9]", "");
+            if (!digits.equals(s)) this.newValueBox.setValue(digits);
         });
 
         FrameLayout layout = new FrameLayout(this.leftPos + 10, this.topPos + 64, 135, 17);
@@ -126,11 +126,9 @@ public class EditChallengeScreen extends Screen {
             }
         }, CommonComponents.GUI_DONE) {
             @Override
-            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-                int i = this.getX() + 2;
-                int j = this.getX() + this.getWidth() - 2;
-                renderScrollingString(guiGraphics, font, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight() - 1, Color.WHITE.getRGB());
+            public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+                super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
+                this.extractDefaultLabel(guiGraphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
             }
         }));
 
@@ -138,11 +136,9 @@ public class EditChallengeScreen extends Screen {
                 EditChallengeScreen.this.onClose(), CommonComponents.GUI_CANCEL) {
 
             @Override
-            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-                int i = this.getX() + 2;
-                int j = this.getX() + this.getWidth() - 2;
-                renderScrollingString(guiGraphics, font, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight() - 1, Color.WHITE.getRGB());
+            public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+                super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
+                this.extractDefaultLabel(guiGraphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
             }
         }));
 
@@ -156,9 +152,8 @@ public class EditChallengeScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.parent.render(guiGraphics, mouseX, mouseY, partialTick);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
         this.doneButton.active = this.isValidInput();
         try {
             int value = Integer.parseInt(this.newValueBox.getValue());
@@ -173,11 +168,11 @@ public class EditChallengeScreen extends Screen {
         this.renderArrow(guiGraphics);
     }
 
-    private void renderArrow(GuiGraphics guiGraphics) {
+    private void renderArrow(GuiGraphicsExtractor guiGraphics) {
         int value = this.getNewValue();
         boolean still = value == this.challenge.getCurrentPoints();
         boolean flip = value < this.challenge.getCurrentPoints();
-        ResourceLocation texture = still ? EQUAL_SPRITE : ARROW_SPRITE;
+        Identifier texture = still ? EQUAL_SPRITE : ARROW_SPRITE;
         int minX = this.leftPos + (still ? 68 : 66);
         int minY = this.topPos + 48;
         int maxX = this.leftPos + 88;
@@ -193,9 +188,9 @@ public class EditChallengeScreen extends Screen {
         long currentTime = Util.getMillis();
         double offset = still ? (double)0.0F : (double)currentTime / (double)1000.0F * (double)speed;
         guiGraphics.enableScissor(minX, minY, maxX, maxY);
-        PoseStack pose = guiGraphics.pose();
-        pose.pushPose();
-        pose.translate((float)minX, (float)maxY, 0.0F);
+        Matrix3x2fStack pose = guiGraphics.pose();
+        pose.pushMatrix();
+        pose.translate((float)minX, (float)maxY);
 
         for(int i = 0; i < numArrows; ++i) {
             int localArrowX;
@@ -213,19 +208,19 @@ public class EditChallengeScreen extends Screen {
             }
 
             if (localArrowX + arrowWidth > 0 && localArrowX < conveyorWidth) {
-                pose.pushPose();
+                pose.pushMatrix();
                 if (flip) {
-                    pose.translate((float)localArrowX + (float)arrowWidth / 2.0F, (float)(-conveyorHeight) / 2.0F, 0.0F);
-                    pose.mulPose(Axis.ZN.rotationDegrees(180.0F));
-                    pose.translate(-((float)localArrowX + (float)arrowWidth / 2.0F), (float)conveyorHeight / 2.0F, 0.0F);
+                    pose.translate((float)localArrowX + (float)arrowWidth / 2.0F, (float)(-conveyorHeight) / 2.0F);
+                    pose.rotate((float) Math.toRadians(-180.0F));
+                    pose.translate(-((float)localArrowX + (float)arrowWidth / 2.0F), (float)conveyorHeight / 2.0F);
                 }
 
-                guiGraphics.blitSprite(texture, localArrowX, -conveyorHeight, arrowWidth, arrowHeight);
-                pose.popPose();
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, localArrowX, -conveyorHeight, arrowWidth, arrowHeight);
+                pose.popMatrix();
             }
         }
 
-        pose.popPose();
+        pose.popMatrix();
         guiGraphics.disableScissor();
     }
 
@@ -242,12 +237,13 @@ public class EditChallengeScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers))
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event))
             return true;
 
+        int keyCode = event.key();
         if (this.isValidInput() && (keyCode == 257 || keyCode == 335)) {
-            this.doneButton.onPress();
+            this.doneButton.onPress(event);
             return true;
         }
 
@@ -255,11 +251,12 @@ public class EditChallengeScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (super.mouseClicked(event, doubleClick)) {
             return true;
         }
 
+        int button = event.button();
         if (this.newValueBox.isHovered() && button == GLFW.GLFW_MOUSE_BUTTON_2) {
             this.newValueBox.setValue("");
             return true;
@@ -290,12 +287,15 @@ public class EditChallengeScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        // The Skills Record stays visible behind the dialog (with its own background and blur; blurring again here
+        // isn't allowed in the same frame), dimmed, and the dialog starts a new layer so none of it shows through.
+        this.parent.extractRenderStateWithTooltipAndSubtitles(guiGraphics, -1, -1, partialTick);
+        guiGraphics.nextStratum();
+        guiGraphics.fill(0, 0, this.width, this.height, 0x90000000);
         SkillsRecordScreen.OverlayColor color = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
-        guiGraphics.setColor(color.red(), color.green(), color.blue(), color.alpha());
-        guiGraphics.blitSprite(BACKGROUND_SPRITE, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
-        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND_SPRITE, this.leftPos, this.topPos, this.imageWidth, this.imageHeight,
+                ARGB.colorFromFloat(color.alpha(), color.red(), color.green(), color.blue()));
     }
 
     @Override

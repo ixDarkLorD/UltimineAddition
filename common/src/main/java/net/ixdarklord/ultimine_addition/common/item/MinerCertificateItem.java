@@ -1,5 +1,10 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.core.Registration;
@@ -12,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,7 +34,7 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
+    public @NotNull InteractionResult use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
         if (level.isClientSide()) {
             if (ServicePlatform.get().players().isPlayerUltimineCapable(player) && isAccomplished(stack)) {
@@ -37,7 +42,7 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
                 getData(stack).sendClientMessage(player);
             }
 
-            return InteractionResultHolder.pass(stack);
+            return InteractionResult.PASS;
         }
 
         if (!ServicePlatform.get().players().isPlayerUltimineCapable(player)) {
@@ -47,22 +52,22 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
                 getData(stack).playCelebration(true).sendClientMessage(player).sendToClient(ItemUtils.getSlotIndex(usedHand), (ServerPlayer) player).save();
                 ServicePlatform.get().players().setPlayerUltimineCapability(player, true);
                 if (!player.isCreative()) stack.shrink(1);
-                return InteractionResultHolder.success(stack);
+                return InteractionResult.SUCCESS_SERVER;
             }
         }
 
-        return InteractionResultHolder.fail(stack);
+        return InteractionResult.FAIL;
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotIndex, boolean isSelected) {
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot) {
         if (entity instanceof ServerPlayer player)
-            getData(stack).tick(slotIndex, player);
+            getData(stack).tick(ItemUtils.findSlotIndex(player, stack), player);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, display, tooltipComponents, tooltipFlag);
         Optional<MinerCertificateData.Legacy> legacy = getData(stack).getLegacy();
         legacy.ifPresent(value -> value.createInfoComponent(tooltipComponents, false));
 
@@ -74,7 +79,7 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
 
         Component component = Component.translatable("tooltip.ultimine_addition.certificate.info").withStyle(ChatFormatting.GRAY);
         List<Component> components = ComponentHelper.splitComponent(component, getSplitterLength());
-        tooltipComponents.addAll(components);
+        components.forEach(tooltipComponents);
     }
 
     @Override
@@ -89,16 +94,16 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
     public void playParticleAndSound(Entity entity) {
         final int PARTICLE_COUNT = 80;
         if (entity instanceof ServerPlayer serverPlayer) {
-            serverPlayer.serverLevel().sendParticles(Registration.CELEBRATE_PARTICLE.get(),
+            serverPlayer.level().sendParticles(Registration.CELEBRATE_PARTICLE.get(),
                     serverPlayer.getX(), serverPlayer.getY() + 0.15d, serverPlayer.getZ(),
                     PARTICLE_COUNT, 1.0d, 1.0d, 1.0d, 0.02d
             );
-            serverPlayer.serverLevel().sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
+            serverPlayer.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
                     serverPlayer.getX(), serverPlayer.getY() + 0.15d, serverPlayer.getZ(),
                     PARTICLE_COUNT, 1.0d, 1.0d, 1.0d, 0.02d
             );
-            serverPlayer.serverLevel().playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.TOTEM_USE, serverPlayer.getSoundSource(), 0.25F, 2.5F);
-            serverPlayer.serverLevel().playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.NOTE_BLOCK_CHIME.value(), serverPlayer.getSoundSource(), 1.0F, 1.0F);
+            serverPlayer.level().playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.TOTEM_USE, serverPlayer.getSoundSource(), 0.25F, 2.5F);
+            serverPlayer.level().playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.NOTE_BLOCK_CHIME.value(), serverPlayer.getSoundSource(), 1.0F, 1.0F);
         }
     }
 

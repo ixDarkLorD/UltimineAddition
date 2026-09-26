@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.api;
 import com.google.common.base.Stopwatch;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,7 +29,7 @@ public class UAApi {
         List<IUAPlugin> invalidPlugins = new ArrayList<>();
         for (IUAPlugin plugin : plugins) {
             try {
-                ResourceLocation pluginUid = plugin.getUid();
+                Identifier pluginUid = plugin.getUid();
                 LOGGER.info("{}: {}...", title, pluginUid);
                 Stopwatch stopwatch = Stopwatch.createStarted();
                 func.accept(plugin);

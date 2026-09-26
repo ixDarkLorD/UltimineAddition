@@ -7,10 +7,19 @@ pluginManagement {
         maven { url "https://maven.minecraftforge.net/" }
         maven { url "https://maven.firstdark.dev/releases" }
     }
+    resolutionStrategy {
+        eachPlugin {
+            // Shadow 8.1.1 (pinned by the shared v3 scripts) is incompatible with Gradle 9;
+            // GradleUp's Shadow still registers the old plugin ID.
+            if (requested.id.id == "com.github.johnrengelman.shadow") {
+                useModule("com.gradleup.shadow:shadow-gradle-plugin:8.3.11")
+            }
+        }
+    }
 }
 
 include('common')
 include(project_loaders.split(","))
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v2/settings.gradle"
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v3/settings.gradle"
 
 

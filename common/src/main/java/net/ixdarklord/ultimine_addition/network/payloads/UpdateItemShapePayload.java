@@ -11,7 +11,7 @@ import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ public record UpdateItemShapePayload(String shapeId) implements CustomPacketPayl
                 return;
             }
 
-            Shape shape = FTBUltimineIntegration.getShape(ResourceLocation.parse(message.shapeId));
+            Shape shape = FTBUltimineIntegration.getShape(Identifier.parse(message.shapeId));
             if (shape == null) return;
             stack.set(Registration.SELECTED_SHAPE_COMPONENT.get(), new SelectedShapeData(shape));
         });

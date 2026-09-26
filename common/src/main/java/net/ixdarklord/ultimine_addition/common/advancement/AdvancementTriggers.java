@@ -3,8 +3,8 @@ package net.ixdarklord.ultimine_addition.common.advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.criterion.*;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 
@@ -15,7 +15,7 @@ public class AdvancementTriggers {
         return advancementTrigger(advancementHolder.id());
     }
 
-    public static Criterion<PlayerTrigger.TriggerInstance> advancementTrigger(ResourceLocation name) {
+    public static Criterion<PlayerTrigger.TriggerInstance> advancementTrigger(Identifier name) {
         ContextAwarePredicate predicate = ContextAwarePredicate.create(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS,
                 EntityPredicate.Builder.entity().subPredicate(PlayerPredicate.Builder.player().checkAdvancementDone(name, true).build())).build());
         return CriteriaTriggers.TICK.createCriterion(new PlayerTrigger.TriggerInstance(Optional.of(predicate)));

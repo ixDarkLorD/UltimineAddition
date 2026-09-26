@@ -13,7 +13,7 @@ import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -25,27 +25,31 @@ import java.util.*;
 
 public final class ChallengesPanelManager {
     public static ChallengesPanelManager INSTANCE = new ChallengesPanelManager();
-    private final Minecraft mc = Minecraft.getInstance();
     private final Map<Panel.Key, Panel> panelMap = new TreeMap<>();
     private Panel.Align panelAlign;
     private final int panelPadding = 4;
+
+    // Looked up on use: this class is loaded during mod setup, before the Minecraft instance exists.
+    private Minecraft mc() {
+        return Minecraft.getInstance();
+    }
 
     public void cleanup(@Nullable LocalPlayer ignored) {
         panelMap.clear();
     }
 
-    public void render(GuiGraphics guiGraphics, DeltaTracker ignored) {
+    public void render(GuiGraphicsExtractor guiGraphics, DeltaTracker ignored) {
         if (COMMON.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
             if (this.panelAlign == null) {
                 this.panelAlign = CLIENT.CHALLENGES_PANEL_ALIGNMENT.get();
             }
 
-            Window window = this.mc.getWindow();
-            Player player = this.mc.player;
+            Window window = this.mc().getWindow();
+            Player player = this.mc().player;
             if (player != null) {
                 ItemStack stack = ItemUtils.findItemInHand(player, Registration.SKILLS_RECORD.get());
                 if (this.shouldProcess(stack)) {
-                    SkillsRecordData data = SkillsRecordData.load(stack);
+                    SkillsRecordData data = SkillsRecordData.getClient(stack).orElseThrow();
                     this.createPanels(data);
                     this.updatePanels(data);
                 }
@@ -68,7 +72,7 @@ public final class ChallengesPanelManager {
 
         for(Panel panel : this.panelMap.values()) {
             if (!panel.isInactive() && !panel.isNotifyPanel()) {
-                int titleWidth = this.mc.font.width(panel.getTitle());
+                int titleWidth = this.mc().font.width(panel.getTitle());
                 maxTextLength = Math.max(maxTextLength, titleWidth);
             }
         }
@@ -85,13 +89,13 @@ public final class ChallengesPanelManager {
     }
 
     private boolean shouldProcess(ItemStack stack) {
-        if (!SkillsRecordData.hasData(stack)) {
+        if (!SkillsRecordData.getClient(stack).isPresent()) {
             Collection<Panel> panels = this.panelMap.values();
             panels.forEach(Panel::markRemoved);
             this.slideOutPanels(panels);
             return false;
         } else {
-            return !this.mc.isPaused();
+            return !this.mc().isPaused();
         }
     }
 
@@ -128,8 +132,8 @@ public final class ChallengesPanelManager {
     }
 
     private void validatePanels(ItemStack stack) {
-        if (SkillsRecordData.hasData(stack)) {
-            SkillsRecordData recordData = SkillsRecordData.load(stack);
+        if (SkillsRecordData.getClient(stack).isPresent()) {
+            SkillsRecordData recordData = SkillsRecordData.getClient(stack).orElseThrow();
             this.panelMap.forEach((key, panel) -> {
                 AnimatedComponent anim = panel.getAnimatedComponent();
                 if (!panel.isAssignedToRemove() && !anim.isForward()) {

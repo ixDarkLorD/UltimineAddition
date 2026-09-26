@@ -2,14 +2,12 @@ package net.ixdarklord.ultimine_addition.config;
 
 import dev.architectury.platform.Platform;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Environment(EnvType.CLIENT)
 public final class ClientSideConfigPreserver {
     private static final Map<List<String>, ConfigValueWrapper<?>> PRESERVED_VALUES = new ConcurrentHashMap<>();
     private static boolean hasPreservedValues = false;

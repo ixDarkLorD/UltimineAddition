@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.event;
 
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import dev.architectury.registry.ReloadListenerRegistry;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
@@ -9,7 +10,7 @@ import net.minecraft.server.packs.PackType;
 
 public class ChallengesEvents {
     public static void init() {
-        ReloadListenerRegistry.register(PackType.SERVER_DATA, ChallengesManager.INSTANCE);
+        ReloadListenerRegistry.register(PackType.SERVER_DATA, ChallengesManager.INSTANCE, FTBUltimineAddition.id("challenges"));
 
         DatapackEvents.TAG_UPDATE.register((registryAccess, updateCause, shouldUpdateStaticData) -> {
             if (updateCause == DatapackEvents.TagUpdate.Cause.SERVER_DATA_LOAD) {

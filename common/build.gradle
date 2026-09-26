@@ -1,12 +1,14 @@
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/common.gradle"
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v3/common.gradle"
 
 dependencies {
-    modApi(libs.architectury.common.get())
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-common:1.21-${coolcatlib_version}"
-    modApi libs.forgeconfigapiport.common.get()
-    modApi libs.jei.libs.common.get()
-    modApi libs.jei.api.common.get()
+    api libs.architectury.common
+    api "net.ixdarklord.coolcatlib:coolcatlib-common:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    api libs.forgeconfigapiport.common
+    api libs.jei.libs.common
+    api libs.jei.api.common
+    // JEI internals (client-synced recipes); the loader-specific JEI jars provide them at runtime.
+    compileOnly "mezz.jei:jei-${libs.versions.minecraft.get()}-common:${libs.versions.jei.get()}"
 
-    modApi "dev.ftb.mods:ftb-ultimine:${ftbultimine_version}"
-    modApi "dev.ftb.mods:ftb-library:${ftblibrary_version}"
+    api "dev.ftb.mods:ftb-ultimine:${ftbultimine_version}"
+    api "dev.ftb.mods:ftb-library:${ftblibrary_version}"
 }

@@ -11,7 +11,7 @@ import static net.ixdarklord.ultimine_addition.config.ConfigHandler.SERVER.CARD_
 
 public class MineGoJuiceEffectInstance extends MobEffectInstance {
     public MineGoJuiceEffectInstance(RegistrySupplier<MobEffect> effect, int amplifier) {
-        super(BuiltInRegistries.MOB_EFFECT.getHolder(effect.getId()).orElseThrow(),
+        super(BuiltInRegistries.MOB_EFFECT.get(effect.getId()).orElseThrow(),
                 CARD_POTION_DURATIONS.getDefaultValue(MiningSkillCardItem.Tier.fromInt(amplifier+1)) * 20,
                 amplifier
         );

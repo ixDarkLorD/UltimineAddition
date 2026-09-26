@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[4,)"
+loaderVersion = "[${min_neoforge_fml_version},)"
 issueTrackerURL = "${mod_issue_url}"
 license = "${mod_license}"
 
@@ -56,3 +56,6 @@ side = "BOTH"
 
 [[mixins]]
 config = "${modid}.common.mixins.json"
+
+[[accessTransformers]]
+file = "META-INF/accesstransformer.cfg"

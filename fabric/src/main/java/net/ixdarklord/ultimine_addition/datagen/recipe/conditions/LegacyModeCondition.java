@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe.conditions;
 
+import net.minecraft.resources.RegistryOps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -23,7 +24,7 @@ public record LegacyModeCondition(boolean value) implements ResourceCondition {
     }
 
     @Override
-    public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+    public boolean test(@Nullable RegistryOps.RegistryInfoLookup registryLookup) {
         boolean isLegacyMode = ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
         return value == isLegacyMode;
     }

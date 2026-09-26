@@ -28,7 +28,7 @@ public class SyncEvents {
 
 
         PlayerEvent.PLAYER_JOIN.register(player -> {
-            if (player.server.isDedicatedServer()) {
+            if (player.level().getServer().isDedicatedServer()) {
                 ConfigHandler.COMMON.syncConfigToClient(true, player);
             }
         });
