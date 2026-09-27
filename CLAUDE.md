@@ -58,7 +58,7 @@ Other consequences of the unobfuscated setup:
 
 **Dev runs.** NeoForge's dev `runServer` skips the EULA check and starts a full world. Fabric's stops at the EULA check unless `run/server/eula.txt` exists. NeoForge 26.1 split datagen into client/server runs, so `neoforge/build.gradle` switches the shared `data` run to `clientData()` (the client run generates everything); it may keep running after "finished" lines appear and can be stopped. Trinkets is `localRuntime` on Fabric because it injects interfaces into vanilla classes, so dev runs crash without it.
 
-`mod_version` still has the 1.21.1 value (`2101.x.x.x` in the `MCVR.X.X.X` scheme) until a 26.1.2 prefix is chosen.
+`mod_version` is a plain build number, like CoolCatLib's (e.g. `1`); the build scripts prefix the Minecraft version, so jars and maven artifacts are `<mc>-<build>` (`ultimine_addition-fabric-26.1.2-1.jar`), similar to FTB Ultimine's `26.1.2.5`. The 1.21.1 branch used the older `MCVR.X.X.X` scheme (`2101.x.x.x`).
 
 ### Dependencies in 26.1.2
 
@@ -115,7 +115,9 @@ When you change one of these interfaces, update both Impl classes.
 
 **Skills Record storage.** The item only carries `SkillsRecordLink` (the record's UUID, registered under the old `skills_record_data` component id; its codec still reads the pre-SavedData layout so `SkillsRecordSavedData.resolve` can migrate old items). Contents/settings live in the server-wide `SkillsRecordSavedData` (`common/data/record`), together with each card's `CardHistory` keyed by card UUID. Get a record with `SkillsRecordData.get(stack, level)` on the server (links/migrates the stack) or `SkillsRecordData.getClient(stack)` on the client. `SkillsRecordData.save()` on the server records card history (by diffing the card against the last observation) and bumps the record's version; `SkillsRecordSync` pushes changed records to players carrying them every tick, and `SkillsRecordClientCache` holds the client copies (unknown records are requested on demand). The menu works directly on the record's live container.
 
-**Card viewer.** `client/gui/components/cardviewer` replaces the old `TextScreen`: a `CardViewerWidget` (CoolCatLib `AbstractMultiPanelWidget`) stacking a pan/zoom `TierTreePanel` (`ViewportPanel`), status `MessagePanel`s and a modal `ChallengeDetailsPanel`. `CardTree` builds the layout from the card and its history. The book's scrollbar is the viewer's zoom slider.
+**Mining Skill Card storage.** The card's item component (`MiningSkillCardData`) holds only its UUID, tier and display item, which rendering, recipes and JEI need anywhere. Its challenges and potion points (`CardProgress`) live in `SkillsRecordSavedData` next to its `CardHistory` (one `CardEntry` per card UUID; the history fields stay inline, as older saves have them). `MiningSkillCardData` keeps its API and reaches the progress through `CardStore`, which picks the side by thread: server thread → the SavedData, otherwise → `SkillsRecordClientCache`. Reading never creates entries: a card is stored when the server first saves it or a player carries it (so crafting previews stay out of the file); until then it uses a temporary local copy that becomes the stored progress. Use `writeComponent()` instead of `save()` for stacks that may not become real cards (recipe results, ingredient displays). Old items still carrying `Challenges`/`PotionPoints` are migrated when first stored. `SkillsRecordSync` pushes carried cards (`SyncCards`, snapshots with the just-completed challenges for the toasts); others are requested on demand (`RequestCard`).
+
+**Card viewer.** `client/gui/components/cardviewer` replaces the old `TextScreen`: a `CardViewerWidget` (CoolCatLib `AbstractMultiPanelWidget`) stacking a pan/zoom `TierTreePanel` (`ViewportPanel`), status `MessagePanel`s and a modal `ChallengeDetailsPanel`. `CardTree` builds the layout from the card and its history. 
 
 **Networking.** Payloads are in `network/payloads`. They are registered and sent through Architectury `NetworkManager` in `PayloadHandler` (FTB Library 26.1 has its own networking layer with a different handler type, so its `NetworkHelper` is no longer used).
 
@@ -133,5 +135,5 @@ When you change one of these interfaces, update both Impl classes.
 
 ## Conventions
 
-- Keep `CHANGELOG.md` up to date. Entries use the format `## vX.X.X.X Release - <date>` with emoji subsections (✨ New Features / 🐛 Bug Fixes & Improvements / ⚙️ Refactoring). It is bundled into the jar.
+- Keep `CHANGELOG.md` up to date. Entries use the format `## v<mc>-<build> Release - <date>` (1.21.1 used `## vX.X.X.X Release - <date>`) with emoji subsections (✨ New Features / 🐛 Bug Fixes & Improvements / ⚙️ Refactoring). It is bundled into the jar.
 - Loader-specific code goes under a `.fabric` / `.neoforge` subpackage that mirrors the common package.

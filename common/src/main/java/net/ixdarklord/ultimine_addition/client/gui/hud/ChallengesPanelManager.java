@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.client.gui.hud;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import net.ixdarklord.coolcatlib.api.client.gui.components.animations.AnimatedComponent;
-import net.ixdarklord.ultimine_addition.client.gui.components.Panel;
+import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesPanel;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler.CLIENT;
@@ -25,8 +25,8 @@ import java.util.*;
 
 public final class ChallengesPanelManager {
     public static ChallengesPanelManager INSTANCE = new ChallengesPanelManager();
-    private final Map<Panel.Key, Panel> panelMap = new TreeMap<>();
-    private Panel.Align panelAlign;
+    private final Map<ChallengesPanel.Key, ChallengesPanel> panelMap = new TreeMap<>();
+    private ChallengesPanel.Align panelAlign;
     private final int panelPadding = 4;
 
     // Looked up on use: this class is loaded during mod setup, before the Minecraft instance exists.
@@ -59,7 +59,7 @@ public final class ChallengesPanelManager {
                 this.adjustPanelsToFitScreen(window);
                 this.alignPanels(window);
 
-                for(Panel panel : this.panelMap.values()) {
+                for(ChallengesPanel panel : this.panelMap.values()) {
                     panel.render(guiGraphics);
                 }
 
@@ -70,7 +70,7 @@ public final class ChallengesPanelManager {
     private void resizePanels() {
         int maxTextLength = 0;
 
-        for(Panel panel : this.panelMap.values()) {
+        for(ChallengesPanel panel : this.panelMap.values()) {
             if (!panel.isInactive() && !panel.isNotifyPanel()) {
                 int titleWidth = this.mc().font.width(panel.getTitle());
                 maxTextLength = Math.max(maxTextLength, titleWidth);
@@ -80,7 +80,7 @@ public final class ChallengesPanelManager {
         int length = maxTextLength - 94;
         boolean b = length > 0;
 
-        for(Panel panel : this.panelMap.values()) {
+        for(ChallengesPanel panel : this.panelMap.values()) {
             if (panel.isActive()) {
                 panel.setWidth(112 + (b ? length : 0));
             }
@@ -90,8 +90,8 @@ public final class ChallengesPanelManager {
 
     private boolean shouldProcess(ItemStack stack) {
         if (!SkillsRecordData.getClient(stack).isPresent()) {
-            Collection<Panel> panels = this.panelMap.values();
-            panels.forEach(Panel::markRemoved);
+            Collection<ChallengesPanel> panels = this.panelMap.values();
+            panels.forEach(ChallengesPanel::markRemoved);
             this.slideOutPanels(panels);
             return false;
         } else {
@@ -99,16 +99,16 @@ public final class ChallengesPanelManager {
         }
     }
 
-    private void slideOutPanels(Collection<Panel> panels) {
+    private void slideOutPanels(Collection<ChallengesPanel> panels) {
         panels.stream()
-                .filter(Panel::isAssignedToRemove)
-                .map(Panel::getAnimatedComponent)
+                .filter(ChallengesPanel::isAssignedToRemove)
+                .map(ChallengesPanel::getAnimatedComponent)
                 .filter(AnimatedComponent::isForward)
                 .forEach((component) -> component.play(true));
     }
 
     private void createPanels(SkillsRecordData recordData) {
-        boolean hasInactivePanel = this.panelMap.values().stream().anyMatch(Panel::isInactive);
+        boolean hasInactivePanel = this.panelMap.values().stream().anyMatch(ChallengesPanel::isInactive);
         if (hasInactivePanel && this.notContainPanel(recordData.getUUID(), 999)) {
             this.createNotifyPanel(recordData.getUUID());
         }
@@ -121,7 +121,7 @@ public final class ChallengesPanelManager {
 
                     for(MiningSkillCardData.Challenge challenge : cardData.getChallenges()) {
                         if (challenge.isPinned()) {
-                            Panel panel = this.getOrCreatePanel(recordData.getUUID(), slotIndex);
+                            ChallengesPanel panel = this.getOrCreatePanel(recordData.getUUID(), slotIndex);
                             panel.setTitle(cardData.getStack().getHoverName());
                         }
                     }
@@ -143,9 +143,9 @@ public final class ChallengesPanelManager {
                 if (!panel.isNotifyPanel()) {
                     Optional<MiningSkillCardData> cardData = recordData.getCardData(key.slotIndex());
                     cardData.ifPresentOrElse((data) -> {
-                        Set<Panel.Info> flaggedInfos = new HashSet<>();
+                        Set<ChallengesPanel.Info> flaggedInfos = new HashSet<>();
 
-                        for(Panel.Info info : panel.getInfos()) {
+                        for(ChallengesPanel.Info info : panel.getInfos()) {
                             Optional<MiningSkillCardData.Challenge> challengeOpt = data.getChallenge(info.getChallengeId());
                             if (challengeOpt.isEmpty()) {
                                 flaggedInfos.add(info);
@@ -169,13 +169,13 @@ public final class ChallengesPanelManager {
             });
         }
 
-        List<Panel> panelsToSlideOff = this.panelMap.values().stream().filter((p) -> p.isActive() && p.isAssignedToRemove() && p.getAnimatedComponent().isForward()).toList();
+        List<ChallengesPanel> panelsToSlideOff = this.panelMap.values().stream().filter((p) -> p.isActive() && p.isAssignedToRemove() && p.getAnimatedComponent().isForward()).toList();
         if (!panelsToSlideOff.isEmpty()) {
             this.slideOutPanels(panelsToSlideOff);
         }
 
         this.panelMap.entrySet().removeIf((entry) -> {
-            Panel panel = entry.getValue();
+            ChallengesPanel panel = entry.getValue();
             AnimatedComponent anim = panel.getAnimatedComponent();
             return panel.isAssignedToRemove() && (panel.isInactive() || anim.isFinished());
         });
@@ -183,12 +183,12 @@ public final class ChallengesPanelManager {
 
     private void adjustPanelsToFitScreen(Window window) {
         this.panelMap.values().forEach((p) -> p.setActive(true));
-        List<Map.Entry<Panel.Key, Panel>> entries = Lists.newArrayList(this.panelMap.entrySet());
+        List<Map.Entry<ChallengesPanel.Key, ChallengesPanel>> entries = Lists.newArrayList(this.panelMap.entrySet());
         int screenHeight = window.getGuiScaledHeight();
 
         while(!this.doesLayoutFitScreen(entries, screenHeight)) {
             for(int i = entries.size() - 1; i >= 0; --i) {
-                Panel panel = entries.get(i).getValue();
+                ChallengesPanel panel = entries.get(i).getValue();
                 if (panel.isActive() && !panel.isNotifyPanel()) {
                     panel.setActive(false);
                     if (this.doesLayoutFitScreen(entries, screenHeight)) {
@@ -198,28 +198,28 @@ public final class ChallengesPanelManager {
             }
         }
 
-        if (this.panelMap.values().stream().allMatch(Panel::isActive)) {
-            this.panelMap.values().stream().filter(Panel::isNotifyPanel).forEach(Panel::markRemoved);
+        if (this.panelMap.values().stream().allMatch(ChallengesPanel::isActive)) {
+            this.panelMap.values().stream().filter(ChallengesPanel::isNotifyPanel).forEach(ChallengesPanel::markRemoved);
         }
 
     }
 
-    private boolean doesLayoutFitScreen(List<Map.Entry<Panel.Key, Panel>> entries, int screenHeight) {
+    private boolean doesLayoutFitScreen(List<Map.Entry<ChallengesPanel.Key, ChallengesPanel>> entries, int screenHeight) {
         LinearLayout tempLayout = LinearLayout.vertical().spacing(panelPadding);
-        entries.stream().map(Map.Entry::getValue).filter(Panel::isActive).forEach((p) -> tempLayout.addChild(p.copy()));
+        entries.stream().map(Map.Entry::getValue).filter(ChallengesPanel::isActive).forEach((p) -> tempLayout.addChild(p.copy()));
         tempLayout.arrangeElements();
         return tempLayout.getY() >= 0 && tempLayout.getY() + tempLayout.getHeight() <= screenHeight;
     }
 
     private void alignPanels(Window window) {
         LinearLayout layout = LinearLayout.vertical().spacing(panelPadding);
-        this.panelMap.values().stream().filter(Panel::isActive).forEach(layout::addChild);
+        this.panelMap.values().stream().filter(ChallengesPanel::isActive).forEach(layout::addChild);
         layout.arrangeElements();
         int baseX = this.panelAlign.toScreenPos().getX(window.getGuiScaledWidth(), layout.getWidth(), 4);
         int baseY = this.panelAlign.toScreenPos().getY(window.getGuiScaledHeight(), layout.getHeight(), 4);
         layout.setPosition(baseX, baseY);
 
-        for(Panel panel : this.panelMap.values()) {
+        for(ChallengesPanel panel : this.panelMap.values()) {
             AnimatedComponent anim = panel.getAnimatedComponent();
             AnimatedComponent.Position positions = anim.getRelativePosition(this.panelAlign.toScreenPos(), panel.getX(), panel.getY(), panel.getWidth(), panel.getHeight(), 4);
             panel.setPosition(positions.x(), positions.y());
@@ -255,28 +255,28 @@ public final class ChallengesPanelManager {
     }
 
     private int getInactivePanelsSize() {
-        return (int)this.panelMap.values().stream().filter(Panel::isInactive).count();
+        return (int)this.panelMap.values().stream().filter(ChallengesPanel::isInactive).count();
     }
 
     public void cycleAlignment(boolean next) {
         this.panelAlign = next ? this.panelAlign.next() : this.panelAlign.previous();
     }
 
-    public Panel.Align getPanelAlignment() {
+    public ChallengesPanel.Align getPanelAlignment() {
         return this.panelAlign;
     }
 
     private boolean notContainPanel(UUID uuid, int slotIndex) {
-        return !this.panelMap.containsKey(new Panel.Key(uuid, slotIndex));
+        return !this.panelMap.containsKey(new ChallengesPanel.Key(uuid, slotIndex));
     }
 
-    private Panel getOrCreatePanel(UUID uuid, int slotIndex) {
-        Panel.Key key = new Panel.Key(uuid, slotIndex);
-        return this.panelMap.computeIfAbsent(key, (k) -> Panel.create(slotIndex, false));
+    private ChallengesPanel getOrCreatePanel(UUID uuid, int slotIndex) {
+        ChallengesPanel.Key key = new ChallengesPanel.Key(uuid, slotIndex);
+        return this.panelMap.computeIfAbsent(key, (k) -> ChallengesPanel.create(slotIndex, false));
     }
 
     private void createNotifyPanel(UUID uuid) {
-        Panel.Key key = new Panel.Key(uuid, 999);
-        this.panelMap.computeIfAbsent(key, (k) -> Panel.create(999, true));
+        ChallengesPanel.Key key = new ChallengesPanel.Key(uuid, 999);
+        this.panelMap.computeIfAbsent(key, (k) -> ChallengesPanel.create(999, true));
     }
 }

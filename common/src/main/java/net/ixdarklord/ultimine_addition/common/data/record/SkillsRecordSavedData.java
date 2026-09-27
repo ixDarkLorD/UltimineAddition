@@ -15,30 +15,23 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-/**
- * Server-wide storage of every Skills Record (contents and settings, keyed by the record's UUID) and of every
- * Mining Skill Card's {@link CardHistory} (keyed by the card's UUID, so the history follows the card between records).
- * <p>
- * Like the Building Gadgets templates, the item only links to its entry. Copies of a record item (creative
- * pick-block, commands) share one entry, and entries of destroyed records stay in the file.
- */
 public final class SkillsRecordSavedData extends SavedData {
     public static final Codec<SkillsRecordSavedData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             SkillsRecordData.CODEC.listOf().optionalFieldOf("Records", List.of()).forGetter(data -> List.copyOf(data.records.values())),
-            Codec.unboundedMap(UUIDUtil.STRING_CODEC, CardHistory.CODEC).optionalFieldOf("Cards", Map.of()).forGetter(data -> data.cards)
+            Codec.unboundedMap(UUIDUtil.STRING_CODEC, CardEntry.CODEC).optionalFieldOf("Cards", Map.of()).forGetter(data -> data.cards)
     ).apply(instance, SkillsRecordSavedData::new));
 
     public static final SavedDataType<SkillsRecordSavedData> TYPE = new SavedDataType<>(
             FTBUltimineAddition.id("skills_records"), SkillsRecordSavedData::new, CODEC, DataFixTypes.LEVEL);
 
     private final Map<UUID, SkillsRecordData> records = new HashMap<>();
-    private final Map<UUID, CardHistory> cards;
+    private final Map<UUID, CardEntry> cards;
 
     public SkillsRecordSavedData() {
         this(List.of(), Map.of());
     }
 
-    private SkillsRecordSavedData(List<SkillsRecordData> records, Map<UUID, CardHistory> cards) {
+    private SkillsRecordSavedData(List<SkillsRecordData> records, Map<UUID, CardEntry> cards) {
         records.forEach(this::add);
         this.cards = new HashMap<>(cards);
     }
@@ -56,11 +49,6 @@ public final class SkillsRecordSavedData extends SavedData {
         return this.records.get(id);
     }
 
-    /**
-     * The record a stack links to. Unlinked stacks get a new record; stacks still holding the pre-SavedData
-     * contents have them moved into the storage (into a fresh record if the UUID is already taken by another copy,
-     * so duplicated old items don't lose their contents).
-     */
     public SkillsRecordData resolve(ItemStack stack) {
         SkillsRecordLink link = stack.get(SkillsRecordLink.DATA_COMPONENT);
         UUID id = SkillsRecordLink.getId(stack);
@@ -84,7 +72,6 @@ public final class SkillsRecordSavedData extends SavedData {
         return data;
     }
 
-    /** Called by {@link SkillsRecordData#save()}. */
     public void onRecordChanged(SkillsRecordData data) {
         this.observeCards(data);
         data.bumpVersion();
@@ -96,23 +83,76 @@ public final class SkillsRecordSavedData extends SavedData {
         for (int i = 0; i < SkillsRecordData.CARD_SLOTS; i++) {
             data.getCardData(i).ifPresent(card -> {
                 if (card.isCreativeItem()) return;
-                this.cards.computeIfAbsent(card.getUUID(), uuid -> new CardHistory()).observe(card, now);
+                CardEntry entry = this.entry(card);
+                if (entry.history.observe(card, now)) entry.version++;
             });
         }
     }
 
-    public Optional<CardHistory> getCardHistory(UUID cardId) {
-        return Optional.ofNullable(this.cards.get(cardId));
+    private CardEntry entry(MiningSkillCardData card) {
+        CardEntry entry = this.cards.computeIfAbsent(card.getUUID(), id -> new CardEntry());
+        if (entry.progress == null) {
+            CardProgress legacy = card.getLegacy();
+            CardProgress local = card.takeLocal();
+            if (legacy != null) {
+                entry.progress = new CardProgress(legacy.getChallenges(), legacy.getPotionPoints(), List.of());
+            } else if (local != null && !local.isEmpty()) {
+                entry.progress = local;
+            } else {
+                entry.progress = new CardProgress();
+                card.rollChallenges(entry.progress);
+            }
+            entry.version++;
+            this.setDirty();
+        }
+        if (card.getLegacy() != null) card.clearLegacy();
+        return entry;
     }
 
-    /** The histories of the cards currently inside a record, for syncing. */
-    public Map<UUID, CardHistory> getHistoriesFor(SkillsRecordData data) {
-        Map<UUID, CardHistory> result = new HashMap<>();
+    public @Nullable CardProgress findProgress(MiningSkillCardData card) {
+        CardEntry entry = this.cards.get(card.getUUID());
+        return entry == null ? null : entry.progress;
+    }
+
+    public CardProgress ensure(MiningSkillCardData card) {
+        return this.entry(card).progress;
+    }
+
+    public void onCardChanged(MiningSkillCardData card) {
+        if (card.isCreativeItem()) return;
+        CardEntry entry = this.entry(card);
+        entry.history.observe(card, System.currentTimeMillis());
+        entry.version++;
+        this.setDirty();
+    }
+
+    public Optional<CardHistory> getCardHistory(UUID cardId) {
+        return Optional.ofNullable(this.cards.get(cardId)).map(entry -> entry.history);
+    }
+
+    public int getCardVersion(MiningSkillCardData card) {
+        CardEntry entry = this.cards.get(card.getUUID());
+        return entry == null ? -1 : entry.version;
+    }
+
+    public CardSync createSync(MiningSkillCardData card, ItemStack stack) {
+        CardEntry entry = this.entry(card);
+        CardSync sync = new CardSync(card.getUUID(), stack.copy(), entry.progress.copy(), entry.history.copy());
+        entry.progress.clearFinished();
+        return sync;
+    }
+
+    public @Nullable CardSync createSync(UUID cardId) {
+        CardEntry entry = this.cards.get(cardId);
+        if (entry == null || entry.progress == null) return null;
+        return new CardSync(cardId, ItemStack.EMPTY, entry.progress.copy(), entry.history.copy());
+    }
+
+    public List<CardSync> createSyncsFor(SkillsRecordData data) {
+        List<CardSync> result = new ArrayList<>();
         for (int i = 0; i < SkillsRecordData.CARD_SLOTS; i++) {
-            data.getCardData(i).map(MiningSkillCardData::getUUID).ifPresent(uuid -> {
-                CardHistory history = this.cards.get(uuid);
-                if (history != null) result.put(uuid, history);
-            });
+            ItemStack stack = data.getCardSlots().get(i);
+            data.getCardData(i).filter(card -> !card.isCreativeItem()).ifPresent(card -> result.add(this.createSync(card, stack)));
         }
         return result;
     }

@@ -16,7 +16,6 @@ import java.awt.*;
 import java.util.Arrays;
 
 public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
-    // The vanilla inventory slot (the bundle's own slot sprites were removed in 1.21.2).
     public static final Identifier SLOT_SPRITE = Identifier.withDefaultNamespace("container/slot");
     private static final int SLOT_SIZE = 18;
     private static final int ITEM_OFFSET = 1;

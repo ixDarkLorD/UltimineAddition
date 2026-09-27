@@ -2,7 +2,7 @@
 This file is for listing all the changes to this project
 <hr>
 
-## Unreleased (Minecraft 26.1.2 port)
+## v26.1.2-1 Release - Unreleased (Minecraft 26.1.2 port)
 ### ✨ New Features
 - Redesigned the Skills Record's card viewer: the selected card's tiers and challenges are shown on a map you can pan (drag) and zoom (mouse wheel or `+`/`-`). Completed tiers, the current tier's live progress and locked tiers are all visible.
 - Clicking a challenge opens its details (description, target blocks, progress, completion date) with Pin and Edit actions.
@@ -11,6 +11,7 @@ This file is for listing all the changes to this project
 
 ### 🐛 Bug Fixes & Improvements
 - Skills Record contents are now stored in the world save and linked to the item by UUID; existing Skills Records are migrated automatically the first time they are loaded.
+- Mining Skill Card challenges and potion points are now stored in the world save with the card's history; the item keeps its UUID, tier and display item. Existing cards are migrated automatically.
 - Cards without a saved UUID no longer share one.
 - The server now checks permissions before applying challenge edits from the Skills Record.
 - The Skills Record window is larger, giving the card viewer more room.

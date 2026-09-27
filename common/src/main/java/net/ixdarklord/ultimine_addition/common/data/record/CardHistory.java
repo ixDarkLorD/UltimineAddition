@@ -1,6 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.data.record;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -13,15 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-/**
- * What a Mining Skill Card went through, keyed by the card's UUID in {@link SkillsRecordSavedData}.
- * <p>
- * Cards only keep the challenges of their current tier, so the history is built by {@link #observe observing}
- * the card each time a Skills Record holding it is saved, and diffing against the last observation:
- * a higher tier means the observed tier was completed (with the observed challenges); a lower tier (commands)
- * drops the records from that tier up. Tiers skipped in one jump are recorded without challenges.
- * Times are epoch milliseconds; {@code 0} means "unknown" (completed before the card was first observed).
- */
 public final class CardHistory {
     public record ChallengeRecord(Identifier id, int order, int requiredPoints, long completedAt) {
         public static final Codec<ChallengeRecord> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -39,7 +31,6 @@ public final class CardHistory {
                 ChallengeRecord::new);
     }
 
-    /** A completed tier. {@code skipped} tiers were jumped over (e.g. by a command) and have no challenges. */
     public record TierRecord(MiningSkillCardItem.Tier tier, long completedAt, boolean skipped, List<ChallengeRecord> challenges) {
         public static final Codec<TierRecord> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 MiningSkillCardItem.Tier.CODEC.fieldOf("Tier").forGetter(TierRecord::tier),
@@ -56,7 +47,6 @@ public final class CardHistory {
                 TierRecord::new);
     }
 
-    /** The last observed challenge list of the current tier (needed once the card has moved on). */
     private record Observed(Identifier id, int order, int requiredPoints) {
         static final Codec<Observed> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Identifier.CODEC.fieldOf("Id").forGetter(Observed::id),
@@ -65,14 +55,15 @@ public final class CardHistory {
         ).apply(instance, Observed::new));
     }
 
-    public static final Codec<CardHistory> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final MapCodec<CardHistory> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             MiningSkillCardItem.Tier.CODEC.optionalFieldOf("ObservedTier").forGetter(h -> Optional.ofNullable(h.observedTier)),
             Observed.CODEC.listOf().optionalFieldOf("Observed", List.of()).forGetter(h -> h.observed),
             Codec.unboundedMap(Identifier.CODEC, Codec.LONG).optionalFieldOf("CompletionTimes", Map.of()).forGetter(h -> h.completionTimes),
             TierRecord.CODEC.listOf().optionalFieldOf("Tiers", List.of()).forGetter(h -> List.copyOf(h.completedTiers.values()))
     ).apply(instance, (tier, observed, times, tiers) -> new CardHistory(tier.orElse(null), observed, times, tiers)));
 
-    /** Clients get the completed tiers and current-tier completion times; the observation state stays on the server. */
+    public static final Codec<CardHistory> CODEC = MAP_CODEC.codec();
+
     public static final StreamCodec<RegistryFriendlyByteBuf, CardHistory> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, ByteBufCodecs.VAR_LONG), h -> h.completionTimes,
             TierRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), h -> List.copyOf(h.completedTiers.values()),
@@ -94,7 +85,10 @@ public final class CardHistory {
         tiers.forEach(record -> this.completedTiers.put(record.tier(), record));
     }
 
-    /** The record of a completed tier, if any. */
+    public CardHistory copy() {
+        return new CardHistory(this.observedTier, this.observed, this.completionTimes, List.copyOf(this.completedTiers.values()));
+    }
+
     public Optional<TierRecord> getTier(MiningSkillCardItem.Tier tier) {
         return Optional.ofNullable(this.completedTiers.get(tier));
     }
@@ -103,23 +97,16 @@ public final class CardHistory {
         return Collections.unmodifiableCollection(this.completedTiers.values());
     }
 
-    /** When a challenge of the current tier was completed; empty if unknown or not completed. */
     public OptionalLong getCompletionTime(Identifier challengeId) {
         Long time = this.completionTimes.get(challengeId);
         return time == null || time <= 0 ? OptionalLong.empty() : OptionalLong.of(time);
     }
 
-    /**
-     * Updates the history from the card's current state.
-     *
-     * @return whether anything changed
-     */
     public boolean observe(MiningSkillCardData card, long now) {
         MiningSkillCardItem.Tier tier = card.getTier();
         boolean changed = false;
 
         if (this.observedTier == null) {
-            // First sighting: challenges already done were completed at an unknown time.
             for (MiningSkillCardData.Challenge challenge : card.getChallenges()) {
                 if (card.isChallengeAccomplished(challenge)) this.completionTimes.put(challenge.getId(), 0L);
             }
@@ -142,7 +129,6 @@ public final class CardHistory {
             changed = true;
         }
 
-        // Same tier (or just switched): track completion times and the challenge list.
         Set<Identifier> current = new HashSet<>();
         for (MiningSkillCardData.Challenge challenge : card.getChallenges()) {
             current.add(challenge.getId());

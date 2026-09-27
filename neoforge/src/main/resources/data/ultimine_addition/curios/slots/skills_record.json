@@ -1,6 +1,6 @@
 {
-  "replace": true,
   "icon": "ultimine_addition:slot/skills_record",
   "size": 1,
-  "render_toggle": false
+  "render_toggle": false,
+  "validators": ["curios:tag"]
 }

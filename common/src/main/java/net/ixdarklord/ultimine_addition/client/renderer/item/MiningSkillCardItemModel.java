@@ -29,13 +29,8 @@ import org.joml.Vector3fc;
 import java.util.*;
 import java.util.function.Consumer;
 
-/**
- * Item model for Mining Skill Cards: picks the model for the card's tier and, when the client's
- * "custom renderer" option is on, draws the card's display item on top of the card.
- * Replaces the 1.21.1 item properties + BlockEntityWithoutLevelRenderer setup.
- */
 public class MiningSkillCardItemModel implements ItemModel {
-    // Placement of the display item relative to the card's center (tune to match the old renderer's look).
+    // Display item placement; still needs tuning in-game.
     private static final float DISPLAY_ITEM_SCALE = 0.5F;
     private static final float DISPLAY_ITEM_X = -0.2F;
     private static final float DISPLAY_ITEM_Y = -0.15F;
@@ -92,7 +87,6 @@ public class MiningSkillCardItemModel implements ItemModel {
 
     private record CustomCard(ItemModel card, ModelRenderProperties properties) {}
 
-    /** Draws the card's display item, as an inventory icon, inside the card's layer. */
     private static final class DisplayItemRenderer implements SpecialModelRenderer<ItemStack> {
         private static final DisplayItemRenderer INSTANCE = new DisplayItemRenderer();
         private final ItemStackRenderState displayState = new ItemStackRenderState();

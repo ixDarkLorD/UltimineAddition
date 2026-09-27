@@ -11,10 +11,6 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
 
-/**
- * The card viewer's button style: dark fill with a grey outline that turns white on hover.
- * This class is the text-label variant; {@link Icon} draws an icon instead.
- */
 final class ViewerButton extends AbstractButton {
     private final OnPress onPress;
 
@@ -46,7 +42,6 @@ final class ViewerButton extends AbstractButton {
         this.defaultButtonNarrationText(output);
     }
 
-    /** Background and outline shared by all viewer buttons. */
     static void drawFrame(GuiGraphicsExtractor graphics, int x, int y, int width, int height, boolean hovered) {
         int outline = hovered ? 0xFFFFFFFF : 0xFF8A8A8A;
         graphics.fill(x, y, x + width, y + height, hovered ? 0xE0404040 : 0xC0202020);
@@ -56,7 +51,6 @@ final class ViewerButton extends AbstractButton {
         graphics.fill(x + width - 1, y, x + width, y + height, outline);
     }
 
-    /** A tiny square button drawing its icon with fills (no font glyphs needed). */
     static final class Icon extends AbstractButton {
         private final Consumer<Icon> onPress;
         private final IconPainter painter;
@@ -90,7 +84,6 @@ final class ViewerButton extends AbstractButton {
             this.defaultButtonNarrationText(output);
         }
 
-        /** Four corner brackets pointing outwards (expand) or inwards (collapse). */
         static void corners(GuiGraphicsExtractor g, int x, int y, int size, int color, boolean outwards) {
             int a = 2, b = size - 2, len = 3;
             if (outwards) {
@@ -115,7 +108,6 @@ final class ViewerButton extends AbstractButton {
             }
         }
 
-        /** A small hollow square with a dot: "fit to view". */
         static void target(GuiGraphicsExtractor g, int x, int y, int size, int color) {
             int a = 2, b = size - 2;
             g.fill(x + a, y + a, x + b, y + a + 1, color);

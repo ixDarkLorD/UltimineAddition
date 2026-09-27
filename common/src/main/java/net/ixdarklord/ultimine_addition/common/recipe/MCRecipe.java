@@ -3,6 +3,7 @@ package net.ixdarklord.ultimine_addition.common.recipe;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
 import net.ixdarklord.ultimine_addition.core.Registration;
@@ -73,10 +74,11 @@ public class MCRecipe extends NormalCraftingRecipe {
                     inputs.add(itemStack.copy());
             }
 
-            if (!inputs.isEmpty()) {
-                item.getData(stack).setDisplayItem(inputs.getFirst());
-            }
-            item.getData(stack).initChallenges().save();
+            MiningSkillCardData data = item.getData(stack);
+            if (!inputs.isEmpty()) data.setDisplayItem(inputs.getFirst());
+            // Component only: this also runs for the crafting preview. The card is stored (and rolls its challenges)
+            // once the player carries it.
+            data.writeComponent();
         }
         return stack;
     }

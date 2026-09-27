@@ -12,10 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Centered status text: either filling the whole viewer ({@link Mode#FULL}) or as a strip along the bottom
- * of the viewer ({@link Mode#BANNER}) that leaves the tree above it usable. Optionally shows a row of items.
- */
 final class MessagePanel extends Panel {
     enum Mode { FULL, BANNER }
 
@@ -37,7 +33,6 @@ final class MessagePanel extends Panel {
         this.setVisible(false);
     }
 
-    /** Shows the message (cheap to call every frame with the same content). */
     void show(List<Component> lines, List<ItemStack> items, int background, boolean centered) {
         if (!lines.equals(this.lines) || this.centered != centered) {
             this.lines = lines;
@@ -103,7 +98,6 @@ final class MessagePanel extends Panel {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        // Swallow clicks on the message so they don't reach the tree underneath.
         return this.mode == Mode.BANNER && this.isMouseOver(event.x(), event.y());
     }
 }

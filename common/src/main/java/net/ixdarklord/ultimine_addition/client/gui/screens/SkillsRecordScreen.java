@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -69,10 +70,8 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     public static final WidgetSprites CONFIGURATION_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.id("container/skills_record/configuration_button_enabled"), FTBUltimineAddition.id("container/skills_record/configuration_button_disabled"), FTBUltimineAddition.id("container/skills_record/configuration_button_focused"));
     private static final WidgetSprites CONSUME_BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.id("container/skills_record/consume_on"), FTBUltimineAddition.id("container/skills_record/consume_off"), FTBUltimineAddition.id("container/skills_record/consume_on_focused"), FTBUltimineAddition.id("container/skills_record/consume_off_focused"));
 
-    // The book's screen area, filled exactly by the card viewer, and the column of the configuration/consume buttons.
     private static final int VIEWER_X = 9, VIEWER_Y = 20, VIEWER_WIDTH = 170, VIEWER_HEIGHT = 87;
     private static final int SIDE_BUTTON_X = 170;
-    // Row of the card/pen/paper slots' selection markers.
     private static final int SLOT_MARKER_Y = 107;
 
     private ColorableImageButton configurationButton;
@@ -103,7 +102,6 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         super.init();
 
         this.titleLabelX = 8;
-        // Title and configuration button are centered in the header above the viewer.
         this.titleLabelY = 7;
         this.inventoryLabelX = (this.imageWidth / 2) - (this.font.width(this.playerInventoryTitle) / 2);
         this.inventoryLabelY = this.imageHeight - 96;
@@ -117,8 +115,14 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         boolean visibility = this.configuration != null && this.configuration.isVisible();
         this.configuration = this.addWidget(new ConfigurationPanel(this.leftPos + this.imageWidth + 2, this.topPos));
         this.configuration.setVisible(visibility);
-        // Added after the configuration panel, which is drawn on top of it and must get input first.
-        this.viewer = this.addWidget(new CardViewerWidget(this.leftPos + VIEWER_X, this.topPos + VIEWER_Y, VIEWER_WIDTH, VIEWER_HEIGHT, this));
+        // After the configuration panel, which draws on top and must get input first.
+        // Kept across re-inits so an open details panel, zoom and pan survive the edit dialog.
+        if (this.viewer == null) {
+            this.viewer = new CardViewerWidget(this.leftPos + VIEWER_X, this.topPos + VIEWER_Y, VIEWER_WIDTH, VIEWER_HEIGHT, this);
+        } else {
+            this.viewer.setCompactBounds(this.leftPos + VIEWER_X, this.topPos + VIEWER_Y, VIEWER_WIDTH, VIEWER_HEIGHT);
+        }
+        this.addWidget(this.viewer);
 
         this.configuration.addButton((button) -> {
             if (!Minecraft.getInstance().hasShiftDown()) this.backgroundColor = this.backgroundColor.next();
@@ -165,7 +169,6 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
                 }));
 
         this.consumeButton = this.addRenderableWidget(new ConsumeButton(this.leftPos + SIDE_BUTTON_X, this.topPos + 114, 10, 18, this.menu.getData().isConsumeModeActive()) {
-
             @Override
             protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
                 if (!SkillsRecordItem.isConsumeChallengeExists(SkillsRecordScreen.this.menu.getData()) && this.isStateTriggered) {
@@ -202,8 +205,6 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             }
         });
     }
-
-    // --- Per-frame state ---
 
     private @Nullable MiningSkillCardData getSelectedCard() {
         if (this.selectedSlot < 0) return null;
@@ -268,8 +269,6 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         super.onClose();
     }
 
-    // --- Viewer actions ---
-
     @Override
     public void togglePin(Identifier challengeId) {
         if (this.selectedSlot < 0) return;
@@ -290,14 +289,12 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         this.setFocused(this.viewer);
     }
 
-    // --- Rendering ---
-
     @Override
     public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.update();
         super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
 
-        // A new layer so the selection markers stay on top of the slots, their items and the hovered-slot highlight.
+        // New stratum so the markers draw over slot items and highlights.
         guiGraphics.nextStratum();
         this.renderSlotDecorations(guiGraphics, this.leftPos, this.topPos);
         if (!this.viewer.isExpandedWindow()) {
@@ -308,17 +305,28 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             guiGraphics.setTooltipForNextFrame(this.font, Component.literal("➤ ").withStyle(ChatFormatting.GRAY).append(Component.translatable("gui.ultimine_addition.skills_record.configuration").withStyle(ChatFormatting.WHITE)), mouseX, mouseY);
         }
         this.configuration.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
-        // The expanded viewer covers everything else.
         if (this.viewer.isExpandedWindow()) {
             this.viewer.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
         }
+        if (ConfigHandler.CLIENT.SR_EDIT_MODE.get()) this.renderZoomDebug(guiGraphics);
+    }
+
+    // Left of the book, or of the expanded window.
+    private void renderZoomDebug(GuiGraphicsExtractor guiGraphics) {
+        guiGraphics.nextStratum();
+        String text = String.format(Locale.ROOT, "Zoom %.2fx (%.0f%%)", this.viewer.getZoom(), this.viewer.getZoomProgress() * 100);
+        boolean expanded = this.viewer.isExpandedWindow();
+        int right = (expanded ? this.viewer.getX() : this.leftPos) - 4;
+        int x = Math.max(2, right - this.font.width(text)), y = (expanded ? this.viewer.getY() : this.topPos) + 4;
+        guiGraphics.fill(x - 2, y - 2, x + this.font.width(text) + 2, y + 9, 0xA0000000);
+        guiGraphics.text(this.font, text, x, y, 0xFFFFFF55, false);
     }
 
     @Override
     public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 512, this.backgroundColor.argb());
-        // Drawn with the background so the slot items render above it (there is no z-order in the GUI anymore).
+        // With the background, so slot items draw above it.
         this.renderGhostItem(guiGraphics, this.leftPos, this.topPos);
     }
 
@@ -386,15 +394,12 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_SELECT_SPRITE, x + X, y + SLOT_MARKER_Y, 4, 8, tint);
     }
 
-    // --- Input ---
-
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         double mouseX = event.x(), mouseY = event.y();
         int button = event.button();
 
         if (this.viewer.isExpandedWindow()) {
-            // The expanded window is modal: clicks outside it only close it.
             if (this.viewer.isMouseOver(mouseX, mouseY) && this.viewer.mouseClicked(event, doubleClick)) {
                 this.setFocused(this.viewer);
                 this.setDragging(true);
@@ -440,7 +445,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        // AbstractContainerScreen doesn't pass scrolling on to its widgets.
+        // AbstractContainerScreen doesn't pass scrolling to widgets.
         if (this.viewer.isExpandedWindow() || (!this.lock && this.viewer.isMouseOver(mouseX, mouseY))) {
             return this.viewer.mouseScrolled(mouseX, mouseY, scrollX, scrollY) || this.viewer.isExpandedWindow();
         }
@@ -464,7 +469,6 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        // The viewer gets keys (zoom/pan, Escape to close its details or collapse) when expanded or under the cursor.
         boolean overViewer = this.viewer.isMouseOver(MouseHelper.getMouseX(), MouseHelper.getMouseY());
         if ((this.viewer.isExpandedWindow() || overViewer || event.key() == GLFW.GLFW_KEY_ESCAPE) && this.viewer.keyPressed(event)) return true;
         if (this.viewer.isExpandedWindow()) return true;
@@ -478,7 +482,6 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         return collection;
     }
 
-    /** A two-state toggle button (vanilla's StateSwitchingButton was removed). */
     private abstract static class ConsumeButton extends AbstractButton {
         protected boolean isStateTriggered;
 
@@ -529,7 +532,6 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             return new ColorUtils(color.getRGB()).blue();
         }
 
-        /** The color as an ARGB tint. */
         public int argb() {
             return ARGB.colorFromFloat(this.alpha(), this.red(), this.green(), this.blue());
         }

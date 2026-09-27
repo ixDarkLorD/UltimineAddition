@@ -30,14 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The pannable/zoomable tier tree of the selected card.
- * <p>
- * Nodes use the card viewer sprites (white shapes tinted per state). With animations on: the background's dot grid
- * carries a slow wave and drifting motes, completed paths carry light pulses, the current tier has a sweeping shine,
- * hovered nodes lift, and nodes slide in one after another when a card is shown.
- */
 final class TierTreePanel extends ViewportPanel {
+    private static final double DEFAULT_ZOOM = 0.85;
     private static final Identifier TIER_FILL = sprite("tier_fill");
     private static final Identifier TIER_BORDER = sprite("tier_border");
     private static final Identifier ROW_FILL = sprite("row_fill");
@@ -47,14 +41,16 @@ final class TierTreePanel extends ViewportPanel {
     private static final Identifier STAR_FILL = sprite("star_fill");
     private static final Identifier STAR_BORDER = sprite("star_border");
     private static final int MASTERED_GOLD = 0xFFFFC940;
-    static final Identifier SLOT_FILL = sprite("slot_fill");
-    static final Identifier SLOT_BORDER = sprite("slot_border");
+    private static final Identifier SLOT_FILL = sprite("slot_fill");
+    private static final Identifier SLOT_BORDER = sprite("slot_border");
+    private static final Identifier SMALL_SLOT_FILL = sprite("slot_small_fill");
+    private static final Identifier SMALL_SLOT_BORDER = sprite("slot_small_border");
     private static final Identifier JOINT = sprite("joint");
 
     static final int PROGRESS_BAR_HEIGHT = 7;
-    private static final int BADGE_SIZE = 30;
-    private static final int BADGE_OVERHANG = 9;
-    static final int SLOT_SIZE = 20;
+    private static final int BADGE_SIZE = 36;
+    static final int SLOT_SIZE = 24;
+    static final int SMALL_SLOT_SIZE = 20;
     private static final int LINE_DONE = 0xFF4E9A56;
     private static final int LINE_LOCKED = 0xFF4A4A4A;
     private static final int LINE_OPEN = 0xFF7A7A7A;
@@ -78,7 +74,6 @@ final class TierTreePanel extends ViewportPanel {
         this.viewer = viewer;
         this.setZoomLimits(0.4, 2.5);
         this.setMargin(12);
-        // Fade into the book's screen color (tinted like the book) where the tree continues past an edge.
         this.setEdgeFade(14, () -> ARGB.multiply(0xFF404040, ARGB.opaque(viewer.getAccentColor())));
         this.setVignette(18, 0.22F);
     }
@@ -87,7 +82,6 @@ final class TierTreePanel extends ViewportPanel {
         return FTBUltimineAddition.id("container/skills_record/card_viewer/" + name);
     }
 
-    /** @param reveal whether to play the slide-in animation (a different card was selected) */
     void setTree(@Nullable CardTree tree, boolean reveal) {
         this.tree = tree;
         if (reveal) {
@@ -96,7 +90,6 @@ final class TierTreePanel extends ViewportPanel {
         }
     }
 
-    /** Frames the given tier: zoom 1, tier node near the top of the view (once the panel has a size). */
     void focus(MiningSkillCardItem.Tier tier) {
         this.pendingFocus = tier;
         if (this.getBounds().width() > 0) this.applyFocus();
@@ -105,9 +98,9 @@ final class TierTreePanel extends ViewportPanel {
     private void applyFocus() {
         if (this.tree == null || this.pendingFocus == null) return;
         ScreenRectangle b = this.getBounds();
-        this.zoomTo(1.0, b.left(), b.top(), false);
+        this.zoomTo(DEFAULT_ZOOM, b.left(), b.top(), false);
         TierNode node = this.tree.getTier(this.pendingFocus);
-        this.centerOn(node.centerX(), node.y() + b.height() / 2.0 - 6);
+        this.centerOn(node.centerX(), node.y() + (b.height() / 2.0 - 6) / DEFAULT_ZOOM);
         this.pendingFocus = null;
     }
 
@@ -121,17 +114,14 @@ final class TierTreePanel extends ViewportPanel {
     protected ScreenRectangle getContentBounds() {
         if (this.tree == null) return new ScreenRectangle(0, 0, 1, 1);
         ScreenRectangle b = this.tree.bounds;
-        // The first tier's badge sticks out to the left.
-        return new ScreenRectangle(b.left() - BADGE_OVERHANG - 2, b.top(), b.width() + BADGE_OVERHANG + 2, b.height());
+        int above = Math.max(0, (BADGE_SIZE - CardTree.TIER_HEIGHT) / 2);
+        return new ScreenRectangle(b.left() - BADGE_SIZE / 2, b.top() - above, b.width() + BADGE_SIZE / 2, b.height() + above);
     }
-
-    // --- Rendering ---
 
     private boolean animated() {
         return this.viewer.isAnimated();
     }
 
-    /** Seconds, wrapped every hour to keep float precision. */
     private static float time() {
         return (Util.getMillis() % 3_600_000L) / 1000.0F;
     }
@@ -161,7 +151,6 @@ final class TierTreePanel extends ViewportPanel {
         }
     }
 
-    /** Smoothed 0-1 hover state of a node. */
     private float hover(String key, boolean hovered) {
         float target = hovered ? 1.0F : 0.0F;
         if (!this.animated()) {
@@ -174,7 +163,6 @@ final class TierTreePanel extends ViewportPanel {
         return value;
     }
 
-    /** 0-1 progress of the slide-in of the index-th node. */
     private float reveal(int index) {
         if (!this.animated() || this.revealStart < 0) return 1.0F;
         long elapsed = Util.getMillis() - this.revealStart - index * REVEAL_STEP_MS;
@@ -182,7 +170,6 @@ final class TierTreePanel extends ViewportPanel {
         return 1.0F - (1.0F - t) * (1.0F - t) * (1.0F - t); // ease-out cubic
     }
 
-    /** Lifts/scales a node around its center for hover, and slides it for the reveal. */
     private void pushNodeTransform(GuiGraphicsExtractor graphics, float centerX, float centerY, float hover, float reveal) {
         Matrix3x2fStack pose = graphics.pose();
         pose.pushMatrix();
@@ -192,7 +179,6 @@ final class TierTreePanel extends ViewportPanel {
         pose.translate(-centerX, -centerY);
     }
 
-    // Dot grid with a travelling wave, plus drifting motes.
     private void drawBackground(GuiGraphicsExtractor graphics) {
         ScreenRectangle b = this.getBounds();
         double zoom = this.getZoom();
@@ -245,10 +231,9 @@ final class TierTreePanel extends ViewportPanel {
         int midY = CardTree.TIER_HEIGHT / 2;
         float t = time();
 
-        // Tier to tier: solid with flowing pulses once unlocked, dashed while locked, a diamond joint midway.
         for (int i = 0; i + 1 < tiers.size(); i++) {
             TierNode from = tiers.get(i), to = tiers.get(i + 1);
-            int start = from.x() + CardTree.TIER_WIDTH, end = to.x() - BADGE_OVERHANG;
+            int start = from.x() + CardTree.TIER_WIDTH, end = to.x() - BADGE_SIZE / 2;
             boolean open = to.state() != TierState.LOCKED;
             if (open) {
                 graphics.fill(start, midY - 1, end, midY + 1, LINE_DONE);
@@ -256,16 +241,16 @@ final class TierTreePanel extends ViewportPanel {
             } else {
                 for (int x = start; x < end; x += 7) graphics.fill(x, midY - 1, Math.min(x + 4, end), midY + 1, LINE_LOCKED);
             }
-            // 8px diamond centered on the 2px line (rows midY-1 and midY).
+            // Even-sized so it centers on the 2px line.
             int jointX = (start + end) / 2 - 4;
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, JOINT, jointX, midY - 4, 8, 8, open ? 0xFF8FE08F : 0xFF5A5A5A);
         }
 
-        // Tier to its challenges: a trunk under the badge, and a branch into each row's arrow tip.
         for (TierNode tier : tiers) {
             if (tier.challenges().isEmpty()) continue;
-            int trunkX = tier.x() + 3;
-            int trunkTop = tier.y() + CardTree.TIER_HEIGHT - 4;
+            // Hangs from the badge's bottom tip, which sits on the box's left edge.
+            int trunkX = tier.x() - 1;
+            int trunkTop = tier.y() + (CardTree.TIER_HEIGHT + BADGE_SIZE) / 2 - 1;
             ChallengeNode last = tier.challenges().getLast();
             int trunkBottom = last.y() + CardTree.ROW_BOX_HEIGHT / 2 + 1;
             boolean done = tier.state() == TierState.COMPLETED;
@@ -282,10 +267,6 @@ final class TierTreePanel extends ViewportPanel {
         }
     }
 
-    /**
-     * The pulse turning from the trunk into a challenge's branch: it starts when a trunk pulse reaches the branch
-     * ({@code distance} down the trunk) and runs to the row's tip.
-     */
     private void drawBranchPulse(GuiGraphicsExtractor graphics, int from, int to, int y, int distance, float t) {
         if (!this.animated()) return;
         int length = to - from;
@@ -296,7 +277,6 @@ final class TierTreePanel extends ViewportPanel {
         graphics.fill(x, y, Math.min(x + 3, to), y + 2, ARGB.color(alpha, PULSE));
     }
 
-    /** Bright dots travelling along a line (horizontal, or vertical when {@code horizontal} is false). */
     private void drawPulses(GuiGraphicsExtractor graphics, int from, int to, int across, boolean horizontal, float t) {
         if (!this.animated() || to - from < 8) return;
         int length = to - from;
@@ -329,17 +309,14 @@ final class TierTreePanel extends ViewportPanel {
         border = ARGB.srgbLerp(0.5F * hover, border, 0xFFFFFFFF);
 
         this.pushNodeTransform(graphics, x + w / 2.0F, y + h / 2.0F, hover, reveal);
-        // Drop shadow, body, outline.
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TIER_FILL, x + 2, y + 2, w, h, ARGB.color(0.35F * reveal, 0x000000));
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TIER_FILL, x, y, w, h, ARGB.multiplyAlpha(fill, reveal));
         if (node.state() == TierState.CURRENT && this.animated()) this.drawShine(graphics, x, y, w, h);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TIER_BORDER, x, y, w, h, ARGB.multiplyAlpha(border, reveal));
 
-        // Gem badge sticking out on the left with the card's model for that tier: a diamond, or a star for Mastered
-        // (gold once reached).
         boolean mastered = node.tier() == MiningSkillCardItem.Tier.Mastered;
         int badgeColor = mastered && node.state() != TierState.LOCKED ? ARGB.srgbLerp(0.5F * hover, MASTERED_GOLD, 0xFFFFFFFF) : border;
-        int bx = x - BADGE_OVERHANG, by = y + (h - BADGE_SIZE) / 2;
+        int bx = x - BADGE_SIZE / 2, by = y + (h - BADGE_SIZE) / 2;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, mastered ? STAR_FILL : BADGE_FILL, bx, by, BADGE_SIZE, BADGE_SIZE, ARGB.multiplyAlpha(ARGB.scaleRGB(badgeColor, 0.45F), reveal));
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, mastered ? STAR_BORDER : BADGE_BORDER, bx, by, BADGE_SIZE, BADGE_SIZE, ARGB.multiplyAlpha(badgeColor, reveal));
         if (reveal > 0.5F) {
@@ -349,7 +326,7 @@ final class TierTreePanel extends ViewportPanel {
         }
 
         boolean shadow = this.viewer.hasTextShadow();
-        int textX = x + BADGE_SIZE - BADGE_OVERHANG + 4;
+        int textX = x + BADGE_SIZE / 2 + 4;
         Component name = node.tier().getDisplayName();
         if (node.state() == TierState.LOCKED) name = name.copy().withStyle(ChatFormatting.DARK_GRAY);
         graphics.text(this.font, name, textX, y + 7, ARGB.multiplyAlpha(RenderUtils.textColor(0xFFFFFF), reveal), shadow);
@@ -357,18 +334,12 @@ final class TierTreePanel extends ViewportPanel {
         graphics.pose().popMatrix();
     }
 
-    /**
-     * A soft light band sweeping across the node every few seconds, drawn one column at a time so it follows
-     * the banner's chamfered corners (see {@code viewer_sprites.py}: 8px top-left and 9px bottom-right cuts,
-     * 2px top-right and bottom-left ones, which the nine-slice keeps unscaled).
-     */
     private void drawShine(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
         float cycle = (time() % 3.2F) / 3.2F;
         int bandX = -16 + (int) ((w + 32) * cycle);
         for (int i = 0; i < 12; i++) {
             int col = bandX + i;
             if (col < 1 || col >= w - 1) continue;
-            // Inside the 1px outline.
             int top = Math.max(0, Math.max(8 - col, col - (w - 3))) + 1;
             int bottom = h - Math.max(0, Math.max(col - (w - 9), 2 - col)) - 1;
             if (bottom <= top) continue;
@@ -377,17 +348,20 @@ final class TierTreePanel extends ViewportPanel {
         }
     }
 
-    /** An octagon slot (fill + bezelled border), styled like the tier crest; items go 2px in. */
     static void drawSlot(GuiGraphicsExtractor graphics, int x, int y, int fill, int border) {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_FILL, x, y, SLOT_SIZE, SLOT_SIZE, fill);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_BORDER, x, y, SLOT_SIZE, SLOT_SIZE, border);
+    }
+
+    static void drawSmallSlot(GuiGraphicsExtractor graphics, int x, int y, int fill, int border) {
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SMALL_SLOT_FILL, x, y, SMALL_SLOT_SIZE, SMALL_SLOT_SIZE, fill);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SMALL_SLOT_BORDER, x, y, SMALL_SLOT_SIZE, SMALL_SLOT_SIZE, border);
     }
 
     static int progressColor(int progress) {
         return Mth.hsvToRgb(Math.min(progress / 100.0F, 1.0F) / 3.0F, 1.0F, 1.0F);
     }
 
-    /** The Skills Record's progress bar sprite, filled from red (0) to green (1). */
     static void drawProgressBar(GuiGraphicsExtractor graphics, int x, int y, int width, float progress) {
         if (width < 6) return;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SkillsRecordScreen.PROGRESS_BAR_SPRITE, x, y, width, PROGRESS_BAR_HEIGHT);
@@ -434,18 +408,19 @@ final class TierTreePanel extends ViewportPanel {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_FILL, x, y, w, h, ARGB.multiplyAlpha(fill, reveal));
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_BORDER, x, y, w, h, ARGB.multiplyAlpha(border, reveal));
 
-        // Target block in an octagon slot, cycling through the challenge's blocks.
-        drawSlot(graphics, x + 6, y + 1, ARGB.multiplyAlpha(ARGB.scaleRGB(accent, 0.35F), reveal), ARGB.multiplyAlpha(border, reveal));
+        int slotY = y + (h - SLOT_SIZE) / 2;
+        drawSlot(graphics, x + 6, slotY, ARGB.multiplyAlpha(ARGB.scaleRGB(accent, 0.35F), reveal), ARGB.multiplyAlpha(border, reveal));
         if (reveal > 0.5F && !node.targets().isEmpty()) {
             ItemStack target = node.targets().get((int) (Util.getMillis() / 1000L % node.targets().size()));
-            graphics.item(target, x + 8, y + 3);
+            graphics.item(target, x + 6 + (SLOT_SIZE - 16) / 2, slotY + (SLOT_SIZE - 16) / 2);
         }
 
         boolean shadow = this.viewer.hasTextShadow();
-        int textX = x + 28;
-        Component title = Component.translatable("challenge.ultimine_addition.title", node.order());
-        graphics.text(this.font, title, textX, y + 3, ARGB.multiplyAlpha(RenderUtils.textColor(0xFBF1C1), reveal), shadow);
-        if (node.pinned()) graphics.text(this.font, "◎", x + w - 11, y + 3, ARGB.multiplyAlpha(RenderUtils.textColor(0xFFFF55), reveal), shadow);
+        int textX = x + 6 + SLOT_SIZE + 2;
+        String title = CardViewerWidget.challengeName(node).getString();
+        CardViewerWidget.drawFittedText(graphics, this.font, Component.literal(title), width -> CardViewerWidget.ellipsize(this.font, title, width),
+                textX, y + 3, x + w - 4 - textX, ARGB.multiplyAlpha(RenderUtils.textColor(0xFBF1C1), reveal), shadow);
+        if (node.pinned()) graphics.text(this.font, "◎", x + w - 11, y + 12, ARGB.multiplyAlpha(RenderUtils.textColor(0xFFFF55), reveal), shadow);
 
         String progress = node.state() == ChallengeState.COMPLETED ? "✔ " + node.requiredPoints() + "/" + node.requiredPoints()
                 : node.currentPoints() + "/" + node.requiredPoints();
@@ -456,7 +431,7 @@ final class TierTreePanel extends ViewportPanel {
     private ItemStack tierIcon(MiningSkillCardItem.Tier tier) {
         ItemStack card = this.viewer.getSelectedCardStack();
         if (!(card.getItem() instanceof MiningSkillCardItem item)) return ItemStack.EMPTY;
-        // Separate stacks with their own data, so the icon shows each tier's model without touching the real card.
+        // Separate stacks, so each tier's model shows without touching the real card.
         return this.tierIcons.computeIfAbsent(item, k -> new EnumMap<>(MiningSkillCardItem.Tier.class))
                 .computeIfAbsent(tier, t -> MiningSkillCardData.createForCreativeTab(item, t));
     }
@@ -464,11 +439,9 @@ final class TierTreePanel extends ViewportPanel {
     @Override
     protected void extractViewForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         if (this.hoveredChallenge != null) {
-            graphics.setTooltipForNextFrame(this.font, this.viewer.describeChallenge(this.hoveredChallenge, true), mouseX, mouseY);
+            graphics.setTooltipForNextFrame(this.font, this.viewer.describeChallenge(this.hoveredChallenge), mouseX, mouseY);
         }
     }
-
-    // --- Input ---
 
     @Override
     protected boolean worldClicked(double worldX, double worldY, MouseButtonEvent event) {

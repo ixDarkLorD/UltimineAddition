@@ -4,6 +4,8 @@ import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.MiningSkillCardPayload;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSync;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -44,9 +46,12 @@ public abstract class BrewingStandBlockEntityMixin {
                 if (!(blockEntity instanceof BrewingStandBlockEntity brewingStandBlock)) return;
                 List<ServerPlayer> players = serverLevel.getPlayers(brewingStandBlock::stillValid);
 
+                // The card isn't carried by anyone, so push its new potion points along with the slot display.
+                SkillsRecordSavedData storage = SkillsRecordSavedData.get(serverLevel.getServer());
                 for (ServerPlayer player : players) {
                     FTBUltimineAddition.LOGGER.debug("{} synced potion points! [B:{} / A:{}]", player.getDisplayName().getString(), oldPoints, data.getPotionPoints());
                     PayloadHandler.sendToPlayer(new MiningSkillCardPayload.SyncBrewing(stack.copy()), player);
+                    SkillsRecordSync.sendCards(player, List.of(storage.createSync(data, stack)));
                 }
             }
         }

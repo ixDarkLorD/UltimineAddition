@@ -15,14 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalLong;
 
-/**
- * The layout (in viewport world coordinates) of one card's tiers, left to right, each with its challenges
- * listed below it. Past tiers come from the card's {@link CardHistory}, the current tier from the card itself,
- * and future tiers are placeholders.
- */
 final class CardTree {
-    static final int COLUMN_WIDTH = 132;
-    static final int TIER_WIDTH = 112;
+    static final int COLUMN_WIDTH = 160;
+    static final int TIER_WIDTH = 116;
     static final int TIER_HEIGHT = 32;
     static final int ROW_TOP = TIER_HEIGHT + 14;
     static final int ROW_HEIGHT = 26;
@@ -119,7 +114,6 @@ final class CardTree {
                 }
                 nodes.add(new TierNode(tier, TierState.CURRENT, OptionalLong.empty(), true, rows, x, 0));
             } else {
-                // A locked tier's challenges aren't rolled yet; they appear once the tier is unlocked.
                 nodes.add(new TierNode(tier, TierState.LOCKED, OptionalLong.empty(), false, rows, x, 0));
             }
         }

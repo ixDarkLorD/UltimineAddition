@@ -111,12 +111,12 @@ public class EditChallengeScreen extends Screen {
         FrameLayout layout = new FrameLayout(this.leftPos + 10, this.topPos + 64, 135, 17);
         LinearLayout linearLayout = layout.addChild(LinearLayout.horizontal().spacing(5));
 
-        this.doneButton = linearLayout.addChild(this.addRenderableWidget(new ColorableImageButton(0, 0, 45, 13, SkillsRecordScreen.BUTTON_SPRITES, button -> {
+        this.doneButton = linearLayout.addChild(this.addRenderableWidget(new ColorableImageButton(0, 0, 45, 14, SkillsRecordScreen.BUTTON_SPRITES, button -> {
             SkillsRecordData data = this.parent.getMenu().getData();
             Optional<MiningSkillCardData> dataOpt = data.getCardData(this.parent.selectedSlot);
             if (dataOpt.isPresent()) {
                 dataOpt.get().setAmount(this.challenge.getId(), this.getNewValue()).save();
-                data.onClientUpdate().save();
+                data.save();
                 PayloadHandler.sendToServer(new SkillsRecordPayload.EditChallenge(this.parent.selectedSlot, this.challenge.getId(), this.getNewValue()));
 
                 assert this.minecraft != null;
@@ -132,7 +132,7 @@ public class EditChallengeScreen extends Screen {
             }
         }));
 
-        linearLayout.addChild(this.addRenderableWidget(new ColorableImageButton(0, 0, 45, 13, SkillsRecordScreen.BUTTON_SPRITES, button ->
+        linearLayout.addChild(this.addRenderableWidget(new ColorableImageButton(0, 0, 45, 14, SkillsRecordScreen.BUTTON_SPRITES, button ->
                 EditChallengeScreen.this.onClose(), CommonComponents.GUI_CANCEL) {
 
             @Override

@@ -40,16 +40,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
-/**
- * A Skills Record's contents (4 cards, pen, paper) and settings.
- * <p>
- * The item only carries a {@link SkillsRecordLink} (the record's UUID). On the server the data lives in
- * {@link SkillsRecordSavedData}; {@link #save()} marks it dirty, records card history and bumps the version,
- * which makes the server sync it to players carrying the record. On the client, the synced copies are kept in
- * {@link SkillsRecordClientCache} and {@link #save()} does nothing.
- * <p>
- * Instances are live: the container is the one the menu's slots use, and changes to it save automatically.
- */
 public final class SkillsRecordData {
     public static final int CARD_SLOTS = 4;
     public static final int PEN_SLOT = 4;
@@ -86,7 +76,6 @@ public final class SkillsRecordData {
         this.consumeMode = consumeMode;
     }
 
-    /** Saves the record whenever its contents change (menu slots, consumed paper...). */
     private final class RecordContainer extends SimpleContainer {
         private RecordContainer() {
             super(SkillsRecordMenu.CONTAINER_SIZE);
@@ -107,12 +96,6 @@ public final class SkillsRecordData {
         return new SkillsRecordData(uuid, legacy.contents(), legacy.selectedCard(), legacy.consumeMode());
     }
 
-    // --- Access ---
-
-    /**
-     * The record of a Skills Record stack. On the server this links (and migrates) the stack if needed;
-     * on the client it is the synced copy, or an empty placeholder until the sync arrives.
-     */
     public static SkillsRecordData get(ItemStack stack, Level level) {
         if (level instanceof ServerLevel serverLevel) {
             return SkillsRecordSavedData.get(serverLevel.getServer()).resolve(stack);
@@ -120,7 +103,6 @@ public final class SkillsRecordData {
         return getClient(stack).orElseGet(() -> create(Objects.requireNonNullElse(SkillsRecordLink.getId(stack), new UUID(0L, 0L))));
     }
 
-    /** The client's synced copy of the stack's record (requesting it from the server if unknown). */
     public static Optional<SkillsRecordData> getClient(ItemStack stack) {
         return SkillsRecordClientCache.get(stack);
     }
@@ -139,12 +121,14 @@ public final class SkillsRecordData {
         this.version++;
     }
 
-    /** Persists changes on the server (no-op on the client). */
     public void save() {
         if (this.owner != null) this.owner.onRecordChanged(this);
     }
 
-    /** Copies another snapshot of this record into this instance (client sync). */
+    public SkillsRecordData snapshot() {
+        return new SkillsRecordData(this.uuid, this.container.getItems().stream().map(ItemStack::copy).toList(), this.selectedCard, this.consumeMode);
+    }
+
     @ApiStatus.Internal
     public void copyFrom(SkillsRecordData other) {
         for (int i = 0; i < this.container.getContainerSize(); i++) {
@@ -156,8 +140,6 @@ public final class SkillsRecordData {
         this.selectedCard = other.selectedCard;
         this.consumeMode = other.consumeMode;
     }
-
-    // --- Challenge tracking (server) ---
 
     public Pair<Boolean, Boolean> initTaskValidator(BlockState state, BlockPos pos, ServerPlayer player, ChallengeData.Type challengeType) {
         boolean progressed = false;
@@ -181,7 +163,7 @@ public final class SkillsRecordData {
         boolean isMissingRequiredItems = hasCorrectGamemode && (this.getPenSlot().isEmpty() || this.getPaperSlot().isEmpty());
         boolean notEnoughInk = hasCorrectGamemode && this.getInkAmount() == 0;
 
-        // Copy: completing the last challenge rerolls the card's challenge list.
+        // Copy: finishing the tier rerolls the list.
         for (MiningSkillCardData.Challenge challenge : List.copyOf(cardData.getChallenges())) {
             Identifier challengeId = challenge.getId();
             ChallengeData challengeData = ChallengesManager.INSTANCE.getAllChallenges().get(challengeId);
@@ -225,7 +207,6 @@ public final class SkillsRecordData {
 
             cardData.addAmount(challengeId, 1).save();
             if (hasCorrectGamemode) this.consumeContents();
-            // One challenge per card and action.
             return Pair.of(true, false);
         }
         return Pair.of(false, false);
@@ -259,8 +240,6 @@ public final class SkillsRecordData {
             paper.shrink(1);
         }
     }
-
-    // --- Contents ---
 
     public Optional<MiningSkillCardData> getCardData(int slot) {
         if (slot < 0 || slot >= CARD_SLOTS) return Optional.empty();
@@ -323,22 +302,6 @@ public final class SkillsRecordData {
 
     public SkillsRecordData setConsumeMode(boolean trigger) {
         this.consumeMode = trigger;
-        return this;
-    }
-
-    /** Shows the challenge toasts carried by freshly synced cards (client). */
-    public SkillsRecordData onClientUpdate() {
-        for (int i = 0; i < CARD_SLOTS; ++i) {
-            this.getCardData(i).ifPresent(MiningSkillCardData::onClientUpdate);
-        }
-        return this;
-    }
-
-    /** Clears the toast markers once the cards have been sent (server). */
-    public SkillsRecordData onServerUpdate() {
-        for (int i = 0; i < CARD_SLOTS; ++i) {
-            this.getCardData(i).ifPresent(MiningSkillCardData::onServerUpdate);
-        }
         return this;
     }
 }

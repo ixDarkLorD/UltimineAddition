@@ -219,7 +219,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
             for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
                 ItemStack stack = new ItemStack(item);
                 if (this.tier.isPresent() && stack.getItem() instanceof MiningSkillCardItem cardItem) {
-                    cardItem.getData(stack).setTier(this.tier.get()).save();
+                    cardItem.getData(stack).setTier(this.tier.get()).writeComponent();
                 }
                 list.add(stack);
             }
@@ -246,7 +246,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
         public Collection<ItemStack> getItems() {
             ItemStack stack = new ItemStack(this.item);
             if (this.tier.isPresent() && this.item instanceof MiningSkillCardItem cardItem) {
-                cardItem.getData(stack).setTier(this.tier.get()).save();
+                cardItem.getData(stack).setTier(this.tier.get()).writeComponent();
             }
             return Collections.singleton(stack);
         }

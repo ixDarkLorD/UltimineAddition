@@ -1,18 +1,15 @@
 package net.ixdarklord.ultimine_addition.common.menu;
 
-
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import dev.architectury.registry.menu.MenuRegistry;
-import net.ixdarklord.ultimine_addition.common.data.record.CardHistory;
+import net.ixdarklord.ultimine_addition.common.data.record.CardSync;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordClientCache;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.SimpleMenuProvider;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
@@ -49,10 +46,9 @@ public class SkillsRecordMenu extends AbstractContainerMenu {
     private final SimpleContainer container;
     public final @Nullable InteractionHand interactionHand;
 
-    /** Client: the server sends the record's current state along with the open request. */
     public SkillsRecordMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buf) {
         this(id, inventory, inventory.player,
-                SkillsRecordClientCache.accept(SkillsRecordData.STREAM_CODEC.decode(buf), OPEN_HISTORIES_CODEC.decode(buf)),
+                acceptOpenData(buf),
                 buf.readBoolean() ? buf.readEnum(InteractionHand.class) : null);
     }
 
@@ -70,10 +66,14 @@ public class SkillsRecordMenu extends AbstractContainerMenu {
         layoutPlayerInventorySlots(14, 148);
     }
 
-    private static final StreamCodec<RegistryFriendlyByteBuf, Map<UUID, CardHistory>> OPEN_HISTORIES_CODEC =
-            ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, CardHistory.STREAM_CODEC);
+    private static final StreamCodec<RegistryFriendlyByteBuf, List<CardSync>> OPEN_CARDS_CODEC = CardSync.STREAM_CODEC.apply(ByteBufCodecs.list());
 
-    /** Opens the menu for a record held in {@code hand}, or worn in the accessory slot when {@code hand} is null. */
+    private static SkillsRecordData acceptOpenData(RegistryFriendlyByteBuf buf) {
+        SkillsRecordData data = SkillsRecordClientCache.accept(SkillsRecordData.STREAM_CODEC.decode(buf));
+        SkillsRecordClientCache.acceptCards(OPEN_CARDS_CODEC.decode(buf));
+        return data;
+    }
+
     public static void open(ServerPlayer player, ItemStack stack, @Nullable InteractionHand hand) {
         if (!(stack.getItem() instanceof SkillsRecordItem))
             throw new IllegalArgumentException("Invalid item! This container only accepts Skills Record.");
@@ -83,7 +83,7 @@ public class SkillsRecordMenu extends AbstractContainerMenu {
         MenuRegistry.openExtendedMenu(player, new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, data, hand), SkillsRecordItem.TITLE), buf -> {
             RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
             SkillsRecordData.STREAM_CODEC.encode(registryBuf, data);
-            OPEN_HISTORIES_CODEC.encode(registryBuf, storage.getHistoriesFor(data));
+            OPEN_CARDS_CODEC.encode(registryBuf, storage.createSyncsFor(data));
             buf.writeBoolean(hand != null);
             if (hand != null) buf.writeEnum(hand);
         });
@@ -121,7 +121,6 @@ public class SkillsRecordMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        // The record must still be where it was opened from (and not swapped for another one).
         return this.data.getUUID().equals(SkillsRecordLink.getId(ItemUtils.getSkillsRecord(this.getPlayer(), this.interactionHand)));
     }
 

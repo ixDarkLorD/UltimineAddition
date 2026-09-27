@@ -20,10 +20,11 @@ public class PayloadHandler {
         registerC2S(SkillsRecordPayload.PinChallenge.TYPE, SkillsRecordPayload.PinChallenge.STREAM_CODEC, SkillsRecordPayload.PinChallenge::handle);
         registerC2S(SkillsRecordPayload.EditChallenge.TYPE, SkillsRecordPayload.EditChallenge.STREAM_CODEC, SkillsRecordPayload.EditChallenge::handle);
         registerC2S(SkillsRecordPayload.RequestRecord.TYPE, SkillsRecordPayload.RequestRecord.STREAM_CODEC, SkillsRecordPayload.RequestRecord::handle);
+        registerC2S(SkillsRecordPayload.RequestCard.TYPE, SkillsRecordPayload.RequestCard.STREAM_CODEC, SkillsRecordPayload.RequestCard::handle);
         registerC2S(UpdateItemShapePayload.TYPE, UpdateItemShapePayload.STREAM_CODEC, UpdateItemShapePayload::handle);
         registerS2C(SkillsRecordPayload.SyncRecord.TYPE, SkillsRecordPayload.SyncRecord.STREAM_CODEC, SkillsRecordPayload.SyncRecord::handle);
+        registerS2C(SkillsRecordPayload.SyncCards.TYPE, SkillsRecordPayload.SyncCards.STREAM_CODEC, SkillsRecordPayload.SyncCards::handle);
         registerS2C(MinerCertificatePayload.TYPE, MinerCertificatePayload.STREAM_CODEC, MinerCertificatePayload::handle);
-        registerS2C(MiningSkillCardPayload.TYPE, MiningSkillCardPayload.STREAM_CODEC, MiningSkillCardPayload::handle);
         registerS2C(MiningSkillCardPayload.SyncBrewing.TYPE, MiningSkillCardPayload.SyncBrewing.STREAM_CODEC, MiningSkillCardPayload.SyncBrewing::handle);
         registerS2C(SyncChallengesPayload.TYPE, SyncChallengesPayload.STREAM_CODEC, SyncChallengesPayload::handle);
         registerS2C(PlayerAbilityPayload.TYPE, PlayerAbilityPayload.STREAM_CODEC, PlayerAbilityPayload::handle);

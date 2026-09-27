@@ -164,7 +164,7 @@ public final class CardsCommand {
             cardData.save();
             recordData.save();
         } else {
-            cardData.sendToClient(player, location.slotIndex).save();
+            cardData.save();
         }
 
     }

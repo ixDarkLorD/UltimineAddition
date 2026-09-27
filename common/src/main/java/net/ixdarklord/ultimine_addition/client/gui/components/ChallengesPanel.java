@@ -37,7 +37,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
-public class Panel implements LayoutElement {
+public class ChallengesPanel implements LayoutElement {
     private static final Identifier SLOT_INDICATOR_TEXTURE = FTBUltimineAddition.id("challenge_panel/slot_indicator");
     private static final Identifier TITLE_TEXTURE = FTBUltimineAddition.id("challenge_panel/title");
     private static final Identifier DESCRIPTION_TEXTURE = FTBUltimineAddition.id("challenge_panel/description");
@@ -58,7 +58,7 @@ public class Panel implements LayoutElement {
     private long lastStamp = System.nanoTime();
     private LinearLayout infosLayout;
 
-    private Panel(int slot, boolean notifyPanel) {
+    private ChallengesPanel(int slot, boolean notifyPanel) {
         this.width = 112;
         this.height = !notifyPanel ? 30 : 15;
         this.mc = Minecraft.getInstance();
@@ -67,8 +67,8 @@ public class Panel implements LayoutElement {
         this.animatedComponent = new SlideAnimation(0.5F, Direction.HORIZONTAL);
     }
 
-    public static Panel create(int slot, boolean notifyPanel) {
-        return new Panel(slot, notifyPanel);
+    public static ChallengesPanel create(int slot, boolean notifyPanel) {
+        return new ChallengesPanel(slot, notifyPanel);
     }
 
     private void update() {
@@ -219,8 +219,8 @@ public class Panel implements LayoutElement {
         return this.notifyPanel;
     }
 
-    public Panel copy() {
-        Panel copy = new Panel(this.slot, this.notifyPanel);
+    public ChallengesPanel copy() {
+        ChallengesPanel copy = new ChallengesPanel(this.slot, this.notifyPanel);
         copy.active = this.active;
         copy.x = this.x;
         copy.y = this.y;
@@ -282,7 +282,7 @@ public class Panel implements LayoutElement {
 
     public static class Info implements LayoutElement, Comparable<Info> {
         private static final int PADDING = 4;
-        private final Panel parent;
+        private final ChallengesPanel parent;
         private final int order;
         private final Identifier challengeId;
         private int currentValue;
@@ -292,7 +292,7 @@ public class Panel implements LayoutElement {
         private int width;
         private int height;
 
-        public Info(Panel parent, int order, Identifier challengeId, int currentValue, int requiredValue) {
+        public Info(ChallengesPanel parent, int order, Identifier challengeId, int currentValue, int requiredValue) {
             this.parent = parent;
             this.order = order;
             this.challengeId = challengeId;
@@ -434,7 +434,7 @@ public class Panel implements LayoutElement {
             this.requiredValue = requiredValue;
         }
 
-        public Panel getParent() {
+        public ChallengesPanel getParent() {
             return this.parent;
         }
 
@@ -457,7 +457,7 @@ public class Panel implements LayoutElement {
             return Objects.hash(this.order, this.challengeId);
         }
 
-        public Info copy(Panel parent) {
+        public Info copy(ChallengesPanel parent) {
             Info copy = new Info(parent, this.order, this.challengeId, this.currentValue, this.requiredValue);
             copy.x = this.x;
             copy.y = this.y;

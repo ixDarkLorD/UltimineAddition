@@ -13,28 +13,8 @@ import net.minecraft.world.inventory.BrewingStandMenu;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public record MiningSkillCardPayload(int slotIndex, MiningSkillCardData data) implements CustomPacketPayload {
-    public static final Type<MiningSkillCardPayload> TYPE = new Type<>(FTBUltimineAddition.id("mining_skill_card_sync"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, MiningSkillCardPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.INT, MiningSkillCardPayload::slotIndex,
-            MiningSkillCardData.STREAM_CODEC, MiningSkillCardPayload::data,
-            MiningSkillCardPayload::new
-    );
-
-    public static void handle(MiningSkillCardPayload message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
-            Player player = context.getPlayer();
-            ItemStack stack = ItemUtils.getSlotItem(player, message.slotIndex);
-            if (stack.isEmpty())
-                throw new IllegalArgumentException("The assigned slot index does not contain the mining skill card item!");
-
-            message.data.setStack(stack).onClientUpdate().save();
-        });
-    }
-
-    @Override
-    public @NotNull Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+public final class MiningSkillCardPayload {
+    private MiningSkillCardPayload() {
     }
 
     public record SyncBrewing(ItemStack stack) implements CustomPacketPayload {

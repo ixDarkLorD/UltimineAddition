@@ -15,14 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * The only data a Skills Record item carries: the UUID of its entry in {@link SkillsRecordSavedData}.
- * <p>
- * Before the SavedData storage, the whole record (contents, selected card, consume mode) lived in this
- * component under the same id. That layout still decodes into {@link #legacy()} so the server can move it
- * into the SavedData the first time the item is loaded ({@link SkillsRecordSavedData#resolve}); the UUID
- * may be missing in very old items, in which case a new one is assigned then.
- */
 public record SkillsRecordLink(Optional<UUID> id, Optional<Legacy> legacy) {
     public record Legacy(List<ItemStack> contents, int selectedCard, boolean consumeMode) {}
 
@@ -34,7 +26,6 @@ public record SkillsRecordLink(Optional<UUID> id, Optional<Legacy> legacy) {
     ).apply(instance, (id, contents, selected, consume) ->
             new SkillsRecordLink(id, contents.map(list -> new Legacy(list, selected, consume)))));
 
-    /** Clients only need the id; the contents come from the record sync. */
     public static final StreamCodec<ByteBuf, SkillsRecordLink> STREAM_CODEC =
             UUIDUtil.STREAM_CODEC.map(SkillsRecordLink::of, link -> link.id().orElse(Util.NIL_UUID));
 
@@ -51,7 +42,6 @@ public record SkillsRecordLink(Optional<UUID> id, Optional<Legacy> legacy) {
         return link == null ? null : link.id().filter(id -> !id.equals(Util.NIL_UUID)).orElse(null);
     }
 
-    /** Whether the stack is a Skills Record that has been linked to a SavedData entry. */
     public static boolean isLinked(ItemStack stack) {
         return getId(stack) != null;
     }

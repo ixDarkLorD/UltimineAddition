@@ -1,16 +1,14 @@
 package net.ixdarklord.ultimine_addition.common.data.item;
 
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
-import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.platform.Platform;
 import net.ixdarklord.coolcatlib.api.data.ItemDataComponent;
-import net.ixdarklord.ultimine_addition.client.gui.toasts.ChallengesToast;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
+import net.ixdarklord.ultimine_addition.common.data.record.CardProgress;
+import net.ixdarklord.ultimine_addition.common.data.record.CardStore;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.network.PayloadHandler;
-import net.ixdarklord.ultimine_addition.network.payloads.MiningSkillCardPayload;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
@@ -19,36 +17,37 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
 public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCardData> {
+    public static final UUID CREATIVE_UUID = Util.NIL_UUID;
+
     public static final Codec<MiningSkillCardData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            // A default of UUID.randomUUID() would be evaluated once and shared by every card without a UUID.
+            // A randomUUID() default would be shared by every card without a UUID.
             UUIDUtil.CODEC.optionalFieldOf("UUID").xmap(id -> id.orElseGet(UUID::randomUUID), Optional::of).forGetter(MiningSkillCardData::getUUID),
             MiningSkillCardItem.Tier.CODEC.fieldOf("Tier").forGetter(MiningSkillCardData::getTier),
             ItemUtils.SIMPLE_ITEM_CODEC.fieldOf("DisplayItem").forGetter(MiningSkillCardData::getDisplayItem),
-            ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("PotionPoints", 0).forGetter(MiningSkillCardData::getPotionPoints),
-            Challenge.CODEC.listOf().optionalFieldOf("Challenges", Lists.newArrayList()).forGetter(MiningSkillCardData::getChallenges)
-    ).apply(instance, MiningSkillCardData::new));
+            // Pre-SavedData fields, kept until migrated.
+            ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("PotionPoints", 0).forGetter(data -> data.legacy == null ? 0 : data.legacy.getPotionPoints()),
+            Challenge.CODEC.listOf().optionalFieldOf("Challenges", List.of()).forGetter(data -> data.legacy == null ? List.of() : data.legacy.getChallenges())
+    ).apply(instance, (uuid, tier, display, points, challenges) -> new MiningSkillCardData(uuid, tier, display,
+            challenges.isEmpty() && points == 0 ? null : new CardProgress(challenges, points, List.of()))));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, MiningSkillCardData> STREAM_CODEC = StreamCodec.composite(
             UUIDUtil.STREAM_CODEC, MiningSkillCardData::getUUID,
             MiningSkillCardItem.Tier.STREAM_CODEC, MiningSkillCardData::getTier,
             ItemStack.STREAM_CODEC, MiningSkillCardData::getDisplayItem,
-            ByteBufCodecs.INT, MiningSkillCardData::getPotionPoints,
-            Challenge.STREAM_CODEC.apply(ByteBufCodecs.list()), MiningSkillCardData::getChallenges,
-            Challenge.STREAM_CODEC.apply(ByteBufCodecs.list()), data -> data.finishedChallenges,
-            MiningSkillCardData::new
+            ByteBufCodecs.optional(CardProgress.STREAM_CODEC), data -> Optional.ofNullable(data.legacy),
+            (uuid, tier, display, legacy) -> new MiningSkillCardData(uuid, tier, display, legacy.orElse(null))
     );
 
     public static final DataComponentType<MiningSkillCardData> DATA_COMPONENT =
@@ -58,34 +57,27 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     private final UUID uuid;
     private MiningSkillCardItem.Tier tier;
     private ItemStack displayItem;
-    private int potionPoints;
-    private final List<Challenge> challenges;
-    private final List<Challenge> finishedChallenges;
+    private @Nullable CardProgress legacy;
+    private @Nullable CardProgress local;
 
-    private MiningSkillCardData(@NotNull UUID uuid, MiningSkillCardItem.Tier tier, ItemStack displayItem, int potionPoints, List<Challenge> challenges) {
-        this(uuid, tier, displayItem, potionPoints, challenges, Lists.newArrayList());
-    }
-
-    private MiningSkillCardData(@NotNull UUID uuid, MiningSkillCardItem.Tier tier, ItemStack displayItem, int potionPoints, List<Challenge> challenges, List<Challenge> finishedChallenges) {
+    private MiningSkillCardData(@NotNull UUID uuid, MiningSkillCardItem.Tier tier, ItemStack displayItem, @Nullable CardProgress legacy) {
         super(DATA_COMPONENT);
         this.uuid = uuid;
         this.tier = tier;
         this.displayItem = displayItem;
-        this.potionPoints = potionPoints;
-        this.challenges = Lists.newArrayList(challenges);
-        this.finishedChallenges = Lists.newArrayList(finishedChallenges);
+        this.legacy = legacy;
     }
 
     public static MiningSkillCardData create(MiningSkillCardItem.Type type) {
-        return new MiningSkillCardData(UUID.randomUUID(), MiningSkillCardItem.Tier.Unlearned, type.getDefaultDisplayItem().getDefaultInstance(), 0, Lists.newArrayList());
+        return new MiningSkillCardData(UUID.randomUUID(), MiningSkillCardItem.Tier.Unlearned, type.getDefaultDisplayItem().getDefaultInstance(), null);
     }
 
     @ApiStatus.Internal
     public static ItemStack createForCreativeTab(MiningSkillCardItem cardItem, MiningSkillCardItem.Tier tier) {
         ItemStack stack = cardItem.getDefaultInstance();
-        MiningSkillCardData data = new MiningSkillCardData(UUID.fromString("00000000-0000-0000-0000-000000000000"), tier, cardItem.getType().getDefaultDisplayItem().getDefaultInstance(), 0, Lists.newArrayList());
+        MiningSkillCardData data = new MiningSkillCardData(CREATIVE_UUID, tier, cardItem.getType().getDefaultDisplayItem().getDefaultInstance(), null);
         data.stack = stack;
-        data.save();
+        stack.set(DATA_COMPONENT, data);
         return stack;
     }
 
@@ -98,79 +90,103 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
         return !stack.isEmpty() && stack.getItem() instanceof MiningSkillCardItem && stack.has(DATA_COMPONENT);
     }
 
-    public MiningSkillCardData onClientUpdate() {
-        for(Challenge finishedChallenge : this.finishedChallenges) {
-            ChallengesToast.run(finishedChallenge, this.stack);
+    private CardProgress progress() {
+        if (!this.isCreativeItem()) {
+            CardProgress stored = CardStore.progress(this);
+            if (stored != null) return stored;
         }
-
-        this.finishedChallenges.clear();
-        return this;
+        if (this.local == null) this.local = this.legacy != null ? this.legacy : new CardProgress();
+        return this.local;
     }
 
-    public MiningSkillCardData onServerUpdate() {
-        this.finishedChallenges.clear();
-        return this;
+    public boolean hasProgress() {
+        return this.isCreativeItem() || CardStore.progress(this) != null;
+    }
+
+    public @Nullable CardProgress getLegacy() {
+        return this.legacy;
+    }
+
+    @ApiStatus.Internal
+    public @Nullable CardProgress takeLocal() {
+        CardProgress local = this.local;
+        this.local = null;
+        return local == this.legacy ? null : local;
+    }
+
+    public void writeComponent() {
+        super.save();
+    }
+
+    @ApiStatus.Internal
+    public void clearLegacy() {
+        this.legacy = null;
+        if (this.stack != null) this.stack.set(DATA_COMPONENT, this);
+    }
+
+    public MiningSkillCardItem.Type getType() {
+        return this.stack != null && this.stack.getItem() instanceof MiningSkillCardItem item ? item.getType() : MiningSkillCardItem.Type.EMPTY;
+    }
+
+    @Override
+    public void save() {
+        super.save();
+        CardStore.changed(this);
     }
 
     public MiningSkillCardData initChallenges() {
-        if (!(this.stack.getItem() instanceof MiningSkillCardItem)) {
-            LOGGER.error("You've tried to initiate challenges on item can't accept it: {}", this.stack.getItem().getDescriptionId());
+        return this.rollChallenges(this.progress());
+    }
+
+    @ApiStatus.Internal
+    public MiningSkillCardData rollChallenges(CardProgress progress) {
+        MiningSkillCardItem.Type type = this.getType();
+        if (type == MiningSkillCardItem.Type.EMPTY) {
+            LOGGER.error("You've tried to initiate challenges on item can't accept it: {}", this.stack == null ? "<none>" : this.stack.getItem().getDescriptionId());
             return this;
         }
 
-        if (tier == MiningSkillCardItem.Tier.Mastered) {
-            challenges.clear();
-            return this;
-        }
-
-        AtomicInteger slotId = new AtomicInteger(1);
-        AtomicInteger quantity = new AtomicInteger();
-        MiningSkillCardItem.Type type = ((MiningSkillCardItem) stack.getItem()).getType();
-        quantity.set(ConfigHandler.SERVER.CARD_CHALLENGES_AMOUNT.getValue(tier));
-
-        if (tier != MiningSkillCardItem.Tier.Unlearned && tier != MiningSkillCardItem.Tier.Mastered)
-            this.resetPotionPoints();
-
+        List<Challenge> challenges = progress.getChallenges();
         challenges.clear();
-        ChallengesManager.INSTANCE.getRandomChallenges(quantity.get(), type, this.tier).forEach((location, data) -> {
-            challenges.add(new Challenge(location, slotId.get(), data.getRequiredAmount()));
-            slotId.getAndIncrement();
-        });
+        if (this.tier == MiningSkillCardItem.Tier.Mastered) return this;
+
+        if (this.tier != MiningSkillCardItem.Tier.Unlearned) progress.setPotionPoints(this.getMaxPotionPoints());
+
+        int quantity = ConfigHandler.SERVER.CARD_CHALLENGES_AMOUNT.getValue(this.tier);
+        int[] order = {1};
+        ChallengesManager.INSTANCE.getRandomChallenges(quantity, type, this.tier).forEach((location, data) ->
+                challenges.add(new Challenge(location, order[0]++, data.getRequiredAmount())));
         return this;
     }
 
     public boolean validateChallenges() {
         if (this.tier == MiningSkillCardItem.Tier.Mastered) return false;
-
-        MiningSkillCardItem.Type type = ((MiningSkillCardItem) stack.getItem()).getType();
-        if (!this.challenges.isEmpty()) {
-            Collection<Challenge> removedChallenges = new TreeSet<>();
-            this.challenges.forEach((challengeData) -> {
-                if (!ChallengesManager.INSTANCE.getAllChallenges().containsKey(challengeData.id)) {
-                    removedChallenges.add(challengeData);
-                }
-            });
-            removedChallenges.forEach(challengeData -> {
-                AtomicBoolean isDone = new AtomicBoolean(true);
-                this.challenges.remove(challengeData);
-                do {
-                    ChallengesManager.INSTANCE.getRandomChallenges(1, type, this.tier).forEach((location, data) -> {
-                        if (this.challenges.stream().filter(challengeData1 -> challengeData1.id.equals(location)).toList().isEmpty()) {
-                            this.challenges.add(new Challenge(location, challengeData.order, data.getRequiredAmount()));
-                            if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
-                                LOGGER.debug("Changing the invalid challenge! id:\"{}\" to: id:\"{}\"", challengeData.id, location);
-                            }
-                            isDone.set(false);
-                        }
-                    });
-                } while (isDone.get());
-            });
-            return !removedChallenges.isEmpty();
-
-        } else {
-            initChallenges();
+        List<Challenge> challenges = this.progress().getChallenges();
+        if (challenges.isEmpty()) {
+            this.initChallenges();
             return true;
         }
+
+        MiningSkillCardItem.Type type = this.getType();
+        List<Challenge> removed = challenges.stream()
+                .filter(challenge -> !ChallengesManager.INSTANCE.getAllChallenges().containsKey(challenge.id))
+                .toList();
+        for (Challenge invalid : removed) {
+            challenges.remove(invalid);
+            boolean replaced = false;
+            while (!replaced) {
+                for (var entry : ChallengesManager.INSTANCE.getRandomChallenges(1, type, this.tier).entrySet()) {
+                    if (challenges.stream().noneMatch(c -> c.id.equals(entry.getKey()))) {
+                        challenges.add(new Challenge(entry.getKey(), invalid.order, entry.getValue().getRequiredAmount()));
+                        if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
+                            LOGGER.debug("Changing the invalid challenge! id:\"{}\" to: id:\"{}\"", invalid.id, entry.getKey());
+                        }
+                        replaced = true;
+                    }
+                }
+            }
+        }
+        return !removed.isEmpty();
     }
 
     public void setDisplayItem(ItemStack stack) {
@@ -180,18 +196,13 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     public MiningSkillCardData addAmount(Identifier challengeId, int value) {
         Optional<Challenge> challengeData = this.getChallenge(challengeId);
         if (challengeData.isEmpty()) return this;
-
-        int currentAmount = challengeData.get().currentPoints;
-        int requiredAmount = challengeData.get().requiredPoints;
-        if (currentAmount >= requiredAmount) return this;
-
-        return setAmount(challengeId, currentAmount + value);
+        Challenge challenge = challengeData.get();
+        if (challenge.currentPoints >= challenge.requiredPoints) return this;
+        return this.setAmount(challengeId, challenge.currentPoints + value);
     }
 
     public void accomplishChallenge(Identifier challengeId) {
-        Optional<Challenge> challengeData = this.getChallenge(challengeId);
-        if (challengeData.isEmpty()) return;
-        setAmount(challengeId, challengeData.get().requiredPoints);
+        this.getChallenge(challengeId).ifPresent(challenge -> this.setAmount(challengeId, challenge.requiredPoints));
     }
 
     public MiningSkillCardData setAmount(Identifier challengeId, int value) {
@@ -199,8 +210,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
         if (challengeData.isEmpty()) return this;
 
         Challenge challenge = challengeData.get();
-        int requiredAmount = challenge.requiredPoints;
-        challenge.currentPoints = Math.min(value, requiredAmount);
+        challenge.currentPoints = Math.min(value, challenge.requiredPoints);
         this.checkChallengeAccomplishment(challenge);
         return this;
     }
@@ -211,11 +221,12 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     public void setPotionPoints(int value) {
-        this.potionPoints = value;
+        this.progress().setPotionPoints(value);
     }
 
     public MiningSkillCardData consumePotionPoint(int value) {
-        this.potionPoints = Math.max(0, this.potionPoints - value);
+        CardProgress progress = this.progress();
+        progress.setPotionPoints(progress.getPotionPoints() - value);
         return this;
     }
 
@@ -233,7 +244,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     public Optional<Challenge> getChallenge(Identifier challengeId) {
-        for (Challenge challenge : this.challenges) {
+        for (Challenge challenge : this.getChallenges()) {
             if (challenge.id.equals(challengeId))
                 return Optional.of(challenge);
         }
@@ -241,15 +252,13 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     private void checkChallengeAccomplishment(Challenge challenge) {
+        List<Challenge> finished = this.progress().getFinished();
         if (this.isAllChallengesCompleted()) {
             this.tier = this.tier.next();
             this.initChallenges();
-            this.finishedChallenges.add(new Challenge());
-        } else {
-            if (this.isChallengeAccomplished(challenge) && !this.finishedChallenges.contains(challenge)) {
-                this.finishedChallenges.add(challenge);
-            }
-
+            finished.add(new Challenge());
+        } else if (this.isChallengeAccomplished(challenge) && !finished.contains(challenge)) {
+            finished.add(challenge);
         }
     }
 
@@ -258,8 +267,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     public boolean isChallengeAccomplished(Identifier challengeId) {
-        Optional<Challenge> challengeData = this.getChallenge(challengeId);
-        return challengeData.filter((data) -> data.currentPoints >= data.requiredPoints).isPresent();
+        return this.getChallenge(challengeId).filter((data) -> data.currentPoints >= data.requiredPoints).isPresent();
     }
 
     public boolean isAllChallengesCompleted() {
@@ -271,7 +279,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     public List<Challenge> getChallenges() {
-        return this.challenges;
+        return this.progress().getChallenges();
     }
 
     public MiningSkillCardItem.Tier getTier() {
@@ -279,11 +287,11 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     public boolean isPotionPointsFull() {
-        return this.potionPoints >= this.getMaxPotionPoints();
+        return this.getPotionPoints() >= this.getMaxPotionPoints();
     }
 
     public int getPotionPoints() {
-        return this.potionPoints;
+        return this.progress().getPotionPoints();
     }
 
     public int getMaxPotionPoints() {
@@ -291,12 +299,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     public boolean isCreativeItem() {
-        return this.uuid.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-    }
-
-    public MiningSkillCardData sendToClient(ServerPlayer player, int slotIndex) {
-        PayloadHandler.sendToPlayer(new MiningSkillCardPayload(slotIndex, this), player);
-        return this.onServerUpdate();
+        return this.uuid.equals(CREATIVE_UUID);
     }
 
     @Override
@@ -306,24 +309,17 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
         return uuid.equals(that.uuid)
                 && tier == that.tier
                 && ItemStack.isSameItemSameComponents(this.displayItem, that.displayItem)
-                && potionPoints == that.potionPoints
-                && challenges.equals(that.challenges);
+                && Objects.equals(this.legacy == null ? null : this.legacy.getChallenges(), that.legacy == null ? null : that.legacy.getChallenges());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, tier, potionPoints, challenges) + ItemStack.hashItemAndComponents(displayItem);
+        return Objects.hash(uuid, tier) + ItemStack.hashItemAndComponents(displayItem);
     }
 
     @Override
     public String toString() {
-        return "MiningSkillCardData{" +
-                "uuid=" + uuid +
-                ", tier=" + tier +
-                ", displayItem=" + displayItem +
-                ", potionPoints=" + potionPoints +
-                ", challenges=" + challenges +
-                '}';
+        return "MiningSkillCardData{uuid=" + uuid + ", tier=" + tier + ", displayItem=" + displayItem + ", legacy=" + (legacy != null) + '}';
     }
 
     public static class Challenge implements Comparable<Challenge> {
@@ -372,6 +368,10 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
 
         public Identifier getId() {
             return id;
+        }
+
+        public Challenge copy() {
+            return new Challenge(this.id, this.order, this.currentPoints, this.requiredPoints, this.isPinned);
         }
 
         public int getOrder() {

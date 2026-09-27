@@ -137,8 +137,9 @@ public class MSCEvents {
                 }
                 if (needSync)
                     recordData.save();
-            } else {
-                validateCardFunction.apply(slot.get());
+            } else if (validateCardFunction.apply(slot.get())) {
+                // Loose card: its challenges live in the storage, so save to persist and sync the change.
+                MiningSkillCardData.load(slot.get()).save();
             }
         }
     }

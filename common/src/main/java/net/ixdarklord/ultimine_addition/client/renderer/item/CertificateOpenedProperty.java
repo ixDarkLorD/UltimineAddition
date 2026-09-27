@@ -9,7 +9,6 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-/** Item model condition: true once a Miner Certificate has been accomplished (replaces the "opened" item property). */
 public record CertificateOpenedProperty() implements ConditionalItemModelProperty {
     public static final MapCodec<CertificateOpenedProperty> MAP_CODEC = MapCodec.unit(new CertificateOpenedProperty());
 

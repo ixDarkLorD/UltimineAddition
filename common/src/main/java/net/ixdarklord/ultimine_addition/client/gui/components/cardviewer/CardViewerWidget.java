@@ -9,11 +9,13 @@ import net.ixdarklord.ultimine_addition.common.data.record.CardHistory;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -24,6 +26,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2fStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
@@ -35,26 +38,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.IntFunction;
 
-/**
- * The Skills Record's card viewer: the selected card's tiers and challenges on a pannable, zoomable map,
- * with a details panel per challenge and status messages on top. It sits in the book's text area and can be
- * expanded into a large window centered on the screen.
- * <p>
- * Panels, bottom to top: tier tree, bottom banner (warnings), full message (no card/none selected),
- * challenge details (modal), configuration preview (modal).
- */
 public final class CardViewerWidget extends AbstractMultiPanelWidget {
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault());
     private static final Identifier FRAME_SPRITE = FTBUltimineAddition.id("container/skills_record/card_viewer/frame");
     private static final int ICON_SIZE = 11;
 
-    /** Everything the viewer shows, provided by the screen every frame. */
     public record State(boolean hasCards, ItemStack cardStack, @Nullable MiningSkillCardData card, @Nullable CardHistory history,
                         boolean consumeMode, List<ItemStack> missingItems, boolean notEnoughInk, boolean preview,
                         Color accent, boolean animated) {}
 
-    /** What the viewer asks the screen to do. */
     public interface Actions {
         void togglePin(Identifier challengeId);
 
@@ -103,9 +97,6 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
                 b -> this.tree.requestFit()));
     }
 
-    // --- State ---
-
-    /** Updates what is shown; called by the screen before rendering. */
     public void update(State state) {
         this.state = state;
         MiningSkillCardData card = state.card();
@@ -172,8 +163,6 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         }
     }
 
-    // --- Queries used by the panels ---
-
     boolean isExpanded() {
         return this.expanded;
     }
@@ -219,35 +208,66 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         this.actions.editChallenge(challengeId);
     }
 
-    /** Title, description, progress and dates of a challenge, as tooltip lines. */
-    List<FormattedCharSequence> describeChallenge(ChallengeNode node, boolean asTooltip) {
-        List<FormattedCharSequence> result = new ArrayList<>();
-        for (Component line : this.describeChallengeLines(node, asTooltip)) {
-            result.addAll(line.getString().isEmpty() ? List.of(FormattedCharSequence.EMPTY) : this.font.split(line, 200));
+    static final float MIN_TEXT_SCALE = 0.65F;
+
+    static void drawFittedText(GuiGraphicsExtractor graphics, Font font, Component text, IntFunction<Component> shorten,
+                               int x, int y, int maxWidth, int color, boolean shadow) {
+        int width = font.width(text);
+        if (width <= maxWidth) {
+            graphics.text(font, text, x, y, color, shadow);
+            return;
         }
+        float scale = Math.max(MIN_TEXT_SCALE, maxWidth / (float) width);
+        if (width * scale > maxWidth) text = shorten.apply((int) (maxWidth / scale));
+        Matrix3x2fStack pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(x, y + font.lineHeight * (1.0F - scale) / 2.0F);
+        pose.scale(scale, scale);
+        graphics.text(font, text, 0, 0, color, shadow);
+        pose.popMatrix();
+    }
+
+    static Component ellipsize(Font font, String text, int maxWidth) {
+        if (font.width(text) <= maxWidth) return Component.literal(text);
+        return Component.literal(font.plainSubstrByWidth(text, Math.max(0, maxWidth - font.width("..."))) + "...");
+    }
+
+    static Component challengeName(ChallengeNode node) {
+        if (node.id() != null) {
+            String key = "challenge.%s.%s.name".formatted(node.id().getNamespace(), node.id().getPath().replace('/', '.'));
+            if (Language.getInstance().has(key)) return Component.translatable(key);
+        }
+        return Component.translatable("challenge.ultimine_addition.title", node.order());
+    }
+
+    List<FormattedCharSequence> describeChallenge(ChallengeNode node) {
+        List<FormattedCharSequence> header = new ArrayList<>();
+        header.add(Component.translatable("challenge.ultimine_addition.title", node.order()).withStyle(ChatFormatting.GRAY).getVisualOrderText());
+        header.addAll(this.font.split(Component.literal("\ud83d\udcdd ").append(challengeName(node)).withStyle(Style.EMPTY.withColor(0xFBF1C1)), 200));
+        if (node.pinned()) {
+            header.add(Component.literal("◎ ").append(Component.translatable("gui.ultimine_addition.card_viewer.pinned")).withStyle(ChatFormatting.YELLOW).getVisualOrderText());
+        }
+
+        List<Component> lines = new ArrayList<>(this.challengeStatus(node));
+        lines.add(Component.translatable("gui.ultimine_addition.card_viewer.click_for_details").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        List<FormattedCharSequence> body = new ArrayList<>();
+        for (Component line : lines) {
+            body.addAll(line.getString().isEmpty() ? List.of(FormattedCharSequence.EMPTY) : this.font.split(line, 200));
+        }
+
+        // Struck-through spaces draw a clean line.
+        int width = 0;
+        for (FormattedCharSequence line : header) width = Math.max(width, this.font.width(line));
+        for (FormattedCharSequence line : body) width = Math.max(width, this.font.width(line));
+        int spaces = Math.max(1, (width + this.font.width(" ") - 1) / this.font.width(" "));
+        FormattedCharSequence divider = Component.literal(" ".repeat(spaces)).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.STRIKETHROUGH).getVisualOrderText();
+
+        List<FormattedCharSequence> result = new ArrayList<>(header);
+        result.add(divider);
+        result.addAll(body);
         return result;
     }
 
-    /** Tooltip lines: title, full description (with the block list), progress and status. */
-    List<Component> describeChallengeLines(ChallengeNode node, boolean asTooltip) {
-        List<Component> lines = new ArrayList<>();
-        if (asTooltip) {
-            lines.add(Component.translatable("challenge.ultimine_addition.title", node.order()).withStyle(Style.EMPTY.withColor(0xFBF1C1)));
-        }
-        lines.addAll(this.challengeDescription(node, true));
-        lines.add(Component.empty());
-        lines.add(this.challengeProgress(node));
-        lines.addAll(this.challengeStatus(node));
-        if (asTooltip) {
-            lines.add(Component.translatable("gui.ultimine_addition.card_viewer.click_for_details").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        }
-        return lines;
-    }
-
-    /**
-     * What the challenge asks for. Without {@code withBlockList}, a challenge on several blocks only gets its
-     * first sentence; the details view shows the blocks as items instead.
-     */
     List<Component> challengeDescription(ChallengeNode node, boolean withBlockList) {
         if (node.id() == null) return List.of();
         List<Component> lines = ChallengesManager.INSTANCE.createChallengeDescription(node.id(), Style.EMPTY.withColor(ChatFormatting.GRAY)).stream()
@@ -267,7 +287,6 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
                 Component.literal(node.currentPoints() + "/" + node.requiredPoints()).withStyle(color)).withStyle(ChatFormatting.GRAY);
     }
 
-    /** Consume-mode warning, completion date and pin state. */
     List<Component> challengeStatus(ChallengeNode node) {
         List<Component> lines = new ArrayList<>();
         if (node.state() == ChallengeState.NEEDS_CONSUME_MODE) {
@@ -278,9 +297,6 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
                     ? Component.translatable("gui.ultimine_addition.card_viewer.completed_at", formatTime(node.completedAt().getAsLong())).withStyle(ChatFormatting.DARK_GREEN)
                     : Component.translatable("gui.ultimine_addition.card_viewer.completed").withStyle(ChatFormatting.DARK_GREEN));
         }
-        if (node.pinned()) {
-            lines.add(Component.translatable("gui.ultimine_addition.card_viewer.pinned").withStyle(ChatFormatting.YELLOW));
-        }
         return lines;
     }
 
@@ -288,10 +304,12 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         return TIME_FORMAT.format(Instant.ofEpochMilli(epochMillis));
     }
 
-    // --- Zoom slider (the book's scrollbar) ---
-
     public boolean isTreeShown() {
         return this.tree.isVisible() && !this.details.isVisible() && !this.preview.isVisible();
+    }
+
+    public double getZoom() {
+        return this.tree.getZoom();
     }
 
     public double getZoomProgress() {
@@ -302,23 +320,18 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         this.tree.setZoomProgress(progress);
     }
 
-    // --- Expanded window ---
-
     public boolean isExpandedWindow() {
         return this.expanded;
     }
 
-    /** Resizes the in-book viewer (e.g. when the progression bar takes the bottom rows). */
-    public void setCompactHeight(int height) {
-        if (this.compactBounds.height() == height) return;
-        this.compactBounds = new ScreenRectangle(this.compactBounds.left(), this.compactBounds.top(), this.compactBounds.width(), height);
-        if (!this.expanded) this.setBounds(this.compactBounds.left(), this.compactBounds.top(), this.compactBounds.width(), height);
+    // The screen keeps its viewer across re-inits (resize, edit dialog), so only its place changes.
+    public void setCompactBounds(int x, int y, int width, int height) {
+        this.compactBounds = new ScreenRectangle(x, y, width, height);
+        this.layout();
     }
 
-    public void setExpanded(boolean expanded) {
-        if (this.expanded == expanded) return;
-        this.expanded = expanded;
-        if (expanded) {
+    private void layout() {
+        if (this.expanded) {
             int screenW = this.minecraft.getWindow().getGuiScaledWidth(), screenH = this.minecraft.getWindow().getGuiScaledHeight();
             int w = Math.min(screenW - 20, 420), h = Math.min(screenH - 20, 280);
             this.setBounds((screenW - w) / 2, (screenH - h) / 2, w, h);
@@ -326,6 +339,12 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             ScreenRectangle c = this.compactBounds;
             this.setBounds(c.left(), c.top(), c.width(), c.height());
         }
+    }
+
+    public void setExpanded(boolean expanded) {
+        if (this.expanded == expanded) return;
+        this.expanded = expanded;
+        this.layout();
         MiningSkillCardItem.Tier tier = this.getCurrentTier();
         if (tier != null) this.tree.focus(tier);
         this.actions.onExpandedChanged(expanded);
@@ -342,7 +361,6 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             this.expandButton.setPosition(r.right() - ICON_SIZE - 1, r.top() + 1);
             this.fitButton.setPosition(r.right() - ICON_SIZE * 2 - 3, r.top() + 1);
         }
-        // In the book the buttons sit over the viewer, so they hide while a panel covers the tree.
         boolean covered = !this.expanded && (this.details.isVisible() || this.preview.isVisible());
         boolean treeControls = this.tree.isVisible() && !covered;
         this.expandButton.visible = this.expandButton.active = this.visible && !covered && (treeControls || this.expanded);
@@ -357,10 +375,8 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         int tint = ARGB.opaque(this.state.accent().getRGB());
         int x0 = this.x, y0 = this.y, x1 = this.x + this.width, y1 = this.y + this.height;
 
-        // The book's own frame, header and recessed screen (cut from its background texture), tinted like it.
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FRAME_SPRITE, x0, y0, this.width, this.height, tint);
 
-        // The card's name on a small recessed plate in the header, in white so it stays readable.
         if (!this.state.cardStack().isEmpty()) {
             int maxWidth = this.width - 24 - ICON_SIZE * 2 - 8;
             String text = this.state.cardStack().getHoverName().getString();
@@ -388,14 +404,12 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
 
     @Override
     public @NotNull ScreenRectangle getDraggingRectangle() {
-        // The viewer can't be dragged, compact or expanded.
         return ScreenRectangle.empty();
     }
 
     @Override
     protected @NotNull ScreenRectangle layoutRectangle() {
         if (this.expanded) {
-            // Inside the frame sprite's screen (9px left/right, 20px header, 8px bottom).
             return new ScreenRectangle(this.x + 9, this.y + 20, this.width - 18, this.height - 28);
         }
         return new ScreenRectangle(this.x, this.y, this.width, this.height);

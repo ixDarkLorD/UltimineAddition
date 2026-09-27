@@ -63,9 +63,9 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
         if (this.isLegacyMode() || this.type == EMPTY) return;
 
         if (entity instanceof ServerPlayer) {
+            // A card without data yet (e.g. from /give): give it an identity; it's stored and rolls its challenges.
             if (!stack.has(MiningSkillCardData.DATA_COMPONENT)) {
-                if (getData(stack).getChallenges().isEmpty())
-                    getData(stack).initChallenges().save();
+                MiningSkillCardData.create(this.type).setStack(stack).save();
             }
         }
     }
@@ -86,7 +86,8 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
         tooltipComponents.accept(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
 
         MiningSkillCardData data = stack.get(MiningSkillCardData.DATA_COMPONENT);
-        if (type != EMPTY && data != null && !data.isCreativeItem() && data.getTier() != Tier.Unlearned && data.getTier() != Tier.Mastered) {
+        // Potion points live outside the item; skip the line until they've been synced.
+        if (type != EMPTY && data != null && !data.isCreativeItem() && data.getTier() != Tier.Unlearned && data.getTier() != Tier.Mastered && data.hasProgress()) {
             ChatFormatting formatting = ChatFormattingUtils.getProgressColor(data.getPotionPoints(), data.getMaxPotionPoints());
             component = Component.translatable("tooltip.ultimine_addition.skill_card.potion_point", Component.literal(String.valueOf(data.getPotionPoints())).withStyle(formatting));
             tooltipComponents.accept(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
@@ -106,6 +107,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
     public boolean isBarVisible(ItemStack itemStack) {
         var data = getData(itemStack);
         if (!itemStack.has(MiningSkillCardData.DATA_COMPONENT) || type == EMPTY || data.isCreativeItem() || data.getTier() == Tier.Unlearned || data.getTier() == Tier.Mastered) return false;
+        if (!data.hasProgress()) return false;  // potion points not synced yet
         return !data.isPotionPointsFull();
     }
 

@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.network.payloads;
 
 import dev.architectury.networking.NetworkManager;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
-import net.ixdarklord.ultimine_addition.common.data.record.CardHistory;
+import net.ixdarklord.ultimine_addition.common.data.record.CardSync;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordClientCache;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSync;
@@ -23,8 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,7 +31,6 @@ public final class SkillsRecordPayload {
     private SkillsRecordPayload() {
     }
 
-    /** The record of the Skills Record menu the player has open (server side). */
     private static Optional<SkillsRecordData> getOpenRecord(Player player) {
         if (player instanceof ServerPlayer && player.containerMenu instanceof SkillsRecordMenu menu) {
             return Optional.of(menu.getData());
@@ -40,7 +38,6 @@ public final class SkillsRecordPayload {
         return Optional.empty();
     }
 
-    /** Opens the record worn in the accessory slot (Curios/Trinkets keybind). */
     public record Open() implements CustomPacketPayload {
         public static final Type<SkillsRecordPayload.Open> TYPE =
                 new Type<>(FTBUltimineAddition.id("open_skills_record"));
@@ -125,7 +122,6 @@ public final class SkillsRecordPayload {
         }
     }
 
-    /** Asks the server for a record the client doesn't know yet (e.g. hovered in a chest). */
     public record RequestRecord(UUID id) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<RequestRecord> TYPE = new CustomPacketPayload.Type<>(FTBUltimineAddition.id("request_skills_record"));
         public static final StreamCodec<FriendlyByteBuf, RequestRecord> STREAM_CODEC = StreamCodec.composite(UUIDUtil.STREAM_CODEC, RequestRecord::id, RequestRecord::new);
@@ -145,17 +141,50 @@ public final class SkillsRecordPayload {
         }
     }
 
-    /** A record's contents and settings, plus the history of the cards inside it. */
-    public record SyncRecord(SkillsRecordData data, Map<UUID, CardHistory> histories) implements CustomPacketPayload {
+    public record RequestCard(UUID id) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<RequestCard> TYPE = new CustomPacketPayload.Type<>(FTBUltimineAddition.id("request_mining_skill_card"));
+        public static final StreamCodec<FriendlyByteBuf, RequestCard> STREAM_CODEC = StreamCodec.composite(UUIDUtil.STREAM_CODEC, RequestCard::id, RequestCard::new);
+
+        public static void handle(RequestCard msg, NetworkManager.PacketContext ctx) {
+            ctx.queue(() -> {
+                if (ctx.getPlayer() instanceof ServerPlayer player) {
+                    CardSync sync = SkillsRecordSavedData.get(player.level().getServer()).createSync(msg.id);
+                    if (sync != null) SkillsRecordSync.sendCards(player, List.of(sync));
+                }
+            });
+        }
+
+        public CustomPacketPayload.@NotNull Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    public record SyncCards(List<CardSync> cards) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SyncCards> TYPE = new CustomPacketPayload.Type<>(FTBUltimineAddition.id("mining_skill_cards_sync"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, SyncCards> STREAM_CODEC = StreamCodec.composite(
+                CardSync.STREAM_CODEC.apply(ByteBufCodecs.list()), SyncCards::cards,
+                SyncCards::new
+        );
+
+        public static void handle(SyncCards message, NetworkManager.PacketContext context) {
+            context.queue(() -> SkillsRecordClientCache.acceptCards(message.cards));
+        }
+
+        @Override
+        public @NotNull Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    public record SyncRecord(SkillsRecordData data) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<SyncRecord> TYPE = new CustomPacketPayload.Type<>(FTBUltimineAddition.id("skills_record_sync"));
         public static final StreamCodec<RegistryFriendlyByteBuf, SyncRecord> STREAM_CODEC = StreamCodec.composite(
                 SkillsRecordData.STREAM_CODEC, SyncRecord::data,
-                ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, CardHistory.STREAM_CODEC), SyncRecord::histories,
                 SyncRecord::new
         );
 
         public static void handle(SyncRecord message, NetworkManager.PacketContext context) {
-            context.queue(() -> SkillsRecordClientCache.accept(message.data, message.histories));
+            context.queue(() -> SkillsRecordClientCache.accept(message.data));
         }
 
         @Override

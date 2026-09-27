@@ -8,7 +8,6 @@ import net.minecraft.resources.Identifier;
 
 import java.util.function.BiConsumer;
 
-/** Custom item model types and properties, registered by each loader's client setup. */
 public final class UAItemModels {
     public static final Identifier MINING_SKILL_CARD = FTBUltimineAddition.id("mining_skill_card");
     public static final Identifier CERTIFICATE_OPENED = FTBUltimineAddition.id("certificate_opened");

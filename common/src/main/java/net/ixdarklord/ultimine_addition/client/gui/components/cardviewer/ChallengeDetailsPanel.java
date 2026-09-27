@@ -17,17 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/** Modal panel with everything about one challenge; pin/edit actions for the current tier's challenges. */
 final class ChallengeDetailsPanel extends ScrollPanel {
     private static final int PADDING = 4;
-    // Title (y 4-11), 3px gap, divider (y 14), 3px gap, then the scrolled content.
     private static final int HEADER = 18;
     private static final int DIVIDER_Y = 14;
     private static final int FOOTER = 17;
     private static final int LINE_HEIGHT = 10;
-    private static final int ICON_SIZE = TierTreePanel.SLOT_SIZE + 2;
+    private static final int ICON_SIZE = TierTreePanel.SMALL_SLOT_SIZE + 2;
     private static final int SECTION_GAP = 4;
-    private static final int BAR_HEIGHT = TierTreePanel.PROGRESS_BAR_HEIGHT + 1;
 
     private final CardViewerWidget viewer;
     private final ViewerButton backButton;
@@ -61,7 +58,6 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         this.setVisible(true);
     }
 
-    /** Swaps in the rebuilt node for the same challenge (live progress), or closes if it no longer exists. */
     void refresh(@Nullable CardTree tree) {
         if (this.node == null || !this.isVisible()) return;
         ChallengeNode updated = null;
@@ -85,10 +81,9 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         this.wrappedWidth = -1;
     }
 
-    /** Right-aligns the visible footer buttons (Back, then Edit and Pin when shown) with no gaps for hidden ones. */
     private void layoutButtons() {
         ScreenRectangle b = this.getBounds();
-        int y = b.bottom() - FOOTER + 2;
+        int y = b.bottom() - FOOTER + (FOOTER + 2 - 12) / 2;
         int x = b.right() - PADDING;
         for (ViewerButton button : List.of(this.backButton, this.editButton, this.pinButton)) {
             if (!button.visible) continue;
@@ -119,9 +114,8 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         return result;
     }
 
-    /** Height of the icon grid down to the last slot's bottom edge (no spacing after the last row). */
     private int iconsHeight(int rows) {
-        return rows <= 0 ? 0 : rows * ICON_SIZE - (ICON_SIZE - TierTreePanel.SLOT_SIZE);
+        return rows <= 0 ? 0 : rows * ICON_SIZE - (ICON_SIZE - TierTreePanel.SMALL_SLOT_SIZE);
     }
 
     private int iconRows(int width) {
@@ -130,16 +124,15 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         return (this.node.targets().size() + perRow - 1) / perRow;
     }
 
-    // Layout, top to bottom: description, target blocks, progress text, progress bar, status lines.
     @Override
     protected int getContentHeight() {
         this.rewrap();
         int rows = this.iconRows(this.getContentWidth());
         return this.description.size() * LINE_HEIGHT
-                + (rows > 0 ? 2 + this.iconsHeight(rows) : 0)
-                + SECTION_GAP + this.progress.size() * LINE_HEIGHT
-                + BAR_HEIGHT + SECTION_GAP
-                + this.status.size() * LINE_HEIGHT;
+                + this.iconsHeight(rows)
+                + (rows > 0 ? SECTION_GAP : 0) + this.progress.size() * LINE_HEIGHT
+                + TierTreePanel.PROGRESS_BAR_HEIGHT
+                + (this.status.isEmpty() ? 0 : SECTION_GAP + this.status.size() * LINE_HEIGHT);
     }
 
     @Override
@@ -148,10 +141,18 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         graphics.fill(b.left(), b.top(), b.right(), b.bottom(), 0xF0141414);
         if (this.node == null) return;
 
-        Component title = Component.literal("》").append(Component.translatable("challenge.ultimine_addition.title", this.node.order()))
-                .append(" · ").append(this.node.tier().getDisplayName()).append("《");
-        graphics.text(this.font, title, b.left() + PADDING, b.top() + 4, RenderUtils.textColor(0xFBF1C1), this.viewer.hasTextShadow());
+        Component tierPart = Component.literal(" · ").append(this.node.tier().getDisplayName()).append("《");
+        String name = CardViewerWidget.challengeName(this.node).getString();
+        Component title = Component.literal("》").append(name).append(tierPart);
+        CardViewerWidget.drawFittedText(graphics, this.font, title,
+                width -> Component.literal("》").append(CardViewerWidget.ellipsize(this.font, name, width - this.font.width("》") - this.font.width(tierPart))).append(tierPart),
+                b.left() + PADDING, b.top() + 4, b.width() - PADDING * 2, RenderUtils.textColor(0xFBF1C1), this.viewer.hasTextShadow());
         graphics.fill(b.left() + 2, b.top() + DIVIDER_Y, b.right() - 2, b.top() + DIVIDER_Y + 1, 0x30FFFFFF);
+
+        int footerTop = b.bottom() - FOOTER;
+        graphics.fill(b.left(), footerTop, b.right(), b.bottom(), 0xFF202020);
+        graphics.fill(b.left(), footerTop, b.right(), footerTop + 1, 0xFF0A0A0A);
+        graphics.fill(b.left(), footerTop + 1, b.right(), footerTop + 2, 0x28FFFFFF);
 
         boolean live = this.node.isLive() && this.node.tier() == this.viewer.getCurrentTier();
         this.pinButton.visible = live;
@@ -169,23 +170,22 @@ final class ChallengeDetailsPanel extends ScrollPanel {
 
         List<ItemStack> targets = this.node.targets();
         if (!targets.isEmpty()) {
-            y += 2;
             int perRow = Math.max(1, width / ICON_SIZE);
             for (int i = 0; i < targets.size(); i++) {
                 int x = left + (i % perRow) * ICON_SIZE;
                 int iy = y + (i / perRow) * ICON_SIZE;
-                boolean hovered = this.isInScrollArea(mouseX, mouseY) && mouseX >= x && mouseX < x + TierTreePanel.SLOT_SIZE && mouseY >= iy && mouseY < iy + TierTreePanel.SLOT_SIZE;
+                boolean hovered = this.isInScrollArea(mouseX, mouseY) && mouseX >= x && mouseX < x + TierTreePanel.SMALL_SLOT_SIZE && mouseY >= iy && mouseY < iy + TierTreePanel.SMALL_SLOT_SIZE;
                 if (hovered) this.hoveredTarget = targets.get(i);
-                // Same outlined octagon slot as the challenge rows.
-                TierTreePanel.drawSlot(graphics, x, iy, 0xFF3A3A3A, hovered ? 0xFFFFFFFF : 0xFF9A9A9A);
+                TierTreePanel.drawSmallSlot(graphics, x, iy, 0xFF3A3A3A, hovered ? 0xFFFFFFFF : 0xFF9A9A9A);
                 graphics.item(targets.get(i), x + 2, iy + 2);
             }
-            y += this.iconsHeight(this.iconRows(width));
+            y += this.iconsHeight(this.iconRows(width)) + SECTION_GAP;
         }
 
-        y = this.drawLines(graphics, this.progress, left, y + SECTION_GAP, shadow);
-        TierTreePanel.drawProgressBar(graphics, left, y, Math.min(width, 120), this.node.progress());
-        this.drawLines(graphics, this.status, left, y + BAR_HEIGHT + SECTION_GAP, shadow);
+        y = this.drawLines(graphics, this.progress, left, y, shadow);
+        TierTreePanel.drawProgressBar(graphics, left, y, width, this.node.progress());
+        y += TierTreePanel.PROGRESS_BAR_HEIGHT;
+        if (!this.status.isEmpty()) this.drawLines(graphics, this.status, left, y + SECTION_GAP, shadow);
 
         if (this.hoveredTarget != null) {
             graphics.setTooltipForNextFrame(this.font, this.hoveredTarget.getHoverName(), mouseX, mouseY);

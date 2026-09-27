@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.config;
 
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
-import net.ixdarklord.ultimine_addition.client.gui.components.Panel;
+import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.ShapeSelectorScreen;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -31,7 +31,7 @@ public final class ConfigHandler {
         public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
         public static final ModConfigSpec.EnumValue<SkillsRecordScreen.OverlayColor> BACKGROUND_COLOR;
         public static final ModConfigSpec.ConfigValue<Boolean> ANIMATIONS_MODE;
-        public static final ModConfigSpec.EnumValue<Panel.Align> CHALLENGES_PANEL_ALIGNMENT;
+        public static final ModConfigSpec.EnumValue<ChallengesPanel.Align> CHALLENGES_PANEL_ALIGNMENT;
         public static final ModConfigSpec.BooleanValue SR_EDIT_MODE;
         public static final ModConfigSpec.BooleanValue MSC_RENDERER;
         public static final ModConfigSpec.BooleanValue TEXT_SCREEN_SHADOW;
@@ -69,7 +69,7 @@ public final class ConfigHandler {
 
             CHALLENGES_PANEL_ALIGNMENT = BUILDER
                     .comment("Determines the alignment of the challenges panel on the screen.")
-                    .defineEnum("challenges_panel_alignment", Panel.Align.LEFT);
+                    .defineEnum("challenges_panel_alignment", ChallengesPanel.Align.LEFT);
 
             MSC_RENDERER = BUILDER
                     .comment("Enables or disables the Mining Skill Card Renderer.",
