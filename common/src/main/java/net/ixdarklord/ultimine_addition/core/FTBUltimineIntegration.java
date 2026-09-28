@@ -2,6 +2,7 @@ package net.ixdarklord.ultimine_addition.core;
 
 import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import dev.ftb.mods.ftbultimine.api.restriction.RestrictionHandler;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import dev.ftb.mods.ftbultimine.api.util.CanUltimineResult;
@@ -278,9 +279,16 @@ public class FTBUltimineIntegration implements RestrictionHandler {
     }
 
     // FTB Ultimine keeps separate client/server shape registries (with distinct Shape instances). The no-arg
-    // helpers use the server registry, which is populated on every environment.
+    // helpers use the server registry, which only a server fills: a client connected to a dedicated server (tooltips,
+    // JEI) reads the client registry instead.
+    private static ShapeRegistry defaultRegistry() {
+        ShapeRegistry server = ShapeRegistry.getInstance(false);
+        if (!Platform.isClient() || !getShapesList(server).isEmpty()) return server;
+        return ShapeRegistry.getInstance(true);
+    }
+
     public static List<Shape> getShapesList() {
-        return getShapesList(ShapeRegistry.getInstance(false));
+        return getShapesList(defaultRegistry());
     }
 
     public static List<Shape> getShapesList(ShapeRegistry registry) {
@@ -289,7 +297,7 @@ public class FTBUltimineIntegration implements RestrictionHandler {
     }
 
     public static Shape getDefaultShape() {
-        return getDefaultShape(ShapeRegistry.getInstance(false));
+        return getDefaultShape(defaultRegistry());
     }
 
     public static Shape getDefaultShape(ShapeRegistry registry) {
@@ -298,7 +306,7 @@ public class FTBUltimineIntegration implements RestrictionHandler {
     }
 
     public static List<Shape> getEnabledShapes() {
-        return getEnabledShapes(ShapeRegistry.getInstance(false));
+        return getEnabledShapes(defaultRegistry());
     }
 
     public static List<Shape> getEnabledShapes(ShapeRegistry registry) {

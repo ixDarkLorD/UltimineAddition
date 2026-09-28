@@ -62,6 +62,8 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     private ItemStack displayItem;
     private @Nullable CardProgress legacy;
     private @Nullable CardProgress local;
+    // The stack's value this was loaded from, which keeps the temporary progress (see copy).
+    private @Nullable MiningSkillCardData source;
 
     private MiningSkillCardData(@NotNull UUID uuid, MiningSkillCardItem.Tier tier, ItemStack displayItem, @Nullable CardProgress legacy) {
         super(DATA_COMPONENT);
@@ -84,9 +86,21 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
         return stack;
     }
 
+    // A copy of the stack's value: a component value must never change in place. Vanilla tells a changed slot from the
+    // copy it last sent, and that copy shares the value, so a tier changed in place would never reach the client.
+    // Changes land when saved (save / writeComponent), as a new value.
     public static MiningSkillCardData load(ItemStack stack) {
         MiningSkillCardItem.Type type = stack.getItem() instanceof MiningSkillCardItem ? ((MiningSkillCardItem) stack.getItem()).getType() : MiningSkillCardItem.Type.EMPTY;
-        return stack.getOrDefault(DATA_COMPONENT, create(type)).setStack(stack);
+        MiningSkillCardData stored = stack.get(DATA_COMPONENT);
+        return (stored != null ? stored.copy() : create(type)).setStack(stack);
+    }
+
+    private MiningSkillCardData copy() {
+        MiningSkillCardData copy = new MiningSkillCardData(this.uuid, this.tier, this.displayItem.copy(), this.legacy);
+        // A card that isn't stored yet keeps its temporary progress between loads.
+        copy.local = this.local;
+        copy.source = this;
+        return copy;
     }
 
     public static boolean hasData(@NotNull ItemStack stack) {
@@ -98,7 +112,10 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
             CardProgress stored = CardStore.progress(this);
             if (stored != null) return stored;
         }
-        if (this.local == null) this.local = this.legacy != null ? this.legacy : new CardProgress();
+        if (this.local == null) {
+            this.local = this.legacy != null ? this.legacy : new CardProgress();
+            if (this.source != null && this.source.local == null) this.source.local = this.local;
+        }
         return this.local;
     }
 

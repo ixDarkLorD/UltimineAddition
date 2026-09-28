@@ -6,7 +6,7 @@ license = "${mod_license}"
 [[mods]]
 modId = "${modid}"
 displayName = "${mod_name}"
-version = "${mod_version}"
+version = "${mc_version}-${mod_version}"
 description = "${mod_description}"
 authors = "${mod_author}"
 logoFile = "mod_logo.png"
@@ -29,14 +29,14 @@ side = "BOTH"
 [[dependencies.${modid}]]
 modId = "coolcatcore"
 type = "required"
-versionRange = "[${coolcatlib_version},)"
+versionRange = "[${mc_version}-${coolcatlib_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${modid}]]
 modId = "coolcatcanvas"
 type = "required"
-versionRange = "[${coolcatlib_version},)"
+versionRange = "[${mc_version}-${coolcatlib_version},)"
 ordering = "NONE"
 side = "BOTH"
 

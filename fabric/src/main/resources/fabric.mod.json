@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "${modid}",
-  "version": "${mod_version}",
+  "version": "${mc_version}-${mod_version}",
 
   "name": "${mod_name}",
   "description": "${mod_description}",
@@ -37,8 +37,8 @@
     "minecraft": ">=${mc_version} <=${max_mc_version}",
     "fabricloader": ">=${min_fabric_version}",
     "fabric-api": ">=${min_fabric_api_version}",
-    "coolcatcore": ">=${coolcatlib_version}",
-    "coolcatcanvas": ">=${coolcatlib_version}",
+    "coolcatcore": ">=${mc_version}-${coolcatlib_version}",
+    "coolcatcanvas": ">=${mc_version}-${coolcatlib_version}",
     "ftbultimine": ">=${ftbultimine_version}"
   },
   "suggests": {
