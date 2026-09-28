@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.data.record;
 
-import dev.architectury.utils.GameInstance;
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
@@ -10,7 +10,7 @@ public final class CardStore {
     private CardStore() {}
 
     private static @Nullable MinecraftServer serverThread() {
-        MinecraftServer server = GameInstance.getServer();
+        MinecraftServer server = Platform.getServer();
         return server != null && server.isSameThread() ? server : null;
     }
 

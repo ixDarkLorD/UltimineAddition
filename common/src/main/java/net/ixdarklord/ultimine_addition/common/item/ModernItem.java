@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
 
-import net.ixdarklord.coolcatlib.api.item.ComponentItem;
+import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 
 public class ModernItem extends ComponentItem {
     public ModernItem(Properties properties, ComponentType componentType) {

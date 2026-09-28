@@ -43,6 +43,31 @@ public class ItemModelDataProvider implements DataProvider {
         this.simpleItem(cache, "pen", "minecraft:item/handheld", null);
         this.simpleItem(cache, "card_blueprint", "minecraft:item/generated", null);
         this.simpleItem(cache, "mining_skill_card_empty", "minecraft:item/generated", null);
+
+        // Shape Certificates: the tool's plaque (as on its Mining Skill Card) picked from the certificate's tool;
+        // custom card tools fall back to the plain certificate.
+        for (String tier : new String[]{"novice", "apprentice", "adept"}) {
+            String base = "shape_certificate_" + tier;
+            this.model(cache, base, "minecraft:item/generated", "item/" + base, null);
+            JsonArray cases = new JsonArray();
+            for (String type : CARD_TYPES) {
+                String name = base + "_" + type;
+                this.model(cache, name, "minecraft:item/generated", "item/" + name, null);
+                JsonObject when = new JsonObject();
+                when.addProperty("Tool", type);
+                JsonObject entry = new JsonObject();
+                entry.add("when", when);
+                entry.add("model", modelReference(name));
+                cases.add(entry);
+            }
+            JsonObject select = new JsonObject();
+            select.addProperty("type", "minecraft:select");
+            select.addProperty("property", "minecraft:component");
+            select.addProperty("component", FTBUltimineAddition.id("shape_certificate_data").toString());
+            select.add("cases", cases);
+            select.add("fallback", modelReference(base));
+            this.itemDefinition(cache, base, select);
+        }
         this.simpleItem(cache, "skills_record", "minecraft:item/handheld", heldToolDisplay());
         this.simpleItem(cache, "shape_selector", "minecraft:item/handheld", heldToolDisplay());
 

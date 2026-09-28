@@ -1,5 +1,7 @@
 package net.ixdarklord.ultimine_addition.integration.jei;
 
+import java.util.ArrayList;
+import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
@@ -7,7 +9,6 @@ import mezz.jei.api.registration.*;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -64,7 +65,16 @@ public class JEIIntegration implements IModPlugin {
 
         registration.addItemStackInfo(allCards, Component.translatable("jei.ultimine_addition.info.cards.grade_up"));
         registration.addItemStackInfo(masteredCards, Component.translatable("jei.ultimine_addition.info.cards.mastered"));
-        ConfigIngredientInfoRecipe.addConfigInfo(registration, ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), "jei.ultimine_addition.info.cards.obtain", ConfigHandler.COMMON.VILLAGER_CARD_TRADE_LEVEL);
+        for (ShapeCertificateItem certificate : ShapeCertificateItem.all()) {
+            List<ItemStack> stacks = new ArrayList<>();
+            for (var shape : ShapeCertificateItem.tierList(certificate.getTier())) {
+                for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
+                    if (type != MiningSkillCardItem.Type.EMPTY) stacks.add(certificate.create(type, shape));
+                }
+            }
+            registration.addItemStackInfo(stacks, Component.translatable("jei.ultimine_addition.info.shape_certificate", certificate.getTier().getDisplayName()));
+        }
+        registration.addItemStackInfo(ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), Component.translatable("jei.ultimine_addition.info.cards.obtain"));
     }
 
     @Override

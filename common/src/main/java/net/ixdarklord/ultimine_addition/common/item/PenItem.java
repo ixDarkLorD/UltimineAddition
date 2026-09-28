@@ -5,7 +5,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.server.level.ServerLevel;
 import java.util.function.Consumer;
 import net.minecraft.world.item.component.TooltipDisplay;
-import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.data.item.StorageItemData;
 import net.minecraft.ChatFormatting;

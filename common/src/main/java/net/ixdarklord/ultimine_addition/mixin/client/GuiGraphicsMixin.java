@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.mixin.client;
 
-import net.ixdarklord.coolcatlib.api.item.ComponentItem;
+import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -18,6 +18,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
+import net.minecraft.client.renderer.state.gui.GuiItemRenderState;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
@@ -50,5 +53,14 @@ abstract class GuiGraphicsMixin {
 
         this.setTooltipForNextFrameInternal(font, list, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, style, false);
         ci.cancel();
+    }
+
+    // Tags the item with the alpha set by ItemAlpha.draw (see GuiRendererMixin).
+    @ModifyArg(method = "item(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;III)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/state/gui/GuiRenderState;addItem(Lnet/minecraft/client/renderer/state/gui/GuiItemRenderState;)V"))
+    private GuiItemRenderState UA$tagItemAlpha(GuiItemRenderState state) {
+        float alpha = ItemAlpha.next();
+        if (alpha < 1.0F) ((ItemAlpha.Holder) (Object) state).ua$setAlpha(alpha);
+        return state;
     }
 }

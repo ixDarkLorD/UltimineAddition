@@ -1,10 +1,10 @@
 package net.ixdarklord.ultimine_addition.core;
 
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.permissions.PermissionCheck;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.Identifier;
@@ -27,32 +27,32 @@ public class FTBUltimineAddition {
 		return Identifier.fromNamespaceAndPath(MOD_ID, GUI_DIR + textureName + "." + fileType);
 	}
 
+    // The root is open to everyone (e.g. "config"); subcommands set their own permission.
     public static void withCommandPrompt(
             CommandDispatcher<CommandSourceStack> dispatcher,
-            PermissionCheck permission,
             Consumer<LiteralArgumentBuilder<CommandSourceStack>> builderConsumer) {
 
-        registerWithSuffix(dispatcher, permission, builderConsumer, "");
+        registerWithSuffix(dispatcher, null, builderConsumer, "");
     }
 
     public static void withClientCommandPrompt(
-            CommandDispatcher<ClientCommandRegistrationEvent.ClientCommandSourceStack> dispatcher,
+            CommandDispatcher<SharedSuggestionProvider> dispatcher,
             PermissionCheck permission,
-            Consumer<LiteralArgumentBuilder<ClientCommandRegistrationEvent.ClientCommandSourceStack>> builderConsumer) {
+            Consumer<LiteralArgumentBuilder<SharedSuggestionProvider>> builderConsumer) {
 
         registerWithSuffix(dispatcher, permission, builderConsumer, "_client");
     }
 
     private static <T extends SharedSuggestionProvider> void registerWithSuffix(
             CommandDispatcher<T> dispatcher,
-            PermissionCheck permission,
+            @Nullable PermissionCheck permission,
             Consumer<LiteralArgumentBuilder<T>> builderConsumer,
             String suffix) {
 
         String[] allies = {MOD_ID, "ua"};
         for (String ally : allies) {
             LiteralArgumentBuilder<T> builder = LiteralArgumentBuilder.literal(ally + suffix);
-            builderConsumer.accept(builder.requires(Commands.hasPermission(permission)));
+            builderConsumer.accept(permission == null ? builder : builder.requires(Commands.hasPermission(permission)));
             dispatcher.register(builder);
         }
     }

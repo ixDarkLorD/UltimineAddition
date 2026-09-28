@@ -16,5 +16,4 @@ public class SkillsRecordTooltip implements TooltipComponent {
         return this.items;
     }
 
-    public record Option(int buttonId, Component textComponent) implements TooltipComponent {}
 }

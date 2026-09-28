@@ -1,15 +1,15 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
+import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.server.level.ServerLevel;
 import java.util.function.Consumer;
 import net.minecraft.world.item.component.TooltipDisplay;
-import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
-import net.ixdarklord.coolcatlib.api.item.ComponentItem;
+import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
+import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.client.gui.tooltip.SkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
@@ -114,7 +114,7 @@ public class SkillsRecordItem extends ComponentItem {
     }
 
     public boolean isLegacyMode() {
-        return ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
+        return UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
     }
 
     @Override

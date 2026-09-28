@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.common.data.item;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.ixdarklord.coolcatlib.api.data.ItemDataComponent;
+import net.ixdarklord.coolcatcore.api.data.ItemDataComponent;
 import net.ixdarklord.ultimine_addition.common.item.StorageItem;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.RegistryFriendlyByteBuf;

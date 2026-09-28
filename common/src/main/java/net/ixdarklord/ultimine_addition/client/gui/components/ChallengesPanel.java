@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.components;
 
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import org.joml.Matrix3x2fStack;
 import net.minecraft.util.ARGB;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -10,17 +11,16 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.Consumer;
-import net.ixdarklord.coolcatlib.api.client.gui.components.animations.AnimatedComponent;
-import net.ixdarklord.coolcatlib.api.client.gui.components.animations.SlideAnimation;
-import net.ixdarklord.coolcatlib.api.client.gui.components.animations.SlideAnimation.Direction;
-import net.ixdarklord.coolcatlib.api.client.utils.RenderUtils;
-import net.ixdarklord.coolcatlib.api.client.utils.ScreenAnchor;
-import net.ixdarklord.coolcatlib.api.utils.ColorUtils;
-import net.ixdarklord.coolcatlib.api.utils.MathUtils;
+import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.AnimatedComponent;
+import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.SlideAnimation;
+import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.SlideAnimation.Direction;
+import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcanvas.api.client.utils.ScreenAnchor;
+import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
+import net.ixdarklord.coolcatcore.api.utils.MathUtils;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler.CLIENT;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -30,6 +30,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
@@ -85,12 +86,12 @@ public class ChallengesPanel implements LayoutElement {
     public void render(GuiGraphicsExtractor guiGraphics) {
         this.update();
         if (this.active) {
-            SkillsRecordScreen.OverlayColor overlayColor = CLIENT.BACKGROUND_COLOR.get();
+            SkillsRecordScreen.OverlayColor overlayColor = UAClientConfig.backgroundColor();
             if (!this.notifyPanel) {
                 guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_INDICATOR_TEXTURE, this.x + 5, this.y, 51, 10, ARGB.colorFromFloat(overlayColor.alpha(), overlayColor.red(), overlayColor.green(), overlayColor.blue()));
                 int spacing = 13 * this.slot;
                 double value = MathUtils.cycledBetweenValues(0.0F, 1.0F, 0.8F, this.time / 20.0F, false);
-                Color color = ColorUtils.blend(new Color(9036329), new Color(6991904), CLIENT.ANIMATIONS_MODE.get() ? value : (double)0.0F);
+                Color color = ColorUtils.blend(new Color(9036329), new Color(6991904), UAClientConfig.ANIMATIONS_MODE.get() ? value : (double)0.0F);
                 guiGraphics.fill(this.x + 8 + spacing, this.y + 3, this.x + 14 + spacing, this.y + 9, color.getRGB());
             }
 
@@ -235,7 +236,7 @@ public class ChallengesPanel implements LayoutElement {
         return copy;
     }
 
-    public enum Align implements StringRepresentable {
+    public enum Align implements StringRepresentable, EnumType.Displayable {
         TOP_LEFT(0, ScreenAnchor.TOP_LEFT),
         TOP_RIGHT(2, ScreenAnchor.TOP_RIGHT),
         LEFT(3, ScreenAnchor.LEFT),
@@ -267,6 +268,11 @@ public class ChallengesPanel implements LayoutElement {
 
         public @NotNull String getSerializedName() {
             return this.name().toLowerCase();
+        }
+
+        @Override
+        public Component displayName() {
+            return Component.translatable("gui.ultimine_addition.skills_record.option.panel_alignment." + this.getSerializedName());
         }
 
         public int getPosIndex() {

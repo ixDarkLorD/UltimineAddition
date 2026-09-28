@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.menu;
 
+import net.ixdarklord.coolcatcore.api.menu.ExtendedMenus;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
-import dev.architectury.registry.menu.MenuRegistry;
 import net.ixdarklord.ultimine_addition.common.data.record.CardSync;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordClientCache;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
@@ -80,7 +80,7 @@ public class SkillsRecordMenu extends AbstractContainerMenu {
 
         SkillsRecordSavedData storage = SkillsRecordSavedData.get(player.level().getServer());
         SkillsRecordData data = storage.resolve(stack);
-        MenuRegistry.openExtendedMenu(player, new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, data, hand), SkillsRecordItem.TITLE), buf -> {
+        ExtendedMenus.open(player, new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, data, hand), SkillsRecordItem.TITLE), buf -> {
             RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
             SkillsRecordData.STREAM_CODEC.encode(registryBuf, data);
             OPEN_CARDS_CODEC.encode(registryBuf, storage.createSyncsFor(data));

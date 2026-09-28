@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.datagen.particle;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -47,7 +48,7 @@ public abstract class ParticleProvider implements DataProvider {
     }
 
     public void add(SimpleParticleType particle, Identifier... texture) {
-        var particleName = Objects.requireNonNull(Registration.PARTICLE_TYPES.getRegistrar().getId(particle)).getPath();
+        var particleName = Objects.requireNonNull(BuiltInRegistries.PARTICLE_TYPE.getKey(particle)).getPath();
         if (data.containsKey(particleName)) {
             throw new IllegalStateException("Duplicate particle " + particleName);
         } else data.put(particleName, Arrays.stream(texture).toList());

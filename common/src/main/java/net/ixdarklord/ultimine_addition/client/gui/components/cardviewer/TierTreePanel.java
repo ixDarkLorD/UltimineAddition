@@ -1,7 +1,11 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.panel.ViewportPanel;
-import net.ixdarklord.coolcatlib.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcanvas.api.utils.Easing;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
+import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.ViewportPanel;
+import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeState;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
@@ -66,6 +70,7 @@ final class TierTreePanel extends ViewportPanel {
     private @Nullable CardTree tree;
     private MiningSkillCardItem.@Nullable Tier pendingFocus;
     private @Nullable ChallengeNode hoveredChallenge;
+    private @Nullable TierNode hoveredTier;
     private long revealStart = -1L;
     private long lastFrame = -1L;
     private float frameDelta;
@@ -132,6 +137,7 @@ final class TierTreePanel extends ViewportPanel {
         this.frameDelta = this.lastFrame < 0 ? 0.0F : Math.min((now - this.lastFrame) / 1000.0F, 0.1F);
         this.lastFrame = now;
         this.hoveredChallenge = null;
+        this.hoveredTier = null;
 
         this.drawBackground(graphics);
         if (this.tree == null) return;
@@ -140,6 +146,7 @@ final class TierTreePanel extends ViewportPanel {
         int index = 0;
         for (TierNode tier : this.tree.tiers) {
             boolean hovered = mouseInView && tier.contains(mouseX, mouseY);
+            if (hovered) this.hoveredTier = tier;
             this.drawTier(graphics, tier, this.hover("t" + tier.tier().ordinal(), hovered), this.reveal(index++));
 
             for (ChallengeNode challenge : tier.challenges()) {
@@ -167,7 +174,7 @@ final class TierTreePanel extends ViewportPanel {
         if (!this.animated() || this.revealStart < 0) return 1.0F;
         long elapsed = Util.getMillis() - this.revealStart - index * REVEAL_STEP_MS;
         float t = Mth.clamp(elapsed / (float) REVEAL_DURATION_MS, 0.0F, 1.0F);
-        return 1.0F - (1.0F - t) * (1.0F - t) * (1.0F - t); // ease-out cubic
+        return Easing.CUBIC_OUT.apply(t);
     }
 
     private void pushNodeTransform(GuiGraphicsExtractor graphics, float centerX, float centerY, float hover, float reveal) {
@@ -226,43 +233,74 @@ final class TierTreePanel extends ViewportPanel {
         }
     }
 
+    // Lines grow in with the node they lead to, using the same staggered reveal as the nodes.
     private void drawConnections(GuiGraphicsExtractor graphics) {
         List<TierNode> tiers = this.tree.tiers;
         int midY = CardTree.TIER_HEIGHT / 2;
         float t = time();
 
-        for (int i = 0; i + 1 < tiers.size(); i++) {
-            TierNode from = tiers.get(i), to = tiers.get(i + 1);
-            int start = from.x() + CardTree.TIER_WIDTH, end = to.x() - BADGE_SIZE / 2;
-            boolean open = to.state() != TierState.LOCKED;
-            if (open) {
-                graphics.fill(start, midY - 1, end, midY + 1, LINE_DONE);
-                this.drawPulses(graphics, start, end, midY - 1, true, t + i * 0.37F);
-            } else {
-                for (int x = start; x < end; x += 7) graphics.fill(x, midY - 1, Math.min(x + 4, end), midY + 1, LINE_LOCKED);
-            }
-            // Even-sized so it centers on the 2px line.
-            int jointX = (start + end) / 2 - 4;
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, JOINT, jointX, midY - 4, 8, 8, open ? 0xFF8FE08F : 0xFF5A5A5A);
+        int[] firstIndex = new int[tiers.size()];
+        for (int i = 0, index = 0; i < tiers.size(); i++) {
+            firstIndex[i] = index;
+            index += 1 + tiers.get(i).challenges().size();
         }
 
-        for (TierNode tier : tiers) {
+        for (int i = 0; i + 1 < tiers.size(); i++) {
+            float reveal = this.reveal(firstIndex[i + 1]);
+            if (reveal <= 0.0F) continue;
+            TierNode from = tiers.get(i), to = tiers.get(i + 1);
+            int start = from.x() + CardTree.TIER_WIDTH, end = to.x() - BADGE_SIZE / 2;
+            int grown = start + Math.round((end - start) * reveal);
+            boolean open = to.state() != TierState.LOCKED;
+            if (open) {
+                graphics.fill(start, midY - 1, grown, midY + 1, ARGB.multiplyAlpha(LINE_DONE, reveal));
+                if (reveal >= 1.0F) this.drawPulses(graphics, start, end, midY - 1, true, t + i * 0.37F);
+            } else {
+                for (int x = start; x < grown; x += 7) graphics.fill(x, midY - 1, Math.min(x + 4, grown), midY + 1, ARGB.multiplyAlpha(LINE_LOCKED, reveal));
+            }
+            // Even-sized so it centers on the 2px line; shows once the line has reached the middle.
+            float joint = Mth.clamp((reveal - 0.5F) * 2.0F, 0.0F, 1.0F);
+            if (joint > 0.0F) {
+                int jointX = (start + end) / 2 - 4;
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, JOINT, jointX, midY - 4, 8, 8, ARGB.multiplyAlpha(open ? 0xFF8FE08F : 0xFF5A5A5A, joint));
+            }
+        }
+
+        for (int i = 0; i < tiers.size(); i++) {
+            TierNode tier = tiers.get(i);
             if (tier.challenges().isEmpty()) continue;
+            float tierReveal = this.reveal(firstIndex[i]);
+            if (tierReveal <= 0.0F) continue;
             // Hangs from the badge's bottom tip, which sits on the box's left edge.
             int trunkX = tier.x() - 1;
             int trunkTop = tier.y() + (CardTree.TIER_HEIGHT + BADGE_SIZE) / 2 - 1;
-            ChallengeNode last = tier.challenges().getLast();
-            int trunkBottom = last.y() + CardTree.ROW_BOX_HEIGHT / 2 + 1;
             boolean done = tier.state() == TierState.COMPLETED;
-            graphics.fill(trunkX, trunkTop, trunkX + 2, trunkBottom, done ? LINE_DONE : LINE_OPEN);
-            if (tier.state() == TierState.CURRENT) this.drawPulses(graphics, trunkTop, trunkBottom, trunkX, false, t);
+            boolean current = tier.state() == TierState.CURRENT;
+            boolean settled = this.reveal(firstIndex[i] + tier.challenges().size()) >= 1.0F;
 
-            for (ChallengeNode row : tier.challenges()) {
+            // The trunk reaches down row by row as each row appears.
+            int trunkBottom = trunkTop;
+            for (int j = 0; j < tier.challenges().size(); j++) {
+                float rowReveal = this.reveal(firstIndex[i] + 1 + j);
+                if (rowReveal <= 0.0F) break;
+                int rowY = tier.challenges().get(j).y() + CardTree.ROW_BOX_HEIGHT / 2 + 1;
+                trunkBottom += Math.round((rowY - trunkBottom) * rowReveal);
+            }
+            if (trunkBottom > trunkTop) {
+                graphics.fill(trunkX, trunkTop, trunkX + 2, trunkBottom, ARGB.multiplyAlpha(done ? LINE_DONE : LINE_OPEN, tierReveal));
+                if (current && settled) this.drawPulses(graphics, trunkTop, trunkBottom, trunkX, false, t);
+            }
+
+            for (int j = 0; j < tier.challenges().size(); j++) {
+                ChallengeNode row = tier.challenges().get(j);
+                float rowReveal = this.reveal(firstIndex[i] + 1 + j);
+                if (rowReveal <= 0.0F) continue;
                 int y = row.y() + CardTree.ROW_BOX_HEIGHT / 2 - 1;
                 boolean rowDone = row.state() == ChallengeState.COMPLETED;
-                graphics.fill(trunkX, y, row.x() + 1, y + 2, rowDone ? LINE_DONE : LINE_OPEN);
-                if (tier.state() == TierState.CURRENT) this.drawBranchPulse(graphics, trunkX, row.x() + 1, y, y - trunkTop, t);
-                graphics.fill(trunkX - 1, y - 1, trunkX + 3, y + 3, rowDone ? 0xFF8FE08F : 0xFF9A9A9A);
+                int branchEnd = trunkX + Math.round((row.x() + 1 - trunkX) * rowReveal);
+                graphics.fill(trunkX, y, branchEnd, y + 2, ARGB.multiplyAlpha(rowDone ? LINE_DONE : LINE_OPEN, rowReveal));
+                if (current && settled) this.drawBranchPulse(graphics, trunkX, row.x() + 1, y, y - trunkTop, t);
+                graphics.fill(trunkX - 1, y - 1, trunkX + 3, y + 3, ARGB.multiplyAlpha(rowDone ? 0xFF8FE08F : 0xFF9A9A9A, rowReveal));
             }
         }
     }
@@ -301,7 +339,7 @@ final class TierTreePanel extends ViewportPanel {
             case CURRENT -> {
                 fill = 0xFF2A2F3A;
                 float pulse = this.animated() ? (Mth.sin(time() * 3.3F) + 1.0F) / 2.0F : 1.0F;
-                border = ARGB.srgbLerp(pulse, 0xFF7A8AA0, ARGB.opaque(this.viewer.getAccentColor()));
+                border = ARGB.srgbLerp(pulse, 0xFF7A8AA0, 0xFFB4D2FF);
             }
             default -> { fill = 0xFF1C1C1C; border = 0xFF454545; }
         }
@@ -331,6 +369,15 @@ final class TierTreePanel extends ViewportPanel {
         if (node.state() == TierState.LOCKED) name = name.copy().withStyle(ChatFormatting.DARK_GRAY);
         graphics.text(this.font, name, textX, y + 7, ARGB.multiplyAlpha(RenderUtils.textColor(0xFFFFFF), reveal), shadow);
         graphics.text(this.font, this.tierStatus(node), textX, y + 18, ARGB.multiplyAlpha(RenderUtils.textColor(0xAAAAAA), reveal), shadow);
+
+        // An unclaimed Shape Certificate waits on the box's right, glowing gold.
+        ItemStack reward = this.viewer.claimableCertificate(node);
+        if (!reward.isEmpty()) {
+            float glow = this.animated() ? (Mth.sin(time() * 4.0F) + 1.0F) / 2.0F : 1.0F;
+            int sx = x + w - SMALL_SLOT_SIZE - 5, sy = y + (h - SMALL_SLOT_SIZE) / 2;
+            drawSmallSlot(graphics, sx, sy, ARGB.multiplyAlpha(ARGB.srgbLerp(glow, 0xFF3A2E12, 0xFF6A5420), reveal), ARGB.multiplyAlpha(ARGB.srgbLerp(glow, 0xFFB08A30, MASTERED_GOLD), reveal));
+            if (reveal > 0.5F) graphics.item(reward, sx + (SMALL_SLOT_SIZE - 16) / 2, sy + (SMALL_SLOT_SIZE - 16) / 2);
+        }
         graphics.pose().popMatrix();
     }
 
@@ -440,6 +487,9 @@ final class TierTreePanel extends ViewportPanel {
     protected void extractViewForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         if (this.hoveredChallenge != null) {
             graphics.setTooltipForNextFrame(this.font, this.viewer.describeChallenge(this.hoveredChallenge), mouseX, mouseY);
+        } else if (this.hoveredTier != null) {
+            ItemStack reward = this.viewer.claimableCertificate(this.hoveredTier);
+            if (!reward.isEmpty()) graphics.setTooltipForNextFrame(this.font, this.viewer.describeCertificate(this.hoveredTier, reward), mouseX, mouseY);
         }
     }
 
@@ -448,6 +498,14 @@ final class TierTreePanel extends ViewportPanel {
         if (this.tree == null) return false;
         for (TierNode tier : this.tree.tiers) {
             if (tier.contains(worldX, worldY)) {
+                ItemStack reward = this.viewer.claimableCertificate(tier);
+                if (!reward.isEmpty()) {
+                    if (this.viewer.hasRoomFor(reward)) {
+                        this.viewer.openShapeChoice(tier);
+                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    }
+                    return true;
+                }
                 ScreenRectangle b = this.getBounds();
                 this.centerOn(tier.centerX(), this.toWorldY(b.top() + b.height() / 2.0));
                 return true;

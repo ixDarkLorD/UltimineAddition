@@ -6,8 +6,8 @@
   "for_card_tier": 3,
   "for_card_type": "shovel",
   "required_amount": {
-    "max": 512,
-    "min": 256
+    "max": 256,
+    "min": 128
   },
   "targeted_blocks": [
     "minecraft:sand"

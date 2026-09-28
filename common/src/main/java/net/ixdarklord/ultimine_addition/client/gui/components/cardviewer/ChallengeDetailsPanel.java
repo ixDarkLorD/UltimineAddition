@@ -1,7 +1,9 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.panel.ScrollPanel;
-import net.ixdarklord.coolcatlib.api.client.utils.RenderUtils;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.ChatFormatting;
+import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.ScrollPanel;
+import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -30,6 +32,8 @@ final class ChallengeDetailsPanel extends ScrollPanel {
     private final ViewerButton backButton;
     private final ViewerButton pinButton;
     private final ViewerButton editButton;
+    private final ViewerButton rerollButton;
+    private String rerollTooltip = "";
     private @Nullable ChallengeNode node;
     private List<FormattedCharSequence> description = List.of();
     private List<FormattedCharSequence> progress = List.of();
@@ -48,6 +52,9 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         }));
         this.editButton = this.addChild(new ViewerButton(36, Component.translatable("gui.ultimine_addition.card_viewer.edit"), b -> {
             if (this.node != null && this.node.id() != null) viewer.editChallenge(this.node.id());
+        }));
+        this.rerollButton = this.addChild(new ViewerButton(40, Component.translatable("gui.ultimine_addition.card_viewer.reroll"), b -> {
+            if (this.node != null && this.node.id() != null) viewer.rerollChallenge(this.node.id());
         }));
     }
 
@@ -85,7 +92,7 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         ScreenRectangle b = this.getBounds();
         int y = b.bottom() - FOOTER + (FOOTER + 2 - 12) / 2;
         int x = b.right() - PADDING;
-        for (ViewerButton button : List.of(this.backButton, this.editButton, this.pinButton)) {
+        for (ViewerButton button : List.of(this.backButton, this.editButton, this.pinButton, this.rerollButton)) {
             if (!button.visible) continue;
             x -= button.getWidth();
             button.setPosition(x, y);
@@ -158,7 +165,24 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         this.pinButton.visible = live;
         this.pinButton.setMessage(Component.translatable(this.node.pinned() ? "gui.ultimine_addition.card_viewer.unpin" : "gui.ultimine_addition.card_viewer.pin"));
         this.editButton.visible = live && this.viewer.canEdit();
+        this.updateRerollButton(live);
         this.layoutButtons();
+    }
+
+    private void updateRerollButton(boolean live) {
+        CardViewerWidget.RerollInfo info = live && this.node != null ? this.viewer.rerollInfo(this.node) : null;
+        this.rerollButton.visible = info != null;
+        if (info == null) return;
+        this.rerollButton.active = info.blocked() == null;
+
+        Component tooltip = Component.translatable("gui.ultimine_addition.card_viewer.reroll.info")
+                .append("\n").append(Component.translatable("gui.ultimine_addition.card_viewer.reroll.cost", info.cost(), info.left()).withStyle(ChatFormatting.GRAY));
+        if (info.blocked() != null) tooltip = tooltip.copy().append("\n").append(info.blocked());
+        String key = tooltip.getString();
+        if (!key.equals(this.rerollTooltip)) {
+            this.rerollTooltip = key;
+            this.rerollButton.setTooltip(Tooltip.create(tooltip));
+        }
     }
 
     @Override

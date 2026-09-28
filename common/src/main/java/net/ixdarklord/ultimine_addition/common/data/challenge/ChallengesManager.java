@@ -1,14 +1,14 @@
 package net.ixdarklord.ultimine_addition.common.data.challenge;
 
+import net.ixdarklord.coolcatcore.api.platform.Platform;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.util.ExtraCodecs;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
-import dev.architectury.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -75,7 +75,7 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener<JsonElem
                 randomValues.put(randomKey, challenges.get(randomKey));
             }
         }
-        if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
+        if (UAServerConfig.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
             LOGGER.debug("/----------[Challenge Tracker]-----------/");
             LOGGER.debug("| Added Challenges:");
             randomValues.forEach((location, data) -> LOGGER.debug("|> ID: {}", location));

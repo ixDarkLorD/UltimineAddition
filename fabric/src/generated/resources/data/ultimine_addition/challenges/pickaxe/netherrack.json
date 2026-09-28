@@ -6,8 +6,8 @@
   "for_card_tier": 2,
   "for_card_type": "pickaxe",
   "required_amount": {
-    "max": 350,
-    "min": 128
+    "max": 175,
+    "min": 64
   },
   "targeted_blocks": [
     "minecraft:netherrack"

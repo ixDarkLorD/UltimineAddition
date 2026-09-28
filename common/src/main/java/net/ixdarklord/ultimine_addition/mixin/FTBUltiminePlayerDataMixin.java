@@ -4,13 +4,15 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.ftb.mods.ftbultimine.FTBUltiminePlayerData;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import dev.ftb.mods.ftbultimine.shape.ShapeRegistry;
-import net.ixdarklord.coolcatlib.api.hooks.ServerLifecycleHooks;
+import net.ixdarklord.coolcatcore.api.hooks.ServerLifecycleHooks;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
@@ -24,20 +26,23 @@ public abstract class FTBUltiminePlayerDataMixin {
 
     @ModifyReturnValue(method = "getCurrentShape", at = @At(value = "RETURN"), remap=false)
     private Shape UA$ModifyReturn$getCurrentShape(Shape original) {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        if (server != null) {
-            ServerPlayer player = server.getPlayerList().getPlayer(playerId);
-            if (player != null && FTBUltimineIntegration.hasToolWithShape(player)) {
-                return FTBUltimineIntegration.getToolShape(player);
-            }
+        ServerPlayer player = this.UA$getPlayer();
+        ShapeRegistry registry = ShapeRegistry.getInstance(false);
+        if (player != null && FTBUltimineIntegration.hasToolWithShape(player)) {
+            Shape toolShape = FTBUltimineIntegration.getToolShape(player);
+            if (FTBUltimineIntegration.getAvailableShapes(player, registry).contains(toolShape)) return toolShape;
         }
-        return FTBUltimineIntegration.getEnabledShapes(this.shapeIndex);
+        return FTBUltimineIntegration.getAvailableShape(player, registry, this.shapeIndex);
     }
 
     @Redirect(method = "cycleShape", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/shape/ShapeRegistry;shapeCount()I"), remap=false)
     public int UA$Redirect$cycleShape(ShapeRegistry instance) {
-        return FTBUltimineIntegration.getEnabledShapes().size();
+        return FTBUltimineIntegration.getAvailableShapes(this.UA$getPlayer(), instance).size();
     }
 
-
+    @Unique
+    private @Nullable ServerPlayer UA$getPlayer() {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        return server == null ? null : server.getPlayerList().getPlayer(this.playerId);
+    }
 }

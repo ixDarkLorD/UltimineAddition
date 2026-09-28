@@ -1,13 +1,13 @@
 package net.ixdarklord.ultimine_addition.client.gui.hud;
 
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
+import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
-import net.ixdarklord.coolcatlib.api.client.gui.components.animations.AnimatedComponent;
+import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.AnimatedComponent;
 import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesPanel;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler.CLIENT;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler.COMMON;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
@@ -26,7 +26,6 @@ import java.util.*;
 public final class ChallengesPanelManager {
     public static ChallengesPanelManager INSTANCE = new ChallengesPanelManager();
     private final Map<ChallengesPanel.Key, ChallengesPanel> panelMap = new TreeMap<>();
-    private ChallengesPanel.Align panelAlign;
     private final int panelPadding = 4;
 
     // Looked up on use: this class is loaded during mod setup, before the Minecraft instance exists.
@@ -39,10 +38,7 @@ public final class ChallengesPanelManager {
     }
 
     public void render(GuiGraphicsExtractor guiGraphics, DeltaTracker ignored) {
-        if (COMMON.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
-            if (this.panelAlign == null) {
-                this.panelAlign = CLIENT.CHALLENGES_PANEL_ALIGNMENT.get();
-            }
+        if (UAStartupConfig.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
 
             Window window = this.mc().getWindow();
             Player player = this.mc().player;
@@ -215,13 +211,13 @@ public final class ChallengesPanelManager {
         LinearLayout layout = LinearLayout.vertical().spacing(panelPadding);
         this.panelMap.values().stream().filter(ChallengesPanel::isActive).forEach(layout::addChild);
         layout.arrangeElements();
-        int baseX = this.panelAlign.toScreenPos().getX(window.getGuiScaledWidth(), layout.getWidth(), 4);
-        int baseY = this.panelAlign.toScreenPos().getY(window.getGuiScaledHeight(), layout.getHeight(), 4);
+        int baseX = this.getPanelAlignment().toScreenPos().getX(window.getGuiScaledWidth(), layout.getWidth(), 4);
+        int baseY = this.getPanelAlignment().toScreenPos().getY(window.getGuiScaledHeight(), layout.getHeight(), 4);
         layout.setPosition(baseX, baseY);
 
         for(ChallengesPanel panel : this.panelMap.values()) {
             AnimatedComponent anim = panel.getAnimatedComponent();
-            AnimatedComponent.Position positions = anim.getRelativePosition(this.panelAlign.toScreenPos(), panel.getX(), panel.getY(), panel.getWidth(), panel.getHeight(), 4);
+            AnimatedComponent.Position positions = anim.getRelativePosition(this.getPanelAlignment().toScreenPos(), panel.getX(), panel.getY(), panel.getWidth(), panel.getHeight(), 4);
             panel.setPosition(positions.x(), positions.y());
         }
 
@@ -258,12 +254,8 @@ public final class ChallengesPanelManager {
         return (int)this.panelMap.values().stream().filter(ChallengesPanel::isInactive).count();
     }
 
-    public void cycleAlignment(boolean next) {
-        this.panelAlign = next ? this.panelAlign.next() : this.panelAlign.previous();
-    }
-
     public ChallengesPanel.Align getPanelAlignment() {
-        return this.panelAlign;
+        return UAClientConfig.CHALLENGES_PANEL_ALIGNMENT.get();
     }
 
     private boolean notContainPanel(UUID uuid, int slotIndex) {

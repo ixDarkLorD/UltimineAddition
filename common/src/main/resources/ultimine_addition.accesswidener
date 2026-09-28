@@ -8,3 +8,6 @@ accessible field net/minecraft/world/effect/MobEffectInstance duration I
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
 accessible field net/minecraft/client/renderer/item/ItemModels ID_MAPPER Lnet/minecraft/util/ExtraCodecs$LateBoundIdMapper;
 accessible field net/minecraft/client/renderer/item/properties/conditional/ConditionalItemModelProperties ID_MAPPER Lnet/minecraft/util/ExtraCodecs$LateBoundIdMapper;
+
+# Creative tab contents (the displayItems lambda takes an Output)
+accessible class net/minecraft/world/item/CreativeModeTab$Output

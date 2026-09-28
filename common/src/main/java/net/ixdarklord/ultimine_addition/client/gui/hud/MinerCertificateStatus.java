@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.hud;
 
-import net.ixdarklord.coolcatlib.api.utils.ChatFormattingUtils;
+import net.ixdarklord.coolcatcore.api.utils.ChatFormattingUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;

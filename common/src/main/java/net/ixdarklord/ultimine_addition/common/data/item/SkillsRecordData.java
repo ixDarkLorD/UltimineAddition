@@ -1,5 +1,9 @@
 package net.ixdarklord.ultimine_addition.common.data.item;
 
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
+import net.ixdarklord.ultimine_addition.common.progression.ChallengeBoosts;
+import net.ixdarklord.ultimine_addition.common.progression.ProgressionRewards;
+import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -13,7 +17,6 @@ import net.ixdarklord.ultimine_addition.common.item.PenItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -174,9 +177,9 @@ public final class SkillsRecordData {
             boolean isCorrectAction = challengeData.challengeType().equals(challengeType) || challengeData.challengeType().equals(challengeType.getConsumeVersion());
             boolean isValidBlock = blocks.contains(state.getBlock());
             boolean isCorrectTool = !hasCorrectGamemode || ChallengesManager.INSTANCE.isCorrectTool(player, challengeData);
-            boolean isBlockPlacedByEntity = ConfigHandler.SERVER.IS_PLACED_BY_ENTITY_CONDITION.get() && hasCorrectGamemode && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY) && savedData.isBlockPlacedByEntity(pos);
+            boolean isBlockPlacedByEntity = UAServerConfig.IS_PLACED_BY_ENTITY_CONDITION.get() && hasCorrectGamemode && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY) && savedData.isBlockPlacedByEntity(pos);
 
-            if (ConfigHandler.SERVER.CHALLENGE_ACTIONS_LOGGER.get()) {
+            if (UAServerConfig.CHALLENGE_ACTIONS_LOGGER.get()) {
                 LOGGER.debug("/----------[Challenge Tracker]----------/");
                 LOGGER.debug("Challenge Id: {}", challengeId);
                 LOGGER.debug("hasCorrectGamemode: {}", hasCorrectGamemode);
@@ -198,16 +201,16 @@ public final class SkillsRecordData {
                 continue;
             }
 
-            if (challengeData.challengeType().isConsuming()) {
-                if (!this.consumeMode) continue;
-                cardData.addAmount(challengeId, 1).save();
-                if (hasCorrectGamemode) this.consumeContents();
-                return Pair.of(true, true);
-            }
+            boolean consuming = challengeData.challengeType().isConsuming();
+            if (consuming && !this.consumeMode) continue;
 
-            cardData.addAmount(challengeId, 1).save();
+            MiningSkillCardItem.Tier before = cardData.getTier();
+            int points = 1;
+            if (hasCorrectGamemode) points += ChallengeBoosts.bonusPoints(player, challengeId, pos, state.getBlock().asItem().getDefaultInstance());
+            cardData.addAmount(challengeId, points).save();
+            ProgressionRewards.checkTierUp(player, cardData, before);
             if (hasCorrectGamemode) this.consumeContents();
-            return Pair.of(true, false);
+            return Pair.of(true, consuming);
         }
         return Pair.of(false, false);
     }
@@ -229,6 +232,13 @@ public final class SkillsRecordData {
         return this;
     }
 
+    public void consumeInk(int amount) {
+        ItemStack pen = this.getPenSlot();
+        if (amount > 0 && pen.getItem() instanceof PenItem item) {
+            item.getData(pen).removeAmount(amount).save();
+        }
+    }
+
     private void consumeContents() {
         ItemStack pen = this.getPenSlot();
         ItemStack paper = this.getPaperSlot();
@@ -236,7 +246,7 @@ public final class SkillsRecordData {
         if (pen.getItem() instanceof PenItem item) {
             item.getData(pen).removeAmount(1).save();
         }
-        if (paper.is(Items.PAPER) && ThreadLocalRandom.current().nextDouble() < ConfigHandler.SERVER.PAPER_CONSUMPTION_RATE.get()) {
+        if (paper.is(Items.PAPER) && ThreadLocalRandom.current().nextDouble() < UAServerConfig.PAPER_CONSUMPTION_RATE.get()) {
             paper.shrink(1);
         }
     }

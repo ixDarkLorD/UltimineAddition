@@ -27,14 +27,14 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${modid}]]
-modId = "architectury"
+modId = "coolcatcore"
 type = "required"
-versionRange = "[${versions.architectury.get()},)"
+versionRange = "[${coolcatlib_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${modid}]]
-modId = "coolcatlib"
+modId = "coolcatcanvas"
 type = "required"
 versionRange = "[${coolcatlib_version},)"
 ordering = "NONE"

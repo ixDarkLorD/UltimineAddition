@@ -3,7 +3,7 @@ package net.ixdarklord.ultimine_addition.common.item;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.ixdarklord.coolcatlib.api.item.ComponentItem;
+import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 
@@ -11,6 +11,15 @@ public class ModItems {
     public static final MinerCertificateItem MINER_CERTIFICATE = new MinerCertificateItem(properties("miner_certificate")
             .stacksTo(1)
             .rarity(Rarity.EPIC));
+    public static final ShapeCertificateItem SHAPE_CERTIFICATE_NOVICE = new ShapeCertificateItem(MiningSkillCardItem.Tier.Novice, properties("shape_certificate_novice")
+            .stacksTo(16)
+            .rarity(Rarity.UNCOMMON));
+    public static final ShapeCertificateItem SHAPE_CERTIFICATE_APPRENTICE = new ShapeCertificateItem(MiningSkillCardItem.Tier.Apprentice, properties("shape_certificate_apprentice")
+            .stacksTo(16)
+            .rarity(Rarity.RARE));
+    public static final ShapeCertificateItem SHAPE_CERTIFICATE_ADEPT = new ShapeCertificateItem(MiningSkillCardItem.Tier.Adept, properties("shape_certificate_adept")
+            .stacksTo(16)
+            .rarity(Rarity.RARE));
     public static final SkillsRecordItem SKILLS_RECORD = new SkillsRecordItem(properties("skills_record")
             .stacksTo(1));
     public static final ShapeSelectorItem SHAPE_SELECTOR = new ShapeSelectorItem(properties("shape_selector")

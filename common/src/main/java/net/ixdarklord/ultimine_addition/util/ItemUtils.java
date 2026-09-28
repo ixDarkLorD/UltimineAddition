@@ -5,7 +5,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.core.component.DataComponents;
 import com.mojang.serialization.Codec;
 import com.google.common.collect.Lists;
-import net.ixdarklord.coolcatlib.api.utils.SlotReference;
+import net.ixdarklord.coolcatcore.api.utils.SlotReference;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
@@ -25,6 +25,7 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -193,6 +194,21 @@ public class ItemUtils {
     public static boolean isItemInHandHoe(Player player) {
         ItemStack stack = getItemInHand(player, true);
         return isItemInHandPaxel(player) || stack.is(ItemTags.HOES) || stack.getItem() instanceof HoeItem;
+    }
+
+    // The Mining Skill Card types whose tools include this item (a paxel counts for all four).
+    public static List<MiningSkillCardItem.Type> getToolTypes(ItemStack stack) {
+        List<MiningSkillCardItem.Type> types = new ArrayList<>();
+        if (stack.isEmpty()) return types;
+        boolean paxel = ServicePlatform.get().players().isToolPaxel(stack);
+        if (paxel || stack.is(ItemTags.PICKAXES)) types.add(MiningSkillCardItem.Type.PICKAXE);
+        if (paxel || stack.is(ItemTags.AXES) || stack.getItem() instanceof AxeItem) types.add(MiningSkillCardItem.Type.AXE);
+        if (paxel || stack.is(ItemTags.SHOVELS) || stack.getItem() instanceof ShovelItem) types.add(MiningSkillCardItem.Type.SHOVEL);
+        if (paxel || stack.is(ItemTags.HOES) || stack.getItem() instanceof HoeItem) types.add(MiningSkillCardItem.Type.HOE);
+        for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
+            if (type.isCustomType() && type.utilizeRequiredTools().contains(stack.getItem())) types.add(type);
+        }
+        return types;
     }
 
     public static boolean isItemInHandPaxel(Player player) {

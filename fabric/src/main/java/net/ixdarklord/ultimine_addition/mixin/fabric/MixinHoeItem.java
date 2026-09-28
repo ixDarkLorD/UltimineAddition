@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.mixin.fabric;
 
+import net.ixdarklord.coolcatcore.api.event.v2.core.EventResultHolder;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import dev.architectury.event.CompoundEventResult;
 import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationEvent;
 import net.ixdarklord.ultimine_addition.util.ToolActions;
 import net.minecraft.core.BlockPos;
@@ -26,8 +26,8 @@ abstract class MixinHoeItem {
         return (context) -> {
             Level level = context.getLevel();
             BlockPos pos = context.getClickedPos();
-            CompoundEventResult<BlockState> result = BlockToolModificationEvent.EVENT.invoker().modify(level.getBlockState(context.getClickedPos()), context, ToolActions.HOE_TILL, false);
-            BlockState modified = result.object() != null ? result.object() : state;
+            EventResultHolder<BlockState> result = BlockToolModificationEvent.EVENT.invoker().modify(level.getBlockState(context.getClickedPos()), context, ToolActions.HOE_TILL, false);
+            BlockState modified = result.getValue().orElse(state);
             level.setBlock(pos, modified, 11);
             level.gameEvent(GameEvent.BLOCK_CHANGE, pos, Context.of(context.getPlayer(), modified));
         };
@@ -38,8 +38,8 @@ abstract class MixinHoeItem {
         return (context) -> {
             Level level = context.getLevel();
             BlockPos pos = context.getClickedPos();
-            CompoundEventResult<BlockState> result = BlockToolModificationEvent.EVENT.invoker().modify(level.getBlockState(context.getClickedPos()), context, ToolActions.HOE_TILL, false);
-            BlockState modified = result.object() != null ? result.object() : state;
+            EventResultHolder<BlockState> result = BlockToolModificationEvent.EVENT.invoker().modify(level.getBlockState(context.getClickedPos()), context, ToolActions.HOE_TILL, false);
+            BlockState modified = result.getValue().orElse(state);
             level.setBlock(pos, modified, 11);
             level.gameEvent(GameEvent.BLOCK_CHANGE, pos, Context.of(context.getPlayer(), modified));
             Block.popResourceFromFace(level, pos, context.getClickedFace(), new ItemStack(itemToDrop));

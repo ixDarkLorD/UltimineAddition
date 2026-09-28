@@ -1,18 +1,20 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
+import net.ixdarklord.coolcatcore.api.config.type.EnumType;
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.ARGB;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.renderer.RenderPipelines;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
-import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
-import net.ixdarklord.coolcatlib.api.client.utils.RenderUtils;
-import net.ixdarklord.coolcatlib.api.utils.ColorUtils;
+import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
+import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.ultimine_addition.client.gui.components.ColoredButton;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
 import net.ixdarklord.ultimine_addition.common.menu.ShapeSelectorMenu;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.Registration;
@@ -66,7 +68,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
     @Override
     protected void init() {
         // Set before the first frame: 26.1 draws the background before extractRenderState runs.
-        this.color = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
+        this.color = UAClientConfig.backgroundColor();
         super.init();
 
         this.titleLabelX = 6;
@@ -76,12 +78,12 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
         this.filterButton = this.addWidget(new ColoredButton(this.leftPos + 165, this.topPos + 4, 9, 9, SkillsRecordScreen.CONFIGURATION_BUTTON_SPRITES,
                 button -> {
-                    Filter filter = ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.get();
-                    ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.set(Minecraft.getInstance().hasShiftDown() ? filter.previous() : filter.next());
-                    ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.save();
+                    Filter filter = UAClientConfig.SHAPE_SELECTOR_FILTER.get();
+                    UAClientConfig.SHAPE_SELECTOR_FILTER.set(Minecraft.getInstance().hasShiftDown() ? filter.previous() : filter.next());
+                    UAClientConfig.CONFIG.save();
                     this.selectBox.refreshList();
                 }, Component.empty(), tooltipInfo -> {
-            MutableComponent filterComponent = ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.get() == Filter.ALL
+            MutableComponent filterComponent = UAClientConfig.SHAPE_SELECTOR_FILTER.get() == Filter.ALL
                     ? Component.translatable("gui.ultimine_addition.filter.all")
                     : Component.translatable("gui.ultimine_addition.filter.only_enabled");
 
@@ -175,10 +177,14 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.color = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
+        this.color = UAClientConfig.backgroundColor();
         this.update();
         super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
         this.filterButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    private Player mc() {
+        return Objects.requireNonNull(Objects.requireNonNull(this.minecraft).player);
     }
 
     @Override
@@ -194,6 +200,9 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         } else if (entry.isShapeSelected()) {
             components.add(Component.translatable("gui.ultimine_addition.shape_selector.selected").withColor(0xA0DA3E));
             components.add(Component.literal("- ").append(entry.shape.getDisplayName()));
+        }
+        if (entry.isAllowed() && FTBUltimineIntegration.isShapeNotLearned(mc(), this.menu.getSlot(0).getItem(), entry.shape)) {
+            components.add(Component.translatable("gui.ultimine_addition.shape_selector.not_learned").withStyle(ChatFormatting.GOLD));
         }
 
         Minecraft mc = Objects.requireNonNull(minecraft);
@@ -231,9 +240,14 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
     }
 
-    public enum Filter {
+    public enum Filter implements EnumType.Displayable {
         ALL,
         ENABLED_SHAPES;
+
+        @Override
+        public Component displayName() {
+            return Component.translatable(this == ALL ? "gui.ultimine_addition.filter.all" : "gui.ultimine_addition.filter.only_enabled");
+        }
 
         public Filter next() {
             int nextIndex = (this.ordinal() + 1) % Filter.values().length;
@@ -259,7 +273,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         public void refreshList() {
             this.clearEntries();
             for (Shape shape : FTBUltimineIntegration.getShapesList()) {
-                if (ConfigHandler.CLIENT.SHAPE_SELECTOR_FILTER.get() == Filter.ENABLED_SHAPES) {
+                if (UAClientConfig.SHAPE_SELECTOR_FILTER.get() == Filter.ENABLED_SHAPES) {
                     if (!FTBUltimineIntegration.getEnabledShapes().contains(shape)) {
                         continue;
                     }

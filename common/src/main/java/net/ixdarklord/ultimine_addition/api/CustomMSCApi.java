@@ -1,9 +1,9 @@
 package net.ixdarklord.ultimine_addition.api;
 
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import com.google.common.base.Stopwatch;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
-import dev.architectury.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.world.item.Items;

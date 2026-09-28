@@ -104,7 +104,7 @@ public class ItemStorageDataRecipeBuilder implements RecipeBuilder {
     public void save(RecipeOutput recipeOutput, ResourceKey<Recipe<?>> actualId) {
         Identifier location = actualId.identifier();
         ResourceKey<Recipe<?>> id = ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(location.getNamespace(),
-                Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.result)).getPath() + "_" + location.getPath()));
+                Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(this.result)).getPath() + "_" + location.getPath()));
 
         ItemStorageDataRecipe recipe = new ItemStorageDataRecipe(Objects.requireNonNullElse(this.group, ""), RecipeBuilder.determineCraftingBookCategory(this.category), new ItemStackTemplate(this.result, this.count), this.storageName, this.ingredients);
         recipeOutput.accept(id, recipe, this.advancementBuilder.build(recipeOutput, id, this.category));

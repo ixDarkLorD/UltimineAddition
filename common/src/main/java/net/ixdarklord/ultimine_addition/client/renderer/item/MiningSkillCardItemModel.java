@@ -1,14 +1,14 @@
 package net.ixdarklord.ultimine_addition.client.renderer.item;
 
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.ixdarklord.coolcatlib.api.utils.MathUtils;
+import net.ixdarklord.coolcatcore.api.utils.MathUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -53,7 +53,7 @@ public class MiningSkillCardItemModel implements ItemModel {
         MiningSkillCardData data = MiningSkillCardData.load(item);
         MiningSkillCardItem.Tier tier = data.getTier();
 
-        CustomCard customCard = ConfigHandler.CLIENT.MSC_RENDERER.get() ? pick(this.custom, tier) : null;
+        CustomCard customCard = UAClientConfig.MSC_RENDERER.get() ? pick(this.custom, tier) : null;
         if (customCard == null) {
             ItemModel model = pick(this.classic, tier);
             if (model != null) model.update(output, item, resolver, displayContext, level, owner, seed);

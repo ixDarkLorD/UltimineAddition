@@ -1,9 +1,9 @@
 package net.ixdarklord.ultimine_addition.common.data.challenge;
 
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.core.UUIDUtil;
 import com.mojang.serialization.Codec;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -64,7 +64,7 @@ public class IneligibleBlocksSavedData extends SavedData {
             setDirty();
         }
 
-        if (ConfigHandler.SERVER.INELIGIBLE_BLOCKS_LOGGER.get()) {
+        if (UAServerConfig.INELIGIBLE_BLOCKS_LOGGER.get()) {
             Identifier blockId = BuiltInRegistries.BLOCK.getKey(blockInfo.blockState.getBlock());
             LOGGER.debug("[Ineligible Blocks] Block added at: {} with ID: {} by {}", blockInfo.pos, blockId, entityId);
         }
@@ -105,7 +105,7 @@ public class IneligibleBlocksSavedData extends SavedData {
 
         if (isDirty) {
             setDirty();
-            if (ConfigHandler.SERVER.INELIGIBLE_BLOCKS_LOGGER.get() && removedBlockState != null) {
+            if (UAServerConfig.INELIGIBLE_BLOCKS_LOGGER.get() && removedBlockState != null) {
                 Identifier blockId = BuiltInRegistries.BLOCK.getKey(removedBlockState.getBlock());
                 LOGGER.debug("[Ineligible Blocks] Block removed at: {} with ID: {}", pos, blockId);
             }

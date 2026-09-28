@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.integration.jei;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.world.item.Items;
@@ -17,8 +18,8 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.ixdarklord.coolcatlib.api.client.utils.MouseHelper;
-import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import net.ixdarklord.coolcatcore.api.client.utils.MouseHelper;
+import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.common.data.item.StorageItemData;
 import net.ixdarklord.ultimine_addition.common.item.StorageItem;
 import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
@@ -112,7 +113,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
     @Override
     public void setRecipe(@NotNull IRecipeLayoutBuilder builder, @NotNull ItemStorageDataRecipe recipe, @NotNull IFocusGroup focuses) {
         if (this.title.equals(Component.literal("Not Assigned!"))) {
-            this.title = Component.translatable(String.format("jei.ultimine_addition.category.item_storage.%s", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(recipe.getResultItem().getItem())).getPath()));
+            this.title = Component.translatable(String.format("jei.ultimine_addition.category.item_storage.%s", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(recipe.getResultItem().getItem())).getPath()));
         }
         List<ItemStack> items = DataIngredient.toDisplayStacks(recipe.getDataIngredients());
         builder.addSlot(RecipeIngredientRole.INPUT, 9, 5).addItemStack(recipe.getResultItem());

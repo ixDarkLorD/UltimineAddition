@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.ixdarklord.ultimine_addition.datagen.model.ItemModelDataProvider;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.ixdarklord.coolcatlib.api.datagen.FabricLanguageWrapper;
+import net.ixdarklord.coolcatcore.api.datagen.FabricLanguageWrapper;
 import net.ixdarklord.ultimine_addition.datagen.advancement.AdvancementGenerator;
 import net.ixdarklord.ultimine_addition.datagen.challenge.ChallengeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.language.LanguageGenerator;

@@ -1,5 +1,8 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
+import net.minecraft.client.renderer.RenderPipelines;
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
+import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -30,9 +33,11 @@ final class ViewerButton extends AbstractButton {
 
     @Override
     protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        boolean hovered = this.isHoveredOrFocused();
-        drawFrame(graphics, this.getX(), this.getY(), this.getWidth(), this.getHeight(), hovered);
-        int color = hovered ? 0xFFFFFFFF : 0xFFC8C8C8;
+        boolean hovered = this.active && this.isHoveredOrFocused();
+        // The Skills Record's own button, tinted like the book (as in the edit challenge screen).
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SkillsRecordScreen.BUTTON_SPRITES.get(this.active, hovered),
+                this.getX(), this.getY(), this.getWidth(), this.getHeight(), UAClientConfig.backgroundColor().argb());
+        int color = !this.active ? 0xFFA0A0A0 : 0xFFFFFFFF;
         Font font = Minecraft.getInstance().font;
         graphics.centeredText(font, this.getMessage(), this.getX() + this.getWidth() / 2, this.getY() + (this.getHeight() - 8) / 2, color);
     }

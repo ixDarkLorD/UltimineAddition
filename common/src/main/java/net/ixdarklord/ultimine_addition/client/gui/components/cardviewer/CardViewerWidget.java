@@ -1,13 +1,16 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.AbstractMultiPanelWidget;
+import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
+import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
+import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.AbstractMultiPanelWidget;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeState;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.record.CardHistory;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -54,6 +57,12 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
 
         void editChallenge(Identifier challengeId);
 
+        void rerollChallenge(Identifier challengeId);
+
+        void claimCertificate(MiningSkillCardItem.Tier tier, Identifier shape);
+
+        int getInkAmount();
+
         void onExpandedChanged(boolean expanded);
     }
 
@@ -63,6 +72,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     private final MessagePanel banner;
     private final MessagePanel message;
     private final ChallengeDetailsPanel details;
+    private final ShapeChoicePanel shapeChoice;
     private final MessagePanel preview;
     private ViewerButton.Icon expandButton;
     private ViewerButton.Icon fitButton;
@@ -80,6 +90,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         this.banner = this.addPanel(new MessagePanel(this, MessagePanel.Mode.BANNER));
         this.message = this.addPanel(new MessagePanel(this, MessagePanel.Mode.FULL));
         this.details = this.addPanel(new ChallengeDetailsPanel(this));
+        this.shapeChoice = this.addPanel(new ShapeChoicePanel(this));
         this.preview = this.addPanel(new MessagePanel(this, MessagePanel.Mode.FULL));
         this.preview.setModal(true);
         this.setOverlayColor(0xA0000000);
@@ -105,6 +116,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             this.tree.setVisible(false);
             this.banner.setVisible(false);
             this.details.setVisible(false);
+            this.shapeChoice.setVisible(false);
             this.shownCard = null;
             this.message.show(List.of(state.hasCards()
                     ? Component.translatable("gui.ultimine_addition.skills_record.select_card").withStyle(ChatFormatting.GRAY)
@@ -126,6 +138,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             if (newCard) {
                 this.shownCard = card.getUUID();
                 this.details.setVisible(false);
+                this.shapeChoice.setVisible(false);
                 this.tree.focus(card.getTier());
             }
             this.updateBanner(card);
@@ -172,7 +185,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     }
 
     boolean hasTextShadow() {
-        return ConfigHandler.CLIENT.TEXT_SCREEN_SHADOW.get();
+        return UAClientConfig.TEXT_SCREEN_SHADOW.get();
     }
 
     Color getAccent() {
@@ -193,7 +206,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
 
     boolean canEdit() {
         var player = this.minecraft.player;
-        return ConfigHandler.CLIENT.SR_EDIT_MODE.get() && player != null && player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+        return UAClientConfig.SR_EDIT_MODE.get() && player != null && player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
     }
 
     void openDetails(ChallengeNode node) {
@@ -207,6 +220,68 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     void editChallenge(Identifier challengeId) {
         this.actions.editChallenge(challengeId);
     }
+
+    void rerollChallenge(Identifier challengeId) {
+        this.actions.rerollChallenge(challengeId);
+    }
+
+    // The Shape Certificate this tier's box hands out, or empty when there's nothing to claim.
+    // The shapes this tier's certificate can be picked from; empty when there's nothing to claim.
+    List<Identifier> claimPool(TierNode node) {
+        MiningSkillCardData card = this.state.card();
+        if (card == null || this.minecraft.player == null || !card.hasProgress() || !card.canClaimCertificate(node.tier())) return List.of();
+        return ShapeCertificateItem.claimPool(this.minecraft.player, card.getType().getId(), node.tier());
+    }
+
+    // The certificate shown on a claimable tier box (its tier and the card's tool), or empty.
+    ItemStack claimableCertificate(TierNode node) {
+        MiningSkillCardData card = this.state.card();
+        ShapeCertificateItem certificate = ShapeCertificateItem.forTier(node.tier());
+        if (card == null || certificate == null || this.claimPool(node).isEmpty()) return ItemStack.EMPTY;
+        return certificate.create(card.getType());
+    }
+
+    void openShapeChoice(TierNode node) {
+        List<Identifier> pool = this.claimPool(node);
+        if (!pool.isEmpty()) this.shapeChoice.show(node.tier(), pool, this.claimableCertificate(node));
+    }
+
+    boolean hasRoomFor(ItemStack stack) {
+        return this.minecraft.player != null && ShapeCertificateItem.hasRoomFor(this.minecraft.player, stack);
+    }
+
+    void claimCertificate(MiningSkillCardItem.Tier tier, Identifier shape) {
+        this.actions.claimCertificate(tier, shape);
+    }
+
+    List<FormattedCharSequence> describeCertificate(TierNode node, ItemStack reward) {
+        List<Component> lines = new ArrayList<>();
+        lines.add(Component.literal("✦ ").append(Component.translatable("gui.ultimine_addition.card_viewer.certificate.ready")).withStyle(ChatFormatting.GOLD));
+        lines.add(Component.translatable("gui.ultimine_addition.card_viewer.certificate.choices", this.claimPool(node).size()).withStyle(ChatFormatting.YELLOW));
+        lines.add(Component.literal(" "));
+        lines.add(this.hasRoomFor(reward)
+                ? Component.translatable("gui.ultimine_addition.card_viewer.certificate.click").withStyle(ChatFormatting.GREEN)
+                : Component.translatable("gui.ultimine_addition.card_viewer.certificate.no_space").withStyle(ChatFormatting.RED));
+        return lines.stream().map(Component::getVisualOrderText).toList();
+    }
+
+    // Null when the challenge can't be rerolled at all; otherwise the reason it's blocked (or null reason when allowed).
+    @Nullable RerollInfo rerollInfo(ChallengeNode node) {
+        MiningSkillCardData card = this.state.card();
+        if (card == null || node.id() == null || UAServerConfig.REROLLS_PER_TIER.get() <= 0) return null;
+        var challenge = card.getChallenge(node.id());
+        if (challenge.isEmpty() || challenge.get().getCurrentPoints() > 0 || card.isCreativeItem()) return null;
+
+        int left = card.getRerollsLeft();
+        boolean creative = this.minecraft.player != null && this.minecraft.player.isCreative();
+        int cost = creative ? 0 : UAServerConfig.REROLL_INK_COST.get();
+        Component blocked = null;
+        if (left <= 0) blocked = Component.translatable("gui.ultimine_addition.card_viewer.reroll.used").withStyle(ChatFormatting.RED);
+        else if (this.actions.getInkAmount() < cost) blocked = Component.translatable("gui.ultimine_addition.card_viewer.reroll.no_ink", cost).withStyle(ChatFormatting.RED);
+        return new RerollInfo(left, cost, blocked);
+    }
+
+    record RerollInfo(int left, int cost, @Nullable Component blocked) {}
 
     static final float MIN_TEXT_SCALE = 0.65F;
 
@@ -305,7 +380,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     }
 
     public boolean isTreeShown() {
-        return this.tree.isVisible() && !this.details.isVisible() && !this.preview.isVisible();
+        return this.tree.isVisible() && !this.details.isVisible() && !this.shapeChoice.isVisible() && !this.preview.isVisible();
     }
 
     public double getZoom() {
@@ -361,7 +436,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             this.expandButton.setPosition(r.right() - ICON_SIZE - 1, r.top() + 1);
             this.fitButton.setPosition(r.right() - ICON_SIZE * 2 - 3, r.top() + 1);
         }
-        boolean covered = !this.expanded && (this.details.isVisible() || this.preview.isVisible());
+        boolean covered = !this.expanded && (this.details.isVisible() || this.shapeChoice.isVisible() || this.preview.isVisible());
         boolean treeControls = this.tree.isVisible() && !covered;
         this.expandButton.visible = this.expandButton.active = this.visible && !covered && (treeControls || this.expanded);
         this.fitButton.visible = this.fitButton.active = this.visible && treeControls;

@@ -1,10 +1,10 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
+import net.ixdarklord.coolcatcore.api.menu.ExtendedMenus;
 import java.util.function.Consumer;
 import net.minecraft.world.item.component.TooltipDisplay;
-import dev.architectury.registry.menu.MenuRegistry;
-import net.ixdarklord.coolcatlib.api.item.ComponentItem;
-import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import net.ixdarklord.coolcatcore.api.item.ComponentItem;
+import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.common.menu.ShapeSelectorMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -40,7 +40,7 @@ public class ShapeSelectorItem extends ComponentItem {
     @Override
     public @NotNull InteractionResult use(Level level, Player player, InteractionHand usedHand) {
         if (!(player instanceof ServerPlayer serverPlayer)) return super.use(level, player, usedHand);
-        MenuRegistry.openMenu(serverPlayer, new SimpleMenuProvider(ShapeSelectorMenu::new, TITLE));
+        ExtendedMenus.open(serverPlayer, new SimpleMenuProvider(ShapeSelectorMenu::new, TITLE));
         return super.use(level, player, usedHand);
     }
 

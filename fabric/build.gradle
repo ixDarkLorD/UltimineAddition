@@ -14,9 +14,14 @@ loom {
 }
 
 dependencies {
-    api libs.architectury.fabric
-    api "net.ixdarklord.coolcatlib:coolcatlib-fabric:${libs.versions.minecraft.get()}-${coolcatlib_version}"
-    api libs.forgeconfigapiport.fabric
+    // CoolCatLib: Core (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
+    // render utilities, easing), published from ../CoolCatLib-26.1.2.
+    api "net.ixdarklord.coolcatcore:coolcatcore-fabric:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    api "net.ixdarklord.coolcatcanvas:coolcatcanvas-fabric:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+
+    // Dev runs: the loader JEI 29.43 settles on brings sponge-mixin 0.17.4, which crashes MixinExtras 0.5.4 (a
+    // ClassCastException in FactoryRedirectWrapperMixinTransformer on this mod's @Redirects); the catalog's 0.5.5 works.
+    runtimeOnly "io.github.llamalad7:mixinextras-fabric:${libs.versions.mixinextras.version.get()}"
 
     compileOnlyApi libs.jei.api.fabric
     runtimeOnly libs.jei.fabric
@@ -26,4 +31,10 @@ dependencies {
 
     api "dev.ftb.mods:ftb-ultimine-fabric:${ftbultimine_version}"
     api "dev.ftb.mods:ftb-library-fabric:${ftblibrary_version}"
+
+    // MCP Bridge (../MCPBridge-26.1.2) in dev runs only, when it's been published to Maven Local: lets Claude Code
+    // drive the running game (its MCP server is registered in Claude Code as "minecraft"). Never part of the built jar.
+    if (new File("${System.getProperty('user.home')}/.m2/repository/net/ixdarklord/mcp_bridge").exists()) {
+        localRuntime "net.ixdarklord.mcp_bridge:mcp_bridge-fabric:${libs.versions.minecraft.get()}-1"
+    }
 }

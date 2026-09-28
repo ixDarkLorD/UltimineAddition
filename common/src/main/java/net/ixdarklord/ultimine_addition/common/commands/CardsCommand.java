@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.server.permissions.Permissions;
 import com.mojang.brigadier.CommandDispatcher;
@@ -10,7 +11,6 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
-import dev.architectury.platform.Platform;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -67,8 +67,9 @@ public final class CardsCommand {
             tierArg.then(tierInApi);
         }
 
-        FTBUltimineAddition.withCommandPrompt(dispatcher, Commands.LEVEL_GAMEMASTERS, (builder) -> builder.then(
+        FTBUltimineAddition.withCommandPrompt(dispatcher, (builder) -> builder.then(
                 Commands.literal("mining_skill_card")
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.literal("challenge")
                                         .then(challengeArg))

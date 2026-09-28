@@ -1,15 +1,17 @@
 package net.ixdarklord.ultimine_addition.common.data.item;
 
+import net.ixdarklord.coolcatcore.api.platform.Platform;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
+import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.architectury.platform.Platform;
-import net.ixdarklord.coolcatlib.api.data.ItemDataComponent;
+import net.ixdarklord.coolcatcore.api.data.ItemDataComponent;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.record.CardProgress;
 import net.ixdarklord.ultimine_addition.common.data.record.CardStore;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -25,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
@@ -148,11 +151,12 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
 
         List<Challenge> challenges = progress.getChallenges();
         challenges.clear();
+        progress.setRerolls(0);
         if (this.tier == MiningSkillCardItem.Tier.Mastered) return this;
 
         if (this.tier != MiningSkillCardItem.Tier.Unlearned) progress.setPotionPoints(this.getMaxPotionPoints());
 
-        int quantity = ConfigHandler.SERVER.CARD_CHALLENGES_AMOUNT.getValue(this.tier);
+        int quantity = UAServerConfig.CARD_CHALLENGES_AMOUNT.getValue(this.tier);
         int[] order = {1};
         ChallengesManager.INSTANCE.getRandomChallenges(quantity, type, this.tier).forEach((location, data) ->
                 challenges.add(new Challenge(location, order[0]++, data.getRequiredAmount())));
@@ -178,7 +182,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
                 for (var entry : ChallengesManager.INSTANCE.getRandomChallenges(1, type, this.tier).entrySet()) {
                     if (challenges.stream().noneMatch(c -> c.id.equals(entry.getKey()))) {
                         challenges.add(new Challenge(entry.getKey(), invalid.order, entry.getValue().getRequiredAmount()));
-                        if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
+                        if (UAServerConfig.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
                             LOGGER.debug("Changing the invalid challenge! id:\"{}\" to: id:\"{}\"", invalid.id, entry.getKey());
                         }
                         replaced = true;
@@ -187,6 +191,48 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
             }
         }
         return !removed.isEmpty();
+    }
+
+    // The Shape Certificate for a tier this card has reached, not yet claimed from the Skills Record.
+    public boolean canClaimCertificate(MiningSkillCardItem.Tier tier) {
+        return FTBUltimineIntegration.isShapeCertificatesActive() && this.getType() != MiningSkillCardItem.Type.EMPTY && !this.isCreativeItem()
+                && ShapeCertificateItem.forTier(tier) != null && this.tier.getValue() >= tier.getValue()
+                && !this.progress().isCertificateClaimed(tier.getValue());
+    }
+
+    public void claimCertificate(MiningSkillCardItem.Tier tier) {
+        this.progress().claimCertificate(tier.getValue());
+    }
+
+    public int getRerollsLeft() {
+        return Math.max(0, UAServerConfig.REROLLS_PER_TIER.get() - this.progress().getRerolls());
+    }
+
+    // Only challenges without progress can be swapped, so a reroll never throws work away.
+    public boolean canReroll(Challenge challenge) {
+        return this.tier != MiningSkillCardItem.Tier.Mastered && !this.isCreativeItem()
+                && challenge.currentPoints == 0 && this.getRerollsLeft() > 0;
+    }
+
+    public boolean rerollChallenge(Identifier challengeId) {
+        Optional<Challenge> found = this.getChallenge(challengeId);
+        if (found.isEmpty() || !this.canReroll(found.get())) return false;
+
+        MiningSkillCardItem.Type type = this.getType();
+        CardProgress progress = this.progress();
+        List<Challenge> challenges = progress.getChallenges();
+        List<Identifier> candidates = ChallengesManager.INSTANCE.getAllChallenges().entrySet().stream()
+                .filter(entry -> entry.getValue().forCardType().equals(type) && entry.getValue().forCardTier().isEligible(this.tier))
+                .map(Map.Entry::getKey)
+                .filter(id -> challenges.stream().noneMatch(c -> c.id.equals(id)))
+                .toList();
+        if (candidates.isEmpty()) return false;
+
+        Identifier next = candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()));
+        Challenge old = found.get();
+        challenges.set(challenges.indexOf(old), new Challenge(next, old.order, ChallengesManager.INSTANCE.getAllChallenges().get(next).getRequiredAmount()));
+        progress.setRerolls(progress.getRerolls() + 1);
+        return true;
     }
 
     public void setDisplayItem(ItemStack stack) {
@@ -295,7 +341,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     public int getMaxPotionPoints() {
-        return ConfigHandler.SERVER.CARD_POTION_POINTS.getMapValue().get(tier);
+        return UAServerConfig.CARD_POTION_POINTS.getValue(tier);
     }
 
     public boolean isCreativeItem() {

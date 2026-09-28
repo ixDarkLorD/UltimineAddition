@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.network.payloads;
 
+import net.ixdarklord.coolcatcore.api.network.PacketContext;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
-import dev.architectury.networking.NetworkManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -29,7 +29,7 @@ public final class MiningSkillCardPayload {
             return TYPE;
         }
 
-        public static void handle(SyncBrewing message, NetworkManager.PacketContext context) {
+        public static void handle(SyncBrewing message, PacketContext context) {
             context.queue(() -> {
                 Player player = context.getPlayer();
                 if (player.containerMenu instanceof BrewingStandMenu standMenu) {

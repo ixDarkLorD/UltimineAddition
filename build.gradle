@@ -42,3 +42,13 @@ subprojects {
 }
 
 apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v3/main.gradle"
+
+// The 26.1.2-v2 catalog brings GradleUp Shadow 9, whose shadowJar packs the whole runtime classpath unless told
+// otherwise. Common's jar only holds its own classes; the loader jars shade it in through shadowCommon.
+project(":common") {
+    afterEvaluate {
+        tasks.named("shadowJar") {
+            configurations = []
+        }
+    }
+}

@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.coolcatlib.api.client.gui.components.widgets.panel.Panel;
-import net.ixdarklord.coolcatlib.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.Panel;
+import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.MouseButtonEvent;

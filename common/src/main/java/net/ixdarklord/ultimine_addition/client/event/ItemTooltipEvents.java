@@ -1,11 +1,13 @@
 package net.ixdarklord.ultimine_addition.client.event;
 
-import net.ixdarklord.coolcatlib.api.utils.ColorUtils;
+import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
+import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
+import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
+import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
 import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.ChatFormatting;
@@ -28,13 +30,13 @@ import java.util.List;
 import java.util.Objects;
 
 public final class ItemTooltipEvents {
-    public static void init(ItemStack stack, List<Component> components, Item.TooltipContext ignored, TooltipFlag ignored1) {
+    public static void init(ItemStack stack, Item.TooltipContext ignored, TooltipFlag ignored1, List<Component> components) {
         if (stack.has(Registration.SELECTED_SHAPE_COMPONENT.get())) {
             insertSelectedShapeInfo(stack, components);
         }
 
         if (stack.is(ModItemTags.LEGACY_DISABLED_ITEMS)) {
-            if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+            if (UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
                 components.add(1, Component.translatable("tooltip.ultimine_addition.legacy_mode.disabled_item").withStyle(ChatFormatting.RED));
             }
         }
@@ -44,7 +46,13 @@ public final class ItemTooltipEvents {
             components.set(0, name);
 
             components.add(1, Component.literal("§8• ").append(Component.translatable("tooltip.ultimine_addition.skill_card.tier", potion.getTier().getDisplayName())).withStyle(ChatFormatting.ITALIC));
-            if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+            potion.getEffects().stream()
+                    .map(effect -> effect.getEffect().value())
+                    .filter(effect -> effect instanceof MineGoJuiceEffect)
+                    .findFirst()
+                    .ifPresent(effect -> components.add(2, Component.translatable("tooltip.ultimine_addition.mine_go_juice.info",
+                            ShapeCertificateItem.toolName(((MineGoJuiceEffect) effect).getType().getId()).copy().withStyle(ChatFormatting.AQUA)).withStyle(ChatFormatting.GRAY)));
+            if (UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
                 components.add(1, Component.translatable("tooltip.ultimine_addition.legacy_mode.disabled_item").withStyle(ChatFormatting.RED));
             }
         }

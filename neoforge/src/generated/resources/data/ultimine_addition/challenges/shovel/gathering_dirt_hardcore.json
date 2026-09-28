@@ -6,8 +6,8 @@
   "for_card_tier": 3,
   "for_card_type": "shovel",
   "required_amount": {
-    "max": 256,
-    "min": 128
+    "max": 128,
+    "min": 64
   },
   "targeted_blocks": [
     "#minecraft:dirt"

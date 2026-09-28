@@ -1,9 +1,10 @@
 apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v3/common.gradle"
 
 dependencies {
-    api libs.architectury.common
-    api "net.ixdarklord.coolcatlib:coolcatlib-common:${libs.versions.minecraft.get()}-${coolcatlib_version}"
-    api libs.forgeconfigapiport.common
+    // CoolCatLib: Core (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
+    // render utilities, easing), published from ../CoolCatLib-26.1.2.
+    api "net.ixdarklord.coolcatcore:coolcatcore-common:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    api "net.ixdarklord.coolcatcanvas:coolcatcanvas-common:${libs.versions.minecraft.get()}-${coolcatlib_version}"
     api libs.jei.libs.common
     api libs.jei.api.common
     // JEI internals (client-synced recipes); the loader-specific JEI jars provide them at runtime.

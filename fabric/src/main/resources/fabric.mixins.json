@@ -10,7 +10,7 @@
     "fabric.MixinAxeItem",
     "fabric.MixinShovelItem",
     "fabric.MixinHoeItem",
-    "fabric.MixinPlayerData"
+    "fabric.MixinLegacyPlayerData"
   ],
   "injectors": {
     "defaultRequire": 1

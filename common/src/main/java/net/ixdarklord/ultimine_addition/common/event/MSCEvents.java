@@ -1,16 +1,17 @@
 package net.ixdarklord.ultimine_addition.common.event;
 
-import dev.architectury.event.events.common.LifecycleEvent;
-import dev.architectury.event.events.common.PlayerEvent;
+import net.ixdarklord.coolcatcore.api.event.v2.common.BlockEvents;
+import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
+import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
+import net.ixdarklord.coolcatcore.api.event.v2.core.EventResult;
+import net.ixdarklord.coolcatcore.api.event.v2.core.EventResultHolder;
+import net.ixdarklord.coolcatcore.api.platform.Platform;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
+import net.ixdarklord.ultimine_addition.common.progression.ChallengeBoosts;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSync;
 import com.mojang.datafixers.util.Pair;
-import dev.architectury.event.CompoundEventResult;
-import dev.architectury.event.EventResult;
-import dev.architectury.event.events.common.BlockEvent;
-import dev.architectury.event.events.common.TickEvent;
-import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbultimine.FTBUltimine;
-import net.ixdarklord.coolcatlib.api.utils.SlotReference;
+import net.ixdarklord.coolcatcore.api.utils.SlotReference;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
@@ -18,7 +19,6 @@ import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationEvent;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.PlayConsumeEffectPayload;
@@ -44,16 +44,17 @@ import java.util.stream.Stream;
 
 public class MSCEvents {
     public static void init() {
-        TickEvent.PLAYER_POST.register(instance -> {
+        PlayerEvents.END_TICK.register(instance -> {
             if (!(instance instanceof ServerPlayer player)) return;
             validateCards(player);
             cardBonusEffect(player);
             SkillsRecordSync.tick(player);
         });
-        PlayerEvent.PLAYER_QUIT.register(SkillsRecordSync::forget);
-        LifecycleEvent.SERVER_STOPPED.register(server -> SkillsRecordSync.clear());
+        PlayerEvents.LEAVE.register(SkillsRecordSync::forget);
+        PlayerEvents.LEAVE.register(ChallengeBoosts::forget);
+        ServerLifecycleEvents.STOPPED.register(server -> SkillsRecordSync.clear());
 
-        BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
+        BlockEvents.BREAK.register((level, pos, state, player) -> {
             List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
             if (slots.isEmpty()) return EventResult.pass();
             for (SlotReference.Player slot : slots) {
@@ -64,7 +65,7 @@ public class MSCEvents {
                 }
                 if (taskProcess.getSecond()) {
                     player.level().removeBlock(pos, false);
-                    PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(pos, state), player.level(), pos, 128);
+                    PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(pos, state, player.getId()), player.level(), pos, 128);
                 }
             }
             return EventResult.pass();
@@ -74,12 +75,12 @@ public class MSCEvents {
             if (context.getPlayer() instanceof ServerPlayer player && !FTBUltimine.getInstance().getOrCreatePlayerData(player).isPressed()) {
                 return onBlockToolModificationEvent(originalState, context, toolAction, simulate);
             }
-            return CompoundEventResult.pass();
+            return EventResultHolder.pass();
         });
     }
 
     private static void cardBonusEffect(ServerPlayer player) {
-        if (!ConfigHandler.SERVER.CARD_MASTERED_EFFECT.get()) return;
+        if (!UAServerConfig.CARD_MASTERED_EFFECT.get()) return;
         List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || (stack.getItem() instanceof MiningSkillCardItem item && item.getType() != MiningSkillCardItem.Type.EMPTY), false);
         List<MiningSkillCardData> dataList = slots.stream()
                 .map(SlotReference.Player::get)
@@ -108,7 +109,7 @@ public class MSCEvents {
     }
 
     private static void validateCards(ServerPlayer player) {
-        if (!ConfigHandler.SERVER.SPEC.isLoaded() || player.tickCount % (20 * ConfigHandler.SERVER.CARD_VALIDATOR.get()) != 0) return;
+        if (player.tickCount % (20 * UAServerConfig.CARD_VALIDATOR.get()) != 0) return;
         List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || stack.getItem() instanceof MiningSkillCardItem, false);
 
         Function<ItemStack, Boolean> validateCardFunction = itemStack -> {
@@ -144,13 +145,13 @@ public class MSCEvents {
         }
     }
 
-    public static CompoundEventResult<BlockState> onBlockToolModificationEvent(BlockState originalState, @NotNull UseOnContext context, ToolAction toolAction, boolean ignoredSimulate) {
+    public static EventResultHolder<BlockState> onBlockToolModificationEvent(BlockState originalState, @NotNull UseOnContext context, ToolAction toolAction, boolean ignoredSimulate) {
         ServerPlayer player = (ServerPlayer) context.getPlayer();
-        if (player == null) return CompoundEventResult.pass();
-        if (PlayerHooks.isFake(player)) return CompoundEventResult.pass();
+        if (player == null) return EventResultHolder.pass();
+        if (Platform.isFakePlayer(player)) return EventResultHolder.pass();
         if (!context.getLevel().isClientSide()) {
             List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
-            if (slots.isEmpty()) return CompoundEventResult.pass();
+            if (slots.isEmpty()) return EventResultHolder.pass();
 
             for (SlotReference.Player slot : slots) {
                 var data = SkillsRecordData.get(slot.get(), player.level());
@@ -165,7 +166,7 @@ public class MSCEvents {
                     taskProcess = data.initTaskValidator(originalState, context.getClickedPos(), player, ChallengeData.Type.TILLING_BLOCK);
                 }
 
-                if (ConfigHandler.SERVER.CHALLENGE_MANAGER_LOGGER.get()) {
+                if (UAServerConfig.CHALLENGE_MANAGER_LOGGER.get()) {
                     FTBUltimineAddition.LOGGER.debug("[Challenge Tracker] Action: {}, Is Task Succeed: {}, Block: {}", toolAction.name(), taskProcess.getFirst(), originalState.getBlock().getName().getString());
                 }
 
@@ -173,12 +174,12 @@ public class MSCEvents {
                     data.save();
 
                     if (taskProcess.getSecond()) {
-                        PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(context.getClickedPos(), originalState), (ServerLevel)context.getLevel(), context.getClickedPos(), 128);
-                        return CompoundEventResult.interruptTrue(Blocks.AIR.defaultBlockState());
+                        PayloadHandler.sendToTarget(new PlayConsumeEffectPayload(context.getClickedPos(), originalState, player.getId()), (ServerLevel)context.getLevel(), context.getClickedPos(), 128);
+                        return EventResultHolder.interrupt(Blocks.AIR.defaultBlockState());
                     }
                 }
             }
         }
-        return CompoundEventResult.pass();
+        return EventResultHolder.pass();
     }
 }

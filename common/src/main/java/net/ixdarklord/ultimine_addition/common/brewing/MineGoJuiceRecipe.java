@@ -1,14 +1,14 @@
 package net.ixdarklord.ultimine_addition.common.brewing;
 
-import net.ixdarklord.coolcatlib.api.brewing.IBrewingRecipe;
-import net.ixdarklord.coolcatlib.api.brewing.BrewingBuilder;
-import net.ixdarklord.coolcatlib.api.event.v1.server.RegisterBrewingRecipesEvent;
+import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
+import net.ixdarklord.coolcatcore.api.brewing.IBrewingRecipe;
+import net.ixdarklord.coolcatcore.api.brewing.BrewingBuilder;
+import net.ixdarklord.coolcatcore.api.event.v1.server.RegisterBrewingRecipesEvent;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.Holder;
@@ -44,7 +44,7 @@ public class MineGoJuiceRecipe implements IBrewingRecipe {
 
     public static void register() {
         RegisterBrewingRecipesEvent.EVENT.register(event -> {
-            if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return;
+            if (UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return;
             BrewingBuilder builder = event.getBuilder();
             builder.addRecipe(new MineGoJuiceRecipe(Potions.WATER, Items.ENCHANTED_BOOK, getHolder(Registration.KNOWLEDGE_POTION.get())));
 
@@ -77,7 +77,7 @@ public class MineGoJuiceRecipe implements IBrewingRecipe {
         for (int i = 0; i < TIERS.length; i++) {
             MiningSkillCardItem.Tier tier = TIERS[i];
             ItemStack itemStack = MiningSkillCardData.createForCreativeTab(card, tier);
-            Holder<Potion> potion = Registration.POTIONS.getRegistrar().getHolder(i > 0 ? Identifier.parse(output + "_" + (i+1)) : output);
+            Holder<Potion> potion = BuiltInRegistries.POTION.get(i > 0 ? Identifier.parse(output + "_" + (i+1)) : output).orElse(null);
             builder.addRecipe(new MineGoJuiceRecipe(getHolder(Registration.KNOWLEDGE_POTION.get()), itemStack, potion));
         }
     }
