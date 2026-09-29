@@ -4,7 +4,6 @@ import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
 import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.coolcatcore.api.data.ItemDataComponent;
@@ -38,19 +37,18 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
             // A randomUUID() default would be shared by every card without a UUID.
             UUIDUtil.CODEC.optionalFieldOf("UUID").xmap(id -> id.orElseGet(UUID::randomUUID), Optional::of).forGetter(MiningSkillCardData::getUUID),
             MiningSkillCardItem.Tier.CODEC.fieldOf("Tier").forGetter(MiningSkillCardData::getTier),
-            ItemUtils.SIMPLE_ITEM_CODEC.fieldOf("DisplayItem").forGetter(MiningSkillCardData::getDisplayItem),
+            // (Older cards also carry a "DisplayItem" from the removed card renderer; it's ignored.)
             // Pre-SavedData fields, kept until migrated.
             ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("PotionPoints", 0).forGetter(data -> data.legacy == null ? 0 : data.legacy.getPotionPoints()),
             Challenge.CODEC.listOf().optionalFieldOf("Challenges", List.of()).forGetter(data -> data.legacy == null ? List.of() : data.legacy.getChallenges())
-    ).apply(instance, (uuid, tier, display, points, challenges) -> new MiningSkillCardData(uuid, tier, display,
+    ).apply(instance, (uuid, tier, points, challenges) -> new MiningSkillCardData(uuid, tier,
             challenges.isEmpty() && points == 0 ? null : new CardProgress(challenges, points, List.of()))));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, MiningSkillCardData> STREAM_CODEC = StreamCodec.composite(
             UUIDUtil.STREAM_CODEC, MiningSkillCardData::getUUID,
             MiningSkillCardItem.Tier.STREAM_CODEC, MiningSkillCardData::getTier,
-            ItemStack.STREAM_CODEC, MiningSkillCardData::getDisplayItem,
             ByteBufCodecs.optional(CardProgress.STREAM_CODEC), data -> Optional.ofNullable(data.legacy),
-            (uuid, tier, display, legacy) -> new MiningSkillCardData(uuid, tier, display, legacy.orElse(null))
+            (uuid, tier, legacy) -> new MiningSkillCardData(uuid, tier, legacy.orElse(null))
     );
 
     public static final DataComponentType<MiningSkillCardData> DATA_COMPONENT =
@@ -59,28 +57,26 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     @NotNull
     private final UUID uuid;
     private MiningSkillCardItem.Tier tier;
-    private ItemStack displayItem;
     private @Nullable CardProgress legacy;
     private @Nullable CardProgress local;
     // The stack's value this was loaded from, which keeps the temporary progress (see copy).
     private @Nullable MiningSkillCardData source;
 
-    private MiningSkillCardData(@NotNull UUID uuid, MiningSkillCardItem.Tier tier, ItemStack displayItem, @Nullable CardProgress legacy) {
+    private MiningSkillCardData(@NotNull UUID uuid, MiningSkillCardItem.Tier tier, @Nullable CardProgress legacy) {
         super(DATA_COMPONENT);
         this.uuid = uuid;
         this.tier = tier;
-        this.displayItem = displayItem;
         this.legacy = legacy;
     }
 
     public static MiningSkillCardData create(MiningSkillCardItem.Type type) {
-        return new MiningSkillCardData(UUID.randomUUID(), MiningSkillCardItem.Tier.Unlearned, type.getDefaultDisplayItem().getDefaultInstance(), null);
+        return new MiningSkillCardData(UUID.randomUUID(), MiningSkillCardItem.Tier.Unlearned, null);
     }
 
     @ApiStatus.Internal
     public static ItemStack createForCreativeTab(MiningSkillCardItem cardItem, MiningSkillCardItem.Tier tier) {
         ItemStack stack = cardItem.getDefaultInstance();
-        MiningSkillCardData data = new MiningSkillCardData(CREATIVE_UUID, tier, cardItem.getType().getDefaultDisplayItem().getDefaultInstance(), null);
+        MiningSkillCardData data = new MiningSkillCardData(CREATIVE_UUID, tier, null);
         data.stack = stack;
         stack.set(DATA_COMPONENT, data);
         return stack;
@@ -96,7 +92,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     private MiningSkillCardData copy() {
-        MiningSkillCardData copy = new MiningSkillCardData(this.uuid, this.tier, this.displayItem.copy(), this.legacy);
+        MiningSkillCardData copy = new MiningSkillCardData(this.uuid, this.tier, this.legacy);
         // A card that isn't stored yet keeps its temporary progress between loads.
         copy.local = this.local;
         copy.source = this;
@@ -252,10 +248,6 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
         return true;
     }
 
-    public void setDisplayItem(ItemStack stack) {
-        this.displayItem = stack;
-    }
-
     public MiningSkillCardData addAmount(Identifier challengeId, int value) {
         Optional<Challenge> challengeData = this.getChallenge(challengeId);
         if (challengeData.isEmpty()) return this;
@@ -300,10 +292,6 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     public MiningSkillCardData setTier(MiningSkillCardItem.Tier tier) {
         this.tier = tier;
         return this;
-    }
-
-    public ItemStack getDisplayItem() {
-        return this.displayItem;
     }
 
     public Optional<Challenge> getChallenge(Identifier challengeId) {
@@ -371,18 +359,17 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
         if (!(o instanceof MiningSkillCardData that)) return false;
         return uuid.equals(that.uuid)
                 && tier == that.tier
-                && ItemStack.isSameItemSameComponents(this.displayItem, that.displayItem)
                 && Objects.equals(this.legacy == null ? null : this.legacy.getChallenges(), that.legacy == null ? null : that.legacy.getChallenges());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, tier) + ItemStack.hashItemAndComponents(displayItem);
+        return Objects.hash(uuid, tier);
     }
 
     @Override
     public String toString() {
-        return "MiningSkillCardData{uuid=" + uuid + ", tier=" + tier + ", displayItem=" + displayItem + ", legacy=" + (legacy != null) + '}';
+        return "MiningSkillCardData{uuid=" + uuid + ", tier=" + tier + ", legacy=" + (legacy != null) + '}';
     }
 
     public static class Challenge implements Comparable<Challenge> {

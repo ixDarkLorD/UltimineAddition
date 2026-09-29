@@ -1,14 +1,13 @@
 package net.ixdarklord.ultimine_addition.client.gui.hud;
 
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
-import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.AnimatedComponent;
 import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesPanel;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.client.DeltaTracker;
@@ -38,7 +37,7 @@ public final class ChallengesPanelManager {
     }
 
     public void render(GuiGraphicsExtractor guiGraphics, DeltaTracker ignored) {
-        if (UAStartupConfig.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
+        if (!PlaystyleModes.isLegacy()) {
 
             Window window = this.mc().getWindow();
             Player player = this.mc().player;

@@ -5,11 +5,11 @@ import net.ixdarklord.coolcatcore.api.config.ConfigTheme;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 
 // CoolCatLib configs register themselves when their class loads; this loads them at the right time.
-// Syncing the server config (on join and whenever it changes), the startup config check on join, the config screens
-// and hot reloading all come from CoolCatLib.
+// Syncing the server config (on join and whenever it changes), the config screens and hot reloading all come from
+// CoolCatLib.
 public final class UAConfigs {
-    // The accent of the mod's config screens.
-    private static final int ACCENT = 0xFF3FB8C4;
+    // The accent of the mod's config screens: the warm orange of the logo, between its coral pickaxe and golden ore.
+    private static final int ACCENT = 0xFFF0894A;
 
     // The Skills Record's settings popup: its panel is drawn like the book (frame, striped title band, dark screen) and
     // its controls in the same neutral greys, in both light and dark mode.
@@ -29,11 +29,11 @@ public final class UAConfigs {
 
     private UAConfigs() {}
 
-    // While the mod is constructed: the startup config shapes which items and recipes exist.
+    // While the mod is constructed.
     public static void register() {
         ConfigTheme.setForMod(FTBUltimineAddition.MOD_ID, ConfigTheme.builder().colors(ConfigColorScheme.tinted(ACCENT)).build());
-        UAStartupConfig.CONFIG.id();
         UAServerConfig.CONFIG.id();
+        PlaystyleModes.register();
     }
 
     // Client only.

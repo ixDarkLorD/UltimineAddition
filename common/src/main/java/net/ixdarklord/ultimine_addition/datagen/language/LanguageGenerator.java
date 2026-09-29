@@ -89,6 +89,8 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("gui.ultimine_addition.skills_record.configuration", "Configuration");
         this.add("config.ultimine_addition.server.title", "Server Settings");
         this.add("config.ultimine_addition.server.general", "General");
+        this.add("config.ultimine_addition.server.general.playstyle_mode", "Playstyle Mode");
+        this.add("config.ultimine_addition.server.general.playstyle_mode.tooltip", "How players unlock Ultimine. Changes apply at once, and players on a server play by the server's mode.");
         this.add("config.ultimine_addition.server.general.blacklisted_shapes", "Blacklisted Shapes");
         this.add("config.ultimine_addition.server.general.blacklisted_shapes.tooltip", "Ultimine shapes nobody can use, by shape ID (e.g. ftbultimine:shapeless).");
         this.add("config.ultimine_addition.server.general.is_placed_by_entity_condition", "Ignore Placed Blocks");
@@ -162,17 +164,13 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("config.ultimine_addition.client.visuals", "Visuals");
         this.add("config.ultimine_addition.client.visuals.shape_selector_filter", "Shape Selector Filter");
         this.add("config.ultimine_addition.client.visuals.shape_selector_filter.tooltip", "Shapes listed by the Shape Selector: all, or only the ones that aren't blacklisted.");
-        this.add("config.ultimine_addition.client.visuals.mining_skill_card_renderer", "Mining Skill Card Renderer");
-        this.add("config.ultimine_addition.client.visuals.mining_skill_card_renderer.tooltip", "Draw each card's display item on the card (work in progress).");
         this.add("config.ultimine_addition.client.debug", "Debug");
         this.add("config.ultimine_addition.client.debug.skills_record_edit_mode", "Skills Record Edit Mode");
         this.add("config.ultimine_addition.client.debug.skills_record_edit_mode.tooltip", "Lets operators edit challenge progress from the Skills Record, and shows debug info in it.");
-        this.add("config.ultimine_addition.startup.title", "Startup Settings");
-        this.add("config.ultimine_addition.startup.playstyle_mode", "Playstyle Mode");
-        this.add("config.ultimine_addition.startup.playstyle_mode.tooltip", "Modern: Mining Skill Cards, the Skills Record and Shape Certificates. One Tier Only (WIP): a single-tier card that becomes Mastered once its challenges are done. Legacy: the v0.1.0 mechanics (one Miner Certificate and one challenge). Takes effect after a restart; players must use the server's mode.");
         this.add("ultimine_addition.playstyle_mode.modern", "Modern");
-        this.add("ultimine_addition.playstyle_mode.one_tier_only", "One Tier Only");
         this.add("ultimine_addition.playstyle_mode.legacy", "Legacy");
+        this.add("ultimine_addition.playstyle_mode.modern.desc", "The full experience. Complete Mining Skill Cards and earn Shape Certificates to unlock Ultimine, with your progress tracked in the Skills Record.");
+        this.add("ultimine_addition.playstyle_mode.legacy.desc", "The original v0.1.0 rules. Complete one challenge on a Miner Certificate to unlock Ultimine.");
         this.add("config.ultimine_addition.server.mining_skill_cards.challenges_amount.unlearned", "Unlearned");
         this.add("config.ultimine_addition.server.mining_skill_cards.challenges_amount.novice", "Novice");
         this.add("config.ultimine_addition.server.mining_skill_cards.challenges_amount.apprentice", "Apprentice");

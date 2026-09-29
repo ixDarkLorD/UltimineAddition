@@ -22,9 +22,6 @@ public class ItemModelDataProvider implements DataProvider {
     private static final String[][] TIERS = {
             {"unlearned", ""}, {"novice", "_1"}, {"apprentice", "_2"}, {"adept", "_3"}, {"mastered", "_mastered"}
     };
-    private static final String[][] CUSTOM_TIERS = {
-            {"unlearned", "_unlearned"}, {"novice", "_1"}, {"apprentice", "_2"}, {"adept", "_3"}, {"mastered", "_mastered"}
-    };
 
     private final PackOutput.PathProvider modelPaths;
     private final PackOutput.PathProvider itemPaths;
@@ -81,26 +78,19 @@ public class ItemModelDataProvider implements DataProvider {
         certificate.add("on_false", modelReference("miner_certificate"));
         this.itemDefinition(cache, "miner_certificate", certificate);
 
-        // Mining Skill Cards: a model per tier, plus the flat "custom renderer" card models.
-        for (String[] tier : CUSTOM_TIERS) {
-            String name = "custom_renderer/mining_skill_card" + tier[1];
-            this.model(cache, name, "minecraft:item/generated", "item/" + name, null);
-        }
+        // Mining Skill Cards: a model per tier.
         for (String type : CARD_TYPES) {
             String base = "mining_skill_card_" + type;
             JsonObject classic = new JsonObject();
-            JsonObject custom = new JsonObject();
             for (int i = 0; i < TIERS.length; i++) {
                 String modelName = base + TIERS[i][1];
                 String texture = "item/" + base + (i == 0 ? "_unlearned" : TIERS[i][1]);
                 this.model(cache, modelName, "minecraft:item/generated", texture, null);
                 classic.add(TIERS[i][0], modelReference(modelName));
-                custom.addProperty(CUSTOM_TIERS[i][0], FTBUltimineAddition.id("item/custom_renderer/mining_skill_card" + CUSTOM_TIERS[i][1]).toString());
             }
             JsonObject card = new JsonObject();
             card.addProperty("type", FTBUltimineAddition.id("mining_skill_card").toString());
             card.add("classic", classic);
-            card.add("custom", custom);
             this.itemDefinition(cache, base, card);
         }
 

@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.data.item;
 
 import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import java.util.function.Consumer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -9,7 +9,6 @@ import net.ixdarklord.coolcatcore.api.data.ItemDataComponent;
 import net.ixdarklord.coolcatcore.api.utils.ChatFormattingUtils;
 import net.ixdarklord.ultimine_addition.client.handler.ClientHandler;
 import net.ixdarklord.ultimine_addition.common.item.MinerCertificateItem;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.MinerCertificatePayload;
@@ -83,7 +82,7 @@ public final class MinerCertificateData extends ItemDataComponent<MinerCertifica
     }
 
     public void tick(int slotIndex, ServerPlayer player) {
-        if (UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+        if (PlaystyleModes.isLegacy()) {
             if (this.legacy == null) {
                 int min = UAServerConfig.LEGACY_REQUIRED_MIN.get();
                 int max = UAServerConfig.LEGACY_REQUIRED_MAX.get();

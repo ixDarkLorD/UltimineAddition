@@ -136,17 +136,16 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
     }
 
     public static class Type {
-        public static final Type EMPTY = new Type(true, "empty", List.of(), Items.BARRIER);
-        public static final Type PICKAXE = new Type(true, "pickaxe", List.of(), Items.NETHERITE_PICKAXE);
-        public static final Type AXE = new Type(true, "axe", List.of(), Items.NETHERITE_AXE);
-        public static final Type SHOVEL = new Type(true, "shovel", List.of(), Items.NETHERITE_SHOVEL);
-        public static final Type HOE = new Type(true, "hoe", List.of(), Items.NETHERITE_HOE);
+        public static final Type EMPTY = new Type(true, "empty", List.of());
+        public static final Type PICKAXE = new Type(true, "pickaxe", List.of());
+        public static final Type AXE = new Type(true, "axe", List.of());
+        public static final Type SHOVEL = new Type(true, "shovel", List.of());
+        public static final Type HOE = new Type(true, "hoe", List.of());
         public static List<Type> TYPES = new ArrayList<>();
 
         private final boolean active;
         private final String id;
         private final List<String> requiredTools;
-        private final Item defaultDisplayItem;
         private final Color potionColor;
 
         public static final Codec<Type> CODEC = Codec.STRING.comapFlatMap(s -> {
@@ -161,24 +160,19 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
                 Codec.BOOL.fieldOf("active").forGetter(Type::isActive),
                 Codec.STRING.fieldOf("card_id").forGetter(Type::getId),
                 Codec.STRING.listOf().fieldOf("required_tools").forGetter(Type::getRequiredTools),
-                CodecUtils.COLOR_CODEC.optionalFieldOf("potion_color", Color.WHITE).forGetter(Type::getPotionColor),
-                CodecUtils.ITEM_CODEC.optionalFieldOf("default_display_item", Items.BARRIER).forGetter(Type::getDefaultDisplayItem)
+                CodecUtils.COLOR_CODEC.optionalFieldOf("potion_color", Color.WHITE).forGetter(Type::getPotionColor)
+                // (Older custom card files may still have a "default_display_item"; it's ignored.)
         ).apply(instance, Type::new));
 
         public Type(boolean active, String id, List<String> requiredTools) {
-            this(active, id, requiredTools, Color.WHITE, Items.BARRIER);
+            this(active, id, requiredTools, Color.WHITE);
         }
 
-        public Type(boolean active, String id, List<String> requiredTools, Item defaultDisplayItem) {
-            this(active, id, requiredTools, Color.WHITE, defaultDisplayItem);
-        }
-
-        public Type(boolean active, String id, List<String> requiredTools, Color potionColor, Item defaultDisplayItem) {
+        public Type(boolean active, String id, List<String> requiredTools, Color potionColor) {
             this.active = active;
             this.id = validateId(id);
             this.requiredTools = requiredTools;
             this.potionColor = potionColor;
-            this.defaultDisplayItem = defaultDisplayItem;
         }
 
         private String validateId(String input) {
@@ -211,9 +205,6 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
 
         public Color getPotionColor() {
             return potionColor;
-        }
-        public Item getDefaultDisplayItem() {
-            return defaultDisplayItem;
         }
 
         public static Type fromString(String input) {

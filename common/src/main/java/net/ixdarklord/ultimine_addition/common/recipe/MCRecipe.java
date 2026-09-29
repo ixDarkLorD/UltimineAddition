@@ -68,14 +68,7 @@ public class MCRecipe extends NormalCraftingRecipe {
     public @NotNull ItemStack assemble(CraftingInput input) {
         ItemStack stack = this.result.create();
         if (stack.getItem() instanceof MiningSkillCardItem item) {
-            NonNullList<ItemStack> inputs = NonNullList.create();
-            for (ItemStack itemStack : input.items()) {
-                if (!itemStack.isEmpty() && !(itemStack.getItem() instanceof MiningSkillCardItem))
-                    inputs.add(itemStack.copy());
-            }
-
             MiningSkillCardData data = item.getData(stack);
-            if (!inputs.isEmpty()) data.setDisplayItem(inputs.getFirst());
             // Component only: this also runs for the crafting preview. The card is stored (and rolls its challenges)
             // once the player carries it.
             data.writeComponent();

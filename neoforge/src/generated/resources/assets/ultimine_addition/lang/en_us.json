@@ -159,8 +159,6 @@
   "config.ultimine_addition.client.skills_record.text_shadow.tooltip": "Drop shadow on the card viewer's text.",
   "config.ultimine_addition.client.title": "Client Settings",
   "config.ultimine_addition.client.visuals": "Visuals",
-  "config.ultimine_addition.client.visuals.mining_skill_card_renderer": "Mining Skill Card Renderer",
-  "config.ultimine_addition.client.visuals.mining_skill_card_renderer.tooltip": "Draw each card's display item on the card (work in progress).",
   "config.ultimine_addition.client.visuals.shape_selector_filter": "Shape Selector Filter",
   "config.ultimine_addition.client.visuals.shape_selector_filter.tooltip": "Shapes listed by the Shape Selector: all, or only the ones that aren't blacklisted.",
   "config.ultimine_addition.server.debugging": "Debugging",
@@ -174,6 +172,8 @@
   "config.ultimine_addition.server.general.challenge_validator.tooltip": "How often (in seconds) Mining Skill Cards are checked for invalid challenges.",
   "config.ultimine_addition.server.general.is_placed_by_entity_condition": "Ignore Placed Blocks",
   "config.ultimine_addition.server.general.is_placed_by_entity_condition.tooltip": "Blocks placed by players or other entities don't count towards challenges.",
+  "config.ultimine_addition.server.general.playstyle_mode": "Playstyle Mode",
+  "config.ultimine_addition.server.general.playstyle_mode.tooltip": "How players unlock Ultimine. Changes apply at once, and players on a server play by the server's mode.",
   "config.ultimine_addition.server.legacy": "Legacy Mode",
   "config.ultimine_addition.server.legacy.required_amount_max": "Max Required Ores",
   "config.ultimine_addition.server.legacy.required_amount_max.tooltip": "Highest number of ores a sealed Miner Certificate can ask for.",
@@ -243,9 +243,6 @@
   "config.ultimine_addition.server.undo.history.tooltip": "How many Ultimine operations per player can be undone, newest first.",
   "config.ultimine_addition.server.undo.window": "Undo Window (s)",
   "config.ultimine_addition.server.undo.window.tooltip": "Seconds after an Ultimine operation during which it can be undone.",
-  "config.ultimine_addition.startup.playstyle_mode": "Playstyle Mode",
-  "config.ultimine_addition.startup.playstyle_mode.tooltip": "Modern: Mining Skill Cards, the Skills Record and Shape Certificates. One Tier Only (WIP): a single-tier card that becomes Mastered once its challenges are done. Legacy: the v0.1.0 mechanics (one Miner Certificate and one challenge). Takes effect after a restart; players must use the server's mode.",
-  "config.ultimine_addition.startup.title": "Startup Settings",
   "curios.identifier.skills_record": "Skills Record",
   "effect.ultimine_addition.mine_go_juice_axe": "Mine-Go Juice: Lumberjack Limbo",
   "effect.ultimine_addition.mine_go_juice_hoe": "Mine-Go Juice: Soil Serenade",
@@ -470,6 +467,7 @@
   "ultimine_addition.extra_shapes.none": "None",
   "ultimine_addition.extra_shapes.novice": "Novice",
   "ultimine_addition.playstyle_mode.legacy": "Legacy",
+  "ultimine_addition.playstyle_mode.legacy.desc": "The original v0.1.0 rules. Complete one challenge on a Miner Certificate to unlock Ultimine.",
   "ultimine_addition.playstyle_mode.modern": "Modern",
-  "ultimine_addition.playstyle_mode.one_tier_only": "One Tier Only"
+  "ultimine_addition.playstyle_mode.modern.desc": "The full experience. Complete Mining Skill Cards and earn Shape Certificates to unlock Ultimine, with your progress tracked in the Skills Record."
 }

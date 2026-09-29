@@ -33,8 +33,6 @@ public final class UAClientConfig {
     static { BUILDER.push("visuals"); }
     public static final ConfigValue<ShapeSelectorScreen.Filter> SHAPE_SELECTOR_FILTER = BUILDER.enumValue("shape_selector_filter", ShapeSelectorScreen.Filter.ALL)
             .comment("Shapes listed by the Shape Selector: all, or only the ones that aren't blacklisted.").build();
-    public static final ConfigValue<Boolean> MSC_RENDERER = BUILDER.bool("mining_skill_card_renderer", false)
-            .comment("Draw each Mining Skill Card's display item on the card (work in progress).").build();
     static { BUILDER.pop(); }
 
     static { BUILDER.push("debug"); }

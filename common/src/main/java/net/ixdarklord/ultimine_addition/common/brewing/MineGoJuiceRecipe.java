@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.brewing;
 
-import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.coolcatcore.api.brewing.IBrewingRecipe;
 import net.ixdarklord.coolcatcore.api.brewing.BrewingBuilder;
 import net.ixdarklord.coolcatcore.api.event.v1.server.RegisterBrewingRecipesEvent;
@@ -9,7 +9,6 @@ import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -42,9 +41,10 @@ public class MineGoJuiceRecipe implements IBrewingRecipe {
         this.outputStack = PotionContents.createItemStack(Items.POTION, output);
     }
 
+    // Always registered: brewing is built once per server start, and the playstyle mode can change while it runs,
+    // so the recipes stop matching in the legacy mode instead (isInput).
     public static void register() {
         RegisterBrewingRecipesEvent.EVENT.register(event -> {
-            if (UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return;
             BrewingBuilder builder = event.getBuilder();
             builder.addRecipe(new MineGoJuiceRecipe(Potions.WATER, Items.ENCHANTED_BOOK, getHolder(Registration.KNOWLEDGE_POTION.get())));
 
@@ -100,6 +100,7 @@ public class MineGoJuiceRecipe implements IBrewingRecipe {
 
     @Override
     public boolean isInput(@NotNull ItemStack stack) {
+        if (PlaystyleModes.isLegacy()) return false;
         if (stack.getItem() instanceof PotionItem) {
             return stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion().orElse(null) == this.input;
         }

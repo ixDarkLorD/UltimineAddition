@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.core;
 
 import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.coolcatcore.api.platform.Platform;
 import dev.ftb.mods.ftbultimine.api.restriction.RestrictionHandler;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
@@ -14,7 +14,6 @@ import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.progression.UltimineNotice;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -51,7 +50,7 @@ public class FTBUltimineIntegration implements RestrictionHandler {
     @Override
     public boolean canUltimine(Player player) {
         if (ServicePlatform.get().players().isPlayerUltimineCapable(player)) return true;
-        if (UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return false;
+        if (PlaystyleModes.isLegacy()) return false;
         if (hasJuiceAccess(player)) return true;
         return hasCertificateShapes(player);
     }
@@ -83,7 +82,7 @@ public class FTBUltimineIntegration implements RestrictionHandler {
     }
 
     public static boolean isShapeCertificatesActive() {
-        return UAServerConfig.SHAPE_CERTIFICATES.get() && UAStartupConfig.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY;
+        return UAServerConfig.SHAPE_CERTIFICATES.get() && !PlaystyleModes.isLegacy();
     }
 
     // Shapes learned from Shape Certificates for this tool, across every card type it belongs to (a paxel has all four).
@@ -166,7 +165,7 @@ public class FTBUltimineIntegration implements RestrictionHandler {
         Component title = UltimineNotice.actionsTitle();
         Component status = Component.translatable("info.ultimine_addition.notice.locked").withStyle(ChatFormatting.RED);
         ItemStack held = ItemUtils.getItemInHand(player, true);
-        if (UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+        if (PlaystyleModes.isLegacy()) {
             UltimineNoticeHud.INSTANCE.show(new UltimineNotice(UltimineNotice.Kind.ACTION, title,
                     List.of(status, Component.translatable("info.ultimine_addition.notice.locked.legacy")), ModItems.MINER_CERTIFICATE.getDefaultInstance()));
             return;

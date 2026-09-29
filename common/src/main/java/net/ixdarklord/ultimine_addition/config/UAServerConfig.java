@@ -22,6 +22,13 @@ public final class UAServerConfig {
             .comment(FTBUltimineAddition.MOD_NAME + " server settings.");
 
     static { BUILDER.push("general"); }
+    // Applies at once: see PlaystyleModes.
+    public static final ConfigValue<PlaystyleMode> PLAYSTYLE_MODE = BUILDER.enumValue("playstyle_mode", PlaystyleMode.MODERN)
+            .comment("Defines the playstyle mode for the mod:",
+                    "modern: Modern playstyle with Mining Skill Cards, the Skills Record and Shape Certificates.",
+                    "legacy: Restores mechanics from v0.1.0 (only one miner certificate and one challenge).",
+                    "Changes apply at once, and players on a server play by the server's mode.")
+            .build();
     public static final ConfigValue<List<String>> BLACKLISTED_SHAPES = BUILDER.stringList("blacklisted_shapes", List.of())
             .comment("Ultimine shapes nobody can use.",
                     "Press \"F3-H\" and then hold \"Left Shift\" in the Shape Selector to see a shape's ID.",

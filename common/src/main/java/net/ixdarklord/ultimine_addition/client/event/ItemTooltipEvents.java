@@ -2,13 +2,12 @@ package net.ixdarklord.ultimine_addition.client.event;
 
 import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
-import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
 import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Util;
@@ -36,7 +35,7 @@ public final class ItemTooltipEvents {
         }
 
         if (stack.is(ModItemTags.LEGACY_DISABLED_ITEMS)) {
-            if (UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+            if (PlaystyleModes.isLegacy()) {
                 components.add(1, Component.translatable("tooltip.ultimine_addition.legacy_mode.disabled_item").withStyle(ChatFormatting.RED));
             }
         }
@@ -52,7 +51,7 @@ public final class ItemTooltipEvents {
                     .findFirst()
                     .ifPresent(effect -> components.add(2, Component.translatable("tooltip.ultimine_addition.mine_go_juice.info",
                             ShapeCertificateItem.toolName(((MineGoJuiceEffect) effect).getType().getId()).copy().withStyle(ChatFormatting.AQUA)).withStyle(ChatFormatting.GRAY)));
-            if (UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+            if (PlaystyleModes.isLegacy()) {
                 components.add(1, Component.translatable("tooltip.ultimine_addition.legacy_mode.disabled_item").withStyle(ChatFormatting.RED));
             }
         }

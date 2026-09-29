@@ -10,7 +10,7 @@ import net.ixdarklord.coolcatcore.api.registry.RegistryEntry;
 import net.minecraft.resources.Identifier;
 import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
 import net.ixdarklord.ultimine_addition.common.data.item.ShapeCertificateData;
-import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
 import net.ixdarklord.coolcatcore.api.core.commands.ArgumentTypeRegistry;
 import net.ixdarklord.coolcatcore.api.utils.ParticleTypes;
@@ -31,7 +31,6 @@ import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
 import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.MCRecipe;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -136,11 +135,11 @@ public class Registration {
                     output.accept(ModItems.MINER_CERTIFICATE);
                     output.accept(ModItems.SHAPE_SELECTOR);
 
-                    if (UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+                    if (PlaystyleModes.isLegacy()) {
                         output.accept(ModItems.CARD_BLUEPRINT);
                     }
 
-                    if (UAStartupConfig.PLAYSTYLE_MODE.get() != PlaystyleMode.LEGACY) {
+                    if (!PlaystyleModes.isLegacy()) {
                         for (ShapeCertificateItem certificate : ShapeCertificateItem.all()) {
                             for (Identifier shape : ShapeCertificateItem.tierList(certificate.getTier())) {
                                 for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {

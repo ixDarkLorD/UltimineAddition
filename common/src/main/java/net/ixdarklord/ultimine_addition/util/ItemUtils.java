@@ -3,7 +3,6 @@ package net.ixdarklord.ultimine_addition.util;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.Item;
 import net.minecraft.core.component.DataComponents;
-import com.mojang.serialization.Codec;
 import com.google.common.collect.Lists;
 import net.ixdarklord.coolcatcore.api.utils.SlotReference;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -33,8 +32,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 public class ItemUtils {
-    /** Encodes a stack as just its item id (replaces the removed {@code ItemStack.SIMPLE_ITEM_CODEC}). */
-    public static final Codec<ItemStack> SIMPLE_ITEM_CODEC = Item.CODEC.xmap(ItemStack::new, ItemStack::typeHolder);
 
     public record ItemSorter(ItemStack item, int slotId, int order){}
 

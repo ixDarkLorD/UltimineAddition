@@ -7,11 +7,16 @@ import java.util.Locale;
 
 public enum PlaystyleMode implements EnumType.Displayable {
     MODERN,
-    ONE_TIER_ONLY,
     LEGACY;
 
     @Override
     public Component displayName() {
         return Component.translatable("ultimine_addition.playstyle_mode." + this.name().toLowerCase(Locale.ROOT));
+    }
+
+    // Shown when choosing the mode from the config screen's list.
+    @Override
+    public Component description() {
+        return Component.translatable("ultimine_addition.playstyle_mode." + this.name().toLowerCase(Locale.ROOT) + ".desc");
     }
 }

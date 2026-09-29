@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.ultimine_addition.config.UAStartupConfig;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.server.level.ServerLevel;
@@ -10,7 +10,6 @@ import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.client.gui.tooltip.SkillsRecordTooltip;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
@@ -114,7 +113,7 @@ public class SkillsRecordItem extends ComponentItem {
     }
 
     public boolean isLegacyMode() {
-        return UAStartupConfig.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
+        return PlaystyleModes.isLegacy();
     }
 
     @Override

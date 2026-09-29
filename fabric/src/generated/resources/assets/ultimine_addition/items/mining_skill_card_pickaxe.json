@@ -22,13 +22,6 @@
         "type": "minecraft:model",
         "model": "ultimine_addition:item/mining_skill_card_pickaxe"
       }
-    },
-    "custom": {
-      "adept": "ultimine_addition:item/custom_renderer/mining_skill_card_3",
-      "apprentice": "ultimine_addition:item/custom_renderer/mining_skill_card_2",
-      "mastered": "ultimine_addition:item/custom_renderer/mining_skill_card_mastered",
-      "novice": "ultimine_addition:item/custom_renderer/mining_skill_card_1",
-      "unlearned": "ultimine_addition:item/custom_renderer/mining_skill_card_unlearned"
     }
   }
 }
