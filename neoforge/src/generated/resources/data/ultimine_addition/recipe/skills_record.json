@@ -9,15 +9,16 @@
   "category": "misc",
   "group": "ultimine_addition",
   "key": {
-    "C": "minecraft:white_concrete",
     "I": "minecraft:iron_ingot",
     "M": "ultimine_addition:mining_skill_card_empty",
-    "N": "minecraft:iron_nugget"
+    "N": "minecraft:iron_nugget",
+    "P": "minecraft:paper",
+    "W": "#minecraft:planks"
   },
   "pattern": [
     "NIN",
-    "CMC",
-    "NCN"
+    "PMP",
+    "WWW"
   ],
   "result": {
     "id": "ultimine_addition:skills_record"

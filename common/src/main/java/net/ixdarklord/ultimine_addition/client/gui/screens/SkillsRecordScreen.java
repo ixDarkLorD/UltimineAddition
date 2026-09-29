@@ -383,7 +383,8 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
             boolean isMissingItems = this.isChallengesExists && this.isMissingItems && (slot instanceof PenSlot || slot instanceof PaperSlot);
             boolean notEnoughInk = this.isChallengesExists && this.notEnoughInk && slot instanceof PenSlot;
-            boolean warn = isMissingItems || notEnoughInk || (this.menu.isCardSlotsEmpty() && slot instanceof MiningSkillCardSlot);
+            // Only the pen and paper slots turn red; empty card slots stay grey.
+            boolean warn = isMissingItems || notEnoughInk;
             int color = warn ? 0xff0000 : 0x8b8b8b;
             float alpha = warn ? 0.15F : 0.55F;
 

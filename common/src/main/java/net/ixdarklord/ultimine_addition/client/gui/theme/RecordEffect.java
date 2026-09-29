@@ -1,12 +1,12 @@
 package net.ixdarklord.ultimine_addition.client.gui.theme;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
+import org.joml.Matrix3x2fStack;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 /**
- * The card viewer's background effect for each {@link RecordTheme}, drawn in screen space over its gradient: little
+ * The card viewer's background effect for each {@link RecordTheme}, drawn in world space over its gradient, so it pans and zooms with the map: little
  * pixel scenes inspired by Minecraft. Everything is computed from the time, so nothing is kept between frames.
  */
 public enum RecordEffect {
@@ -63,7 +63,8 @@ public enum RecordEffect {
             int n = Math.max(3, c.count(5000));
             for (int i = 0; i < n; i++) {
                 float w = 24 + 26 * c.r(i, 1), h = 6 + 5 * c.r(i, 2);
-                float x = c.x0 - w + Mth.frac(c.r(i, 3) + c.t * (0.012F + 0.01F * c.r(i, 4))) * (c.w + w * 2);
+                // Sailing on for good; the repeating tile brings each cloud round again without a jump.
+                float x = c.x0 + (c.r(i, 3) + c.t * (0.012F + 0.01F * c.r(i, 4))) * c.w;
                 float y = c.y0 + c.r(i, 5) * (c.h - h);
                 int color = ARGB.color(0.10F + 0.06F * c.r(i, 6), 0xFFFFFF);
                 c.rect(x, y + h / 3, w, h * 2 / 3, color);
@@ -100,7 +101,7 @@ public enum RecordEffect {
                 int size = 3 + (int) (4 * c.r(i, 1));
                 float speed = 2.2F + 1.4F * c.r(i, 2);
                 float bounce = Math.abs(Mth.sin(c.t * speed + i * 1.9F));
-                float x = c.x0 + Mth.frac(c.r(i, 3) + c.t * 0.02F * (c.r(i, 4) - 0.5F)) * (c.w - size);
+                float x = c.x0 + (c.r(i, 3) + c.t * 0.02F * (c.r(i, 4) - 0.5F)) * c.w;
                 float y = c.groundY - size - 2 - bounce * (8 + 10 * c.r(i, 5));
                 // Squashed as it lands.
                 float squash = bounce < 0.15F ? 1 : 0;
@@ -149,9 +150,9 @@ public enum RecordEffect {
             int n = c.count(260);
             for (int i = 0; i < n; i++) {
                 float speed = 70 + 40 * c.r(i, 1);
-                float y = c.fall(i, speed);
+                // The whole way fallen, not wrapped: the slant then carries on through the repeating tile.
+                float y = c.y0 + c.r(i, 13) * c.h + c.t * speed;
                 float x = c.x(i) - (y - c.y0) * 0.25F;
-                x = c.x0 + Mth.positiveModulo(x - c.x0, c.w);
                 int color = ARGB.color(0.35F + 0.2F * c.r(i, 2), 0xB9DDF2);
                 for (int k = 0; k < 4; k++) c.dot(x + k * 0.25F, y - k, 1, color);
             }
@@ -204,14 +205,14 @@ public enum RecordEffect {
         @Override
         void render(Ctx c) {
             // Sampled where the world is, so the light slides along with the view as it pans.
-            int cell = 4;
-            int ox = Mth.floor(c.panX) % cell, oy = Mth.floor(c.panY) % cell;
-            for (int y = oy - cell; y < c.viewH; y += cell) {
-                for (int x = ox - cell; x < c.viewW; x += cell) {
-                    float wx = x - c.panX, wy = y - c.panY;
+            // A function of the world position, so the light pans and zooms with the view; sampled in cells about 4 screen
+            // pixels wide whatever the zoom.
+            int cell = 6 * Math.max(1, Math.round(c.px));
+            for (int wy = Mth.floor(c.viewTop / cell) * cell; wy < c.viewBottom; wy += cell) {
+                for (int wx = Mth.floor(c.viewLeft / cell) * cell; wx < c.viewRight; wx += cell) {
                     float v = Mth.sin(wx * 0.09F + c.t * 0.9F) + Mth.sin(wy * 0.13F - c.t * 0.7F) + Mth.sin((wx + wy) * 0.06F + c.t * 0.5F);
                     float a = Mth.clamp((v - 1.6F) * 0.12F, 0.0F, 0.16F);
-                    if (a > 0.01F) c.rectRaw(c.viewX + x, c.viewY + y, cell, cell, ARGB.color(a, 0x9FC4FF));
+                    if (a > 0.01F) c.rectRaw(wx, wy, cell, cell, ARGB.color(a, 0x9FC4FF));
                 }
             }
         }
@@ -254,7 +255,8 @@ public enum RecordEffect {
                 float y = c.y0 + c.h - life * c.h;
                 float x = c.x(i) + Mth.sin(c.t * 1.7F + i) * 3;
                 float flicker = 0.6F + 0.4F * Mth.sin(c.t * 9 + i * 2.7F);
-                int color = ARGB.color((1.0F - life) * flicker * 0.9F, life < 0.4F ? 0xFFE45A : 0xFF7A2A);
+                float in = Mth.clamp(life / 0.08F, 0.0F, 1.0F);
+                int color = ARGB.color(in * (1.0F - life) * flicker * 0.9F, life < 0.4F ? 0xFFE45A : 0xFF7A2A);
                 c.dot(x, y, c.r(i, 3) > 0.8F ? 2 : 1, color);
             }
         }
@@ -284,7 +286,8 @@ public enum RecordEffect {
                 float sx = c.x0 + c.w * (0.2F + 0.5F * hash(shot, 1)), sy = c.y0 + c.h * 0.1F * hash(shot, 2);
                 float hx = sx + p * c.w * 0.4F, hy = sy + p * c.h * 0.35F;
                 for (int k = 0; k < 10; k++) {
-                    c.dot(hx - k * 1.15F, hy - k, 1, ARGB.color((1.0F - k / 10.0F) * (1.0F - p) * 0.9F, 0xFFFFFF));
+                    float in = Mth.clamp(p / 0.15F, 0.0F, 1.0F);
+                    c.dot(hx - k * 1.15F, hy - k, 1, ARGB.color(in * (1.0F - k / 10.0F) * (1.0F - p) * 0.9F, 0xFFFFFF));
                 }
             }
         }
@@ -292,57 +295,53 @@ public enum RecordEffect {
 
     abstract void render(Ctx c);
 
-    /** Draws the effect over the given area (the caller clips to it), not panned. */
-    public void draw(GuiGraphicsExtractor graphics, ScreenRectangle bounds, boolean animated) {
-        this.draw(graphics, bounds, animated, 0, 0);
-    }
-
     /**
-     * Draws the effect over the given area (the caller clips to it), moved along with a view panned by
-     * ({@code panX}, {@code panY}) screen pixels: the particles wrap around the area as they scroll.
+     * Draws the effect over the given world area. The caller's pose maps world to screen and clips to the view, so the
+     * particles pan and zoom with it.
      */
-    public void draw(GuiGraphicsExtractor graphics, ScreenRectangle bounds, boolean animated, float panX, float panY) {
-        if (bounds.width() <= 0 || bounds.height() <= 0) return;
+    public void draw(GuiGraphicsExtractor graphics, double left, double top, double right, double bottom, double zoom, boolean animated) {
+        if (right <= left || bottom <= top) return;
         float t = animated ? (System.currentTimeMillis() % 3_600_000L) / 1000.0F : 12.0F;
-        this.render(new Ctx(graphics, bounds, t, this.ordinal(), panX, panY));
+        this.render(new Ctx(graphics, (float) left, (float) top, (float) right, (float) bottom, (float) zoom, t, this.ordinal()));
     }
 
     static float hash(int a, int b) {
         return (Mth.murmurHash3Mixer(a * 0x9E3779B9 ^ b * 0x85EBCA6B) >>> 8) / (float) (1 << 24);
     }
 
-    // Particles live in the view grown by this much on every side, so the ones wrapping around as the view pans
-    // come in from off screen instead of popping up at the edge.
-    private static final int MARGIN = 40;
+    // The effects place their particles in one tile of the world, repeated all over it; a particle is drawn in every
+    // copy of the tile that shows.
+    private static final int TILE_W = 256;
+    private static final int TILE_H = 192;
 
     static final class Ctx {
         final GuiGraphicsExtractor g;
-        // The area particles live in (the view and its margin), where the effects place them.
-        final float x0, y0, w, h, t;
-        // The view itself, its ground (its bottom) and how far it's panned.
-        final float viewX, viewY, viewW, viewH, groundY, panX, panY;
+        // The tile particles live in (world units), where the effects place them.
+        final float x0 = 0, y0 = 0, w = TILE_W, h = TILE_H, t;
+        // The world area the view shows, its ground (its bottom), and one screen pixel in world units.
+        final float viewLeft, viewTop, viewRight, viewBottom, groundY, px;
+        // Zoomed out, the view shows many copies of the tile; fewer particles per tile keep the count on screen (and
+        // the cost) about the same.
+        final float density;
         final int salt;
 
-        Ctx(GuiGraphicsExtractor g, ScreenRectangle view, float t, int salt, float panX, float panY) {
+        Ctx(GuiGraphicsExtractor g, float left, float top, float right, float bottom, float zoom, float t, int salt) {
             this.g = g;
-            this.viewX = view.left();
-            this.viewY = view.top();
-            this.viewW = view.width();
-            this.viewH = view.height();
-            this.groundY = view.bottom();
-            this.x0 = view.left() - MARGIN;
-            this.y0 = view.top() - MARGIN;
-            this.w = view.width() + MARGIN * 2;
-            this.h = view.height() + MARGIN * 2;
+            this.viewLeft = left;
+            this.viewTop = top;
+            this.viewRight = right;
+            this.viewBottom = bottom;
+            this.groundY = bottom;
+            this.px = Math.max(1.0F, 1.0F / zoom);
+            float tiles = Math.max(1.0F, (right - left) / TILE_W) * Math.max(1.0F, (bottom - top) / TILE_H);
+            this.density = Math.min(1.0F, 1.5F / tiles);
             this.t = t;
-            this.panX = panX;
-            this.panY = panY;
             this.salt = salt * 131;
         }
 
-        /** How many particles for this area, one per {@code areaPer} pixels. */
+        /** How many particles for a tile, one per {@code areaPer} world pixels. */
         int count(int areaPer) {
-            return Mth.clamp((int) (this.w * this.h / areaPer), 1, 400);
+            return Mth.clamp((int) (this.w * this.h / areaPer * this.density), 1, 400);
         }
 
         float r(int i, int k) {
@@ -371,24 +370,31 @@ public enum RecordEffect {
             this.rect(x, y, size, size, color);
         }
 
-        /** A rectangle at a place in the particle area, moved with the pan and wrapped around the area. */
+        /** A rectangle at a place in the tile, drawn in every copy of the tile the view shows. */
         void rect(float x, float y, float w, float h, int color) {
-            this.rectRaw(this.wrapX(x), this.y0 + Mth.positiveModulo(y - this.y0 + this.panY, this.h), w, h, color);
+            float bx = Mth.positiveModulo(x, this.w), by = Mth.positiveModulo(y, this.h);
+            int kx0 = Mth.floor((this.viewLeft - bx - w) / this.w) + 1, kx1 = Mth.floor((this.viewRight - bx) / this.w);
+            int ky0 = Mth.floor((this.viewTop - by - h) / this.h) + 1, ky1 = Mth.floor((this.viewBottom - by) / this.h);
+            for (int ky = ky0; ky <= ky1; ky++) {
+                for (int kx = kx0; kx <= kx1; kx++) this.rectRaw(bx + kx * this.w, by + ky * this.h, w, h, color);
+            }
         }
 
-        /** Like {@link #rect}, but it stays on the view's ground: it only follows the pan sideways. */
+        /** Like {@link #rect}, but it stays on the view's ground: repeated sideways only. */
         void rectOnGround(float x, float y, float w, float h, int color) {
-            this.rectRaw(this.wrapX(x), y, w, h, color);
+            float bx = Mth.positiveModulo(x, this.w);
+            int kx0 = Mth.floor((this.viewLeft - bx - w) / this.w) + 1, kx1 = Mth.floor((this.viewRight - bx) / this.w);
+            for (int kx = kx0; kx <= kx1; kx++) this.rectRaw(bx + kx * this.w, y, w, h, color);
         }
 
-        private float wrapX(float x) {
-            return this.x0 + Mth.positiveModulo(x - this.x0 + this.panX, this.w);
-        }
-
-        /** A rectangle in screen space, as is. */
+        /** A rectangle in world space, as is (at least a screen pixel wide). */
         void rectRaw(float x, float y, float w, float h, int color) {
-            int ix = Math.round(x), iy = Math.round(y);
-            this.g.fill(ix, iy, ix + Math.max(1, Math.round(w)), iy + Math.max(1, Math.round(h)), color);
+            Matrix3x2fStack pose = this.g.pose();
+            pose.pushMatrix();
+            pose.translate(x, y);
+            pose.scale(Math.max(w, this.px), Math.max(h, this.px));
+            this.g.fill(0, 0, 1, 1, color);
+            pose.popMatrix();
         }
     }
 }

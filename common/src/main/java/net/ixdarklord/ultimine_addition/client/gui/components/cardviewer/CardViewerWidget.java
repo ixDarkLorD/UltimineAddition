@@ -214,6 +214,12 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         return this.state.theme();
     }
 
+    // A badge or slot color taken toward the record's color, keeping a hint of its own (a state's green, gold...).
+    int recordTinted(int color) {
+        int tint = ARGB.srgbLerp(0.3F, ARGB.opaque(this.getAccentColor()), 0xFFFFFFFF);
+        return ARGB.multiply(color, tint);
+    }
+
     // A panel shade in the Skills Record's background color (the shade times the color, keeping the shade's alpha).
     int themed(int shade) {
         return ARGB.multiply(shade, ARGB.opaque(this.getAccentColor()));

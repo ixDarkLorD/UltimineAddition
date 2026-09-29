@@ -1,11 +1,10 @@
-package net.ixdarklord.ultimine_addition.datagen.recipe;
+package net.ixdarklord.ultimine_addition.datagen.record;
 
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -13,6 +12,8 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeUnlockAdvancementBuilder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
@@ -22,26 +23,34 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
- * The Skills Record's recipes, one per color: the board is that color's concrete, and the record comes out in that
- * color (white concrete makes the plain, white, record). Shared by both loaders' recipe providers. Records can be
- * recolored any number of times with a dye ({@code skills_record_dyeing}).
+ * The Skills Record's recipes, a clipboard: an iron clip on top, paper around an empty Mining Skill Card, and a board
+ * of planks. With plain planks it's the plain (white) record; a dye in the middle of the board makes that color's
+ * record. Shared by both loaders' recipe providers. Records can be recolored any number of times with a dye
+ * ({@code skills_record_dyeing}).
  */
 public final class SkillsRecordRecipes {
     private SkillsRecordRecipes() {}
 
-    /** @param output the output to save to, with the loader's conditions already applied */
-    public static void save(RecipeOutput output, Criterion<?> unlock) {
+    /**
+     * @param output the output to save to, with the loader's conditions already applied
+     * @param tag    the provider's tag ingredient ({@code RecipeProvider::tag})
+     */
+    public static void save(RecipeOutput output, Function<TagKey<Item>, Ingredient> tag, Criterion<?> unlock) {
         for (DyeColor dye : DyeColor.values()) {
-            Item concrete = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(dye.getSerializedName() + "_concrete"));
-            Map<Character, Ingredient> key = Map.of(
+            boolean plain = dye == DyeColor.WHITE;
+            Map<Character, Ingredient> key = new HashMap<>(Map.of(
                     'N', Ingredient.of(Items.IRON_NUGGET),
                     'I', Ingredient.of(Items.IRON_INGOT),
-                    'C', Ingredient.of(concrete),
-                    'M', Ingredient.of(Registration.MINING_SKILL_CARD_EMPTY.get()));
-            boolean plain = dye == DyeColor.WHITE;
+                    'P', Ingredient.of(Items.PAPER),
+                    'M', Ingredient.of(Registration.MINING_SKILL_CARD_EMPTY.get()),
+                    'W', tag.apply(ItemTags.PLANKS)));
+            // Any dye of the color, by its common tag (c:dyes/<color>), so other mods' dyes work too.
+            if (!plain) key.put('D', tag.apply(TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "dyes/" + dye.getSerializedName()))));
             ItemStackTemplate result = plain ? new ItemStackTemplate(Registration.SKILLS_RECORD.get())
                     : new ItemStackTemplate(Registration.SKILLS_RECORD.get(), DataComponentPatch.builder().set(DataComponents.BASE_COLOR, dye).build());
             ResourceKey<Recipe<?>> id = ResourceKey.create(Registries.RECIPE,
@@ -49,7 +58,7 @@ public final class SkillsRecordRecipes {
 
             ShapedRecipe recipe = new ShapedRecipe(RecipeBuilder.createCraftingCommonInfo(true),
                     RecipeBuilder.createCraftingBookInfo(RecipeCategory.MISC, FTBUltimineAddition.MOD_ID),
-                    ShapedRecipePattern.of(key, "NIN", "CMC", "NCN"), result);
+                    ShapedRecipePattern.of(key, "NIN", "PMP", plain ? "WWW" : "WDW"), result);
             RecipeUnlockAdvancementBuilder advancement = new RecipeUnlockAdvancementBuilder();
             advancement.unlockedBy("has_mining_skill_card", unlock);
             output.accept(id, recipe, advancement.build(output, id, RecipeCategory.MISC));

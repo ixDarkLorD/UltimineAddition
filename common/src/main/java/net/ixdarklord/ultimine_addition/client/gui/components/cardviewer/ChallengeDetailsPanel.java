@@ -1,5 +1,8 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.util.ARGB;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.ChatFormatting;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.ScrollPanel;
@@ -23,6 +26,7 @@ final class ChallengeDetailsPanel extends ScrollPanel {
     private static final int PADDING = 4;
     private static final int HEADER = 18;
     private static final int DIVIDER_Y = 14;
+    private static final float TIER_SCALE = 0.75F;
     private static final int FOOTER = 17;
     private static final int BUTTON_GAP = 3;
     private static final int LINE_HEIGHT = 10;
@@ -49,20 +53,33 @@ final class ChallengeDetailsPanel extends ScrollPanel {
     private static final int SLOT_FILL = 0xFF4A463C;
     // The footer buttons' labels are 6px tall instead of 8px.
     private static final float FOOTER_TEXT_SCALE = 0.75F;
+    // The footer buttons' icons, in front of their labels.
+    private static final String ICON_BACK = "◀", ICON_PIN = "◎", ICON_UNPIN = "✕", ICON_EDIT = "✎";
+    // Drawn from the mod's icons font (a pixel glyph), as the text font has no clear reroll symbol.
+    private static final FontDescription ICON_FONT = new FontDescription.Resource(FTBUltimineAddition.id("icons"));
+    private static final String ICON_REROLL = "";
+
+    private static Component withIcon(String icon, Component label) {
+        return Component.literal(icon + " ").append(label);
+    }
+
+    private static Component withFontIcon(String glyph, Component label) {
+        return Component.empty().append(Component.literal(glyph).withStyle(style -> style.withFont(ICON_FONT))).append(" ").append(label);
+    }
 
     ChallengeDetailsPanel(CardViewerWidget viewer) {
         this.viewer = viewer;
         this.setModal(true);
         this.setVisible(false);
         this.setScrollStep(LINE_HEIGHT * 2);
-        this.backButton = this.addChild(new ViewerButton(36, Component.translatable("gui.back"), b -> viewer.closeDetails()).withTextScale(FOOTER_TEXT_SCALE));
-        this.pinButton = this.addChild(new ViewerButton(36, Component.translatable("gui.ultimine_addition.card_viewer.pin"), b -> {
+        this.backButton = this.addChild(new ViewerButton(36, withIcon(ICON_BACK, Component.translatable("gui.back")), b -> viewer.closeDetails()).withTextScale(FOOTER_TEXT_SCALE));
+        this.pinButton = this.addChild(new ViewerButton(36, withIcon(ICON_PIN, Component.translatable("gui.ultimine_addition.card_viewer.pin")), b -> {
             if (this.node != null && this.node.id() != null) viewer.togglePin(this.node.id());
         }).withTextScale(FOOTER_TEXT_SCALE));
-        this.editButton = this.addChild(new ViewerButton(36, Component.translatable("gui.ultimine_addition.card_viewer.edit"), b -> {
+        this.editButton = this.addChild(new ViewerButton(36, withIcon(ICON_EDIT, Component.translatable("gui.ultimine_addition.card_viewer.edit")), b -> {
             if (this.node != null && this.node.id() != null) viewer.editChallenge(this.node.id());
         }).withTextScale(FOOTER_TEXT_SCALE));
-        this.rerollButton = this.addChild(new ViewerButton(40, Component.translatable("gui.ultimine_addition.card_viewer.reroll"), b -> {
+        this.rerollButton = this.addChild(new ViewerButton(40, withFontIcon(ICON_REROLL, Component.translatable("gui.ultimine_addition.card_viewer.reroll")), b -> {
             if (this.node != null && this.node.id() != null) viewer.rerollChallenge(this.node.id());
         }).withTextScale(FOOTER_TEXT_SCALE));
     }
@@ -104,6 +121,10 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         List<ViewerButton> row = new ArrayList<>();
         for (ViewerButton button : List.of(this.rerollButton, this.pinButton, this.editButton, this.backButton)) {
             if (button.visible) row.add(button);
+        }
+        // Each as wide as its icon and label (the label shrinks further if the row gets too wide).
+        for (ViewerButton button : row) {
+            button.setWidth(Math.max(28, Math.round(this.font.width(button.getMessage()) * FOOTER_TEXT_SCALE) + 8));
         }
         int width = -BUTTON_GAP;
         for (ViewerButton button : row) width += button.getWidth() + BUTTON_GAP;
@@ -160,14 +181,25 @@ final class ChallengeDetailsPanel extends ScrollPanel {
     protected void extractFrame(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         ScreenRectangle b = this.getBounds();
         graphics.fill(b.left(), b.top(), b.right(), b.bottom(), this.viewer.themed(PANEL_FILL));
+        // The scrollbar in the record's color, on a track of a dark shade of it.
+        this.setScrollbarColors(ARGB.opaque(this.viewer.getAccentColor()), ARGB.color(0.5F, ARGB.scaleRGB(ARGB.opaque(this.viewer.getAccentColor()), 0.3F)));
         if (this.node == null) return;
 
-        Component tierPart = Component.literal(" · ").append(this.node.tier().getDisplayName()).append("《");
+        // The challenge's name, then its tier small and muted beside it, on the name's baseline.
+        boolean shadow = this.viewer.hasTextShadow();
+        Component tier = this.node.tier().getDisplayName();
+        int tierWidth = Math.round(this.font.width(tier) * TIER_SCALE);
         String name = CardViewerWidget.challengeName(this.node).getString();
-        Component title = Component.literal("》").append(name).append(tierPart);
-        CardViewerWidget.drawFittedText(graphics, this.font, title,
-                width -> Component.literal("》").append(CardViewerWidget.ellipsize(this.font, name, width - this.font.width("》") - this.font.width(tierPart))).append(tierPart),
-                b.left() + PADDING, b.top() + 4, b.width() - PADDING * 2, RenderUtils.textColor(0xFBF1C1), this.viewer.hasTextShadow());
+        int nameX = b.left() + PADDING, nameY = b.top() + 4;
+        int room = b.width() - PADDING * 2 - tierWidth - 4;
+        Component shown = CardViewerWidget.ellipsize(this.font, name, room);
+        graphics.text(this.font, shown, nameX, nameY, RenderUtils.textColor(0xFBF1C1), shadow);
+        var pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(nameX + this.font.width(shown) + 4, nameY + 8 - 8 * TIER_SCALE);
+        pose.scale(TIER_SCALE, TIER_SCALE);
+        graphics.text(this.font, tier, 0, 0, RenderUtils.textColor(0x9A9A9A), shadow);
+        pose.popMatrix();
         graphics.fill(b.left() + 2, b.top() + DIVIDER_Y, b.right() - 2, b.top() + DIVIDER_Y + 1, 0x30FFFFFF);
 
         int footerTop = b.bottom() - FOOTER;
@@ -177,7 +209,8 @@ final class ChallengeDetailsPanel extends ScrollPanel {
 
         boolean live = this.node.isLive() && this.node.tier() == this.viewer.getCurrentTier();
         this.pinButton.visible = live;
-        this.pinButton.setMessage(Component.translatable(this.node.pinned() ? "gui.ultimine_addition.card_viewer.unpin" : "gui.ultimine_addition.card_viewer.pin"));
+        this.pinButton.setMessage(this.node.pinned() ? withIcon(ICON_UNPIN, Component.translatable("gui.ultimine_addition.card_viewer.unpin"))
+                : withIcon(ICON_PIN, Component.translatable("gui.ultimine_addition.card_viewer.pin")));
         this.editButton.visible = live && this.viewer.canEdit();
         this.updateRerollButton(live);
         this.layoutButtons();
@@ -214,14 +247,14 @@ final class ChallengeDetailsPanel extends ScrollPanel {
                 int iy = y + (i / perRow) * ICON_SIZE;
                 boolean hovered = this.isInScrollArea(mouseX, mouseY) && mouseX >= x && mouseX < x + TierTreePanel.SMALL_SLOT_SIZE && mouseY >= iy && mouseY < iy + TierTreePanel.SMALL_SLOT_SIZE;
                 if (hovered) this.hoveredTarget = targets.get(i);
-                TierTreePanel.drawSmallSlot(graphics, x, iy, this.viewer.themed(SLOT_FILL), hovered ? 0xFFFFFFFF : 0xFF9A9A9A);
+                TierTreePanel.drawSmallSlot(graphics, x, iy, this.viewer.themed(SLOT_FILL), this.viewer.recordTinted(hovered ? 0xFFFFFFFF : 0xFF9A9A9A));
                 graphics.item(targets.get(i), x + 2, iy + 2);
             }
             y += this.iconsHeight(this.iconRows(width)) + SECTION_GAP;
         }
 
         y = this.drawLines(graphics, this.progress, left, y, shadow);
-        TierTreePanel.drawProgressBar(graphics, left, y, width, this.node.progress());
+        TierTreePanel.drawProgressBar(graphics, left, y, width, this.node.progress(), this.viewer.getAccentColor());
         y += TierTreePanel.PROGRESS_BAR_HEIGHT;
         if (!this.status.isEmpty()) this.drawLines(graphics, this.status, left, y + SECTION_GAP, shadow);
 

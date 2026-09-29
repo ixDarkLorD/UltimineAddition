@@ -9,15 +9,17 @@
   "category": "misc",
   "group": "ultimine_addition",
   "key": {
-    "C": "minecraft:yellow_concrete",
+    "D": "#c:dyes/yellow",
     "I": "minecraft:iron_ingot",
     "M": "ultimine_addition:mining_skill_card_empty",
-    "N": "minecraft:iron_nugget"
+    "N": "minecraft:iron_nugget",
+    "P": "minecraft:paper",
+    "W": "#minecraft:planks"
   },
   "pattern": [
     "NIN",
-    "CMC",
-    "NCN"
+    "PMP",
+    "WDW"
   ],
   "result": {
     "components": {

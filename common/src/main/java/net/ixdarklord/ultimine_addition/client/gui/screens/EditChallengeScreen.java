@@ -82,16 +82,26 @@ public class EditChallengeScreen extends Screen {
         return this.leftPos + WIDTH / 2;
     }
 
+    // Rows, top to bottom: name, number and tier, target blocks, the value row, quick values, the bar and its
+    // percentage, then what Done would change and the footer buttons.
+    private int nameY() {
+        return this.topPos + FRAME_TOP + 6;
+    }
+
+    private int infoY() {
+        return this.nameY() + 11;
+    }
+
     private int targetsY() {
-        return this.topPos + 46;
+        return this.infoY() + 13;
     }
 
     private int valueRowY() {
-        return this.topPos + 72;
+        return this.targetsY() + (this.targets.isEmpty() ? 0 : SLOT + 8);
     }
 
     private int quickRowY() {
-        return this.topPos + 93;
+        return this.valueRowY() + BUTTON_HEIGHT + 5;
     }
 
     private int barLeft() {
@@ -103,7 +113,11 @@ public class EditChallengeScreen extends Screen {
     }
 
     private int barTop() {
-        return this.topPos + 120;
+        return this.quickRowY() + BUTTON_HEIGHT + 9;
+    }
+
+    private int changeY() {
+        return this.footerY() - 12;
     }
 
     private int footerY() {
@@ -158,6 +172,7 @@ public class EditChallengeScreen extends Screen {
                 .withTooltip(Component.translatable("gui.ultimine_addition.skills_record.edit.step")));
         this.valueBox = this.addRenderableWidget(new EditBox(this.font, rowX + 20 + 3, rowY + 4, 44, 10, Component.translatable("gui.ultimine_addition.skills_record.edit.new_value", this.required())));
         this.valueBox.setBordered(false);
+        this.valueBox.setCentered(true);
         this.valueBox.setMaxLength(String.valueOf(this.required()).length());
         this.valueBox.setValue(String.valueOf(this.current()));
         this.valueBox.setTooltip(Tooltip.create(Component.translatable("gui.ultimine_addition.skills_record.edit.new_value", this.required())));
@@ -168,14 +183,19 @@ public class EditChallengeScreen extends Screen {
         this.addRenderableWidget(new Button(rowX + 20 + 48 + 4, rowY, 16, Component.literal("+"), b -> this.setValue(this.value() + this.step()))
                 .withTooltip(Component.translatable("gui.ultimine_addition.skills_record.edit.step")));
 
-        // Quick values, centred under the field.
-        int quickWidth = 44, gap = 4;
+        // Quick values, centred under the field, all as wide as the longest label.
+        Component reset = Component.translatable("gui.ultimine_addition.skills_record.edit.reset");
+        Component half = Component.translatable("gui.ultimine_addition.skills_record.edit.half");
+        Component complete = Component.translatable("gui.ultimine_addition.skills_record.edit.complete");
+        int gap = 4;
+        int quickWidth = Math.min((WIDTH - PAD * 2 - 2 * gap) / 3,
+                Math.max(44, Math.max(this.font.width(reset), Math.max(this.font.width(half), this.font.width(complete))) + 10));
         int quickX = this.centerX() - (3 * quickWidth + 2 * gap) / 2;
-        this.addRenderableWidget(new Button(quickX, this.quickRowY(), quickWidth, Component.translatable("gui.ultimine_addition.skills_record.edit.reset"), b -> this.setValue(0)));
-        this.addRenderableWidget(new Button(quickX + quickWidth + gap, this.quickRowY(), quickWidth, Component.translatable("gui.ultimine_addition.skills_record.edit.half"), b -> this.setValue(this.required() / 2)));
-        this.addRenderableWidget(new Button(quickX + 2 * (quickWidth + gap), this.quickRowY(), quickWidth, Component.translatable("gui.ultimine_addition.skills_record.edit.complete"), b -> this.setValue(this.required())));
+        this.addRenderableWidget(new Button(quickX, this.quickRowY(), quickWidth, reset, b -> this.setValue(0)));
+        this.addRenderableWidget(new Button(quickX + quickWidth + gap, this.quickRowY(), quickWidth, half, b -> this.setValue(this.required() / 2)));
+        this.addRenderableWidget(new Button(quickX + 2 * (quickWidth + gap), this.quickRowY(), quickWidth, complete, b -> this.setValue(this.required())));
 
-        int footerWidth = 56;
+        int footerWidth = Math.max(56, Math.max(this.font.width(CommonComponents.GUI_DONE), this.font.width(CommonComponents.GUI_CANCEL)) + 12);
         int footerX = this.centerX() - (2 * footerWidth + gap) / 2;
         this.doneButton = this.addRenderableWidget(new Button(footerX, this.footerY(), footerWidth, CommonComponents.GUI_DONE, b -> this.apply()));
         this.addRenderableWidget(new Button(footerX + footerWidth + gap, this.footerY(), footerWidth, CommonComponents.GUI_CANCEL, b -> this.onClose()));
@@ -208,6 +228,10 @@ public class EditChallengeScreen extends Screen {
         graphics.fill(0, 0, this.width, this.height, 0x90000000);
         graphics.fill(this.leftPos + 3, this.topPos + 3, this.leftPos + WIDTH + 3, this.topPos + HEIGHT + 3, 0x50000000);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FRAME_SPRITE, this.leftPos, this.topPos, WIDTH, HEIGHT, RecordTheme.active().overlay().argb());
+        // The value field's frame, under the field's text.
+        int fieldX = this.valueRowLeft() + 20, rowY = this.valueRowY();
+        graphics.fill(fieldX, rowY, fieldX + 48, rowY + BUTTON_HEIGHT, this.valueBox != null && this.valueBox.isFocused() ? 0xFFFFFFFF : 0xFF7A7A7A);
+        graphics.fill(fieldX + 1, rowY + 1, fieldX + 47, rowY + BUTTON_HEIGHT - 1, 0xFF0C0C0C);
     }
 
     @Override
@@ -224,18 +248,18 @@ public class EditChallengeScreen extends Screen {
         graphics.text(this.font, Component.literal("✎ ").append(this.title), this.leftPos + FRAME_SIDE + 1, this.topPos + 7,
                 RecordTheme.active().labelColor(), false);
 
-        // The challenge's name, then its number/tier and ID.
+        // The challenge's name (hover it for its ID, click to copy it), then its number and tier, centred.
         Component nameLine = Component.literal("📝 ").append(this.name);
-        graphics.text(this.font, this.font.plainSubstrByWidth(nameLine.getString(), right - x), x, this.topPos + FRAME_TOP + 5, RenderUtils.textColor(0xFBF1C1), true);
-        graphics.text(this.font, this.info, x, this.topPos + FRAME_TOP + 16, 0xFFFFFFFF, true);
-        String id = this.challenge.getId().toString();
-        int idWidth = this.idWidth();
-        boolean overId = this.isOverId(mouseX, mouseY);
-        graphics.text(this.font, this.font.plainSubstrByWidth(id, idWidth), right - idWidth, this.topPos + FRAME_TOP + 16, overId ? 0xFFFFFFFF : 0xFF8A8A8A, false);
-        if (overId) {
-            graphics.setTooltipForNextFrame(this.font, this.copiedTicks > 0
-                    ? Component.translatable("gui.ultimine_addition.skills_record.edit.copy_success").withStyle(ChatFormatting.GREEN)
-                    : Component.translatable("gui.ultimine_addition.skills_record.edit.copy_id").withStyle(ChatFormatting.GRAY), mouseX, mouseY);
+        String name = this.font.plainSubstrByWidth(nameLine.getString(), right - x);
+        boolean overName = this.isOverName(mouseX, mouseY);
+        graphics.centeredText(this.font, Component.literal(name).withStyle(overName ? ChatFormatting.UNDERLINE : ChatFormatting.RESET),
+                this.centerX(), this.nameY(), RenderUtils.textColor(0xFBF1C1));
+        graphics.centeredText(this.font, this.info, this.centerX(), this.infoY(), 0xFFFFFFFF);
+        if (overName) {
+            graphics.setComponentTooltipForNextFrame(this.font, List.of(
+                    Component.literal(this.challenge.getId().toString()).withStyle(ChatFormatting.DARK_GRAY),
+                    this.copiedTicks > 0 ? Component.translatable("gui.ultimine_addition.skills_record.edit.copy_success").withStyle(ChatFormatting.GREEN)
+                            : Component.translatable("gui.ultimine_addition.skills_record.edit.copy_id").withStyle(ChatFormatting.GRAY)), mouseX, mouseY);
         }
         if (this.copiedTicks > 0) this.copiedTicks--;
 
@@ -252,10 +276,8 @@ public class EditChallengeScreen extends Screen {
             if (over) hovered = this.targets.get(i);
         }
 
-        // The value field's frame and "/ required", in the centred row.
+        // "/ required", after the field and its + button.
         int fieldX = this.valueRowLeft() + 20, rowY = this.valueRowY();
-        graphics.fill(fieldX, rowY, fieldX + 48, rowY + BUTTON_HEIGHT, this.valueBox.isFocused() ? 0xFFFFFFFF : 0xFF7A7A7A);
-        graphics.fill(fieldX + 1, rowY + 1, fieldX + 47, rowY + BUTTON_HEIGHT - 1, 0xFF0C0C0C);
         graphics.text(this.font, "/ " + this.required(), fieldX + 48 + 4 + 16 + 6, rowY + 4, 0xFFAAAAAA, true);
 
         // The bar previews the change; click or drag it to set the value.
@@ -269,28 +291,22 @@ public class EditChallengeScreen extends Screen {
         if (valueX > currentX) graphics.fill(currentX, bt, valueX, bt + BAR_HEIGHT, 0xFF6BCB6B);
         if (valueX < currentX) graphics.fill(valueX, bt, currentX, bt + BAR_HEIGHT, 0xFF8A2E2E);
         graphics.fill(valueX - 1, bt - 2, valueX + 1, bt + BAR_HEIGHT + 2, 0xFFFFFFFF);
-        graphics.text(this.font, Component.translatable("gui.ultimine_addition.skills_record.edit.progress",
-                Math.round(100.0F * value / Math.max(1, this.required()))), bl, bt + BAR_HEIGHT + 4, 0xFF8A8A8A, false);
+        graphics.centeredText(this.font, Component.translatable("gui.ultimine_addition.skills_record.edit.progress",
+                Math.round(100.0F * value / Math.max(1, this.required()))), this.centerX(), bt + BAR_HEIGHT + 4, 0xFF8A8A8A);
 
-        // What Done would change, under the bar on the right.
+        // What Done would change, centred above the footer buttons.
         int delta = value - current;
         Component change = delta == 0 ? Component.translatable("gui.ultimine_addition.skills_record.edit.no_change").withStyle(ChatFormatting.GRAY)
                 : Component.literal((delta > 0 ? "+" : "") + delta).withStyle(delta > 0 ? ChatFormatting.GREEN : ChatFormatting.RED)
                 .append(Component.literal("  (" + current + " → " + value + ")").withStyle(ChatFormatting.GRAY));
-        graphics.text(this.font, change, br - this.font.width(change), bt + BAR_HEIGHT + 16, 0xFFFFFFFF, true);
+        graphics.centeredText(this.font, change, this.centerX(), this.changeY(), 0xFFFFFFFF);
 
         if (hovered != null) graphics.setTooltipForNextFrame(this.font, hovered.getHoverName(), mouseX, mouseY);
     }
 
-    private int idWidth() {
-        int right = this.leftPos + WIDTH - PAD;
-        return Math.max(0, Math.min(this.font.width(this.challenge.getId().toString()), right - this.leftPos - PAD - this.font.width(this.info) - 8));
-    }
-
-    private boolean isOverId(double mouseX, double mouseY) {
-        int right = this.leftPos + WIDTH - PAD;
-        int y = this.topPos + FRAME_TOP + 15;
-        return mouseX >= right - this.idWidth() && mouseX < right && mouseY >= y && mouseY < y + 10;
+    private boolean isOverName(double mouseX, double mouseY) {
+        int width = Math.min(this.font.width("📝 " + this.name.getString()), WIDTH - PAD * 2);
+        return Math.abs(mouseX - this.centerX()) <= width / 2.0 && mouseY >= this.nameY() - 1 && mouseY < this.nameY() + 9;
     }
 
     private boolean isOverBar(double mouseX, double mouseY) {
@@ -305,7 +321,7 @@ public class EditChallengeScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) return true;
-        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && this.isOverId(event.x(), event.y())) {
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && this.isOverName(event.x(), event.y())) {
             if (this.minecraft != null) this.minecraft.keyboardHandler.setClipboard(this.challenge.getId().toString());
             this.copiedTicks = 80;
             return true;

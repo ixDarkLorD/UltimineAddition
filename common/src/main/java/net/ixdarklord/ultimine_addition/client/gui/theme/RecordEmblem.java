@@ -1,7 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.theme;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
@@ -46,16 +45,39 @@ public enum RecordEmblem {
 
     private static final float ALPHA = 0.22F;
 
-    /** Draws the emblem in the given area (the caller clips to it). */
-    public void draw(GuiGraphicsExtractor graphics, ScreenRectangle b, Identifier sprite, boolean animated) {
-        if (b.width() <= 0 || b.height() <= 0) return;
-        float t = animated ? (System.currentTimeMillis() % 3_600_000L) / 1000.0F : 0.0F;
-        // Whole multiples of the 9px emblem keep its pixels even.
-        int size = Math.min(b.width(), b.height()) >= 80 ? 36 : 27;
+    // The world is cut into cells; some hold an emblem, of a size and at a spot of their own, moving in its own time.
+    private static final int CELL = 120;
+    // Whole multiples of the 9px emblem keep its pixels even.
+    private static final int[] SIZES = {18, 27, 36, 45};
+
+    /**
+     * Draws emblems scattered over the given world area (the caller's pose maps world to screen, so they pan and zoom
+     * with the view).
+     */
+    public void drawScattered(GuiGraphicsExtractor graphics, double left, double top, double right, double bottom, Identifier sprite, boolean animated) {
+        float time = animated ? (System.currentTimeMillis() % 3_600_000L) / 1000.0F : 0.0F;
+        int cx0 = Mth.floor((left - CELL) / CELL), cx1 = Mth.floor(right / CELL);
+        int cy0 = Mth.floor((top - CELL) / CELL), cy1 = Mth.floor(bottom / CELL);
+        for (int cy = cy0; cy <= cy1; cy++) {
+            for (int cx = cx0; cx <= cx1; cx++) {
+                int seed = Mth.murmurHash3Mixer(cx * 73856093 ^ cy * 19349663 ^ this.ordinal() * 83492791);
+                if ((seed >>> 24 & 0xFF) < 115) continue;
+                int size = SIZES[seed >>> 4 & 3];
+                // The emblem moves within a box of the cell, placed at random.
+                float room = CELL - 16 - size;
+                float bw = size + room * 0.55F, bh = size + room * 0.55F;
+                float bl = cx * CELL + 8 + (room - room * 0.55F) * ((seed >>> 8 & 0xFF) / 255.0F);
+                float bt = cy * CELL + 8 + (room - room * 0.55F) * ((seed >>> 16 & 0xFF) / 255.0F);
+                float offset = animated ? (seed & 0xFFFF) / 97.0F : 0.0F;
+                this.drawOne(graphics, bl, bt, bw, bh, size, sprite, time + offset);
+            }
+        }
+    }
+
+    private void drawOne(GuiGraphicsExtractor graphics, float bl, float bt, float w, float h, int size, Identifier sprite, float t) {
         float half = size / 2.0F;
-        float w = b.width(), h = b.height();
-        float homeX = b.right() - half - 10, homeY = b.bottom() - half - 10;
-        float midX = b.left() + w / 2, midY = b.top() + h / 2;
+        float homeX = bl + w / 2, homeY = bt + h / 2;
+        float midX = homeX, midY = homeY;
 
         float x = homeX, y = homeY, angle = 0, sx = 1, sy = 1, alpha = ALPHA;
         // Where it turns and scales from, relative to its center.
@@ -75,9 +97,11 @@ public enum RecordEmblem {
                 angle = 0.14F * Mth.sin(t * 1.3F);
             }
             case DRIFT -> {
-                x = b.left() - half + Mth.frac(t / 30.0F) * (w + size);
-                y = b.top() + h * 0.3F + Mth.sin(t * 0.7F) * 3;
-                alpha = ALPHA * 0.85F;
+                float across = Mth.frac(t / 30.0F);
+                x = bl - half + across * (w + size);
+                y = bt + h * 0.3F + Mth.sin(t * 0.7F) * 3;
+                // Fading in and out at the ends of its path, so it never pops.
+                alpha = ALPHA * 0.85F * Mth.sin(across * Mth.PI);
             }
             case FLY -> {
                 x = midX + Mth.sin(t * 0.5F) * Math.max(0, w / 2 - half - 4) * 0.9F;
@@ -97,8 +121,9 @@ public enum RecordEmblem {
             }
             case FLUTTER -> {
                 float fall = Mth.frac(t / 14.0F);
-                y = b.top() - half + fall * (h + size);
-                x = b.left() + w * 0.7F + Mth.sin(t * 1.1F) * 16;
+                y = bt - half + fall * (h + size);
+                x = bl + w * 0.5F + Mth.sin(t * 1.1F) * Math.min(16, w / 3);
+                alpha = ALPHA * Mth.sin(fall * Mth.PI);
                 angle = Mth.sin(t * 0.9F) * 0.6F;
                 sx = 0.4F + 0.6F * Math.abs(Mth.cos(t * 1.6F));
             }
@@ -121,7 +146,8 @@ public enum RecordEmblem {
                 float phase = Mth.frac(t / 2.6F);
                 if (phase < 0.7F) {
                     float p = phase / 0.7F;
-                    y = Mth.lerp(p * p, b.top() - half, homeY);
+                    y = Mth.lerp(p * p, bt - half, homeY);
+                    alpha = ALPHA * Mth.clamp(p / 0.15F, 0.0F, 1.0F);
                     sy = 1 + 0.15F * p;
                     sx = 1 - 0.08F * p;
                 } else {
@@ -133,8 +159,8 @@ public enum RecordEmblem {
                 }
             }
             case SWIM -> {
-                x = midX + Mth.sin(t * 0.35F) * Math.max(0, w / 2 - half - 6);
-                y = homeY - h * 0.25F + Mth.sin(t * 1.7F) * 3;
+                x = midX + Mth.sin(t * 0.35F) * Math.max(0, w / 2 - half);
+                y = homeY + Mth.sin(t * 1.7F) * 3;
                 // The fish faces left; flipped while it swims right.
                 sx = Mth.cos(t * 0.35F) > 0 ? -1 : 1;
                 angle = 0.06F * Mth.sin(t * 6);

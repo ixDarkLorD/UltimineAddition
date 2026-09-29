@@ -201,19 +201,21 @@ final class TierTreePanel extends ViewportPanel {
 
     // A soft gradient in the Skills Record's background color, drifting slowly: darker at the edges, with a faint
     // light band sweeping across. Drawn in screen space, so it stays put while the map pans.
-    // Also behind the viewer's messages, when no card is shown. Over it go the record's emblem, large and faint and
-    // moving in its own way, and its theme's effect (snow, falling leaves, fireflies...), which pans with the map.
+    // Also behind the viewer's messages, when no card is shown.
     @Override
     protected void extractViewBackground(GuiGraphicsExtractor graphics) {
-        ScreenRectangle b = this.getBounds();
-        drawGradient(graphics, b, this.viewer.getTheme(), this.animated(),
-                (float) (this.toScreenX(0) - b.left()), (float) (this.toScreenY(0) - b.top()));
+        drawGradient(graphics, this.getBounds(), this.viewer.getTheme(), this.animated());
     }
 
-    static void drawGradient(GuiGraphicsExtractor graphics, ScreenRectangle b, RecordTheme theme, boolean animated, float panX, float panY) {
+    static void drawGradient(GuiGraphicsExtractor graphics, ScreenRectangle b, RecordTheme theme, boolean animated) {
         drawGradient(graphics, b, theme.tint(), animated);
-        theme.motion().draw(graphics, b, theme.emblem(), animated);
-        theme.effect().draw(graphics, b, animated, panX, panY);
+    }
+
+    // The record's emblems, scattered in different sizes and each moving in its own way, and its theme's effect (snow,
+    // falling leaves, fireflies...), over the given world area: they pan and zoom with the map.
+    static void drawTheme(GuiGraphicsExtractor graphics, double left, double top, double right, double bottom, double zoom, RecordTheme theme, boolean animated) {
+        theme.motion().drawScattered(graphics, left, top, right, bottom, theme.emblem(), animated);
+        theme.effect().draw(graphics, left, top, right, bottom, zoom, animated);
     }
 
     private static void drawGradient(GuiGraphicsExtractor graphics, ScreenRectangle b, int accentColor, boolean animated) {
@@ -249,8 +251,9 @@ final class TierTreePanel extends ViewportPanel {
     // picture box and the tier badge, in the record's color. A light wave passes over them one after another.
     private void drawBackground(GuiGraphicsExtractor graphics) {
         ScreenRectangle b = this.getBounds();
-        drawCards(graphics, this.toWorldX(b.left()), this.toWorldY(b.top()), this.toWorldX(b.right()), this.toWorldY(b.bottom()),
-                this.getZoom(), this.viewer.getTheme(), this.animated());
+        double left = this.toWorldX(b.left()), top = this.toWorldY(b.top()), right = this.toWorldX(b.right()), bottom = this.toWorldY(b.bottom());
+        drawCards(graphics, left, top, right, bottom, this.getZoom(), this.viewer.getTheme(), this.animated());
+        drawTheme(graphics, left, top, right, bottom, this.getZoom(), this.viewer.getTheme(), this.animated());
     }
 
     // Draws the cards covering the given world area, seen at the given zoom.
@@ -470,6 +473,9 @@ final class TierTreePanel extends ViewportPanel {
         }
         fill = ARGB.srgbLerp(0.35F * hover, fill, 0xFF505050);
         border = ARGB.srgbLerp(0.5F * hover, border, 0xFFFFFFFF);
+        // The tier's box, border and badge take on the record's color, keeping a hint of the state's.
+        fill = this.viewer.recordTinted(fill);
+        border = this.viewer.recordTinted(border);
 
         this.pushNodeTransform(graphics, x + w / 2.0F, y + h / 2.0F, hover, reveal);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TIER_FILL, x + 2, y + 2, w, h, ARGB.color(0.35F * reveal, 0x000000));
@@ -478,7 +484,7 @@ final class TierTreePanel extends ViewportPanel {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TIER_BORDER, x, y, w, h, ARGB.multiplyAlpha(border, reveal));
 
         boolean mastered = node.tier() == MiningSkillCardItem.Tier.Mastered;
-        int badgeColor = mastered && node.state() != TierState.LOCKED ? ARGB.srgbLerp(0.5F * hover, MASTERED_GOLD, 0xFFFFFFFF) : border;
+        int badgeColor = mastered && node.state() != TierState.LOCKED ? this.viewer.recordTinted(ARGB.srgbLerp(0.5F * hover, MASTERED_GOLD, 0xFFFFFFFF)) : border;
         int bx = x - BADGE_SIZE / 2, by = y + (h - BADGE_SIZE) / 2;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, mastered ? STAR_FILL : BADGE_FILL, bx, by, BADGE_SIZE, BADGE_SIZE, ARGB.multiplyAlpha(ARGB.scaleRGB(badgeColor, 0.45F), reveal));
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, mastered ? STAR_BORDER : BADGE_BORDER, bx, by, BADGE_SIZE, BADGE_SIZE, ARGB.multiplyAlpha(badgeColor, reveal));
@@ -500,7 +506,8 @@ final class TierTreePanel extends ViewportPanel {
         if (!reward.isEmpty()) {
             float glow = this.animated() ? (Mth.sin(time() * 4.0F) + 1.0F) / 2.0F : 1.0F;
             int sx = x + w - SMALL_SLOT_SIZE - 5, sy = y + (h - SMALL_SLOT_SIZE) / 2;
-            drawSmallSlot(graphics, sx, sy, ARGB.multiplyAlpha(ARGB.srgbLerp(glow, 0xFF3A2E12, 0xFF6A5420), reveal), ARGB.multiplyAlpha(ARGB.srgbLerp(glow, 0xFFB08A30, MASTERED_GOLD), reveal));
+            drawSmallSlot(graphics, sx, sy, ARGB.multiplyAlpha(this.viewer.recordTinted(ARGB.srgbLerp(glow, 0xFF3A2E12, 0xFF6A5420)), reveal),
+                    ARGB.multiplyAlpha(this.viewer.recordTinted(ARGB.srgbLerp(glow, 0xFFB08A30, MASTERED_GOLD)), reveal));
             if (reveal > 0.5F) graphics.item(reward, sx + (SMALL_SLOT_SIZE - 16) / 2, sy + (SMALL_SLOT_SIZE - 16) / 2);
         }
         graphics.pose().popMatrix();
@@ -520,6 +527,29 @@ final class TierTreePanel extends ViewportPanel {
         }
     }
 
+    // A pixel check mark (7 x 6) with a dark edge, its top left at x, y.
+    private static final String[] CHECK = {
+            "......X",
+            ".....XX",
+            "X...XX.",
+            "XX.XX..",
+            ".XXX...",
+            "..X....",
+    };
+
+    private static void drawCheck(GuiGraphicsExtractor graphics, int x, int y, int color) {
+        int edge = ARGB.color(ARGB.alpha(color) / 255.0F * 0.6F, 0x000000);
+        for (int pass = 0; pass < 2; pass++) {
+            for (int row = 0; row < CHECK.length; row++) {
+                for (int col = 0; col < CHECK[row].length(); col++) {
+                    if (CHECK[row].charAt(col) != 'X') continue;
+                    int px = x + col + (pass == 0 ? 1 : 0), py = y + row + (pass == 0 ? 1 : 0);
+                    graphics.fill(px, py, px + 1, py + 1, pass == 0 ? edge : color);
+                }
+            }
+        }
+    }
+
     static void drawSlot(GuiGraphicsExtractor graphics, int x, int y, int fill, int border) {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_FILL, x, y, SLOT_SIZE, SLOT_SIZE, fill);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_BORDER, x, y, SLOT_SIZE, SLOT_SIZE, border);
@@ -534,9 +564,10 @@ final class TierTreePanel extends ViewportPanel {
         return Mth.hsvToRgb(Math.min(progress / 100.0F, 1.0F) / 3.0F, 1.0F, 1.0F);
     }
 
-    static void drawProgressBar(GuiGraphicsExtractor graphics, int x, int y, int width, float progress) {
+    // The track is tinted with the Skills Record's color; the fill keeps its own, red to green with progress.
+    static void drawProgressBar(GuiGraphicsExtractor graphics, int x, int y, int width, float progress, int recordColor) {
         if (width < 6) return;
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SkillsRecordScreen.PROGRESS_BAR_SPRITE, x, y, width, PROGRESS_BAR_HEIGHT);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SkillsRecordScreen.PROGRESS_BAR_SPRITE, x, y, width, PROGRESS_BAR_HEIGHT, ARGB.opaque(recordColor));
         int fill = Math.round((width - 2) * Math.clamp(progress, 0.0F, 1.0F));
         if (fill > 0) {
             int color = progressColor(Math.round(progress * 100));
@@ -566,14 +597,17 @@ final class TierTreePanel extends ViewportPanel {
             case NEEDS_CONSUME_MODE -> 0xFFD14A4A;
             case NOT_STARTED, LOCKED -> 0xFF8A8A8A;
         };
+        // The row goes gold while in progress and green once done (like a completed tier), otherwise a dark shade of
+        // the record's color; lighter while hovered. Framed and slotted in the record's color, with the count's color
+        // and the mark in the corner telling the state too.
+        int record = ARGB.opaque(this.viewer.getAccentColor());
         int fill = switch (node.state()) {
-            case COMPLETED -> 0xFF1F3323;
-            case IN_PROGRESS -> 0xFF3A3420;
-            case NEEDS_CONSUME_MODE -> 0xFF3A1E1E;
-            case NOT_STARTED, LOCKED -> 0xFF262626;
+            case COMPLETED -> this.viewer.recordTinted(0xFF1E3A22);
+            case IN_PROGRESS -> this.viewer.recordTinted(0xFF3E3418);
+            default -> ARGB.scaleRGB(record, 0.24F);
         };
-        fill = ARGB.srgbLerp(0.35F * hover, fill, 0xFF505050);
-        int border = ARGB.srgbLerp(0.55F * hover, accent, 0xFFFFFFFF);
+        fill = ARGB.srgbLerp(0.35F * hover, fill, ARGB.srgbLerp(0.5F, fill, 0xFF505050));
+        int border = this.viewer.recordTinted(ARGB.srgbLerp(0.55F * hover, 0xFF8A8A8A, 0xFFFFFFFF));
 
         this.pushNodeTransform(graphics, x + w / 2.0F, y + h / 2.0F, hover, reveal);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_FILL, x + 2, y + 2, w, h, ARGB.color(0.3F * reveal, 0x000000));
@@ -581,7 +615,7 @@ final class TierTreePanel extends ViewportPanel {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_BORDER, x, y, w, h, ARGB.multiplyAlpha(border, reveal));
 
         int slotY = y + (h - SLOT_SIZE) / 2;
-        drawSlot(graphics, x + 6, slotY, ARGB.multiplyAlpha(ARGB.scaleRGB(accent, 0.35F), reveal), ARGB.multiplyAlpha(border, reveal));
+        drawSlot(graphics, x + 6, slotY, ARGB.multiplyAlpha(ARGB.scaleRGB(border, 0.35F), reveal), ARGB.multiplyAlpha(border, reveal));
         if (reveal > 0.5F && !node.targets().isEmpty()) {
             ItemStack target = node.targets().get((int) (Util.getMillis() / 1000L % node.targets().size()));
             graphics.item(target, x + 6 + (SLOT_SIZE - 16) / 2, slotY + (SLOT_SIZE - 16) / 2);
@@ -591,11 +625,18 @@ final class TierTreePanel extends ViewportPanel {
         int textX = x + 6 + SLOT_SIZE + 2;
         String title = CardViewerWidget.challengeName(node).getString();
         CardViewerWidget.drawFittedText(graphics, this.font, Component.literal(title), width -> CardViewerWidget.ellipsize(this.font, title, width),
-                textX, y + 3, x + w - 4 - textX, ARGB.multiplyAlpha(RenderUtils.textColor(0xFBF1C1), reveal), shadow);
+                textX, y + 3, x + w - 4 - textX - (node.state() == ChallengeState.COMPLETED || node.state() == ChallengeState.NEEDS_CONSUME_MODE ? 10 : 0),
+                ARGB.multiplyAlpha(RenderUtils.textColor(0xFBF1C1), reveal), shadow);
         if (node.pinned()) graphics.text(this.font, "◎", x + w - 11, y + 12, ARGB.multiplyAlpha(RenderUtils.textColor(0xFFFF55), reveal), shadow);
 
-        String progress = node.state() == ChallengeState.COMPLETED ? "✔ " + node.requiredPoints() + "/" + node.requiredPoints()
+        String progress = node.state() == ChallengeState.COMPLETED ? node.requiredPoints() + "/" + node.requiredPoints()
                 : node.currentPoints() + "/" + node.requiredPoints();
+        // A green check once done; a red "!" when it needs Consume Mode.
+        if (node.state() == ChallengeState.COMPLETED) drawCheck(graphics, x + w - 12, y + 3, ARGB.multiplyAlpha(0xFF6BCB6B, reveal));
+        else if (node.state() == ChallengeState.NEEDS_CONSUME_MODE) {
+            graphics.fill(x + w - 9, y + 3, x + w - 7, y + 8, ARGB.multiplyAlpha(0xFFD14A4A, reveal));
+            graphics.fill(x + w - 9, y + 9, x + w - 7, y + 11, ARGB.multiplyAlpha(0xFFD14A4A, reveal));
+        }
         graphics.text(this.font, progress, textX, y + 12, ARGB.multiplyAlpha(RenderUtils.textColor(accent & 0xFFFFFF), reveal), shadow);
         graphics.pose().popMatrix();
     }

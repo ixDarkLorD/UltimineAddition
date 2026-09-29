@@ -85,8 +85,9 @@ final class GuidePanel extends Panel {
         int accent = this.viewer.getAccentColor();
         this.tint = ARGB.opaque(accent);
         graphics.enableScissor(b.left(), b.top(), b.right(), b.bottom());
-        TierTreePanel.drawGradient(graphics, b, this.viewer.getTheme(), animated, 0, 0);
+        TierTreePanel.drawGradient(graphics, b, this.viewer.getTheme(), animated);
         TierTreePanel.drawCards(graphics, b.left(), b.top(), b.right(), b.bottom(), 1.0, this.viewer.getTheme(), animated);
+        TierTreePanel.drawTheme(graphics, b.left(), b.top(), b.right(), b.bottom(), 1.0, this.viewer.getTheme(), animated);
 
         long elapsed = Util.getMillis() - this.shownAt;
         // The plate rises in when shown; without animations everything sits at its final frame.
@@ -161,7 +162,9 @@ final class GuidePanel extends Panel {
         // Without animations it stays on the card on its way down to the slot.
         if (!animated) { drop = 0.55F; landed = 0.0F; glow = 0.0F; fade = 1.0F; appear = 1.0F; }
 
-        this.drawSlot(graphics, slotX, slotY, landed, 0xFFDCD1B2, intro);
+        // Once the card is in, the slot is outlined in a light shade of the record's color.
+        // It fades away with the card at the end of the loop.
+        this.drawSlot(graphics, slotX, slotY, landed * fade, ARGB.srgbLerp(0.35F, this.tint, 0xFFFFFFFF), intro);
         if (glow > 0.0F) {
             int grow = Math.round((1.0F - glow) * 4.0F);
             outline(graphics, slotX - grow, slotY - grow, SLOT + grow * 2, SLOT + grow * 2, ARGB.color(glow * 0.8F * intro, SELECTED));

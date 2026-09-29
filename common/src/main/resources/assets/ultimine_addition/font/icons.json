@@ -5,7 +5,18 @@
       "file": "ultimine_addition:font/revert.png",
       "height": 8,
       "ascent": 7,
-      "chars": ["\ue000"]
+      "chars": [
+        "\ue000"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "ultimine_addition:font/reroll.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\ue001"
+      ]
     }
   ]
 }

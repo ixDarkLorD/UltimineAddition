@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe;
 
+import net.ixdarklord.ultimine_addition.datagen.record.SkillsRecordRecipes;
 import net.minecraft.data.PackOutput;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
@@ -84,8 +85,8 @@ public class RecipeGenerator extends RecipeProvider {
                 .unlockedBy("has_card_blueprint", has(Registration.CARD_BLUEPRINT.get()))
                 .save(output);
 
-        // One per color, from that color's concrete.
-        SkillsRecordRecipes.save(output.withConditions(new LegacyModeCondition(false)), has(Registration.MINING_SKILL_CARD_EMPTY.get()));
+        // A clipboard; a dye in its board makes that color's record.
+        SkillsRecordRecipes.save(output.withConditions(new LegacyModeCondition(false)), this::tag, has(Registration.MINING_SKILL_CARD_EMPTY.get()));
 
         shaped(RecipeCategory.MISC, Registration.INK_CHAMBER.get())
                 .define('I', Items.IRON_INGOT)
