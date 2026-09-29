@@ -82,13 +82,13 @@ final class ShapeChoicePanel extends Panel {
             button.active = room;
             y += ROW;
         }
-        this.backButton.setPosition(b.right() - PADDING - this.backButton.getWidth(), b.bottom() - FOOTER + (FOOTER + 2 - 12) / 2);
+        this.backButton.setPosition(b.left() + (b.width() - this.backButton.getWidth()) / 2, b.bottom() - FOOTER + (FOOTER + 2 - 12) / 2);
     }
 
     @Override
     protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         ScreenRectangle b = this.getBounds();
-        graphics.fill(b.left(), b.top(), b.right(), b.bottom(), 0xF0141414);
+        graphics.fill(b.left(), b.top(), b.right(), b.bottom(), this.viewer.themed(ChallengeDetailsPanel.PANEL_FILL));
         if (this.tier == null) return;
         boolean shadow = this.viewer.hasTextShadow();
 
@@ -105,8 +105,8 @@ final class ShapeChoicePanel extends Panel {
         graphics.fill(b.left() + 2, b.top() + HEADER - 4, b.right() - 2, b.top() + HEADER - 3, 0x30FFFFFF);
 
         int footerTop = b.bottom() - FOOTER;
-        graphics.fill(b.left(), footerTop, b.right(), b.bottom(), 0xFF202020);
-        graphics.fill(b.left(), footerTop, b.right(), footerTop + 1, 0xFF0A0A0A);
+        graphics.fill(b.left(), footerTop, b.right(), b.bottom(), this.viewer.themed(ChallengeDetailsPanel.FOOTER_FILL));
+        graphics.fill(b.left(), footerTop, b.right(), footerTop + 1, this.viewer.themed(ChallengeDetailsPanel.FOOTER_EDGE));
         graphics.fill(b.left(), footerTop + 1, b.right(), footerTop + 2, 0x28FFFFFF);
         for (ViewerButton button : this.choices) button.active = room;
     }

@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.tooltip;
 
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.minecraft.util.ARGB;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -20,9 +21,11 @@ public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
     private static final int SLOT_SIZE = 18;
     private static final int ITEM_OFFSET = 1;
     private final NonNullList<ItemStack> items;
+    private final RecordTheme theme;
 
     public ClientSkillsRecordTooltip(SkillsRecordTooltip skillsRecordTooltip) {
         this.items = skillsRecordTooltip.getItems();
+        this.theme = RecordTheme.of(skillsRecordTooltip.getColor());
     }
 
     public int getHeight(Font font) {
@@ -35,7 +38,7 @@ public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
 
     @Override
     public void extractImage(Font font, int x, int y, int w, int h, GuiGraphicsExtractor guiGraphics) {
-        SkillsRecordScreen.OverlayColor overlayColor = UAClientConfig.backgroundColor();
+        SkillsRecordScreen.OverlayColor overlayColor = this.theme.overlay();
         int tint = ARGB.colorFromFloat(overlayColor.alpha(), overlayColor.red(), overlayColor.green(), overlayColor.blue());
 
         for (int i = 0; i < this.items.size(); i++) {

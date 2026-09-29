@@ -1,6 +1,125 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "ultimine_addition:item/skills_record"
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_white"
+        },
+        "when": "white"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_orange"
+        },
+        "when": "orange"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_magenta"
+        },
+        "when": "magenta"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_light_blue"
+        },
+        "when": "light_blue"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_yellow"
+        },
+        "when": "yellow"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_lime"
+        },
+        "when": "lime"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_pink"
+        },
+        "when": "pink"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_gray"
+        },
+        "when": "gray"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_light_gray"
+        },
+        "when": "light_gray"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_cyan"
+        },
+        "when": "cyan"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_purple"
+        },
+        "when": "purple"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_blue"
+        },
+        "when": "blue"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_brown"
+        },
+        "when": "brown"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_green"
+        },
+        "when": "green"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_red"
+        },
+        "when": "red"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "ultimine_addition:item/skills_record_black"
+        },
+        "when": "black"
+      }
+    ],
+    "component": "minecraft:base_color",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "ultimine_addition:item/skills_record"
+    },
+    "property": "minecraft:component"
   }
 }

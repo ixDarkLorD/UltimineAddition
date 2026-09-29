@@ -31,6 +31,7 @@ import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
 import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.MCRecipe;
+import net.ixdarklord.ultimine_addition.common.recipe.SkillsRecordDyeRecipe;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -50,6 +51,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.DyeColor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -148,6 +151,14 @@ public class Registration {
                             }
                         }
                         output.accept(ModItems.SKILLS_RECORD);
+                        // Every dyed Skills Record, each with its own look.
+                        for (DyeColor color : DyeColor.values()) {
+                            // The plain record is the white one.
+                            if (color == DyeColor.WHITE) continue;
+                            ItemStack dyed = new ItemStack(ModItems.SKILLS_RECORD);
+                            dyed.set(DataComponents.BASE_COLOR, color);
+                            output.accept(dyed);
+                        }
                         output.accept(ModItems.INK_CHAMBER);
                         output.accept(ModItems.PEN);
                         ItemStack pen = ModItems.PEN.getDefaultInstance();
@@ -210,6 +221,7 @@ public class Registration {
     // Recipe Serializer
     public static final RegistryEntry<RecipeSerializer<ItemStorageDataRecipe>> ITEM_DATA_STORAGE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("item_storage_data", () -> ItemStorageDataRecipe.Serializer.INSTANCE);
     public static final RegistryEntry<RecipeSerializer<MCRecipe>> MC_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("mining_card_recipe", () -> MCRecipe.Serializer.INSTANCE);
+    public static final RegistryEntry<RecipeSerializer<SkillsRecordDyeRecipe>> SKILLS_RECORD_DYE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("skills_record_dyeing", () -> SkillsRecordDyeRecipe.SERIALIZER);
 
     // Data Component
     // Same id as the pre-SavedData component, whose data it still reads for migration.

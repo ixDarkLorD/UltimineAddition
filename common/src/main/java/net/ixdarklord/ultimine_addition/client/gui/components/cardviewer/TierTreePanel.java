@@ -11,6 +11,7 @@ import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTre
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierState;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -63,6 +64,18 @@ final class TierTreePanel extends ViewportPanel {
     private static final float PULSE_SPEED = 32.0F;
     private static final long REVEAL_STEP_MS = 40L;
     private static final long REVEAL_DURATION_MS = 260L;
+    // Background shades, multiplied by the Skills Record's background color; taken from the card's texture.
+    static final int BG_DEEP = 0xFF16150F;
+    private static final int BG_MID = 0xFF35322A;
+    private static final int BG_GLOW = 0xFF8A8577;
+    private static final int CARD_PAPER = 0xFFDCD1B2;
+    private static final int CARD_INK = 0xFFA09881;
+    private static final int CARD_WIDTH = 72;
+    private static final int CARD_HEIGHT = 48;
+    private static final int CARD_GAP = 14;
+    // How fast the card pattern drifts to the right, in world pixels a second.
+    private static final float CARD_DRIFT = 4.0F;
+    private static final int CARD_BLOCK = 256;
 
     private final CardViewerWidget viewer;
     private final Map<Item, Map<MiningSkillCardItem.Tier, ItemStack>> tierIcons = new HashMap<>();
@@ -186,51 +199,163 @@ final class TierTreePanel extends ViewportPanel {
         pose.translate(-centerX, -centerY);
     }
 
+    // A soft gradient in the Skills Record's background color, drifting slowly: darker at the edges, with a faint
+    // light band sweeping across. Drawn in screen space, so it stays put while the map pans.
+    // Also behind the viewer's messages, when no card is shown. Over it go the record's emblem, large and faint and
+    // moving in its own way, and its theme's effect (snow, falling leaves, fireflies...), which pans with the map.
+    @Override
+    protected void extractViewBackground(GuiGraphicsExtractor graphics) {
+        ScreenRectangle b = this.getBounds();
+        drawGradient(graphics, b, this.viewer.getTheme(), this.animated(),
+                (float) (this.toScreenX(0) - b.left()), (float) (this.toScreenY(0) - b.top()));
+    }
+
+    static void drawGradient(GuiGraphicsExtractor graphics, ScreenRectangle b, RecordTheme theme, boolean animated, float panX, float panY) {
+        drawGradient(graphics, b, theme.tint(), animated);
+        theme.motion().draw(graphics, b, theme.emblem(), animated);
+        theme.effect().draw(graphics, b, animated, panX, panY);
+    }
+
+    private static void drawGradient(GuiGraphicsExtractor graphics, ScreenRectangle b, int accentColor, boolean animated) {
+        int accent = ARGB.opaque(accentColor);
+        int deep = ARGB.multiply(BG_DEEP, accent), mid = ARGB.multiply(BG_MID, accent);
+        float t = animated ? time() : 0.0F;
+
+        int bands = Math.max(1, b.height() / 12);
+        for (int i = 0; i < bands; i++) {
+            int y0 = b.top() + b.height() * i / bands, y1 = b.top() + b.height() * (i + 1) / bands;
+            graphics.fillGradient(b.left(), y0, b.right(), y1,
+                    gradientColor(deep, mid, i / (float) bands, t), gradientColor(deep, mid, (i + 1) / (float) bands, t));
+        }
+
+        int glow = ARGB.multiply(BG_GLOW, accent);
+        float center = b.left() + b.width() * (0.5F + 0.42F * Mth.sin(t * 0.23F));
+        float spread = b.width() * 0.32F;
+        for (int x = b.left(); x < b.right(); x += 2) {
+            float d = (x + 1 - center) / spread;
+            float alpha = 0.16F * (float) Math.exp(-d * d);
+            if (alpha > 0.005F) graphics.fill(x, b.top(), Math.min(x + 2, b.right()), b.bottom(), ARGB.color(alpha, glow));
+        }
+    }
+
+    private static int gradientColor(int deep, int mid, float y, float t) {
+        // Brightest a little above the middle, rising and falling slowly.
+        float wave = 0.5F + 0.5F * Mth.sin(y * Mth.PI * 1.1F + 0.3F + t * 0.35F);
+        float edge = 1.0F - 4.0F * (y - 0.45F) * (y - 0.45F);
+        return ARGB.srgbLerp(Mth.clamp(0.25F + 0.5F * wave * edge + 0.25F * edge, 0.0F, 1.0F), deep, mid);
+    }
+
+    // Faint Mining Skill Cards tiled behind the tree: the card's frame, its written lines with their bullets, the
+    // picture box and the tier badge, in the record's color. A light wave passes over them one after another.
     private void drawBackground(GuiGraphicsExtractor graphics) {
         ScreenRectangle b = this.getBounds();
-        double zoom = this.getZoom();
-        int step = zoom < 0.7 ? 32 : 16;
-        float dot = (float) Math.max(1.0, 1.0 / zoom);
+        drawCards(graphics, this.toWorldX(b.left()), this.toWorldY(b.top()), this.toWorldX(b.right()), this.toWorldY(b.bottom()),
+                this.getZoom(), this.viewer.getTheme(), this.animated());
+    }
+
+    // Draws the cards covering the given world area, seen at the given zoom.
+    static void drawCards(GuiGraphicsExtractor graphics, double left, double top, double right, double bottom, double zoom, RecordTheme theme, boolean animated) {
         float t = time();
-        boolean animated = this.animated();
+        int accent = theme.tint();
+        int paper = ARGB.multiply(CARD_PAPER, accent), ink = ARGB.multiply(CARD_INK, accent);
+        boolean detailed = zoom >= 0.6;
 
-        int x0 = Mth.floor(this.toWorldX(b.left()) / step) * step, x1 = Mth.ceil(this.toWorldX(b.right()));
-        int y0 = Mth.floor(this.toWorldY(b.top()) / step) * step, y1 = Mth.ceil(this.toWorldY(b.bottom()));
+        // The whole pattern drifts slowly to the right; the blocks it's laid out in come in from the left.
+        float drift = animated ? t * CARD_DRIFT : 0.0F;
+        int row0 = Mth.floor(top / CARD_BLOCK), row1 = Mth.floor(bottom / CARD_BLOCK);
+        int col0 = Mth.floor((left - drift) / CARD_BLOCK), col1 = Mth.floor((right - drift) / CARD_BLOCK);
+        for (int row = row0; row <= row1; row++) {
+            for (int col = col0; col <= col1; col++) {
+                layoutCards(graphics, col * CARD_BLOCK + drift, row * CARD_BLOCK, CARD_BLOCK, CARD_BLOCK, 0,
+                        Mth.murmurHash3Mixer(col * 73856093 ^ row * 19349663), zoom, t, animated, paper, ink);
+            }
+        }
+    }
+
+    // The world is cut into square blocks, and each block is split again and again at uneven points (along its longer
+    // side), like a treemap, so the cells come in different sizes and never line up into a regular grid. Each cell
+    // holds one card as large as fits, pushed to a random spot of the room left over; a few cells stay empty.
+    private static void layoutCards(GuiGraphicsExtractor graphics, float x, float y, float w, float h, int depth, int seed,
+                                    double zoom, float t, boolean animated, int paper, int ink) {
+        float roll = (seed >>> 24 & 0xFF) / 255.0F;
+        boolean split = depth < 4 && Math.max(w, h) >= CARD_WIDTH * 1.1F && (depth <= 1 || roll > 0.35F);
+        if (split) {
+            float ratio = 0.3F + 0.4F * ((seed & 0xFF) / 255.0F);
+            int a = Mth.murmurHash3Mixer(seed + 1), b = Mth.murmurHash3Mixer(seed + 2);
+            if (w * CARD_HEIGHT >= h * CARD_WIDTH) {
+                float first = w * ratio;
+                layoutCards(graphics, x, y, first, h, depth + 1, a, zoom, t, animated, paper, ink);
+                layoutCards(graphics, x + first, y, w - first, h, depth + 1, b, zoom, t, animated, paper, ink);
+            } else {
+                float first = h * ratio;
+                layoutCards(graphics, x, y, w, first, depth + 1, a, zoom, t, animated, paper, ink);
+                layoutCards(graphics, x, y + first, w, h - first, depth + 1, b, zoom, t, animated, paper, ink);
+            }
+            return;
+        }
+        if (roll < 0.06F) return;
+
+        float scale = Math.min(Math.min((w - CARD_GAP) / CARD_WIDTH, (h - CARD_GAP) / CARD_HEIGHT), 2.2F);
+        if (scale < 0.3F) return;
+        float cw = CARD_WIDTH * scale, ch = CARD_HEIGHT * scale;
+        float cx = x + CARD_GAP / 2.0F + (w - CARD_GAP - cw) * (0.2F + 0.6F * (seed >>> 8 & 0xFF) / 255.0F);
+        float cy = y + CARD_GAP / 2.0F + (h - CARD_GAP - ch) * (0.2F + 0.6F * (seed >>> 16 & 0xFF) / 255.0F);
+
+        float alpha = 0.05F;
+        if (animated) {
+            float wave = Math.max(0.0F, Mth.sin((cx + cw / 2 + cy + ch / 2) * 0.006F - t * 0.9F));
+            alpha += 0.07F * wave * wave * wave;
+        }
         Matrix3x2fStack pose = graphics.pose();
-        for (int y = y0; y <= y1; y += step) {
-            for (int x = x0; x <= x1; x += step) {
-                float alpha = 0.07F;
-                if (animated) {
-                    float wave = Math.max(0.0F, Mth.sin((x + y) * 0.03F - t * 1.8F));
-                    alpha = 0.05F + 0.16F * wave * wave * wave;
-                }
-                pose.pushMatrix();
-                pose.translate(x, y);
-                pose.scale(dot, dot);
-                graphics.fill(0, 0, 1, 1, ARGB.white(alpha));
-                pose.popMatrix();
-            }
-        }
+        pose.pushMatrix();
+        pose.translate(cx, cy);
+        pose.scale(scale, scale);
+        drawCard(graphics, (float) Math.max(1.0, 1.0 / (zoom * scale)), alpha, paper, ink, zoom * scale >= 0.6, seed);
+        pose.popMatrix();
+    }
 
-        if (!animated) return;
-        int cell = 56;
-        int cx0 = Mth.floor(this.toWorldX(b.left()) / cell), cx1 = Mth.floor(this.toWorldX(b.right()) / cell);
-        int cy0 = Mth.floor(this.toWorldY(b.top()) / cell), cy1 = Mth.floor(this.toWorldY(b.bottom()) / cell);
-        for (int cy = cy0; cy <= cy1; cy++) {
-            for (int cx = cx0; cx <= cx1; cx++) {
-                int seed = Mth.murmurHash3Mixer(cx * 73856093 ^ cy * 19349663);
-                float speed = 5.0F + (seed >>> 8 & 7);
-                float mx = cx * cell + (seed & 0xFFFF) % cell;
-                float my = cy * cell + cell - ((t * speed + (seed >>> 16 & 0xFF)) % cell);
-                float alpha = 0.18F + 0.18F * Mth.sin(t * 2.2F + (seed & 0xFF));
-                float size = dot * 1.5F;
-                pose.pushMatrix();
-                pose.translate(mx, my);
-                pose.scale(size, size);
-                graphics.fill(0, 0, 1, 1, ARGB.color(alpha, 0xDDE8FF));
-                pose.popMatrix();
+    // One card at the origin, CARD_WIDTH x CARD_HEIGHT.
+    private static void drawCard(GuiGraphicsExtractor graphics, float px, float alpha, int paper, int ink, boolean detailed, int seed) {
+        int x = 0, y = 0, w = CARD_WIDTH, h = CARD_HEIGHT;
+        int frame = ARGB.color(alpha, paper), inner = ARGB.color(alpha * 0.6F, paper);
+        outline(graphics, x, y, w, h, px, frame);
+        outline(graphics, x + 3, y + 3, w - 6, h - 6, px, inner);
+        if (!detailed) return;
+
+        // The written lines: a bullet, then strokes of varying length.
+        int bullet = ARGB.color(alpha * 1.6F, paper), stroke = ARGB.color(alpha * 1.2F, ink);
+        for (int line = 0; line < 4; line++) {
+            float ly = y + 8 + line * 5;
+            rect(graphics, x + 7, ly, 2, px, bullet);
+            int r = Mth.murmurHash3Mixer(seed + line * 31);
+            float lx = x + 11;
+            for (int part = 0; part < 3 && lx < x + w - 10; part++) {
+                float len = Math.min(8 + (r >>> (part * 5) & 15), x + w - 8 - lx);
+                rect(graphics, lx, ly, len, px, stroke);
+                lx += len + 4;
             }
         }
+        // The picture box and the tier badge.
+        outline(graphics, x + 7, y + 29, 26, h - 35, px, frame);
+        graphics.fill(x + 40, y + 31, x + w - 7, y + h - 8, ARGB.color(alpha * 0.5F, paper));
+        outline(graphics, x + 40, y + 31, w - 47, h - 39, px, frame);
+    }
+
+    private static void outline(GuiGraphicsExtractor graphics, float x, float y, float w, float h, float px, int color) {
+        rect(graphics, x, y, w, px, color);
+        rect(graphics, x, y + h - px, w, px, color);
+        rect(graphics, x, y + px, px, h - 2 * px, color);
+        rect(graphics, x + w - px, y + px, px, h - 2 * px, color);
+    }
+
+    // A fill at fractional world coordinates, so lines stay at least a pixel thick when zoomed out.
+    private static void rect(GuiGraphicsExtractor graphics, float x, float y, float w, float h, int color) {
+        Matrix3x2fStack pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(x, y);
+        pose.scale(w, h);
+        graphics.fill(0, 0, 1, 1, color);
+        pose.popMatrix();
     }
 
     // Lines grow in with the node they lead to, using the same staggered reveal as the nodes.

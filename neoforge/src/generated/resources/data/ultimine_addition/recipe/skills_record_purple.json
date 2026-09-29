@@ -1,0 +1,28 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "ultimine_addition:legacy_mode",
+      "value": false
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "ultimine_addition",
+  "key": {
+    "C": "minecraft:purple_concrete",
+    "I": "minecraft:iron_ingot",
+    "M": "ultimine_addition:mining_skill_card_empty",
+    "N": "minecraft:iron_nugget"
+  },
+  "pattern": [
+    "NIN",
+    "CMC",
+    "NCN"
+  ],
+  "result": {
+    "components": {
+      "minecraft:base_color": "purple"
+    },
+    "id": "ultimine_addition:skills_record"
+  }
+}

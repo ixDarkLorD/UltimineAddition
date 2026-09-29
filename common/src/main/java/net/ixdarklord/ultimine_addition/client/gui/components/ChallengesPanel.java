@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.components;
 
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import org.joml.Matrix3x2fStack;
 import net.minecraft.util.ARGB;
@@ -86,7 +87,7 @@ public class ChallengesPanel implements LayoutElement {
     public void render(GuiGraphicsExtractor guiGraphics) {
         this.update();
         if (this.active) {
-            SkillsRecordScreen.OverlayColor overlayColor = UAClientConfig.backgroundColor();
+            SkillsRecordScreen.OverlayColor overlayColor = RecordTheme.active().overlay();
             if (!this.notifyPanel) {
                 guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_INDICATOR_TEXTURE, this.x + 5, this.y, 51, 10, ARGB.colorFromFloat(overlayColor.alpha(), overlayColor.red(), overlayColor.green(), overlayColor.blue()));
                 int spacing = 13 * this.slot;

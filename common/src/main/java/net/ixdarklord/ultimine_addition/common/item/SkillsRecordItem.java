@@ -1,5 +1,8 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
+import net.minecraft.util.ARGB;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.core.component.DataComponents;
 import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -69,6 +72,14 @@ public class SkillsRecordItem extends ComponentItem {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipComponents, TooltipFlag isAdvanced) {
         super.appendHoverText(stack, context, display, tooltipComponents, isAdvanced);
+        // An undyed record is the white edition.
+        DyeColor color = stack.getOrDefault(DataComponents.BASE_COLOR, DyeColor.WHITE);
+        {
+            tooltipComponents.accept(Component.literal("✦ ").withStyle(ChatFormatting.DARK_GRAY)
+                    .append(Component.translatable("tooltip.ultimine_addition.skills_record.edition." + color.getSerializedName())
+                            // The dye's color, lightened so dark dyes stay readable on the tooltip.
+                            .withColor(ARGB.srgbLerp(0.45F, ARGB.opaque(color.getTextureDiffuseColor()), 0xFFFFFFFF))));
+        }
         if (isShiftButtonNotPressed(tooltipComponents)) return;
         if (!SkillsRecordLink.isLinked(stack)) {
             Component component = Component.translatable("tooltip.ultimine_addition.skills_record.info").withStyle(ChatFormatting.GRAY);
@@ -97,7 +108,7 @@ public class SkillsRecordItem extends ComponentItem {
     @Override
     public @NotNull Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
         if (isShiftButtonNotPressed(null)) return Optional.empty();
-        return SkillsRecordData.getClient(stack).map(data -> new SkillsRecordTooltip(NonNullList.of(ItemStack.EMPTY, data.getAllSlots().toArray(ItemStack[]::new))));
+        return SkillsRecordData.getClient(stack).map(data -> new SkillsRecordTooltip(NonNullList.of(ItemStack.EMPTY, data.getAllSlots().toArray(ItemStack[]::new)), stack.get(DataComponents.BASE_COLOR)));
     }
 
     public static boolean isConsumeChallengeExists(SkillsRecordData data) {

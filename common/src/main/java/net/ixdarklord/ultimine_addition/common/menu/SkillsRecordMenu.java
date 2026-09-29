@@ -30,6 +30,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,20 +47,25 @@ public class SkillsRecordMenu extends AbstractContainerMenu {
     private final SkillsRecordData data;
     private final SimpleContainer container;
     public final @Nullable InteractionHand interactionHand;
+    // The record's dye, which picks its look on the client.
+    private final @Nullable DyeColor recordColor;
 
     public SkillsRecordMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buf) {
         this(id, inventory, inventory.player,
                 acceptOpenData(buf),
-                buf.readBoolean() ? buf.readEnum(InteractionHand.class) : null);
+                buf.readBoolean() ? buf.readEnum(InteractionHand.class) : null,
+                buf.readBoolean() ? buf.readEnum(DyeColor.class) : null);
     }
 
-    private SkillsRecordMenu(int id, Inventory playerInventory, Player player, SkillsRecordData data, @Nullable InteractionHand interactionHand) {
+    private SkillsRecordMenu(int id, Inventory playerInventory, Player player, SkillsRecordData data, @Nullable InteractionHand interactionHand,
+                             @Nullable DyeColor recordColor) {
         super(Registration.SKILLS_RECORD_CONTAINER.get(), id);
         this.player = player;
         this.playerInventory = playerInventory;
         this.data = data;
         this.container = data.getContainer();
         this.interactionHand = interactionHand;
+        this.recordColor = recordColor;
 
         addSlotBox(container, 0, 8, 115, 4, 22, 1, 0);
         addSlot(new PenSlot(container, 4, 125, 115));
@@ -80,12 +87,15 @@ public class SkillsRecordMenu extends AbstractContainerMenu {
 
         SkillsRecordSavedData storage = SkillsRecordSavedData.get(player.level().getServer());
         SkillsRecordData data = storage.resolve(stack);
-        ExtendedMenus.open(player, new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, data, hand), SkillsRecordItem.TITLE), buf -> {
+        DyeColor color = stack.get(DataComponents.BASE_COLOR);
+        ExtendedMenus.open(player, new SimpleMenuProvider((id, inv, p) -> new SkillsRecordMenu(id, inv, p, data, hand, color), SkillsRecordItem.TITLE), buf -> {
             RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
             SkillsRecordData.STREAM_CODEC.encode(registryBuf, data);
             OPEN_CARDS_CODEC.encode(registryBuf, storage.createSyncsFor(data));
             buf.writeBoolean(hand != null);
             if (hand != null) buf.writeEnum(hand);
+            buf.writeBoolean(color != null);
+            if (color != null) buf.writeEnum(color);
         });
     }
 
@@ -181,6 +191,10 @@ public class SkillsRecordMenu extends AbstractContainerMenu {
 
     public int getInkAmount() {
         return this.data.getInkAmount();
+    }
+
+    public @Nullable DyeColor getRecordColor() {
+        return this.recordColor;
     }
 
     public Optional<InteractionHand> getInteractionHand() {

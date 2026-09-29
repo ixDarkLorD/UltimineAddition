@@ -17,15 +17,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class GuiRendererMixin {
     @Unique
     private float ua$itemAlpha = 1.0F;
+    @Unique
+    private int ua$itemTint = ItemAlpha.NO_TINT;
 
     @Inject(method = "submitBlitFromItemAtlas", at = @At("HEAD"))
     private void UA$captureItemAlpha(GuiItemRenderState itemState, @Coerce Object slotView, CallbackInfo ci) {
         this.ua$itemAlpha = ((ItemAlpha.Holder) (Object) itemState).ua$getAlpha();
+        this.ua$itemTint = ((ItemAlpha.Holder) (Object) itemState).ua$getTint();
     }
 
     @ModifyArg(method = "submitBlitFromItemAtlas", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/state/gui/BlitRenderState;<init>(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/gui/render/TextureSetup;Lorg/joml/Matrix3x2f;IIIIFFFFILnet/minecraft/client/gui/navigation/ScreenRectangle;Lnet/minecraft/client/gui/navigation/ScreenRectangle;)V"), index = 11)
     private int UA$fadeItem(int color) {
         float alpha = this.ua$itemAlpha;
-        return alpha >= 1.0F ? color : ARGB.colorFromFloat(alpha, alpha, alpha, alpha);
+        int tint = this.ua$itemTint;
+        if (alpha >= 1.0F && tint == ItemAlpha.NO_TINT) return color;
+        // The item atlas is premultiplied: the colour carries the alpha in every channel, times the tint.
+        return ARGB.colorFromFloat(alpha, alpha * ARGB.red(tint) / 255.0F, alpha * ARGB.green(tint) / 255.0F, alpha * ARGB.blue(tint) / 255.0F);
     }
 }

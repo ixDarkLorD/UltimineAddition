@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
@@ -16,6 +17,7 @@ import java.util.function.Consumer;
 
 final class ViewerButton extends AbstractButton {
     private final OnPress onPress;
+    private float textScale = 1.0F;
 
     interface OnPress {
         void onPress(ViewerButton button);
@@ -24,6 +26,12 @@ final class ViewerButton extends AbstractButton {
     ViewerButton(int width, Component message, OnPress onPress) {
         super(0, 0, width, 12, message);
         this.onPress = onPress;
+    }
+
+    // Draws the label smaller (e.g. 0.75 for 6px text instead of 8px), centered as before.
+    ViewerButton withTextScale(float scale) {
+        this.textScale = scale;
+        return this;
     }
 
     @Override
@@ -36,10 +44,22 @@ final class ViewerButton extends AbstractButton {
         boolean hovered = this.active && this.isHoveredOrFocused();
         // The Skills Record's own button, tinted like the book (as in the edit challenge screen).
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SkillsRecordScreen.BUTTON_SPRITES.get(this.active, hovered),
-                this.getX(), this.getY(), this.getWidth(), this.getHeight(), UAClientConfig.backgroundColor().argb());
+                this.getX(), this.getY(), this.getWidth(), this.getHeight(), RecordTheme.active().overlay().argb());
         int color = !this.active ? 0xFFA0A0A0 : 0xFFFFFFFF;
         Font font = Minecraft.getInstance().font;
-        graphics.centeredText(font, this.getMessage(), this.getX() + this.getWidth() / 2, this.getY() + (this.getHeight() - 8) / 2, color);
+        // Labels too long for the button (longer translations) shrink to fit it.
+        int textWidth = font.width(this.getMessage());
+        float scale = textWidth > 0 ? Math.min(this.textScale, (this.getWidth() - 4) / (float) textWidth) : this.textScale;
+        if (scale >= 1.0F) {
+            graphics.centeredText(font, this.getMessage(), this.getX() + this.getWidth() / 2, this.getY() + (this.getHeight() - 8) / 2, color);
+            return;
+        }
+        var pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(this.getX() + this.getWidth() / 2.0F, this.getY() + this.getHeight() / 2.0F);
+        pose.scale(scale, scale);
+        graphics.centeredText(font, this.getMessage(), 0, -4, color);
+        pose.popMatrix();
     }
 
     @Override

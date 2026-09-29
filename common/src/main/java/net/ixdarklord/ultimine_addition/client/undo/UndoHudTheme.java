@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.undo;
 
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.minecraft.network.chat.FontDescription;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
@@ -46,7 +47,7 @@ final class UndoHudTheme {
     // The body first, then the title bar over its top edge with the title centred in the accent colour.
     // Returns where the body's content starts.
     static int frame(GuiGraphicsExtractor graphics, int width, int height, Component title, int accent, float alpha) {
-        SkillsRecordScreen.OverlayColor theme = UAClientConfig.backgroundColor();
+        SkillsRecordScreen.OverlayColor theme = RecordTheme.active().overlay();
         int tint = ARGB.colorFromFloat(theme.alpha() * alpha, theme.red(), theme.green(), theme.blue());
         int bodyTop = TITLE_HEIGHT - 3;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BODY_SPRITE, 2, bodyTop, width - 4, height - bodyTop, tint);

@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.minecraft.world.entity.player.Player;
@@ -68,7 +69,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
     @Override
     protected void init() {
         // Set before the first frame: 26.1 draws the background before extractRenderState runs.
-        this.color = UAClientConfig.backgroundColor();
+        this.color = RecordTheme.active().overlay();
         super.init();
 
         this.titleLabelX = 6;
@@ -177,7 +178,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.color = UAClientConfig.backgroundColor();
+        this.color = RecordTheme.active().overlay();
         this.update();
         super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
         this.filterButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);

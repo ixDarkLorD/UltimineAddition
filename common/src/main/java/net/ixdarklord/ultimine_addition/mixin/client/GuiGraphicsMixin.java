@@ -55,12 +55,14 @@ abstract class GuiGraphicsMixin {
         ci.cancel();
     }
 
-    // Tags the item with the alpha set by ItemAlpha.draw (see GuiRendererMixin).
+    // Tags the item with the alpha and tint set by ItemAlpha.draw (see GuiRendererMixin).
     @ModifyArg(method = "item(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;III)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/state/gui/GuiRenderState;addItem(Lnet/minecraft/client/renderer/state/gui/GuiItemRenderState;)V"))
     private GuiItemRenderState UA$tagItemAlpha(GuiItemRenderState state) {
         float alpha = ItemAlpha.next();
+        int tint = ItemAlpha.nextTint();
         if (alpha < 1.0F) ((ItemAlpha.Holder) (Object) state).ua$setAlpha(alpha);
+        if (tint != ItemAlpha.NO_TINT) ((ItemAlpha.Holder) (Object) state).ua$setTint(tint);
         return state;
     }
 }

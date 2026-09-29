@@ -91,17 +91,8 @@ public class RecipeGenerator extends FabricRecipeProvider {
                         .unlockedBy("has_card_blueprint", has(Registration.CARD_BLUEPRINT.get()))
                         .save(output);
 
-                shaped(RecipeCategory.MISC, Registration.SKILLS_RECORD.get())
-                        .define('N', Items.IRON_NUGGET)
-                        .define('I', Items.IRON_INGOT)
-                        .define('C', Items.YELLOW_CONCRETE)
-                        .define('M', Registration.MINING_SKILL_CARD_EMPTY.get())
-                        .pattern("NIN")
-                        .pattern("CMC")
-                        .pattern("NCN")
-                        .group(FTBUltimineAddition.MOD_ID)
-                        .unlockedBy("has_mining_skill_card", has(Registration.MINING_SKILL_CARD_EMPTY.get()))
-                        .save(RecipeGenerator.this.withConditions(this.output, new LegacyModeCondition(false)));
+                // One per color, from that color's concrete.
+                SkillsRecordRecipes.save(RecipeGenerator.this.withConditions(this.output, new LegacyModeCondition(false)), has(Registration.MINING_SKILL_CARD_EMPTY.get()));
 
                 shaped(RecipeCategory.MISC, Registration.INK_CHAMBER.get())
                         .define('I', Items.IRON_INGOT)

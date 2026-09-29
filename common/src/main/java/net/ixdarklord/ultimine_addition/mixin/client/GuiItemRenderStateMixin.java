@@ -9,6 +9,8 @@ import org.spongepowered.asm.mixin.Unique;
 public abstract class GuiItemRenderStateMixin implements ItemAlpha.Holder {
     @Unique
     private float ua$alpha = 1.0F;
+    @Unique
+    private int ua$tint = ItemAlpha.NO_TINT;
 
     @Override
     public float ua$getAlpha() {
@@ -18,5 +20,15 @@ public abstract class GuiItemRenderStateMixin implements ItemAlpha.Holder {
     @Override
     public void ua$setAlpha(float alpha) {
         this.ua$alpha = alpha;
+    }
+
+    @Override
+    public int ua$getTint() {
+        return this.ua$tint;
+    }
+
+    @Override
+    public void ua$setTint(int tint) {
+        this.ua$tint = tint;
     }
 }

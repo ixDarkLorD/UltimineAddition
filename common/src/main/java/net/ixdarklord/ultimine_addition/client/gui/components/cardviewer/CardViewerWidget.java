@@ -2,9 +2,13 @@ package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
 import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.AbstractMultiPanelWidget;
+import net.ixdarklord.coolcatcanvas.api.utils.Easing;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Util;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeState;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
@@ -50,7 +54,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
 
     public record State(boolean hasCards, ItemStack cardStack, @Nullable MiningSkillCardData card, @Nullable CardHistory history,
                         boolean consumeMode, List<ItemStack> missingItems, boolean notEnoughInk, boolean preview,
-                        Color accent, boolean animated) {}
+                        RecordTheme theme, boolean animated) {}
 
     public interface Actions {
         void togglePin(Identifier challengeId);
@@ -69,8 +73,18 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     private final Actions actions;
     private ScreenRectangle compactBounds;
     private final TierTreePanel tree;
+    // Behind a requirement banner (missing pen or paper, not enough ink): dims the card above it.
+    private static final int REQUIREMENT_BACKDROP = 0x90000000;
     private final MessagePanel banner;
-    private final MessagePanel message;
+    private final GuidePanel guide;
+    // Opening a challenge's details slides the tree up and away while it fades into the viewer's background, then the
+    // details rise into place as they fade in; closing them fades them out to the background and the tree fades back in.
+    private enum Transition { NONE, TO_DETAILS, TO_TREE }
+    private static final long TRANSITION_OUT_MS = 170L;
+    private static final long TRANSITION_IN_MS = 230L;
+    private Transition transition = Transition.NONE;
+    private long transitionStart;
+    private @Nullable ChallengeNode pendingDetails;
     private final ChallengeDetailsPanel details;
     private final ShapeChoicePanel shapeChoice;
     private final MessagePanel preview;
@@ -78,7 +92,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     private ViewerButton.Icon fitButton;
     private boolean expanded;
 
-    private State state = new State(false, ItemStack.EMPTY, null, null, false, List.of(), false, false, Color.WHITE, true);
+    private State state = new State(false, ItemStack.EMPTY, null, null, false, List.of(), false, false, RecordTheme.WHITE, true);
     private @Nullable UUID shownCard;
     private int treeSignature;
 
@@ -88,7 +102,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         this.compactBounds = new ScreenRectangle(x, y, width, height);
         this.tree = this.addPanel(new TierTreePanel(this));
         this.banner = this.addPanel(new MessagePanel(this, MessagePanel.Mode.BANNER));
-        this.message = this.addPanel(new MessagePanel(this, MessagePanel.Mode.FULL));
+        this.guide = this.addPanel(new GuidePanel(this));
         this.details = this.addPanel(new ChallengeDetailsPanel(this));
         this.shapeChoice = this.addPanel(new ShapeChoicePanel(this));
         this.preview = this.addPanel(new MessagePanel(this, MessagePanel.Mode.FULL));
@@ -113,16 +127,15 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         MiningSkillCardData card = state.card();
 
         if (!state.hasCards() || card == null) {
+            this.cancelTransition();
             this.tree.setVisible(false);
             this.banner.setVisible(false);
             this.details.setVisible(false);
             this.shapeChoice.setVisible(false);
             this.shownCard = null;
-            this.message.show(List.of(state.hasCards()
-                    ? Component.translatable("gui.ultimine_addition.skills_record.select_card").withStyle(ChatFormatting.GRAY)
-                    : Component.translatable("gui.ultimine_addition.skills_record.no_cards").withStyle(ChatFormatting.RED)), List.of(), 0, true);
+            this.guide.show(state.hasCards() ? GuidePanel.Kind.SELECT_CARD : GuidePanel.Kind.NO_CARDS);
         } else {
-            this.message.setVisible(false);
+            this.guide.setVisible(false);
             this.tree.setVisible(true);
 
             int signature = Objects.hash(card.getUUID(), card.getTier(), card.getChallenges(), state.consumeMode(),
@@ -137,6 +150,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             }
             if (newCard) {
                 this.shownCard = card.getUUID();
+                this.cancelTransition();
                 this.details.setVisible(false);
                 this.shapeChoice.setVisible(false);
                 this.tree.focus(card.getTier());
@@ -151,7 +165,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
                     Component.translatable("gui.ultimine_addition.skills_record.example").append(" B: 002").withStyle(ChatFormatting.GRAY),
                     Component.translatable("gui.ultimine_addition.skills_record.example").append(" C: 003").withStyle(ChatFormatting.DARK_AQUA),
                     Component.translatable("gui.ultimine_addition.skills_record.example").append(" D: 004").withStyle(ChatFormatting.GOLD));
-            this.preview.show(lines, List.of(), ARGB.multiply(0xD8202020, ARGB.opaque(this.state.accent().getRGB())), centered);
+            this.preview.show(lines, List.of(), ARGB.multiply(0xD8202020, this.getAccentColor()), centered);
         } else {
             this.preview.setVisible(false);
         }
@@ -161,10 +175,10 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         boolean hasChallenges = !card.getChallenges().isEmpty();
         if (hasChallenges && !this.state.missingItems().isEmpty()) {
             this.banner.show(List.of(Component.translatable("gui.ultimine_addition.skills_record.missing_items").withStyle(ChatFormatting.RED)),
-                    this.state.missingItems(), 0xE04B1818, true);
+                    this.state.missingItems(), 0xE04B1818, true, REQUIREMENT_BACKDROP);
         } else if (hasChallenges && this.state.notEnoughInk()) {
             this.banner.show(List.of(Component.translatable("gui.ultimine_addition.skills_record.not_enough_ink").withStyle(ChatFormatting.RED)),
-                    List.of(), 0xE04B1818, true);
+                    List.of(), 0xE04B1818, true, REQUIREMENT_BACKDROP);
         } else if (card.getTier() == MiningSkillCardItem.Tier.Mastered) {
             this.banner.show(List.of(Component.translatable("gui.ultimine_addition.skills_record.completed_card").withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC)),
                     List.of(), 0xD0302810, true);
@@ -189,11 +203,20 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     }
 
     Color getAccent() {
-        return this.state.accent();
+        return new Color(this.state.theme().tint(), true);
     }
 
     int getAccentColor() {
-        return this.state.accent().getRGB();
+        return this.state.theme().tint();
+    }
+
+    RecordTheme getTheme() {
+        return this.state.theme();
+    }
+
+    // A panel shade in the Skills Record's background color (the shade times the color, keeping the shade's alpha).
+    int themed(int shade) {
+        return ARGB.multiply(shade, ARGB.opaque(this.getAccentColor()));
     }
 
     ItemStack getSelectedCardStack() {
@@ -210,7 +233,85 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     }
 
     void openDetails(ChallengeNode node) {
-        this.details.show(node);
+        if (!this.isAnimated()) {
+            this.details.show(node);
+            return;
+        }
+        this.pendingDetails = node;
+        this.startTransition(Transition.TO_DETAILS);
+    }
+
+    void closeDetails() {
+        if (!this.details.isVisible() || this.transition == Transition.TO_TREE) return;
+        if (!this.isAnimated()) {
+            this.details.setVisible(false);
+            return;
+        }
+        this.startTransition(Transition.TO_TREE);
+    }
+
+    private void startTransition(Transition transition) {
+        this.transition = transition;
+        this.transitionStart = Util.getMillis();
+    }
+
+    private void cancelTransition() {
+        this.transition = Transition.NONE;
+        this.pendingDetails = null;
+    }
+
+    boolean isTransitioning() {
+        return this.transition != Transition.NONE;
+    }
+
+    @Override
+    protected void renderContents(GuiGraphicsExtractor graphics, float partialTick, int mouseX, int mouseY) {
+        if (this.transition == Transition.NONE) {
+            super.renderContents(graphics, partialTick, mouseX, mouseY);
+            return;
+        }
+        long elapsed = Util.getMillis() - this.transitionStart;
+        boolean out = elapsed < TRANSITION_OUT_MS;
+        float slide = 0.0F, curtain;
+        ScreenRectangle r = this.layoutRectangle();
+        if (out) {
+            float p = Easing.CUBIC_IN.apply(elapsed / (float) TRANSITION_OUT_MS);
+            curtain = p;
+            if (this.transition == Transition.TO_DETAILS) slide = -p * r.height() * 0.35F;
+        } else {
+            // Halfway: the panels swap behind the curtain.
+            if (this.transition == Transition.TO_DETAILS && this.pendingDetails != null) {
+                this.details.show(this.pendingDetails);
+                this.pendingDetails = null;
+            } else if (this.transition == Transition.TO_TREE && this.details.isVisible()) {
+                this.details.setVisible(false);
+            }
+            float q = Math.min((elapsed - TRANSITION_OUT_MS) / (float) TRANSITION_IN_MS, 1.0F);
+            curtain = 1.0F - Easing.CUBIC_OUT.apply(q);
+            if (this.transition == Transition.TO_DETAILS) slide = curtain * 16.0F;
+            if (q >= 1.0F) this.transition = Transition.NONE;
+        }
+
+        graphics.enableScissor(r.left(), r.top(), r.right(), r.bottom());
+        Matrix3x2fStack pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(0.0F, slide);
+        super.renderContents(graphics, partialTick, -1, -1);
+        pose.popMatrix();
+        graphics.nextStratum();
+        int background = ARGB.multiply(TierTreePanel.BG_DEEP, ARGB.opaque(this.getAccentColor()));
+        graphics.fill(r.left(), r.top(), r.right(), r.bottom(), ARGB.color(curtain, background));
+        graphics.disableScissor();
+    }
+
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        return this.isTransitioning() ? this.isMouseOver(event.x(), event.y()) : super.mouseClicked(event, doubleClick);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        return this.isTransitioning() ? this.isMouseOver(mouseX, mouseY) : super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     void togglePin(Identifier challengeId) {
@@ -380,7 +481,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     }
 
     public boolean isTreeShown() {
-        return this.tree.isVisible() && !this.details.isVisible() && !this.shapeChoice.isVisible() && !this.preview.isVisible();
+        return this.tree.isVisible() && !this.isTransitioning() && !this.details.isVisible() && !this.shapeChoice.isVisible() && !this.preview.isVisible();
     }
 
     public double getZoom() {
@@ -436,7 +537,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             this.expandButton.setPosition(r.right() - ICON_SIZE - 1, r.top() + 1);
             this.fitButton.setPosition(r.right() - ICON_SIZE * 2 - 3, r.top() + 1);
         }
-        boolean covered = !this.expanded && (this.details.isVisible() || this.shapeChoice.isVisible() || this.preview.isVisible());
+        boolean covered = !this.expanded && (this.isTransitioning() || this.details.isVisible() || this.shapeChoice.isVisible() || this.preview.isVisible());
         boolean treeControls = this.tree.isVisible() && !covered;
         this.expandButton.visible = this.expandButton.active = this.visible && !covered && (treeControls || this.expanded);
         this.fitButton.visible = this.fitButton.active = this.visible && treeControls;
@@ -447,7 +548,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         if (!this.expanded) return;
         // Above the book's slots and items.
         graphics.nextStratum();
-        int tint = ARGB.opaque(this.state.accent().getRGB());
+        int tint = this.getAccentColor();
         int x0 = this.x, y0 = this.y, x1 = this.x + this.width, y1 = this.y + this.height;
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FRAME_SPRITE, x0, y0, this.width, this.height, tint);
@@ -466,8 +567,9 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
+        if (this.isTransitioning()) return event.key() != GLFW.GLFW_KEY_ESCAPE || this.details.isVisible();
         if (this.details.isVisible() && event.key() == GLFW.GLFW_KEY_ESCAPE) {
-            this.details.setVisible(false);
+            this.closeDetails();
             return true;
         }
         if (this.expanded && event.key() == GLFW.GLFW_KEY_ESCAPE) {

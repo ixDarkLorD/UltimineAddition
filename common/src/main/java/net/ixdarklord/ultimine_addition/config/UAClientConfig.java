@@ -18,10 +18,6 @@ public final class UAClientConfig {
     public static final String SKILLS_RECORD_CATEGORY = "skills_record";
 
     static { BUILDER.push(SKILLS_RECORD_CATEGORY); }
-    public static final ConfigValue<Integer> BACKGROUND_COLOR = BUILDER.color("background_color", 0xFFFFFF)
-            .comment("Tint of the Skills Record and the challenge HUD panels (#RRGGBB).").build();
-    public static final ConfigValue<Integer> LABEL_COLOR = BUILDER.color("label_color", 0x404040)
-            .comment("Color of the Skills Record's title and inventory labels (#RRGGBB).").build();
     public static final ConfigValue<Boolean> ANIMATIONS_MODE = BUILDER.bool("animations", true)
             .comment("Animations in the Skills Record.").build();
     public static final ConfigValue<Boolean> TEXT_SCREEN_SHADOW = BUILDER.bool("text_shadow", true)
@@ -44,11 +40,4 @@ public final class UAClientConfig {
 
     private UAClientConfig() {}
 
-    public static SkillsRecordScreen.OverlayColor backgroundColor() {
-        return SkillsRecordScreen.OverlayColor.of(BACKGROUND_COLOR.get() & 0xFFFFFF);
-    }
-
-    public static int labelColor() {
-        return LABEL_COLOR.get() & 0xFFFFFF;
-    }
 }

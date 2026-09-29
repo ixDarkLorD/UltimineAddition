@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
@@ -206,7 +207,7 @@ public class EditChallengeScreen extends Screen {
         graphics.nextStratum();
         graphics.fill(0, 0, this.width, this.height, 0x90000000);
         graphics.fill(this.leftPos + 3, this.topPos + 3, this.leftPos + WIDTH + 3, this.topPos + HEIGHT + 3, 0x50000000);
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FRAME_SPRITE, this.leftPos, this.topPos, WIDTH, HEIGHT, UAClientConfig.backgroundColor().argb());
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FRAME_SPRITE, this.leftPos, this.topPos, WIDTH, HEIGHT, RecordTheme.active().overlay().argb());
     }
 
     @Override
@@ -221,7 +222,7 @@ public class EditChallengeScreen extends Screen {
         int right = this.leftPos + WIDTH - PAD;
         // Header: the dialog's title in the book's label color, like the Skills Record's own title.
         graphics.text(this.font, Component.literal("✎ ").append(this.title), this.leftPos + FRAME_SIDE + 1, this.topPos + 7,
-                ARGB.opaque(UAClientConfig.labelColor()), false);
+                RecordTheme.active().labelColor(), false);
 
         // The challenge's name, then its number/tier and ID.
         Component nameLine = Component.literal("📝 ").append(this.name);
@@ -370,7 +371,7 @@ public class EditChallengeScreen extends Screen {
     private static final class Button extends ColorableImageButton {
         private Button(int x, int y, int width, Component label, OnPress onPress) {
             super(x, y, width, BUTTON_HEIGHT, SkillsRecordScreen.BUTTON_SPRITES, onPress, label);
-            this.setColor(UAClientConfig.backgroundColor().convert());
+            this.setColor(RecordTheme.active().overlay().convert());
         }
 
         private Button withTooltip(@Nullable Component tooltip) {

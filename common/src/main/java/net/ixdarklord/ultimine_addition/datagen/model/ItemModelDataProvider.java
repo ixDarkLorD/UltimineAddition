@@ -19,6 +19,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ItemModelDataProvider implements DataProvider {
     private static final String[] CARD_TYPES = {"pickaxe", "axe", "shovel", "hoe"};
+    private static final String[] DYES = {"white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+            "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"};
     private static final String[][] TIERS = {
             {"unlearned", ""}, {"novice", "_1"}, {"apprentice", "_2"}, {"adept", "_3"}, {"mastered", "_mastered"}
     };
@@ -65,7 +67,24 @@ public class ItemModelDataProvider implements DataProvider {
             select.add("fallback", modelReference(base));
             this.itemDefinition(cache, base, select);
         }
-        this.simpleItem(cache, "skills_record", "minecraft:item/handheld", heldToolDisplay());
+        // Skills Record: a model per dye (vanilla's base_color component, set by crafting it with a dye).
+        this.model(cache, "skills_record", "minecraft:item/handheld", "item/skills_record", heldToolDisplay());
+        JsonArray recordCases = new JsonArray();
+        for (String dye : DYES) {
+            String name = "skills_record_" + dye;
+            this.model(cache, name, "minecraft:item/handheld", "item/" + name, heldToolDisplay());
+            JsonObject entry = new JsonObject();
+            entry.addProperty("when", dye);
+            entry.add("model", modelReference(name));
+            recordCases.add(entry);
+        }
+        JsonObject record = new JsonObject();
+        record.addProperty("type", "minecraft:select");
+        record.addProperty("property", "minecraft:component");
+        record.addProperty("component", "minecraft:base_color");
+        record.add("cases", recordCases);
+        record.add("fallback", modelReference("skills_record"));
+        this.itemDefinition(cache, "skills_record", record);
         this.simpleItem(cache, "shape_selector", "minecraft:item/handheld", heldToolDisplay());
 
         // Miner Certificate: switches to the "opened" model once accomplished.

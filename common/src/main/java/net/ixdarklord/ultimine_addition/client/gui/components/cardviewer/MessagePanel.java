@@ -23,6 +23,8 @@ final class MessagePanel extends Panel {
     private List<Component> lines = List.of();
     private List<ItemStack> items = List.of();
     private int background;
+    // Dims the viewer behind a banner (0 for none), so what the Skills Record still needs stands out.
+    private int backdrop;
     private boolean centered = true;
     private List<FormattedCharSequence> wrapped = List.of();
     private int wrappedWidth = -1;
@@ -34,12 +36,17 @@ final class MessagePanel extends Panel {
     }
 
     void show(List<Component> lines, List<ItemStack> items, int background, boolean centered) {
+        this.show(lines, items, background, centered, 0);
+    }
+
+    void show(List<Component> lines, List<ItemStack> items, int background, boolean centered, int backdrop) {
         if (!lines.equals(this.lines) || this.centered != centered) {
             this.lines = lines;
             this.wrappedWidth = -1;
         }
         this.items = items;
         this.background = background;
+        this.backdrop = backdrop;
         this.centered = centered;
         this.setVisible(true);
     }
@@ -70,6 +77,10 @@ final class MessagePanel extends Panel {
     protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         ScreenRectangle area = this.area();
         this.rewrap(area.width() - PADDING * 2);
+        if (this.backdrop != 0 && this.mode == Mode.BANNER) {
+            ScreenRectangle b = this.getBounds();
+            graphics.fill(b.left(), b.top(), b.right(), area.top(), this.backdrop);
+        }
         if (this.background != 0) {
             graphics.fill(area.left(), area.top(), area.right(), area.bottom(), this.background);
             if (this.mode == Mode.BANNER) graphics.fill(area.left(), area.top(), area.right(), area.top() + 1, 0x60FFFFFF);

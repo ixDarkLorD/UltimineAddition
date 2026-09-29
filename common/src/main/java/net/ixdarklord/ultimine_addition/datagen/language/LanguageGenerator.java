@@ -53,6 +53,23 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("tooltip.ultimine_addition.certificate.legacy.quest.info", "To unseal the the scroll, Mine %s Ores!");
         this.add("tooltip.ultimine_addition.certificate.legacy.quest", "Destroyed Ores: %s");
         this.add("tooltip.ultimine_addition.skills_record.info", "A tool needed for upgrading mining skills card.");
+        // Dyed Skills Records (crafted with a dye), each with its own look.
+        this.add("tooltip.ultimine_addition.skills_record.edition.white", "Snowfall Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.orange", "Harvest Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.magenta", "Allium Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.light_blue", "Skyward Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.yellow", "Beehive Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.lime", "Slime Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.pink", "Cherry Grove Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.gray", "Stonecutter Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.light_gray", "Rainfall Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.cyan", "Warm Ocean Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.purple", "Amethyst Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.blue", "Deep Lapis Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.brown", "Mushroom Fields Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.green", "Firefly Forest Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.red", "Nether Ember Edition");
+        this.add("tooltip.ultimine_addition.skills_record.edition.black", "Starry Night Edition");
         this.add("tooltip.ultimine_addition.skills_record.contents", "Contents:");
         this.add("tooltip.ultimine_addition.skills_record.loading", "Loading contents...");
         this.add("tooltip.ultimine_addition.shape_selector.info", "Need a specific mining shape for your favorite tool? This is where you assign it!");
@@ -151,10 +168,6 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("config.ultimine_addition.server.debugging.challenge_actions_logger", "Log Challenge Actions");
         this.add("config.ultimine_addition.client.title", "Client Settings");
         this.add("config.ultimine_addition.client.skills_record", "Skills Record");
-        this.add("config.ultimine_addition.client.skills_record.background_color", "Background Color");
-        this.add("config.ultimine_addition.client.skills_record.background_color.tooltip", "Tint of the Skills Record and the challenge HUD panels.");
-        this.add("config.ultimine_addition.client.skills_record.label_color", "Label Color");
-        this.add("config.ultimine_addition.client.skills_record.label_color.tooltip", "Color of the Skills Record's title and inventory labels.");
         this.add("config.ultimine_addition.client.skills_record.animations", "Animations");
         this.add("config.ultimine_addition.client.skills_record.animations.tooltip", "Animations in the Skills Record.");
         this.add("config.ultimine_addition.client.skills_record.text_shadow", "Text Shadow");
@@ -196,8 +209,6 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("gui.ultimine_addition.skills_record.option.panel_alignment.bottom_right", "Bottom Right");
         this.add("gui.ultimine_addition.skills_record.consume", "Consume Mode: %s");
         this.add("gui.ultimine_addition.skills_record.example", "This is an example!");
-        this.add("gui.ultimine_addition.skills_record.no_cards", "There is no card inserted!");
-        this.add("gui.ultimine_addition.skills_record.select_card", "Select a card by right click it to discover the challenges.");
         this.add("gui.ultimine_addition.skills_record.no_challenges", "There are no challenges added yet!");
         this.add("gui.ultimine_addition.skills_record.completed_card", "Congratulations! You made it. You have completed all the challenges.");
         this.add("gui.ultimine_addition.skills_record.missing_items", "You can't accomplish any challenge! It would help if you had these items available:");
@@ -243,6 +254,10 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("gui.ultimine_addition.card_viewer.reroll.no_ink", "Not enough ink (needs %s).");
         this.add("gui.ultimine_addition.card_viewer.expand", "Expand / Collapse");
         this.add("gui.ultimine_addition.card_viewer.fit", "Fit to View");
+        this.add("gui.ultimine_addition.card_viewer.guide.no_cards.title", "No Card Inserted");
+        this.add("gui.ultimine_addition.card_viewer.guide.no_cards.hint", "Place a Mining Skill Card in one of the card slots below.");
+        this.add("gui.ultimine_addition.card_viewer.guide.select_card.title", "Choose a Card");
+        this.add("gui.ultimine_addition.card_viewer.guide.select_card.hint", "Right-click a card below to see its challenges.");
         this.add("toast.ultimine_addition.challenge.completed", "Challenge Completed!");
         this.add("toast.ultimine_addition.challenge.completed.info", "You have completed Challenge %s in %s");
         this.add("toast.ultimine_addition.challenge.all_completed", "Congratulations!");

@@ -1,5 +1,8 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
+import net.ixdarklord.coolcatcanvas.api.utils.ColorGradient;
+import net.ixdarklord.coolcatcanvas.api.client.utils.Outline;
+import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.coolcatcore.api.config.client.ConfigScreens;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
@@ -10,6 +13,8 @@ import net.ixdarklord.coolcatcore.api.client.utils.MouseHelper;
 import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.coolcatcore.api.utils.MathUtils;
+import net.ixdarklord.ultimine_addition.client.gui.components.SlotSelectionOutline;
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardViewerWidget;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
@@ -73,12 +78,14 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     private static final int VIEWER_X = 9, VIEWER_Y = 20, VIEWER_WIDTH = 170, VIEWER_HEIGHT = 87;
     private static final int SIDE_BUTTON_X = 170;
     private static final int SLOT_MARKER_Y = 107;
+    private static final int LABEL_FRAME = 0xFF656565;
 
     private ColorableImageButton configurationButton;
     private ConsumeButton consumeButton;
     private CardViewerWidget viewer;
 
     private SkillsRecordScreen.OverlayColor backgroundColor;
+    private RecordTheme theme = RecordTheme.WHITE;
     private boolean isAnimationsEnabled;
 
     public int selectedSlot;
@@ -108,8 +115,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         this.createButtons();
         this.selectedSlot = this.menu.getData().getSelectedCard();
 
-        this.backgroundColor = UAClientConfig.backgroundColor();
-        this.isAnimationsEnabled = UAClientConfig.ANIMATIONS_MODE.get();
+        this.syncConfig();
 
         // Kept across re-inits so an open details panel, zoom and pan survive the edit dialog.
         if (this.viewer == null) {
@@ -174,7 +180,17 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         return MiningSkillCardData.hasData(stack) ? MiningSkillCardData.load(stack) : null;
     }
 
+    // Read every frame, so the book follows its settings while they're edited: in the settings popup drawn over it,
+    // or in the config file (reloaded while the game runs).
+    private void syncConfig() {
+        // The look comes from the record's dye.
+        this.theme = RecordTheme.of(this.menu.getRecordColor());
+        this.backgroundColor = OverlayColor.of(this.theme.tint());
+        this.isAnimationsEnabled = UAClientConfig.ANIMATIONS_MODE.get();
+    }
+
     public void update() {
+        this.syncConfig();
         if (this.selectedSlot > -1 && this.menu.getCardSlots().get(this.selectedSlot).getItem().isEmpty()) {
             this.selectCard(-1);
         }
@@ -197,7 +213,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         CardHistory history = card == null ? null : SkillsRecordClientCache.getHistory(card.getUUID()).orElse(null);
         this.viewer.update(new CardViewerWidget.State(!this.menu.isCardSlotsEmpty(), cardStack, card, history,
                 this.menu.getData().isConsumeModeActive(), missingItems, this.notEnoughInk, false,
-                this.backgroundColor.convert(), this.isAnimationsEnabled));
+                this.theme, this.isAnimationsEnabled));
 
         for (GuiEventListener child : this.children()) {
             if (child instanceof AbstractWidget widget) {
@@ -280,7 +296,11 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         if (this.viewer.isExpandedWindow()) {
             this.viewer.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
         }
-        if (UAClientConfig.SR_EDIT_MODE.get()) this.renderZoomDebug(guiGraphics);
+        // Only while the tree itself is being navigated: not under a details, shape choice or message panel, nor under
+        // the settings popup (which draws this screen behind it).
+        if (UAClientConfig.SR_EDIT_MODE.get() && this.viewer.isTreeShown() && this.minecraft.screen == this) {
+            this.renderZoomDebug(guiGraphics);
+        }
     }
 
     // Left of the book, or of the expanded window.
@@ -304,11 +324,32 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
     @Override
     protected void extractLabels(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
-        Color color = new Color(UAClientConfig.labelColor());
-        guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, color.getRGB(), false);
-        guiGraphics.fill(this.inventoryLabelX - 1, this.inventoryLabelY - 1, this.inventoryLabelX + this.font.width(this.playerInventoryTitle), this.inventoryLabelY + this.font.lineHeight, ColorUtils.rgbToRgba(color.getRGB(), 0.5F));
-        guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
+        int color = this.theme.labelColor();
+        guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, color, false);
+        // The inventory label's patch is the opposite of the label (light behind dark text, dark behind light), so
+        // the two never blend.
+        boolean darkLabel = ARGB.red(color) * 0.299 + ARGB.green(color) * 0.587 + ARGB.blue(color) * 0.114 < 128;
+        int x0 = this.inventoryLabelX - 1, y0 = this.inventoryLabelY - 1;
+        int x1 = this.inventoryLabelX + this.font.width(this.playerInventoryTitle), y1 = this.inventoryLabelY + this.font.lineHeight;
+        guiGraphics.fill(x0, y0, x1, y1, darkLabel ? 0x40FFFFFF : 0x50000000);
+        // Framed on its left, top and right in the gray of the inventory's border; open at the bottom, where it sits
+        // on that border. The top corners are left out, rounding them by a pixel.
+        int frame = ARGB.multiply(LABEL_FRAME, this.theme.tint());
+        guiGraphics.fill(x0, y0 - 1, x1, y0, frame);
+        guiGraphics.fill(x0 - 1, y0, x0, y1, frame);
+        guiGraphics.fill(x1, y0, x1 + 1, y1, frame);
+        guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color, false);
     }
+
+    // A pen, paper or the ink the challenges need is missing: a red wash over the slot and a red outline running
+    // around its inside.
+    private static final int REQUIRED_OVERLAY = 0x55FF2020;
+    private static final Outline REQUIRED_OUTLINE = Outline.gradient(ColorGradient.of(0xFF2A2A, 0xFF9A6A, 0xA01010)
+            .withSpeed(0.8F).withSpread(1.0F));
+
+    // The placeholder in an empty card, pen or paper slot: faded and greyed, so it reads as a hint, not an item.
+    private static final float GHOST_ALPHA = 0.6F;
+    private static final int GHOST_TINT = 0xB4B4B4;
 
     private void renderGhostItem(GuiGraphicsExtractor guiGraphics, int x, int y) {
         Matrix3x2fStack poseStack = guiGraphics.pose();
@@ -335,7 +376,8 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
                 poseStack.pushMatrix();
                 poseStack.translate(x + slot.x + 8.0F, y + slot.y + 8.0F);
                 poseStack.scale(size, size);
-                guiGraphics.fakeItem(displayItem, -8, -8);
+                ItemStack ghost = displayItem;
+                ItemAlpha.draw(GHOST_ALPHA, GHOST_TINT, () -> guiGraphics.fakeItem(ghost, -8, -8));
                 poseStack.popMatrix();
             }
 
@@ -345,7 +387,12 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
             int color = warn ? 0xff0000 : 0x8b8b8b;
             float alpha = warn ? 0.15F : 0.55F;
 
-            if (stack.isEmpty() || notEnoughInk || blocked) {
+            if ((isMissingItems && stack.isEmpty()) || notEnoughInk) {
+                // Over the ghost item, in a layer of its own.
+                guiGraphics.nextStratum();
+                guiGraphics.fill(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, REQUIRED_OVERLAY);
+                REQUIRED_OUTLINE.draw(guiGraphics, x + slot.x, y + slot.y, 16, 16);
+            } else if (stack.isEmpty() || blocked) {
                 guiGraphics.fill(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, ARGB.multiply(ColorUtils.rgbToRgba(color, alpha), this.backgroundColor.argb()));
             }
         }
@@ -364,6 +411,8 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         if (this.selectedSlot == -1) return;
         int X = 14 + (22 * this.selectedSlot);
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_SELECT_SPRITE, x + X, y + SLOT_MARKER_Y, 4, 8, tint);
+        Slot slot = this.menu.getCardSlots().get(this.selectedSlot);
+        SlotSelectionOutline.draw(guiGraphics, x + slot.x, y + slot.y, x + X, 4, y + SLOT_MARKER_Y, this.backgroundColor.argb(), 1.0F);
     }
 
     @Override
