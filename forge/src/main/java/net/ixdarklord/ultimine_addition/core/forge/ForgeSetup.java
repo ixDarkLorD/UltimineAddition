@@ -47,7 +47,7 @@ public final class ForgeSetup {
    @EventBusSubscriber(modid = FTBUltimineAddition.MOD_ID, bus = Bus.MOD)
    public static class EventBus {
       @SubscribeEvent
-      public static void onCommonSetup(FMLCommonSetupEvent event) {
+      public static void onCommonSetup(final FMLCommonSetupEvent event) {
          event.enqueueWork(() -> {
             CraftingHelper.register(LegacyModeCondition.Serializer.INSTANCE);
             CommonSetup.setup();

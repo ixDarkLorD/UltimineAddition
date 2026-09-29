@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.ixdarklord.ultimine_addition.common.brewing.MineGoJuiceRecipe;
+import net.ixdarklord.ultimine_addition.common.event.BrewingEvents;
 import net.ixdarklord.ultimine_addition.common.event.impl.ChunkUnloadEvent;
 import net.ixdarklord.ultimine_addition.common.event.impl.ConfigLifecycleEvent;
 import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
@@ -24,7 +25,6 @@ public final class FabricSetup implements ModInitializer {
     public void onInitialize() {
         CommonSetup.init();
         CommonSetup.setup();
-        MineGoJuiceRecipe.register();
         LegacyModeCondition.register();
         this.initEvents();
     }
