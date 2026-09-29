@@ -545,8 +545,8 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         }
         boolean covered = !this.expanded && (this.isTransitioning() || this.details.isVisible() || this.shapeChoice.isVisible() || this.preview.isVisible());
         boolean treeControls = this.tree.isVisible() && !covered;
-        this.expandButton.visible = this.expandButton.active = this.visible && !covered && (treeControls || this.expanded);
-        this.fitButton.visible = this.fitButton.active = this.visible && treeControls;
+        this.expandButton.setShown(this.visible && !covered && (treeControls || this.expanded), this.isAnimated());
+        this.fitButton.setShown(this.visible && treeControls, this.isAnimated());
     }
 
     @Override

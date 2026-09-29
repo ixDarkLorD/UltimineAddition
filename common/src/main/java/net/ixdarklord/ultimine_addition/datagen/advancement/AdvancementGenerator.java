@@ -53,37 +53,13 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .requirements(AdvancementRequirements.Strategy.OR)
                     .save(consumer, FTBUltimineAddition.id("root").toString());
 
-            AdvancementHolder amethyst = Advancement.Builder.advancement().parent(root).display(
-                            Items.AMETHYST_SHARD,
-                            Component.translatable(String.format("advancement.%s.amethyst_gathering", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.obtain", FTBUltimineAddition.MOD_ID), Component.translatable(Items.AMETHYST_SHARD.getDescriptionId())),
-                            null,
-                            AdvancementType.TASK,
-                            true, true, false)
-                    .addCriterion("has_amethyst", InventoryChangeTrigger.TriggerInstance.hasItems(Items.AMETHYST_SHARD))
-                    .requirements(AdvancementRequirements.Strategy.OR)
-                    .save(consumer, FTBUltimineAddition.id("gathering_amethyst").toString());
-
-            AdvancementHolder cardBlueprint = Advancement.Builder.advancement().parent(amethyst).display(
-                            ModItems.CARD_BLUEPRINT,
-                            Component.translatable(String.format("advancement.%s.craft.card_blueprint", FTBUltimineAddition.MOD_ID)),
-                            Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.CARD_BLUEPRINT.getDescriptionId())),
-                            null,
-                            AdvancementType.TASK,
-                            true, true, false)
-                    .addCriterion("amethyst_adv", advancementTrigger(amethyst))
-                    .addCriterion("has_card_blueprint", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.CARD_BLUEPRINT))
-                    .requirements(AdvancementRequirements.Strategy.AND)
-                    .save(consumer, FTBUltimineAddition.id("card_blueprint").toString());
-
-            AdvancementHolder shapeSelector = Advancement.Builder.advancement().parent(cardBlueprint).display(
+            AdvancementHolder shapeSelector = Advancement.Builder.advancement().parent(root).display(
                             ModItems.SHAPE_SELECTOR,
                             Component.translatable(String.format("advancement.%s.craft.shape_selector", FTBUltimineAddition.MOD_ID)),
                             Component.translatable(String.format("advancement.%s.craft", FTBUltimineAddition.MOD_ID), Component.translatable(ModItems.SHAPE_SELECTOR.getDescriptionId())),
                             null,
                             AdvancementType.TASK,
                             true, true, false)
-                    .addCriterion("has_card_blueprint", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.CARD_BLUEPRINT))
                     .addCriterion("has_shape_selector", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.SHAPE_SELECTOR))
                     .requirements(AdvancementRequirements.Strategy.AND)
                     .save(consumer, FTBUltimineAddition.id("shape_selector").toString());

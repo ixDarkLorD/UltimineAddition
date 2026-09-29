@@ -5,15 +5,26 @@
       "value": false
     }
   ],
-  "type": "minecraft:crafting_shapeless",
+  "type": "minecraft:crafting_shaped",
   "category": "misc",
   "group": "ultimine_addition",
-  "ingredients": [
-    "ultimine_addition:mining_skill_card_empty",
-    "ultimine_addition:card_blueprint"
+  "key": {
+    "D": "#minecraft:dirt",
+    "L": "#minecraft:logs",
+    "M": [
+      "minecraft:copper_ingot",
+      "minecraft:iron_ingot",
+      "minecraft:coal"
+    ],
+    "P": "minecraft:paper",
+    "S": "#c:seeds"
+  },
+  "pattern": [
+    "PMP",
+    "LPD",
+    "PSP"
   ],
   "result": {
-    "count": 2,
     "id": "ultimine_addition:mining_skill_card_empty"
   }
 }

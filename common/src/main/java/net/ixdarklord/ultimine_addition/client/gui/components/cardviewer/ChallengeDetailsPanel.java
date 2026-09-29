@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
+import net.minecraft.util.Util;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.util.ARGB;
@@ -191,7 +192,18 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         int tierWidth = Math.round(this.font.width(tier) * TIER_SCALE);
         String name = CardViewerWidget.challengeName(this.node).getString();
         int nameX = b.left() + PADDING, nameY = b.top() + 4;
-        int room = b.width() - PADDING * 2 - tierWidth - 4;
+        // The challenge's icon in front: its target block, cycling like in the challenge's row.
+        if (!this.node.targets().isEmpty()) {
+            ItemStack icon = this.node.targets().get((int) (Util.getMillis() / 1000L % this.node.targets().size()));
+            var iconPose = graphics.pose();
+            iconPose.pushMatrix();
+            iconPose.translate(nameX, nameY - 1);
+            iconPose.scale(0.625F, 0.625F);
+            graphics.item(icon, 0, 0);
+            iconPose.popMatrix();
+            nameX += 12;
+        }
+        int room = b.right() - PADDING - nameX - tierWidth - 4;
         Component shown = CardViewerWidget.ellipsize(this.font, name, room);
         graphics.text(this.font, shown, nameX, nameY, RenderUtils.textColor(0xFBF1C1), shadow);
         var pose = graphics.pose();

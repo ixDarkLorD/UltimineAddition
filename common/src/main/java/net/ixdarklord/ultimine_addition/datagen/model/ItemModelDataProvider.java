@@ -40,7 +40,6 @@ public class ItemModelDataProvider implements DataProvider {
 
         this.simpleItem(cache, "ink_chamber", "minecraft:item/handheld", null);
         this.simpleItem(cache, "pen", "minecraft:item/handheld", null);
-        this.simpleItem(cache, "card_blueprint", "minecraft:item/generated", null);
         this.simpleItem(cache, "mining_skill_card_empty", "minecraft:item/generated", null);
 
         // Shape Certificates: the tool's plaque (as on its Mining Skill Card) picked from the certificate's tool;

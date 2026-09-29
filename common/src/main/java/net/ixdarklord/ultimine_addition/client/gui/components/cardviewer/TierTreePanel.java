@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
+import net.ixdarklord.coolcatcanvas.api.utils.ColorGradient;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -28,6 +29,7 @@ import net.minecraft.util.Util;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 
 import java.util.EnumMap;
@@ -54,7 +56,9 @@ final class TierTreePanel extends ViewportPanel {
 
     static final int PROGRESS_BAR_HEIGHT = 7;
     private static final int BADGE_SIZE = 36;
-    static final int SLOT_SIZE = 24;
+    // The challenge row's block slot (nine-sliced, so it scales cleanly); as tall as a row's spacing.
+    static final int SLOT_SIZE = 26;
+    private static final float SLOT_ITEM_SCALE = 1.125F;
     static final int SMALL_SLOT_SIZE = 20;
     private static final int LINE_DONE = 0xFF4E9A56;
     private static final int LINE_LOCKED = 0xFF4A4A4A;
@@ -527,6 +531,37 @@ final class TierTreePanel extends ViewportPanel {
         }
     }
 
+    // An in-progress challenge's frame: a gold gradient cycling along it, drawn as narrow slices of the frame sprite,
+    // each clipped and colored from the gradient at its spot.
+    private static final ColorGradient IN_PROGRESS_GOLD = ColorGradient.of(0xC8962A, 0xFFE27A, 0xFFF6C8, 0xE0B040).withSpeed(0.45F).withSpread(1.0F);
+    private static final int GOLD_SLICES = 16;
+    private static final int IN_PROGRESS_BORDER = 0xFFE8BE4A;
+
+    private void drawGoldBorder(GuiGraphicsExtractor graphics, int x, int y, int w, int h, float reveal) {
+        int alpha = Math.round(255 * reveal);
+        // The whole frame in gold first, then the gradient over it in slices. The slices are clipped in screen pixels,
+        // computed here from the current (zoomed) pose, so neighbours share exactly the same edge at any zoom.
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_BORDER, x, y, w, h, ARGB.multiplyAlpha(IN_PROGRESS_BORDER, reveal));
+        Matrix3x2fStack pose = graphics.pose();
+        Matrix3x2f m = new Matrix3x2f(pose);
+        int top = Math.round(m.m01() * x + m.m11() * (y - 1) + m.m21());
+        int bottom = Math.round(m.m01() * x + m.m11() * (y + h + 1) + m.m21());
+        int previous = Math.round(m.m00() * x + m.m10() * y + m.m20());
+        for (int k = 0; k < GOLD_SLICES; k++) {
+            float edge = x + w * (k + 1) / (float) GOLD_SLICES;
+            int next = Math.round(m.m00() * edge + m.m10() * y + m.m20());
+            if (next > previous) {
+                pose.pushMatrix();
+                pose.identity();
+                graphics.enableScissor(previous, Math.min(top, bottom), next, Math.max(top, bottom));
+                pose.popMatrix();
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_BORDER, x, y, w, h, IN_PROGRESS_GOLD.color(k / (float) GOLD_SLICES, alpha));
+                graphics.disableScissor();
+            }
+            previous = next;
+        }
+    }
+
     // A pixel check mark (7 x 6) with a dark edge, its top left at x, y.
     private static final String[] CHECK = {
             "......X",
@@ -612,17 +647,25 @@ final class TierTreePanel extends ViewportPanel {
         this.pushNodeTransform(graphics, x + w / 2.0F, y + h / 2.0F, hover, reveal);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_FILL, x + 2, y + 2, w, h, ARGB.color(0.3F * reveal, 0x000000));
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_FILL, x, y, w, h, ARGB.multiplyAlpha(fill, reveal));
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_BORDER, x, y, w, h, ARGB.multiplyAlpha(border, reveal));
+        // In progress: gold, with the gradient cycling around the frame when animated.
+        if (node.state() == ChallengeState.IN_PROGRESS && this.animated()) this.drawGoldBorder(graphics, x, y, w, h, reveal);
+        else if (node.state() == ChallengeState.IN_PROGRESS) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_BORDER, x, y, w, h, ARGB.multiplyAlpha(IN_PROGRESS_BORDER, reveal));
+        else graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ROW_BORDER, x, y, w, h, ARGB.multiplyAlpha(border, reveal));
 
         int slotY = y + (h - SLOT_SIZE) / 2;
         drawSlot(graphics, x + 6, slotY, ARGB.multiplyAlpha(ARGB.scaleRGB(border, 0.35F), reveal), ARGB.multiplyAlpha(border, reveal));
         if (reveal > 0.5F && !node.targets().isEmpty()) {
             ItemStack target = node.targets().get((int) (Util.getMillis() / 1000L % node.targets().size()));
-            graphics.item(target, x + 6 + (SLOT_SIZE - 16) / 2, slotY + (SLOT_SIZE - 16) / 2);
+            Matrix3x2fStack itemPose = graphics.pose();
+            itemPose.pushMatrix();
+            itemPose.translate(x + 6 + SLOT_SIZE / 2.0F, slotY + SLOT_SIZE / 2.0F);
+            itemPose.scale(SLOT_ITEM_SCALE, SLOT_ITEM_SCALE);
+            graphics.item(target, -8, -8);
+            itemPose.popMatrix();
         }
 
         boolean shadow = this.viewer.hasTextShadow();
-        int textX = x + 6 + SLOT_SIZE + 2;
+        int textX = x + 6 + SLOT_SIZE + 4;
         String title = CardViewerWidget.challengeName(node).getString();
         CardViewerWidget.drawFittedText(graphics, this.font, Component.literal(title), width -> CardViewerWidget.ellipsize(this.font, title, width),
                 textX, y + 3, x + w - 4 - textX - (node.state() == ChallengeState.COMPLETED || node.state() == ChallengeState.NEEDS_CONSUME_MODE ? 10 : 0),

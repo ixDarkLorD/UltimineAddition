@@ -17,7 +17,6 @@ public class LanguageGenerator extends LanguageProvider {
         this.add(Registration.SHAPE_SELECTOR.get(), "Shape Selector");
         this.add(Registration.INK_CHAMBER.get(), "Ink Chamber");
         this.add(Registration.PEN.get(), "Pen");
-        this.add(Registration.CARD_BLUEPRINT.get(), "Card Blueprint");
         this.add(Registration.SHAPE_CERTIFICATE_NOVICE.get(), "Novice Shape Certificate");
         this.add(Registration.SHAPE_CERTIFICATE_APPRENTICE.get(), "Apprentice Shape Certificate");
         this.add(Registration.SHAPE_CERTIFICATE_ADEPT.get(), "Adept Shape Certificate");
@@ -35,7 +34,7 @@ public class LanguageGenerator extends LanguageProvider {
         this.add(Registration.MINE_GO_JUICE_AXE.get(), "Mine-Go Juice: Lumberjack Limbo");
         this.add(Registration.MINE_GO_JUICE_SHOVEL.get(), "Mine-Go Juice: Worm Whispers");
         this.add(Registration.MINE_GO_JUICE_HOE.get(), "Mine-Go Juice: Soil Serenade");
-        this.add("jei.ultimine_addition.info.cards.obtain", "You can obtain this item from a Novice Toolsmith Villager.");
+        this.add("jei.ultimine_addition.info.cards.obtain", "Craft it from five papers and a token of each tool's work: copper, iron or coal (pickaxe), dirt (shovel), a log (axe) and seeds (hoe).");
         this.add("jei.ultimine_addition.info.cards.grade_up", "You can upgrade the tier of the Mining Skill Card by completing challenges in the Skills Record.");
         this.add("jei.ultimine_addition.info.shape_certificate", "When one of the player's Mining Skill Cards reaches %s, they pick one shape from that tier's list (or an earlier tier's shape they passed over) and get its certificate for the card's tool. Use it to permanently learn that shape for that tool.");
         this.add("jei.ultimine_addition.info.cards.mastered", "You can achieve the Mastered tier by completing challenges using the Skills Record.");
@@ -265,12 +264,10 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("advancement.ultimine_addition.root.desc", "Have you been feeling weak lately? Take this journey for an improvement!");
         this.add("advancement.ultimine_addition.obtain", "Obtain a %s");
         this.add("advancement.ultimine_addition.craft", "Craft a %s");
-        this.add("advancement.ultimine_addition.amethyst_gathering", "Bring me the crystals!");
         this.add("advancement.ultimine_addition.obtain.slime_balls", "Huh? oh... Yuck!");
         this.add("advancement.ultimine_addition.obtain.card.empty", "Well... This is Useless!");
         this.add("advancement.ultimine_addition.craft.pen", "Isn't this Exquisite?");
         this.add("advancement.ultimine_addition.craft.skills_record", "It's time to take notes!");
-        this.add("advancement.ultimine_addition.craft.card_blueprint", "Ctrl-C + Ctrl-V = Copy-Paste");
         this.add("advancement.ultimine_addition.craft.shape_selector", "When One Tool Just Isn't Enough!");
         this.add("advancement.ultimine_addition.craft.card.pickaxe", "That's my Geode Gobbler!");
         this.add("advancement.ultimine_addition.craft.card.axe", "Oh, I had an AXEIDENT! Did you get it?");

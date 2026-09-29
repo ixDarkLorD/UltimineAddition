@@ -28,8 +28,6 @@ public class ModItems {
             .stacksTo(64), ComponentItem.ComponentType.CRAFTING);
     public static final PenItem PEN = new PenItem(properties("pen")
             .stacksTo(1));
-    public static final ModernItem CARD_BLUEPRINT = new ModernItem(properties("card_blueprint")
-            .stacksTo(16), ComponentItem.ComponentType.CRAFTING);
 
     public static final MiningSkillCardItem MINING_SKILL_CARD_EMPTY = new MiningSkillCardItem(MiningSkillCardItem.Type.EMPTY, properties("mining_skill_card_empty")
             .stacksTo(16));

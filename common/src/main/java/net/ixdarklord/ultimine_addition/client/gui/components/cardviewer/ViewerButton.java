@@ -1,5 +1,8 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
+import net.minecraft.util.Util;
+import net.minecraft.util.Mth;
+import net.minecraft.util.ARGB;
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
@@ -68,8 +71,12 @@ final class ViewerButton extends AbstractButton {
     }
 
     static void drawFrame(GuiGraphicsExtractor graphics, int x, int y, int width, int height, boolean hovered) {
-        int outline = hovered ? 0xFFFFFFFF : 0xFF8A8A8A;
-        graphics.fill(x, y, x + width, y + height, hovered ? 0xE0404040 : 0xC0202020);
+        drawFrame(graphics, x, y, width, height, hovered, 1.0F);
+    }
+
+    static void drawFrame(GuiGraphicsExtractor graphics, int x, int y, int width, int height, boolean hovered, float alpha) {
+        int outline = ARGB.multiplyAlpha(hovered ? 0xFFFFFFFF : 0xFF8A8A8A, alpha);
+        graphics.fill(x, y, x + width, y + height, ARGB.multiplyAlpha(hovered ? 0xE0404040 : 0xC0202020, alpha));
         graphics.fill(x, y, x + width, y + 1, outline);
         graphics.fill(x, y + height - 1, x + width, y + height, outline);
         graphics.fill(x, y, x + 1, y + height, outline);
@@ -79,6 +86,11 @@ final class ViewerButton extends AbstractButton {
     static final class Icon extends AbstractButton {
         private final Consumer<Icon> onPress;
         private final IconPainter painter;
+        // Fades in when shown and out when hidden, instead of popping.
+        private static final float FADE_SECONDS = 0.15F;
+        private boolean shown;
+        private float fade;
+        private long lastFrame = -1L;
 
         interface IconPainter {
             void paint(GuiGraphicsExtractor graphics, int x, int y, int size, int color);
@@ -96,12 +108,28 @@ final class ViewerButton extends AbstractButton {
             this.onPress.accept(this);
         }
 
+        /** Shows or hides the button: it's clickable only while shown, and fades (when animated) either way. */
+        void setShown(boolean shown, boolean animated) {
+            this.shown = shown;
+            this.active = shown;
+            if (!animated) this.fade = shown ? 1.0F : 0.0F;
+            this.visible = shown || this.fade > 0.0F;
+        }
+
         @Override
         protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+            long now = Util.getMillis();
+            float dt = this.lastFrame < 0 ? 0.0F : Math.min((now - this.lastFrame) / 1000.0F, 0.1F);
+            this.lastFrame = now;
+            this.fade = Mth.clamp(this.fade + (this.shown ? dt : -dt) / FADE_SECONDS, 0.0F, 1.0F);
+            if (!this.shown && this.fade <= 0.0F) {
+                this.visible = false;
+                return;
+            }
             int x = this.getX(), y = this.getY(), size = this.getWidth();
-            boolean hovered = this.isHoveredOrFocused();
-            drawFrame(graphics, x, y, size, size, hovered);
-            this.painter.paint(graphics, x, y, size, hovered ? 0xFFFFFFFF : 0xFFB0B0B0);
+            boolean hovered = this.shown && this.isHoveredOrFocused();
+            drawFrame(graphics, x, y, size, size, hovered, this.fade);
+            this.painter.paint(graphics, x, y, size, ARGB.multiplyAlpha(hovered ? 0xFFFFFFFF : 0xFFB0B0B0, this.fade));
         }
 
         @Override

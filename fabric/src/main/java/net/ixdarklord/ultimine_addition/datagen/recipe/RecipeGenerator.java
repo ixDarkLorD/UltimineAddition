@@ -19,6 +19,7 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -33,22 +34,19 @@ public class RecipeGenerator extends FabricRecipeProvider {
         return new RecipeProvider(registries, output) {
             @Override
             public void buildRecipes() {
-                shaped(RecipeCategory.MISC, Registration.CARD_BLUEPRINT.get())
-                        .define('A', Items.AMETHYST_SHARD)
+                // An empty card from a token of each tool's work around five papers: something a pickaxe digs (copper, iron or
+                // coal), dirt for the shovel, a log for the axe and seeds for the hoe.
+                shaped(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_EMPTY.get())
                         .define('P', Items.PAPER)
-                        .define('L', ConventionalItemTags.LAPIS_GEMS)
-                        .pattern("ALA")
-                        .pattern("LPL")
-                        .pattern("ALA")
+                        .define('M', Ingredient.of(Items.COPPER_INGOT, Items.IRON_INGOT, Items.COAL))
+                        .define('D', ItemTags.DIRT)
+                        .define('L', ItemTags.LOGS)
+                        .define('S', ConventionalItemTags.SEEDS)
+                        .pattern("PMP")
+                        .pattern("LPD")
+                        .pattern("PSP")
                         .group(FTBUltimineAddition.MOD_ID)
-                        .unlockedBy("has_amethyst_shard", has(Items.AMETHYST_SHARD))
-                        .save(output);
-
-                shapeless(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_EMPTY.get(), 2)
-                        .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
-                        .requires(Registration.CARD_BLUEPRINT.get())
-                        .group(FTBUltimineAddition.MOD_ID)
-                        .unlockedBy("has_mining_skill_card", has(Registration.MINING_SKILL_CARD_EMPTY.get()))
+                        .unlockedBy("has_paper", has(Items.PAPER))
                         .save(RecipeGenerator.this.withConditions(this.output, new LegacyModeCondition(false)));
 
 
@@ -84,12 +82,12 @@ public class RecipeGenerator extends FabricRecipeProvider {
                         .define('N', Items.IRON_NUGGET)
                         .define('I', Items.IRON_INGOT)
                         .define('C', Items.GRAY_CONCRETE)
-                        .define('M', Registration.CARD_BLUEPRINT.get())
+                        .define('M', Items.COMPASS)
                         .pattern("NIN")
                         .pattern("CMC")
                         .pattern("NCN")
                         .group(FTBUltimineAddition.MOD_ID)
-                        .unlockedBy("has_card_blueprint", has(Registration.CARD_BLUEPRINT.get()))
+                        .unlockedBy("has_compass", has(Items.COMPASS))
                         .save(output);
 
                 // A clipboard; a dye in its board makes that color's record.

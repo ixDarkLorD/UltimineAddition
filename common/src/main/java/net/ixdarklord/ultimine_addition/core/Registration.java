@@ -138,10 +138,6 @@ public class Registration {
                     output.accept(ModItems.MINER_CERTIFICATE);
                     output.accept(ModItems.SHAPE_SELECTOR);
 
-                    if (PlaystyleModes.isLegacy()) {
-                        output.accept(ModItems.CARD_BLUEPRINT);
-                    }
-
                     if (!PlaystyleModes.isLegacy()) {
                         for (ShapeCertificateItem certificate : ShapeCertificateItem.all()) {
                             for (Identifier shape : ShapeCertificateItem.tierList(certificate.getTier())) {
@@ -164,7 +160,6 @@ public class Registration {
                         ItemStack pen = ModItems.PEN.getDefaultInstance();
                         ModItems.PEN.getData(pen).setToFullCapacity().save();
                         output.accept(pen);
-                        output.accept(ModItems.CARD_BLUEPRINT);
                         for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
                             String name = "mining_skill_card_" + type.getId();
                             Item item = BuiltInRegistries.ITEM.getValue(FTBUltimineAddition.id(name));
@@ -185,7 +180,6 @@ public class Registration {
     public static final RegistryEntry<Item> SHAPE_SELECTOR = ITEMS.register("shape_selector", () -> ModItems.SHAPE_SELECTOR);
     public static final RegistryEntry<Item> INK_CHAMBER = ITEMS.register("ink_chamber", () -> ModItems.INK_CHAMBER);
     public static final RegistryEntry<Item> PEN = ITEMS.register("pen", () -> ModItems.PEN);
-    public static final RegistryEntry<Item> CARD_BLUEPRINT = ITEMS.register("card_blueprint", () -> ModItems.CARD_BLUEPRINT);
 
     public static final RegistryEntry<MiningSkillCardItem> MINING_SKILL_CARD_EMPTY = ITEMS.register("mining_skill_card_empty", () -> ModItems.MINING_SKILL_CARD_EMPTY);
     public static final RegistryEntry<MiningSkillCardItem> MINING_SKILL_CARD_PICKAXE = ITEMS.register("mining_skill_card_pickaxe", () -> ModItems.MINING_SKILL_CARD_PICKAXE);

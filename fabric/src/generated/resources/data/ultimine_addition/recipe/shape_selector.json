@@ -5,7 +5,7 @@
   "key": {
     "C": "minecraft:gray_concrete",
     "I": "minecraft:iron_ingot",
-    "M": "ultimine_addition:card_blueprint",
+    "M": "minecraft:compass",
     "N": "minecraft:iron_nugget"
   },
   "pattern": [
