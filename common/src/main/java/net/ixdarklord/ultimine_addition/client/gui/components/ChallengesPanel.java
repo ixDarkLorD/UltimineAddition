@@ -46,6 +46,8 @@ public class ChallengesPanel implements LayoutElement {
     private final Minecraft mc;
     private final int slot;
     private final boolean notifyPanel;
+    // The record's look this panel's challenge comes from; kept as it fades out after that record is put away.
+    private RecordTheme theme = RecordTheme.WHITE;
     private boolean active = true;
     private int x;
     private int y;
@@ -87,7 +89,7 @@ public class ChallengesPanel implements LayoutElement {
     public void render(GuiGraphicsExtractor guiGraphics) {
         this.update();
         if (this.active) {
-            SkillsRecordScreen.OverlayColor overlayColor = RecordTheme.active().overlay();
+            SkillsRecordScreen.OverlayColor overlayColor = this.theme.overlay();
             if (!this.notifyPanel) {
                 guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_INDICATOR_TEXTURE, this.x + 5, this.y, 51, 10, ARGB.colorFromFloat(overlayColor.alpha(), overlayColor.red(), overlayColor.green(), overlayColor.blue()));
                 int spacing = 13 * this.slot;
@@ -164,6 +166,11 @@ public class ChallengesPanel implements LayoutElement {
 
     public void setTitle(Component title) {
         this.title = title;
+    }
+
+    /** Colors the panel like the record its challenge comes from. */
+    public void setTheme(RecordTheme theme) {
+        this.theme = theme;
     }
 
     public void markRemoved() {

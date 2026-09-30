@@ -79,6 +79,15 @@ public enum RecordTheme {
         return current(player);
     }
 
+    /**
+     * The record the HUDs (the Ultimine notices and the undo panels) follow: the same one the pinned challenges come
+     * from, so they never disagree when the player carries records of several colors. An open Skills Record menu doesn't
+     * change it.
+     */
+    public static RecordTheme hud() {
+        return current(Minecraft.getInstance().player);
+    }
+
     /** The record the player uses: the one in hand, else the equipped one, else the first in the inventory. */
     public static RecordTheme current(@Nullable Player player) {
         if (player == null) return WHITE;

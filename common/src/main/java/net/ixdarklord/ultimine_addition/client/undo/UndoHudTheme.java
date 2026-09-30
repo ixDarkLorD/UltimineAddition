@@ -47,7 +47,7 @@ final class UndoHudTheme {
     // The body first, then the title bar over its top edge with the title centred in the accent colour.
     // Returns where the body's content starts.
     static int frame(GuiGraphicsExtractor graphics, int width, int height, Component title, int accent, float alpha) {
-        SkillsRecordScreen.OverlayColor theme = RecordTheme.active().overlay();
+        SkillsRecordScreen.OverlayColor theme = RecordTheme.hud().overlay();
         int tint = ARGB.colorFromFloat(theme.alpha() * alpha, theme.red(), theme.green(), theme.blue());
         int bodyTop = TITLE_HEIGHT - 3;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BODY_SPRITE, 2, bodyTop, width - 4, height - bodyTop, tint);

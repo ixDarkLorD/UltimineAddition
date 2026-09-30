@@ -22,7 +22,7 @@ public class ShapeSelectorMenu extends AbstractContainerMenu {
     public ShapeSelectorMenu(int id, Inventory inventory, Player player) {
         super(Registration.SHAPE_SELECTOR_CONTAINER.get(), id);
         this.player = player;
-        this.addSlot(new Slot(new SimpleContainer(ItemStack.EMPTY), 0, 22, 35) {
+        this.addSlot(new Slot(new SimpleContainer(ItemStack.EMPTY), 0, 26, 59) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return ItemUtils.isToolItem(stack);
@@ -91,14 +91,14 @@ public class ShapeSelectorMenu extends AbstractContainerMenu {
     private void addPlayerInventory(Inventory playerInventory) {
         for (int i = 0; i < 3; ++i) {
             for (int l = 0; l < 9; ++l) {
-                this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 9 + l * 18, 88 + i * 18));
+                this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 12 + l * 18, 132 + i * 18));
             }
         }
     }
 
     private void addPlayerHotbar(Inventory playerInventory) {
         for (int i = 0; i < 9; ++i) {
-            this.addSlot(new Slot(playerInventory, i, 9 + i * 18, 146));
+            this.addSlot(new Slot(playerInventory, i, 12 + i * 18, 190));
         }
     }
 }

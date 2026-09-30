@@ -1,7 +1,5 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.minecraft.util.Util;
-import net.minecraft.util.Mth;
 import net.minecraft.util.ARGB;
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -93,11 +91,6 @@ final class ViewerButton extends AbstractButton {
         private final Consumer<Icon> onPress;
         private final Supplier<WidgetSprites> sprites;
         private final IntSupplier tint;
-        // Fades in when shown and out when hidden, instead of popping.
-        private static final float FADE_SECONDS = 0.15F;
-        private boolean shown;
-        private float fade;
-        private long lastFrame = -1L;
 
         Icon(Component tooltip, Supplier<WidgetSprites> sprites, IntSupplier tint, Consumer<Icon> onPress) {
             super(0, 0, SIZE, SIZE, CommonComponents.EMPTY);
@@ -118,27 +111,17 @@ final class ViewerButton extends AbstractButton {
             this.onPress.accept(this);
         }
 
-        /** Shows or hides the button: it's clickable only while shown, and fades (when animated) either way. */
-        void setShown(boolean shown, boolean animated) {
-            this.shown = shown;
-            this.active = shown;
-            if (!animated) this.fade = shown ? 1.0F : 0.0F;
-            this.visible = shown || this.fade > 0.0F;
+        /** Shows the button while its viewer shows, clickable only where it applies (greyed out otherwise). */
+        void setState(boolean visible, boolean active) {
+            this.visible = visible;
+            this.active = active;
         }
 
         @Override
         protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-            long now = Util.getMillis();
-            float dt = this.lastFrame < 0 ? 0.0F : Math.min((now - this.lastFrame) / 1000.0F, 0.1F);
-            this.lastFrame = now;
-            this.fade = Mth.clamp(this.fade + (this.shown ? dt : -dt) / FADE_SECONDS, 0.0F, 1.0F);
-            if (!this.shown && this.fade <= 0.0F) {
-                this.visible = false;
-                return;
-            }
-            boolean hovered = this.shown && this.isHoveredOrFocused();
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.sprites.get().get(true, hovered), this.getX(), this.getY(), SIZE, SIZE,
-                    ARGB.color(this.fade, ARGB.opaque(this.tint.getAsInt())));
+            boolean hovered = this.active && this.isHoveredOrFocused();
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.sprites.get().get(this.active, hovered), this.getX(), this.getY(), SIZE, SIZE,
+                    ARGB.opaque(this.tint.getAsInt()));
         }
 
         @Override
