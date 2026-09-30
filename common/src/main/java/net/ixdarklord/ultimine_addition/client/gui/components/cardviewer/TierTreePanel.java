@@ -55,7 +55,7 @@ final class TierTreePanel extends ViewportPanel {
 
     static final int PROGRESS_BAR_HEIGHT = 7;
     private static final int BADGE_SIZE = 36;
-    // The challenge row's block slot (nine-sliced, so it scales cleanly); as tall as a row's spacing.
+    // The challenge row's block slot, drawn at its sprite's native size so its edges stay clean; as tall as a row's spacing.
     static final int SLOT_SIZE = 26;
     private static final float SLOT_ITEM_SCALE = 1.125F;
     static final int SMALL_SLOT_SIZE = 20;
@@ -648,7 +648,10 @@ final class TierTreePanel extends ViewportPanel {
         else GuiDraw.blitSprite(graphics, ROW_BORDER, x, y, w, h, ARGB.multiplyAlpha(border, reveal));
 
         int slotY = y + (h - SLOT_SIZE) / 2;
-        drawSlot(graphics, x + 6, slotY, ARGB.multiplyAlpha(ARGB.scaleRGB(border, 0.35F), reveal), ARGB.multiplyAlpha(border, reveal));
+        // In progress, the slot is gold like the frame: the gradient's color where the slot sits along it.
+        int slotBorder = node.state() != ChallengeState.IN_PROGRESS ? border
+                : this.animated() ? IN_PROGRESS_GOLD.color((6 + SLOT_SIZE / 2.0F) / w, 255) : IN_PROGRESS_BORDER;
+        drawSlot(graphics, x + 6, slotY, ARGB.multiplyAlpha(ARGB.scaleRGB(slotBorder, 0.35F), reveal), ARGB.multiplyAlpha(slotBorder, reveal));
         if (reveal > 0.5F && !node.targets().isEmpty()) {
             ItemStack target = node.targets().get((int) (Util.getMillis() / 1000L % node.targets().size()));
             PoseStack itemPose = graphics.pose();
