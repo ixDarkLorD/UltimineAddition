@@ -37,6 +37,7 @@ public class JEIIntegration implements IModPlugin {
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
         MiningSkillsCardInterpreter.init(registration);
+        ItemVariantInterpreters.init(registration);
         registration.registerSubtypeInterpreter(ModItems.PEN, new PenInterpreter());
     }
 

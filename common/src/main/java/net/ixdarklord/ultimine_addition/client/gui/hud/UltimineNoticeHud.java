@@ -140,7 +140,7 @@ public class UltimineNoticeHud {
         // Slides up into place (easing out), and keeps rising as it fades out.
         int y = bottom - height + Math.round((1.0F - Easing.CUBIC_OUT.apply(in)) * SLIDE_IN) - Math.round(Easing.SINE_IN_OUT.apply(1.0F - out) * SLIDE_UP);
 
-        SkillsRecordScreen.OverlayColor theme = RecordTheme.active().overlay();
+        SkillsRecordScreen.OverlayColor theme = RecordTheme.hud().overlay();
         int tint = ARGB.colorFromFloat(theme.alpha() * alpha, theme.red(), theme.green(), theme.blue());
         int accent = ARGB.color(Math.round(alpha * 255), notice.kind().accent());
 

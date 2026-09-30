@@ -1,7 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.Util;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.resources.ResourceLocation;
 import net.ixdarklord.ultimine_addition.util.ARGB;
@@ -193,17 +192,10 @@ final class ChallengeDetailsPanel extends ScrollPanel {
         int tierWidth = Math.round(this.font.width(tier) * TIER_SCALE);
         String name = CardViewerWidget.challengeName(this.node).getString();
         int nameX = b.left() + PADDING, nameY = b.top() + 4;
-        // The challenge's icon in front: its target block, cycling like in the challenge's row.
-        if (!this.node.targets().isEmpty()) {
-            ItemStack icon = this.node.targets().get((int) (Util.getMillis() / 1000L % this.node.targets().size()));
-            PoseStack iconPose = graphics.pose();
-            iconPose.pushPose();
-            iconPose.translate(nameX, nameY - 1, 0.0F);
-            iconPose.scale(0.625F, 0.625F, 1.0F);
-            graphics.renderItem(icon, 0, 0);
-            iconPose.popPose();
-            nameX += 12;
-        }
+        // The same glyph as in the challenge's tooltip, in front of its name.
+        Component glyph = Component.literal(CardViewerWidget.CHALLENGE_GLYPH);
+        GuiDraw.text(graphics, this.font, glyph, nameX, nameY, RenderUtils.textColor(0xFBF1C1), shadow);
+        nameX += this.font.width(glyph);
         int room = b.right() - PADDING - nameX - tierWidth - 4;
         Component shown = CardViewerWidget.ellipsize(this.font, name, room);
         GuiDraw.text(graphics, this.font, shown, nameX, nameY, RenderUtils.textColor(0xFBF1C1), shadow);
