@@ -2,6 +2,10 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v26.1.2-2 Release - Sep 30, 2026
+### 🐛 Bug Fixes & Improvements
+- The undo preview's ghosts now form one solid, seamless shape: they fill their blocks exactly (they were shrunk, which opened gaps that showed missing faces inside the group), are easier to see, and skip faces hidden against real blocks.
+
 ## v26.1.2-1 Release - Sep 30, 2026 (Minecraft 26.1.2 port)
 ### ✨ New Features
 - Redesigned the Skills Record's card viewer: the selected card's tiers and challenges are shown on a map you can pan (drag) and zoom (mouse wheel or `+`/`-`). Completed tiers, the current tier's live progress and locked tiers are all visible.
@@ -66,7 +70,6 @@ This file is for listing all the changes to this project
 - Fixed the JEI plugin failing on clients connected to a dedicated server (the Shape Certificate info pages found no shapes).
 - `/ultimine_addition skills_record inspect [targets]` and `/ultimine_addition_client skills_record inspect` (operators) print the carried Skills Records and cards as the server and the client see them, to check they're in sync.
 - Ultimine undo puts glass panes, iron bars, fences and walls back connected as they were (they came back with gaps where neighbours broken earlier in the same Ultimine had been), and restores doors, beds and tall plants whole: the other half, removed together with the half that was mined, now comes back too (and shows in the preview and growth). Torches, lanterns, rails, buttons and anything else that popped off the mined blocks come back as well, paid for with the items they dropped, so nothing gets duplicated.
-- The undo preview's ghosts now form one solid, seamless shape: they fill their blocks exactly (they were shrunk, which opened gaps that showed missing faces inside the group), are easier to see, and skip faces hidden against real blocks.
 - Cleaner undo panel: its body is now one soft outline with faint diagonal lines, without the corner marks.
 - Less grind: challenges per tier are now 1/2/2/3 (was 1/2/3/4), required amounts are roughly halved, and rare targets are much lower (e.g. diamond ores 8-16, emerald ores 4-8, ancient debris 4-8).
 - The Shape Selector marks shapes that haven't been learned from a Shape Certificate yet.
