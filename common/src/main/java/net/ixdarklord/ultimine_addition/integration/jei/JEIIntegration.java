@@ -1,58 +1,113 @@
 package net.ixdarklord.ultimine_addition.integration.jei;
 
+import java.util.ArrayList;
+import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.*;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @JeiPlugin
 public class JEIIntegration implements IModPlugin {
-   public @NotNull ResourceLocation getPluginUid() {
-      return FTBUltimineAddition.id("jei_integration");
-   }
 
-   public void registerItemSubtypes(@NotNull ISubtypeRegistration registration) {
-      MiningSkillsCardInterpreter.init(registration);
-      registration.registerSubtypeInterpreter(Registration.PEN.get(), new PenInterpreter());
-   }
+    @Override
+    public @NotNull ResourceLocation getPluginUid() {
+        return FTBUltimineAddition.id("jei_integration");
+    }
 
-   public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-      registration.addGlobalGuiHandler(new SkillsRecordScreenHandler());
-   }
+    @Override
+    public void registerItemSubtypes(ISubtypeRegistration registration) {
+        MiningSkillsCardInterpreter.init(registration);
+        registration.registerSubtypeInterpreter(ModItems.PEN, new PenInterpreter());
+    }
 
-   public void registerCategories(@NotNull IRecipeCategoryRegistration registration) {
-      registration.addRecipeCategories(new ItemStorageDataRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
-   }
+    @Override
+    public void registerGuiHandlers(IGuiHandlerRegistration registration) {
+        registration.addGlobalGuiHandler(new SkillsRecordScreenHandler());
+    }
 
-   public void registerRecipes(@NotNull IRecipeRegistration registration) {
-      registration.addRecipes(ItemStorageDataRecipeCategory.RECIPE_TYPE, ItemStorageDataRecipeCategory.getItemStorageDataRecipes());
-      List<MiningSkillCardItem> skillCardItems = Stream.of(Registration.MINING_SKILL_CARD_PICKAXE, Registration.MINING_SKILL_CARD_AXE, Registration.MINING_SKILL_CARD_SHOVEL, Registration.MINING_SKILL_CARD_HOE).map(Supplier::get).toList();
-      List<ItemStack> allCards = skillCardItems.stream().flatMap((item) -> Arrays.stream(MiningSkillCardItem.Tier.values()).filter((tier) -> tier != MiningSkillCardItem.Tier.Mastered).map((tier) -> MiningSkillCardData.createForCreativeTab(item, tier))).toList();
-      List<ItemStack> masteredCards = skillCardItems.stream().map((item) -> MiningSkillCardData.createForCreativeTab(item, MiningSkillCardItem.Tier.Mastered)).toList();
-      registration.addItemStackInfo(allCards, Component.translatable("jei.ultimine_addition.info.cards.grade_up"));
-      registration.addItemStackInfo(masteredCards, Component.translatable("jei.ultimine_addition.info.cards.mastered"));
-      ConfigIngredientInfoRecipe.addConfigInfo(registration, Registration.MINING_SKILL_CARD_EMPTY.get().getDefaultInstance(), "jei.ultimine_addition.info.cards.obtain", ConfigHandler.COMMON.VILLAGER_CARD_TRADE_LEVEL);
-   }
+    @Override
+    public void registerCategories(@NotNull IRecipeCategoryRegistration registration) {
+        registration.addRecipeCategories(new ItemStorageDataRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
+    }
 
-   public void registerRecipeCatalysts(@NotNull IRecipeCatalystRegistration registration) {
-      ItemStorageDataRecipeCategory.getCatalysts().forEach((stack) -> registration.addRecipeCatalyst(stack, ItemStorageDataRecipeCategory.RECIPE_TYPE));
-   }
+    @Override
+    public void registerRecipes(@NotNull IRecipeRegistration registration) {
+        registration.addRecipes(ItemStorageDataRecipeCategory.RECIPE_TYPE, ItemStorageDataRecipeCategory.getItemStorageDataRecipes());
 
-   public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
-      registration.addRecipeTransferHandler(new MCRecipeTransferHandler(registration.getTransferHelper()), RecipeTypes.CRAFTING);
-   }
+        final List<MiningSkillCardItem> skillCardItems = List.of(
+                ModItems.MINING_SKILL_CARD_PICKAXE,
+                ModItems.MINING_SKILL_CARD_AXE,
+                ModItems.MINING_SKILL_CARD_SHOVEL,
+                ModItems.MINING_SKILL_CARD_HOE
+        );
+
+        final List<ItemStack> allCards = skillCardItems.stream()
+                .flatMap(item -> Arrays.stream(MiningSkillCardItem.Tier.values())
+                        .filter(tier -> tier != MiningSkillCardItem.Tier.Mastered)
+                        .map(tier -> MiningSkillCardData.createForCreativeTab(item, tier))
+                ).toList();
+
+        final List<ItemStack> masteredCards = skillCardItems.stream()
+                .map(item -> MiningSkillCardData.createForCreativeTab(item, MiningSkillCardItem.Tier.Mastered))
+                .toList();
+
+        registration.addItemStackInfo(allCards, Component.translatable("jei.ultimine_addition.info.cards.grade_up"));
+        registration.addItemStackInfo(masteredCards, Component.translatable("jei.ultimine_addition.info.cards.mastered"));
+        for (ShapeCertificateItem certificate : ShapeCertificateItem.all()) {
+            List<ItemStack> stacks = new ArrayList<>();
+            for (var shape : ShapeCertificateItem.tierList(certificate.getTier())) {
+                for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
+                    if (type != MiningSkillCardItem.Type.EMPTY) stacks.add(certificate.create(type, shape));
+                }
+            }
+            registration.addItemStackInfo(stacks, Component.translatable("jei.ultimine_addition.info.shape_certificate", certificate.getTier().getDisplayName()));
+        }
+        registration.addItemStackInfo(ModItems.MINING_SKILL_CARD_EMPTY.getDefaultInstance(), Component.translatable("jei.ultimine_addition.info.cards.obtain"));
+        registration.addRecipes(RecipeTypes.CRAFTING, recoloringRecipes());
+    }
+
+    // The Skills Record's recoloring is a special recipe JEI can't show, so it gets one display recipe per color:
+    // a Skills Record (of any color) and a dye make that color's record, keeping what's inside.
+    private static List<CraftingRecipe> recoloringRecipes() {
+        List<CraftingRecipe> recipes = new ArrayList<>();
+        for (DyeColor color : DyeColor.values()) {
+            ItemStack result = new ItemStack(ModItems.SKILLS_RECORD);
+            SkillsRecordItem.setColor(result, color);
+            ResourceLocation id = FTBUltimineAddition.id("jei/skills_record_dyeing/" + color.getSerializedName());
+            recipes.add(new ShapelessRecipe(id, FTBUltimineAddition.MOD_ID + ":skills_record_dyeing", CraftingBookCategory.MISC, result,
+                    NonNullList.of(Ingredient.EMPTY, Ingredient.of(ModItems.SKILLS_RECORD), Ingredient.of(DyeItem.byColor(color)))));
+        }
+        return recipes;
+    }
+
+    @Override
+    public void registerRecipeCatalysts(@NotNull IRecipeCatalystRegistration registration) {
+        ItemStorageDataRecipeCategory.getCatalysts().forEach(stack ->
+                registration.addRecipeCatalyst(stack, ItemStorageDataRecipeCategory.RECIPE_TYPE));
+    }
+
+    @Override
+    public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
+        registration.addRecipeTransferHandler(new MCRecipeTransferHandler(registration.getTransferHelper()), RecipeTypes.CRAFTING);
+    }
 }

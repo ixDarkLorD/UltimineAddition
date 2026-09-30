@@ -1,176 +1,110 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe.builder;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.DataIngredient;
-import net.ixdarklord.ultimine_addition.core.Registration;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.Advancement.Builder;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.RequirementsStrategy;
-import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.data.recipes.CraftingRecipeBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
+import java.util.function.Consumer;
+import net.minecraft.advancements.AdvancementRewards;
+import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 
+// 1.20.1 recipe builders hand FinishedRecipes to a consumer (CodecRecipeResult writes them with the serializer's codec).
 public class ItemStorageDataRecipeBuilder extends CraftingRecipeBuilder implements RecipeBuilder {
-   private final RecipeCategory category;
-   private final Item result;
-   private final int count;
-   private String storageName;
-   private final List<DataIngredient> ingredients = new ArrayList();
-   private final Advancement.Builder advancement = Builder.advancement();
-   private @Nullable String group;
+    private final RecipeCategory category;
+    private final Item result;
+    private final int count;
+    private String storageName;
+    private final NonNullList<DataIngredient> ingredients = NonNullList.create();
+    private final Advancement.Builder advancement = Advancement.Builder.advancement();
+    @Nullable
+    private String group;
 
-   private ItemStorageDataRecipeBuilder(RecipeCategory category, ItemLike result, int count) {
-      this.category = category;
-      this.result = result.asItem();
-      this.count = count;
-   }
+    private ItemStorageDataRecipeBuilder(RecipeCategory category, ItemLike result, int count) {
+        this.category = category;
+        this.result = result.asItem();
+        this.count = count;
+    }
 
-   public static ItemStorageDataRecipeBuilder create(RecipeCategory category, ItemLike item) {
-      return new ItemStorageDataRecipeBuilder(category, item, 1);
-   }
+    public static ItemStorageDataRecipeBuilder create(RecipeCategory category, ItemLike item) {
+        return new ItemStorageDataRecipeBuilder(category, item, 1);
+    }
 
-   public static ItemStorageDataRecipeBuilder create(RecipeCategory category, ItemLike item, int count) {
-      return new ItemStorageDataRecipeBuilder(category, item, count);
-   }
+    public static ItemStorageDataRecipeBuilder create(RecipeCategory category, ItemLike item, int count) {
+        return new ItemStorageDataRecipeBuilder(category, item, count);
+    }
 
-   public ItemStorageDataRecipeBuilder storage(String name) {
-      this.storageName = name;
-      return this;
-   }
+    public ItemStorageDataRecipeBuilder storage(String name) {
+        this.storageName = name;
+        return this;
+    }
 
-   public ItemStorageDataRecipeBuilder requires(TagKey<Item> tag, int amount) {
-      return this.requires(DataIngredient.of(tag, amount));
-   }
+    @SuppressWarnings("unused")
+    public ItemStorageDataRecipeBuilder requires(TagKey<Item> tag, int amount) {
+        return this.requires(DataIngredient.of(tag, amount));
+    }
 
-   public ItemStorageDataRecipeBuilder requires(ItemLike item) {
-      return this.requires(item, 1);
-   }
+    public ItemStorageDataRecipeBuilder requires(ItemLike item, int amount) {
+        this.requires(DataIngredient.of(amount, item));
+        return this;
+    }
 
-   public ItemStorageDataRecipeBuilder requires(ItemLike item, int amount) {
-      this.requires(DataIngredient.of(amount, item));
-      return this;
-   }
+    public ItemStorageDataRecipeBuilder requires(DataIngredient ingredient) {
+        return this.requires(ingredient, 1);
+    }
 
-   public ItemStorageDataRecipeBuilder requires(DataIngredient ingredient) {
-      return this.requires(ingredient, 1);
-   }
+    public ItemStorageDataRecipeBuilder requires(DataIngredient ingredient, int count) {
+        for (int i = 0; i < count; ++i) {
+            this.ingredients.add(ingredient);
+        }
+        return this;
+    }
 
-   public ItemStorageDataRecipeBuilder requires(DataIngredient ingredient, int count) {
-      for (int i = 0; i < count; ++i) {
-         this.ingredients.add(ingredient);
-      }
+    @Override
+    public @NotNull RecipeBuilder unlockedBy(@NotNull String name, @NotNull CriterionTriggerInstance criterion) {
+        this.advancement.addCriterion(name, criterion);
+        return this;
+    }
 
-      return this;
-   }
+    public @NotNull ItemStorageDataRecipeBuilder group(@Nullable String name) {
+        this.group = name;
+        return this;
+    }
 
-   public @NotNull ItemStorageDataRecipeBuilder unlockedBy(@NotNull String key, @NotNull CriterionTriggerInstance criterionTriggerInstance) {
-      this.advancement.addCriterion(key, criterionTriggerInstance);
-      return this;
-   }
+    public @NotNull Item getResult() {
+        return this.result;
+    }
 
-   public @NotNull ItemStorageDataRecipeBuilder group(@Nullable String name) {
-      this.group = name;
-      return this;
-   }
+    @Override
+    public void save(@NotNull Consumer<FinishedRecipe> consumer, @NotNull ResourceLocation actualId) {
+        ResourceLocation id = new ResourceLocation(actualId.getNamespace(), Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(this.result)).getPath() + "_" + actualId.getPath());
+        this.ensureValid(id);
+        this.advancement.parent(ROOT_RECIPE_ADVANCEMENT).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id)).rewards(AdvancementRewards.Builder.recipe(id)).requirements(RequirementsStrategy.OR);
 
-   public @NotNull Item getResult() {
-      return this.result;
-   }
+        ItemStorageDataRecipe recipe = new ItemStorageDataRecipe(id, Objects.requireNonNullElse(this.group, ""), determineBookCategory(this.category), new ItemStack(this.result, this.count), this.storageName, this.ingredients);
+        consumer.accept(new CodecRecipeResult<>(id, ItemStorageDataRecipe.Serializer.INSTANCE, ItemStorageDataRecipe.Serializer.CODEC, recipe, this.advancement, id.withPrefix("recipes/" + this.category.getFolderName() + "/")));
+    }
 
-   public void save(Consumer<FinishedRecipe> consumer, @NotNull ResourceLocation actionLocation) {
-      String string = actionLocation.getNamespace();
-      String string2 = Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.result)).getPath();
-      ResourceLocation recipeId = new ResourceLocation(string, string2 + "_" + actionLocation.getPath());
-      this.ensureValid(recipeId);
-      this.advancement.parent(new ResourceLocation("recipes/root")).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipeId)).rewards(net.minecraft.advancements.AdvancementRewards.Builder.recipe(recipeId)).requirements(RequirementsStrategy.OR);
-      consumer.accept(new Result(recipeId, this.result, this.count, this.storageName, this.group == null ? "" : this.group, determineBookCategory(this.category), this.ingredients, this.advancement, recipeId.withPrefix("recipes/" + this.category.getFolderName() + "/")));
-   }
-
-   private void ensureValid(ResourceLocation resourceLocation) {
-      if (this.advancement.getCriteria().isEmpty()) {
-         throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
-      }
-   }
-
-   public static class Result extends CraftingRecipeBuilder.CraftingResult {
-      private final ResourceLocation id;
-      private final Item result;
-      private final int count;
-      private final String storageName;
-      private final String group;
-      private final List<DataIngredient> ingredients;
-      private final Advancement.Builder advancement;
-      private final ResourceLocation advancementId;
-
-      public Result(ResourceLocation id, Item result, int count, String storageName, String group, CraftingBookCategory category, List<DataIngredient> ingredients, Advancement.Builder advancement, ResourceLocation advancementId) {
-         super(category);
-         this.id = id;
-         this.result = result;
-         this.count = count;
-         this.storageName = storageName;
-         this.group = group;
-         this.ingredients = ingredients;
-         this.advancement = advancement;
-         this.advancementId = advancementId;
-      }
-
-      public void serializeRecipeData(@NotNull JsonObject json) {
-         super.serializeRecipeData(json);
-         if (!this.group.isEmpty()) {
-            json.addProperty("group", this.group);
-         }
-
-         JsonArray jsonarray = new JsonArray();
-
-         for (DataIngredient ingredient : this.ingredients) {
-            jsonarray.add(ingredient.toJson());
-         }
-
-         json.add("ingredients", jsonarray);
-         JsonObject jsonobject = new JsonObject();
-         jsonobject.addProperty("item", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.result)).toString());
-         if (this.count > 1) {
-            jsonobject.addProperty("count", this.count);
-         }
-
-         if (this.storageName != null) {
-            jsonobject.addProperty("storage_name", this.storageName);
-         }
-
-         json.add("result", jsonobject);
-      }
-
-      public @NotNull RecipeSerializer<?> getType() {
-         return Registration.ITEM_DATA_STORAGE_RECIPE_SERIALIZER.get();
-      }
-
-      public @NotNull ResourceLocation getId() {
-         return this.id;
-      }
-
-      public JsonObject serializeAdvancement() {
-         return this.advancement.serializeToJson();
-      }
-
-      public ResourceLocation getAdvancementId() {
-         return this.advancementId;
-      }
-   }
+    private void ensureValid(ResourceLocation id) {
+        if (this.advancement.getCriteria().isEmpty()) {
+            throw new IllegalStateException("No way of obtaining recipe " + id);
+        }
+    }
 }

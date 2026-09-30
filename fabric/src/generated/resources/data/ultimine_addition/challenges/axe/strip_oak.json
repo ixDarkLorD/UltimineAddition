@@ -6,8 +6,8 @@
   "for_card_tier": 1,
   "for_card_type": "axe",
   "required_amount": {
-    "max": 64,
-    "min": 32
+    "max": 32,
+    "min": 16
   },
   "targeted_blocks": [
     "minecraft:oak_log"

@@ -1,33 +1,44 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.coolcatlib.api.item.ComponentItem.ComponentType;
+import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 
 public class ModItems {
-    public static final Item MINER_CERTIFICATE;
-    public static final SkillsRecordItem SKILLS_RECORD;
-    public static final ShapeSelectorItem SHAPE_SELECTOR;
-    public static final Item INK_CHAMBER;
-    public static final PenItem PEN;
-    public static final Item CARD_BLUEPRINT;
-    public static final MiningSkillCardItem MINING_SKILL_CARD_EMPTY;
-    public static final MiningSkillCardItem MINING_SKILL_CARD_PICKAXE;
-    public static final MiningSkillCardItem MINING_SKILL_CARD_AXE;
-    public static final MiningSkillCardItem MINING_SKILL_CARD_SHOVEL;
-    public static final MiningSkillCardItem MINING_SKILL_CARD_HOE;
+    public static final MinerCertificateItem MINER_CERTIFICATE = new MinerCertificateItem(properties("miner_certificate")
+            .stacksTo(1)
+            .rarity(Rarity.EPIC));
+    public static final ShapeCertificateItem SHAPE_CERTIFICATE_NOVICE = new ShapeCertificateItem(MiningSkillCardItem.Tier.Novice, properties("shape_certificate_novice")
+            .stacksTo(16)
+            .rarity(Rarity.UNCOMMON));
+    public static final ShapeCertificateItem SHAPE_CERTIFICATE_APPRENTICE = new ShapeCertificateItem(MiningSkillCardItem.Tier.Apprentice, properties("shape_certificate_apprentice")
+            .stacksTo(16)
+            .rarity(Rarity.RARE));
+    public static final ShapeCertificateItem SHAPE_CERTIFICATE_ADEPT = new ShapeCertificateItem(MiningSkillCardItem.Tier.Adept, properties("shape_certificate_adept")
+            .stacksTo(16)
+            .rarity(Rarity.RARE));
+    public static final SkillsRecordItem SKILLS_RECORD = new SkillsRecordItem(properties("skills_record")
+            .stacksTo(1));
+    public static final ShapeSelectorItem SHAPE_SELECTOR = new ShapeSelectorItem(properties("shape_selector")
+            .stacksTo(1));
+    public static final ModernItem INK_CHAMBER = new ModernItem(properties("ink_chamber")
+            .stacksTo(64), ComponentItem.ComponentType.CRAFTING);
+    public static final PenItem PEN = new PenItem(properties("pen")
+            .stacksTo(1));
 
-    static {
-        MINER_CERTIFICATE = new MinerCertificateItem((new Item.Properties()).stacksTo(1).rarity(Rarity.EPIC));
-        SKILLS_RECORD = new SkillsRecordItem((new Item.Properties()).stacksTo(1));
-        SHAPE_SELECTOR = new ShapeSelectorItem((new Item.Properties()).stacksTo(1));
-        INK_CHAMBER = new ModernItem((new Item.Properties()).stacksTo(64), ComponentType.CRAFTING);
-        PEN = new PenItem((new Item.Properties()).stacksTo(1));
-        CARD_BLUEPRINT = new ModernItem((new Item.Properties()).stacksTo(16), ComponentType.CRAFTING);
-        MINING_SKILL_CARD_EMPTY = new MiningSkillCardItem((new Item.Properties()).stacksTo(16), MiningSkillCardItem.Type.EMPTY);
-        MINING_SKILL_CARD_PICKAXE = new MiningSkillCardItem((new Item.Properties()).stacksTo(1), MiningSkillCardItem.Type.PICKAXE);
-        MINING_SKILL_CARD_AXE = new MiningSkillCardItem((new Item.Properties()).stacksTo(1), MiningSkillCardItem.Type.AXE);
-        MINING_SKILL_CARD_SHOVEL = new MiningSkillCardItem((new Item.Properties()).stacksTo(1), MiningSkillCardItem.Type.SHOVEL);
-        MINING_SKILL_CARD_HOE = new MiningSkillCardItem((new Item.Properties()).stacksTo(1), MiningSkillCardItem.Type.HOE);
+    public static final MiningSkillCardItem MINING_SKILL_CARD_EMPTY = new MiningSkillCardItem(MiningSkillCardItem.Type.EMPTY, properties("mining_skill_card_empty")
+            .stacksTo(16));
+    public static final MiningSkillCardItem MINING_SKILL_CARD_PICKAXE = new MiningSkillCardItem(MiningSkillCardItem.Type.PICKAXE, properties("mining_skill_card_pickaxe")
+            .stacksTo(1));
+    public static final MiningSkillCardItem MINING_SKILL_CARD_AXE = new MiningSkillCardItem(MiningSkillCardItem.Type.AXE, properties("mining_skill_card_axe")
+            .stacksTo(1));
+    public static final MiningSkillCardItem MINING_SKILL_CARD_SHOVEL = new MiningSkillCardItem(MiningSkillCardItem.Type.SHOVEL, properties("mining_skill_card_shovel")
+            .stacksTo(1));
+    public static final MiningSkillCardItem MINING_SKILL_CARD_HOE = new MiningSkillCardItem(MiningSkillCardItem.Type.HOE, properties("mining_skill_card_hoe")
+            .stacksTo(1));
+
+    // 1.20.1 items don't carry their id in their properties; the name only keeps the declarations as on 26.1.2.
+    public static Item.Properties properties(String name) {
+        return new Item.Properties();
     }
 }

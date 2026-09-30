@@ -6,8 +6,8 @@
   "for_card_tier": 2,
   "for_card_type": "hoe",
   "required_amount": {
-    "max": 16,
-    "min": 4
+    "max": 6,
+    "min": 2
   },
   "targeted_blocks": [
     "minecraft:sculk_catalyst"

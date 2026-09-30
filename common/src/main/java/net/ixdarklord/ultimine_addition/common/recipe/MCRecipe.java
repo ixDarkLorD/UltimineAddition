@@ -1,157 +1,162 @@
 package net.ixdarklord.ultimine_addition.common.recipe;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
-import net.minecraft.core.NonNullList;
+import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.Item;
+import java.util.List;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
+import net.ixdarklord.coolcatcore.api.network.codec.ByteBufCodecs;
+import net.ixdarklord.coolcatcore.api.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 public class MCRecipe extends ShapelessRecipe {
-   private final ResourceLocation id;
-   final String group;
-   final CraftingBookCategory category;
-   final ItemStack result;
-   final NonNullList<MCIngredient> ingredients;
+    // Recipes read by the codec before they know their id (1.20.1 recipes carry one) get it through withId.
+    private static final ResourceLocation UNNAMED = FTBUltimineAddition.id("unnamed");
+    // The result as 1.20.1's crafting recipes write it ({"item": ..., "count": ...}); these results carry no NBT.
+    public static final Codec<ItemStack> RESULT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(ItemStack::getItem),
+            Codec.INT.optionalFieldOf("count", 1).forGetter(ItemStack::getCount)
+    ).apply(instance, (item, count) -> new ItemStack(item, count)));
 
-   public MCRecipe(ResourceLocation id, String group, CraftingBookCategory category, ItemStack result, NonNullList<MCIngredient> ingredients) {
-      super(id, group, category, result, MCIngredient.toNormal(ingredients));
-      this.id = id;
-      this.group = group;
-      this.category = category;
-      this.result = result;
-      this.ingredients = ingredients;
-   }
+    final String group;
+    final CraftingBookCategory category;
+    final ItemStack result;
+    final NonNullList<MCIngredient> ingredients;
 
-   public boolean isSpecial() {
-      return false;
-   }
+    public MCRecipe(String group, CraftingBookCategory category, ItemStack result, NonNullList<MCIngredient> ingredients) {
+        this(UNNAMED, group, category, result, ingredients);
+    }
 
-   public boolean matches(@NotNull CraftingContainer container, @NotNull Level level) {
-      StackedContents stackedContents = new StackedContents();
-      int matchedValue = 0;
+    public MCRecipe(ResourceLocation id, String group, CraftingBookCategory category, ItemStack result, NonNullList<MCIngredient> ingredients) {
+        super(id, group, category, result, MCIngredient.toNormal(ingredients));
+        this.group = group;
+        this.category = category;
+        this.result = result;
+        this.ingredients = ingredients;
+    }
 
-      for (int i = 0; i < container.getContainerSize(); ++i) {
-         ItemStack itemStack = container.getItem(i);
-         if (!itemStack.isEmpty() && !itemStack.isDamaged() && !this.ingredients.stream().filter((ingredient) -> ingredient.test(itemStack)).toList().isEmpty()) {
-            ++matchedValue;
-            stackedContents.accountStack(itemStack, 1);
-         }
-      }
+    private MCRecipe withId(ResourceLocation id) {
+        return new MCRecipe(id, this.group, this.category, this.result, this.ingredients);
+    }
 
-      return matchedValue == this.ingredients.size() && stackedContents.canCraft(this, null);
-   }
+    @Override
+    public @NotNull RecipeSerializer<MCRecipe> getSerializer() {
+        return Registration.MC_RECIPE_SERIALIZER.get();
+    }
 
-   public @NotNull ItemStack assemble(@NotNull CraftingContainer container, @NotNull RegistryAccess registryAccess) {
-      ItemStack stack = this.getResultItem(registryAccess).copy();
-      Item item2 = stack.getItem();
-      if (item2 instanceof MiningSkillCardItem item) {
-         NonNullList<ItemStack> inputs = NonNullList.create();
+    @Override
+    public @NotNull String getGroup() {
+        return this.group;
+    }
 
-         for (int i = 0; i < container.getContainerSize(); ++i) {
-            if (!container.getItem(i).isEmpty() && !(container.getItem(i).getItem() instanceof MiningSkillCardItem)) {
-               inputs.add(container.getItem(i));
-            }
-         }
+    @Override
+    public @NotNull CraftingBookCategory category() {
+        return this.category;
+    }
 
-         if (!inputs.isEmpty()) {
-            item.getData(stack).setDisplayItem(inputs.get(0)).save();
-         }
-      }
+    @Override
+    public @NotNull ItemStack getResultItem(RegistryAccess registries) {
+        return this.result;
+    }
 
-      return stack;
-   }
+    public @NotNull ItemStack getResultItem() {
+        return this.result.copy();
+    }
 
-   public boolean canCraftInDimensions(int width, int height) {
-      return width * height >= this.ingredients.size();
-   }
+    @Override
+    public @NotNull NonNullList<Ingredient> getIngredients() {
+        return MCIngredient.toNormal(this.ingredients);
+    }
 
-   public CraftingBookCategory getCategory() {
-      return this.category;
-   }
+    public @NotNull NonNullList<MCIngredient> getMCIngredients() {
+        return ingredients;
+    }
 
-   public @NotNull ItemStack getResultItem(@NotNull RegistryAccess registryAccess) {
-      return this.result;
-   }
+    @Override
+    public boolean matches(CraftingContainer input, @NotNull Level level) {
+        // 1.20.1 has no CraftingInput: the non-empty stacks of the grid.
+        List<ItemStack> stacks = input.getItems().stream().filter(stack -> !stack.isEmpty()).toList();
+        if (stacks.size() != this.ingredients.size()) {
+            return false;
+        } else if (stacks.size() == 1 && this.ingredients.size() == 1) {
+            return this.ingredients.get(0).test(stacks.get(0));
+        } else {
+            StackedContents contents = new StackedContents();
+            stacks.forEach(stack -> contents.accountStack(stack, 1));
+            return contents.canCraft(this, null);
+        }
+    }
 
-   public @NotNull ResourceLocation getId() {
-      return this.id;
-   }
+    @Override
+    public @NotNull ItemStack assemble(CraftingContainer input, RegistryAccess registries) {
+        ItemStack stack = this.result.copy();
+        if (stack.getItem() instanceof MiningSkillCardItem item) {
+            MiningSkillCardData data = item.getData(stack);
+            // Component only: this also runs for the crafting preview. The card is stored (and rolls its challenges)
+            // once the player carries it.
+            data.writeComponent();
+        }
+        return stack;
+    }
 
-   public @NotNull String getGroup() {
-      return this.group;
-   }
+    public static class Serializer implements RecipeSerializer<MCRecipe> {
+        public static final Serializer INSTANCE = new Serializer();
 
-   public @NotNull NonNullList<MCIngredient> getMCIngredients() {
-      return this.ingredients;
-   }
+        public static final MapCodec<MCRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                Codec.STRING.optionalFieldOf("group", "").forGetter(MCRecipe::getGroup),
+                CraftingBookCategory.CODEC.optionalFieldOf("category", CraftingBookCategory.MISC).forGetter(MCRecipe::category),
+                RESULT_CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
+                MCIngredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").flatXmap(list -> {
+                    MCIngredient[] ingredients = list.stream().filter(ingredient -> !ingredient.isEmpty()).toArray(MCIngredient[]::new);
+                    if (ingredients.length == 0) {
+                        return DataResult.error(() -> "No ingredients for MCRecipe");
+                    } else {
+                        return ingredients.length > 9
+                                ? DataResult.error(() -> "Too many ingredients for MCRecipe")
+                                : DataResult.success(NonNullList.of(MCIngredient.EMPTY, ingredients));
+                    }
+                }, DataResult::success).forGetter(MCRecipe::getMCIngredients)
+        ).apply(instance, MCRecipe::new));
 
-   public @NotNull RecipeSerializer<?> getSerializer() {
-      return Registration.MC_RECIPE_SERIALIZER.get();
-   }
+        public static final StreamCodec<FriendlyByteBuf, MCRecipe> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8, MCRecipe::getGroup,
+                ByteBufCodecs.idMapper(id -> CraftingBookCategory.values()[id], Enum::ordinal), MCRecipe::category,
+                ByteBufCodecs.ITEM_STACK, recipe -> recipe.result,
+                MCIngredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.collection(NonNullList::createWithCapacity)), MCRecipe::getMCIngredients,
+                MCRecipe::new
+        );
 
-   public static class Serializer implements RecipeSerializer<MCRecipe> {
-      public static final ResourceLocation NAME = FTBUltimineAddition.id("mc_recipe");
+        // 1.20.1 serializers read JSON and the network themselves: through the codecs above.
+        @Override
+        public @NotNull MCRecipe fromJson(@NotNull ResourceLocation id, @NotNull JsonObject json) {
+            return CODEC.codec().parse(JsonOps.INSTANCE, json).getOrThrow(false, error -> {}).withId(id);
+        }
 
-      public @NotNull MCRecipe fromJson(@NotNull ResourceLocation recipeId, @NotNull JsonObject json) {
-         String group = GsonHelper.getAsString(json, "group", "");
-         CraftingBookCategory craftingBookCategory = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, "category", null), CraftingBookCategory.MISC);
-         NonNullList<MCIngredient> nonnulllist = itemsFromJson(GsonHelper.getAsJsonArray(json, "ingredients"));
-         if (nonnulllist.isEmpty()) {
-            throw new JsonParseException("No ingredients for shapeless recipe");
-         } else {
-            ItemStack stack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, "result"));
-            return new MCRecipe(recipeId, group, craftingBookCategory, stack, nonnulllist);
-         }
-      }
+        @Override
+        public @NotNull MCRecipe fromNetwork(@NotNull ResourceLocation id, @NotNull FriendlyByteBuf buf) {
+            return STREAM_CODEC.decode(buf).withId(id);
+        }
 
-      private static NonNullList<MCIngredient> itemsFromJson(JsonArray pIngredientArray) {
-         NonNullList<MCIngredient> nonnulllist = NonNullList.create();
-
-         for (int i = 0; i < pIngredientArray.size(); ++i) {
-            MCIngredient ingredient = MCIngredient.fromJson(pIngredientArray.get(i));
-            nonnulllist.add(ingredient);
-         }
-
-         return nonnulllist;
-      }
-
-      public @NotNull MCRecipe fromNetwork(@NotNull ResourceLocation pRecipeId, FriendlyByteBuf buffer) {
-         String group = buffer.readUtf();
-         CraftingBookCategory craftingBookCategory = buffer.readEnum(CraftingBookCategory.class);
-         int i = buffer.readVarInt();
-         NonNullList<MCIngredient> nonnulllist = NonNullList.withSize(i, MCIngredient.EMPTY);
-         nonnulllist.replaceAll((ignored) -> MCIngredient.fromNetwork(buffer));
-         ItemStack stack = buffer.readItem();
-         return new MCRecipe(pRecipeId, group, craftingBookCategory, stack, nonnulllist);
-      }
-
-      public void toNetwork(FriendlyByteBuf buffer, MCRecipe recipe) {
-         buffer.writeUtf(recipe.getGroup());
-         buffer.writeEnum(recipe.category);
-         buffer.writeVarInt(recipe.getIngredients().size());
-
-         for (MCIngredient ingredient : recipe.getMCIngredients()) {
-            ingredient.toNetwork(buffer);
-         }
-
-         buffer.writeItem(recipe.result);
-      }
-   }
+        @Override
+        public void toNetwork(@NotNull FriendlyByteBuf buf, @NotNull MCRecipe recipe) {
+            STREAM_CODEC.encode(buf, recipe);
+        }
+    }
 }

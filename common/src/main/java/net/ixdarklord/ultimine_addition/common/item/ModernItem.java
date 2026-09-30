@@ -1,13 +1,14 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.coolcatlib.api.item.ComponentItem;
-import net.minecraft.world.item.Item;
+
+import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 
 public class ModernItem extends ComponentItem {
-    public ModernItem(Item.Properties properties, ComponentItem.ComponentType componentType) {
+    public ModernItem(Properties properties, ComponentType componentType) {
         super(properties, componentType);
     }
 
+    @Override
     public boolean appendToName() {
         return true;
     }

@@ -7,18 +7,31 @@ import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.concurrent.CompletableFuture;
 
 public class BlockTagGenerator extends FabricTagProvider.BlockTagProvider {
+
     public BlockTagGenerator(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
     }
 
-    protected void addTags(HolderLookup.Provider provider) {
-        this.getOrCreateTagBuilder(ModBlockTags.DENY_IS_PLACED_BY_ENTITY).forceAddTag(ConventionalBlockTags.CHESTS).forceAddTag(BlockTags.BEDS).add(new Block[]{Blocks.SPONGE, Blocks.WET_SPONGE}).add(new Block[]{Blocks.MOSS_BLOCK, Blocks.MOSS_CARPET}).add(Blocks.HAY_BLOCK).add(Blocks.CRAFTING_TABLE).add(Blocks.BARREL).add(Blocks.LADDER).add(Blocks.COMPOSTER).add(Blocks.BOOKSHELF);
+    @Override
+    protected void addTags(HolderLookup.Provider arg) {
+        this.getOrCreateTagBuilder(ModBlockTags.DENY_IS_PLACED_BY_ENTITY)
+                .forceAddTag(ConventionalBlockTags.CHESTS)
+                .forceAddTag(BlockTags.BEDS)
+                .add(Blocks.SPONGE, Blocks.WET_SPONGE)
+                .add(Blocks.MOSS_BLOCK, Blocks.MOSS_CARPET)
+                .add(Blocks.HAY_BLOCK)
+                .add(Blocks.CRAFTING_TABLE)
+                .add(Blocks.BARREL)
+                .add(Blocks.LADDER)
+                .add(Blocks.COMPOSTER)
+                .add(Blocks.BOOKSHELF);
+
+        // Not conventional tags yet on 1.20.1's Fabric API (see PlatformTagsImpl).
         this.getOrCreateTagBuilder(PlatformTags.get().STONES()).add(Blocks.STONE, Blocks.ANDESITE, Blocks.DIORITE, Blocks.GRANITE, Blocks.DEEPSLATE);
         this.getOrCreateTagBuilder(PlatformTags.get().COBBLESTONES()).add(Blocks.COBBLESTONE, Blocks.COBBLED_DEEPSLATE, Blocks.MOSSY_COBBLESTONE);
         this.getOrCreateTagBuilder(PlatformTags.get().OBSIDIAN()).add(Blocks.OBSIDIAN, Blocks.CRYING_OBSIDIAN);

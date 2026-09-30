@@ -1,0 +1,41 @@
+{
+  "type": "ultimine_addition:dyed_skills_record",
+  "category": "misc",
+  "color": "light_gray",
+  "conditions": [
+    {
+      "type": "ultimine_addition:legacy_mode",
+      "value": false
+    }
+  ],
+  "group": "ultimine_addition",
+  "key": {
+    "D": {
+      "tag": "forge:dyes/light_gray"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "M": {
+      "item": "ultimine_addition:mining_skill_card_empty"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "W": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "NIN",
+    "PMP",
+    "WDW"
+  ],
+  "result": {
+    "item": "ultimine_addition:skills_record"
+  },
+  "show_notification": true
+}

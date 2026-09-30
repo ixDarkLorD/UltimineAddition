@@ -1,21 +1,24 @@
 package net.ixdarklord.ultimine_addition.core.forge;
 
-import dev.architectury.platform.Platform;
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.integration.curios.CuriosIntegration;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public final class ServicePlatformSlotAPIImpl implements ServicePlatform.SlotAPI {
+    @Override
     public String getAPIName() {
         return "curios";
     }
 
+    @Override
     public boolean isModLoaded() {
-        return Platform.isModLoaded(this.getAPIName());
+        return Platform.isModLoaded(getAPIName());
     }
 
+    @Override
     public ItemStack getSkillsRecordItem(Player player) {
-        return CuriosIntegration.getItem(player);
+        return CuriosIntegration.getSkillsRecord(player);
     }
 }

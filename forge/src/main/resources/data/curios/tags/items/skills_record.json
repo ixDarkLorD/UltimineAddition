@@ -1,8 +1,6 @@
 {
   "replace": false,
   "values": [
-    {
-      "id": "ultimine_addition:skills_record"
-    }
+    "ultimine_addition:skills_record"
   ]
 }

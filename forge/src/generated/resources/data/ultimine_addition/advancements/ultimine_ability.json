@@ -3,7 +3,7 @@
   "criteria": {
     "has_ultimine_ability": {
       "conditions": {},
-      "trigger": "ultimine_addition:obtain_ultimine"
+      "trigger": "ultimine_addition:ultimine_obtain"
     }
   },
   "display": {

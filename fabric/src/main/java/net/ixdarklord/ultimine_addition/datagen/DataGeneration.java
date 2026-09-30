@@ -1,18 +1,20 @@
 package net.ixdarklord.ultimine_addition.datagen;
 
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.ixdarklord.ultimine_addition.datagen.model.ItemModelDataProvider;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.ixdarklord.coolcatlib.api.datagen.FabricLanguageWrapper;
+import net.ixdarklord.coolcatcore.api.datagen.FabricLanguageWrapper;
 import net.ixdarklord.ultimine_addition.datagen.advancement.AdvancementGenerator;
 import net.ixdarklord.ultimine_addition.datagen.challenge.ChallengeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.language.LanguageGenerator;
-import net.ixdarklord.ultimine_addition.datagen.model.ItemModelGenerator;
 import net.ixdarklord.ultimine_addition.datagen.particle.ParticleGenerator;
 import net.ixdarklord.ultimine_addition.datagen.recipe.RecipeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.BlockTagGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.ItemTagGenerator;
 
 public class DataGeneration implements DataGeneratorEntrypoint {
+    @Override
     public void onInitializeDataGenerator(FabricDataGenerator generator) {
         FabricDataGenerator.Pack pack = generator.createPack();
         pack.addProvider(ItemTagGenerator::new);
@@ -20,8 +22,9 @@ public class DataGeneration implements DataGeneratorEntrypoint {
         pack.addProvider(AdvancementGenerator::new);
         pack.addProvider(ChallengeGenerator::new);
         pack.addProvider(RecipeGenerator::new);
-        pack.addProvider(ItemModelGenerator::new);
-        pack.addProvider((output, registriesFuture) -> new ParticleGenerator(output));
-        pack.addProvider((output, registriesFuture) -> new FabricLanguageWrapper(output, "en_us", new LanguageGenerator()));
+        pack.addProvider((FabricDataOutput output) -> new ItemModelDataProvider(output));
+        pack.addProvider((FabricDataOutput output) -> new ParticleGenerator(output));
+        pack.addProvider((FabricDataOutput output) ->
+                new FabricLanguageWrapper(output, "en_us", new LanguageGenerator()));
     }
 }

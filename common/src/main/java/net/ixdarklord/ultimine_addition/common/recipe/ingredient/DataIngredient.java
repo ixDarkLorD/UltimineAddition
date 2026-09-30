@@ -1,258 +1,223 @@
 package net.ixdarklord.ultimine_addition.common.recipe.ingredient;
 
+import net.minecraft.world.item.Items;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import com.google.common.collect.Lists;
-import com.google.gson.*;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntComparators;
-import it.unimi.dsi.fastutil.ints.IntList;
-import net.ixdarklord.ultimine_addition.core.Registration;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.ixdarklord.coolcatcore.api.network.codec.ByteBufCodecs;
+import net.ixdarklord.coolcatcore.api.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public final class DataIngredient implements Predicate<ItemStack> {
-   public static final DataIngredient EMPTY = new DataIngredient(Stream.empty());
-   private final Value[] values;
-   private @Nullable ItemStack[] itemStacks;
-   private int amount;
-   private @Nullable IntList stackingIds;
+    public static final DataIngredient EMPTY = new DataIngredient(Stream.empty());
+    public static final Codec<DataIngredient> CODEC;
+    public static final Codec<DataIngredient> CODEC_NONEMPTY;
+    public static final StreamCodec<FriendlyByteBuf, DataIngredient> CONTENTS_STREAM_CODEC;
 
-   private DataIngredient(Stream<? extends Value> stream) {
-      this.values = stream.toArray((x$0) -> new Value[x$0]);
-   }
+    private final Value[] values;
+    @Nullable
+    private ItemStack[] itemStacks;
+    private int amount;
 
-   public ItemStack[] getItems() {
-      this.dissolve();
-      return this.itemStacks;
-   }
+    private DataIngredient(Stream<? extends DataIngredient.Value> stream) {
+        this.values = stream.toArray(DataIngredient.Value[]::new);
+    }
 
-   public int getAmount() {
-      this.dissolve();
-      return this.amount;
-   }
+    private DataIngredient(DataIngredient.Value[] values) {
+        this.values = values;
+    }
 
-   private void dissolve() {
-      if (this.itemStacks == null) {
-         this.itemStacks = Arrays.stream(this.values).flatMap((value) -> value.getItems().stream()).distinct().toArray((x$0) -> new ItemStack[x$0]);
-      }
+    public ItemStack[] getItems() {
+        this.dissolve();
+        return this.itemStacks;
+    }
 
-      this.amount = Arrays.stream(this.values).map(Value::getAmount).toList().get(0);
-   }
+    public int getAmount() {
+        this.dissolve();
+        return this.amount;
+    }
 
-   public boolean test(@Nullable ItemStack stack) {
-      if (stack == null) {
-         return false;
-      } else {
-         this.dissolve();
-         if (this.itemStacks.length == 0) {
-            return stack.isEmpty();
-         } else {
-            ItemStack[] stacks = this.itemStacks;
+    private void dissolve() {
+        if (this.itemStacks == null) {
+            this.itemStacks = Arrays.stream(this.values).flatMap((value) ->
+                    value.getItems().stream()).distinct().toArray(ItemStack[]::new);
+        }
+        this.amount = Arrays.stream(this.values).map(Value::getAmount).toList().get(0);
 
-            for (ItemStack itemStack : stacks) {
-               if (itemStack.is(stack.getItem())) {
-                  return true;
-               }
+    }
+
+    public boolean test(@Nullable ItemStack stack) {
+        if (stack == null) return false;
+        this.dissolve();
+        if (this.itemStacks.length == 0) return stack.isEmpty();
+
+        ItemStack[] stacks = this.itemStacks;
+        for (ItemStack itemStack : stacks) {
+            if (itemStack.is(stack.getItem())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public boolean isEmpty() {
+        return this.values.length == 0 && (this.itemStacks == null || this.itemStacks.length == 0);
+    }
+
+    private static DataIngredient fromValues(Stream<? extends Value> stream) {
+        DataIngredient DataIngredient = new DataIngredient(stream);
+        return DataIngredient.values.length == 0 ? EMPTY : DataIngredient;
+    }
+
+    public static DataIngredient of() {
+        return EMPTY;
+    }
+
+    public static DataIngredient of(int amount, ItemLike... items) {
+        // Built from items (not stacks): item components aren't bound yet during datagen.
+        return fromValues(Arrays.stream(items).map(ItemLike::asItem).filter(item -> item != Items.AIR)
+                .map(item -> new ItemValue(item, amount)));
+    }
+
+    public static DataIngredient of(int amount, ItemStack... stacks) {
+        return of(amount, Arrays.stream(stacks));
+    }
+
+    public static DataIngredient of(int amount, Stream<ItemStack> stacks) {
+        return fromValues(stacks.filter((itemStack) -> !itemStack.isEmpty()).map(stack -> new ItemValue(stack.getItem(), amount)));
+    }
+
+    public static DataIngredient of(TagKey<Item> tag, int amount) {
+        return fromValues(Stream.of(new TagValue(tag, amount)));
+    }
+
+    /** Display stacks for each ingredient, tagged with the amount it adds (in their NBT, as "amount"). */
+    public static List<ItemStack> toDisplayStacks(NonNullList<DataIngredient> inputs) {
+        return inputs.stream().flatMap(ingredient -> Arrays.stream(ingredient.getItems()).map(stack -> {
+            ItemStack copy = stack.copy();
+            copy.getOrCreateTag().putInt("amount", ingredient.getAmount());
+            return copy;
+        })).toList();
+    }
+
+    private static Codec<DataIngredient> codec(boolean allowEmpty) {
+        Codec<DataIngredient.Value[]> codec = Codec.list(DataIngredient.Value.CODEC)
+                .comapFlatMap((list) -> !allowEmpty && list.isEmpty()
+                        ? DataResult.error(() -> "Item array cannot be empty, at least one item must be defined")
+                        : DataResult.success(list.toArray(new DataIngredient.Value[0])), List::of);
+
+        return Codec.either(codec, DataIngredient.Value.CODEC)
+                .flatComapMap((either) -> either.map(DataIngredient::new, (value) -> new DataIngredient(new DataIngredient.Value[]{value})),
+                        (ingredient) -> {
+                            if (ingredient.values.length == 1)
+                                return DataResult.success(Either.right(ingredient.values[0]));
+                            else return ingredient.values.length == 0 && !allowEmpty
+                                    ? DataResult.error(() -> "Item array cannot be empty, at least one item must be defined")
+                                    : DataResult.success(Either.left(ingredient.values));
+                        }
+                );
+    }
+
+    static {
+        CONTENTS_STREAM_CODEC = new StreamCodec<>() {
+            @Override
+            public @NotNull DataIngredient decode(FriendlyByteBuf buf) {
+                return DataIngredient.of(
+                        ByteBufCodecs.INT.decode(buf),
+                        ByteBufCodecs.ITEM_STACK.apply(ByteBufCodecs.list()).decode(buf).stream());
             }
 
-            return false;
-         }
-      }
-   }
+            @Override
+            public void encode(FriendlyByteBuf buf, DataIngredient ingredient) {
+                ByteBufCodecs.INT.encode(buf, ingredient.getAmount());
+                ByteBufCodecs.ITEM_STACK.apply(ByteBufCodecs.list()).encode(buf, Arrays.stream(ingredient.getItems()).toList());
+            }
+        };
 
-   public IntList getStackingIds() {
-      if (this.stackingIds == null) {
-         this.dissolve();
-         this.stackingIds = new IntArrayList(this.itemStacks.length);
-         ItemStack[] itemStack2 = this.itemStacks;
+        CODEC = codec(true);
 
-         for (ItemStack itemStack : itemStack2) {
-            this.stackingIds.add(StackedContents.getStackingIndex(itemStack));
-         }
+        CODEC_NONEMPTY = codec(false);
+    }
 
-         this.stackingIds.sort(IntComparators.NATURAL_COMPARATOR);
-      }
+    interface Value {
+        Codec<DataIngredient.Value> CODEC = Codec.either(DataIngredient.ItemValue.CODEC, DataIngredient.TagValue.CODEC).xmap(either -> either.map(itemValue -> itemValue, tagValue -> tagValue), value -> {
+            if (value instanceof DataIngredient.ItemValue itemValue) {
+                return Either.left(itemValue);
+            } else if (value instanceof DataIngredient.TagValue tagValue) {
+                return Either.right(tagValue);
+            } else throw new UnsupportedOperationException("This is neither an item value nor a tag value.");
+        });
 
-      return this.stackingIds;
-   }
+        Collection<ItemStack> getItems();
+        int getAmount();
+    }
+    private record TagValue(TagKey<Item> tag, int amount) implements Value {
+        static final Codec<TagValue> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                TagKey.codec(Registries.ITEM).fieldOf("tag").forGetter(TagValue::tag),
+                Codec.INT.optionalFieldOf("increment_amount", 0).forGetter(TagValue::getAmount)
+        ).apply(instance, TagValue::new));
 
-   public void toNetwork(FriendlyByteBuf buffer) {
-      this.dissolve();
-      buffer.writeInt(this.amount);
-      buffer.writeCollection(Arrays.asList(this.itemStacks), FriendlyByteBuf::writeItem);
-   }
-
-   public JsonElement toJson() {
-      if (this.values.length == 1) {
-         return this.values[0].serialize();
-      } else {
-         JsonArray jsonArray = new JsonArray();
-
-         for (Value value : this.values) {
-            jsonArray.add(value.serialize());
-         }
-
-         return jsonArray;
-      }
-   }
-
-   public boolean isEmpty() {
-      return this.values.length == 0 && (this.itemStacks == null || this.itemStacks.length == 0) && (this.stackingIds == null || this.stackingIds.isEmpty());
-   }
-
-   private static DataIngredient fromValues(Stream<? extends Value> stream) {
-      DataIngredient DataIngredient = new DataIngredient(stream);
-      return DataIngredient.values.length == 0 ? EMPTY : DataIngredient;
-   }
-
-   public static DataIngredient of() {
-      return EMPTY;
-   }
-
-   public static DataIngredient of(int amount, ItemLike... items) {
-      return of(amount, Arrays.stream(items).map(ItemStack::new));
-   }
-
-   public static DataIngredient of(int amount, ItemStack... stacks) {
-      return of(amount, Arrays.stream(stacks));
-   }
-
-   public static DataIngredient of(int amount, Stream<ItemStack> stacks) {
-      return fromValues(stacks.filter((itemStack) -> !itemStack.isEmpty()).map((stack) -> new ItemValue(stack, amount)));
-   }
-
-   public static DataIngredient of(TagKey<Item> tag, int amount) {
-      return fromValues(Stream.of(new TagValue(tag, amount)));
-   }
-
-   public static NonNullList<Ingredient> toNormal(NonNullList<DataIngredient> inputs) {
-      NonNullList<Ingredient> result = NonNullList.create();
-      result.addAll(inputs.stream().map((ingredient) -> {
-         ItemStack[] items = Arrays.stream(ingredient.getItems()).peek((stack) -> stack.getOrCreateTag().putInt("amount", ingredient.getAmount())).toArray((x$0) -> new ItemStack[x$0]);
-         return Ingredient.of(items);
-      }).toList());
-      return result;
-   }
-
-   public static DataIngredient fromNetwork(FriendlyByteBuf buffer) {
-      int amount = buffer.readInt();
-      return fromValues(buffer.readList(FriendlyByteBuf::readItem).stream().map((stack) -> new ItemValue(stack, amount)));
-   }
-
-   public static DataIngredient fromJson(@Nullable JsonElement json) {
-      if (json != null && !json.isJsonNull()) {
-         if (json.isJsonObject()) {
-            return fromValues(Stream.of(valueFromJson(json.getAsJsonObject())));
-         } else if (json.isJsonArray()) {
-            JsonArray jsonArray = json.getAsJsonArray();
-            if (jsonArray.isEmpty()) {
-               throw new JsonSyntaxException("Item array cannot be empty, at least one item must be defined");
+        @Override
+        public boolean equals(Object object) {
+            if (object instanceof TagValue tagValue) {
+                return tagValue.tag.location().equals(this.tag.location());
             } else {
-               return fromValues(StreamSupport.stream(jsonArray.spliterator(), false).map((jsonElement) -> valueFromJson(GsonHelper.convertToJsonObject(jsonElement, "item"))));
+                return false;
             }
-         } else {
-            throw new JsonSyntaxException("Expected item to be object or array of objects");
-         }
-      } else {
-         throw new JsonSyntaxException("Item cannot be null");
-      }
-   }
+        }
 
-   private static Value valueFromJson(JsonObject json) {
-      if (json.has("item") && json.has("tag")) {
-         throw new JsonParseException("An DataIngredient entry is either a tag or an item, not both");
-      } else if (json.has("item")) {
-         Item item = ShapedRecipe.itemFromJson(json);
-         int amount = GsonHelper.getAsInt(json, "amount");
-         return new ItemValue(new ItemStack(item), amount);
-      } else if (json.has("tag")) {
-         ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
-         TagKey<Item> tagKey = TagKey.create(Registries.ITEM, resourceLocation);
-         int amount = GsonHelper.getAsInt(json, "amount");
-         return new TagValue(tagKey, amount);
-      } else {
-         throw new JsonParseException("An DataIngredient entry needs either a tag or an item");
-      }
-   }
+        public Collection<ItemStack> getItems() {
+            List<ItemStack> list = Lists.newArrayList();
+            for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
+                list.add(new ItemStack(holder.value()));
+            }
+            return list;
+        }
 
-   static class TagValue implements Value {
-      private final TagKey<Item> tag;
-      private final int amount;
+        @Override
+        public int getAmount() {
+            return this.amount;
+        }
 
-      TagValue(TagKey<Item> tagKey, int amount) {
-         this.tag = tagKey;
-         this.amount = amount;
-      }
+        @Override
+        public TagKey<Item> tag() {
+            return this.tag;
+        }
+    }
+    private record ItemValue(Item item, int amount) implements Value {
+        static final Codec<ItemValue> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(ItemValue::item),
+                Codec.INT.optionalFieldOf("increment_amount", 0).forGetter(ItemValue::getAmount)
+        ).apply(instance, ItemValue::new));
 
-      public Collection<ItemStack> getItems() {
-         List<ItemStack> list = Lists.newArrayList();
+        public Collection<ItemStack> getItems() {
+            return Collections.singleton(new ItemStack(this.item));
+        }
 
-         for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
-            list.add(new ItemStack(holder));
-         }
-
-         return list;
-      }
-
-      public int getAmount() {
-         return this.amount;
-      }
-
-      public JsonObject serialize() {
-         JsonObject jsonObject = new JsonObject();
-         jsonObject.addProperty("tag", this.tag.location().toString());
-         jsonObject.addProperty("amount", this.getAmount());
-         return jsonObject;
-      }
-   }
-
-   static class ItemValue implements Value {
-      private final ItemStack stack;
-      private final int amount;
-
-      ItemValue(ItemStack stack, int amount) {
-         this.stack = stack;
-         this.amount = amount;
-      }
-
-      public Collection<ItemStack> getItems() {
-         return Collections.singleton(this.stack);
-      }
-
-      public int getAmount() {
-         return this.amount;
-      }
-
-      public JsonObject serialize() {
-         JsonObject jsonObject = new JsonObject();
-         jsonObject.addProperty("item", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.stack.getItem())).toString());
-         jsonObject.addProperty("amount", this.getAmount());
-         return jsonObject;
-      }
-   }
-
-   interface Value {
-      Collection<ItemStack> getItems();
-
-      int getAmount();
-
-      JsonObject serialize();
-   }
+        public int getAmount() {
+            return this.amount;
+        }
+    }
 }

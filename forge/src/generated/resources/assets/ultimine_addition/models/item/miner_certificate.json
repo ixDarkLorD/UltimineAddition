@@ -4,7 +4,7 @@
     {
       "model": "ultimine_addition:item/miner_certificate_opened",
       "predicate": {
-        "ultimine_addition:opened": 1.0
+        "ultimine_addition:certificate_opened": 1.0
       }
     }
   ],

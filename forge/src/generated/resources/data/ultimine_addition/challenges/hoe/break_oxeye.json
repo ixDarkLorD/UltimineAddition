@@ -6,8 +6,8 @@
   "for_card_tier": 2,
   "for_card_type": "hoe",
   "required_amount": {
-    "max": 64,
-    "min": 16
+    "max": 32,
+    "min": 8
   },
   "targeted_blocks": [
     "minecraft:oxeye_daisy"

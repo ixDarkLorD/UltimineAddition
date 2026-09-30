@@ -10,16 +10,16 @@
   "group": "ultimine_addition",
   "ingredients": [
     {
-      "amount": 50,
+      "increment_amount": 50,
       "tag": "ultimine_addition:more_valuable_pigment"
     },
     {
-      "amount": 10,
+      "increment_amount": 10,
       "tag": "ultimine_addition:less_valuable_pigment"
     }
   ],
   "result": {
-    "item": "ultimine_addition:pen",
-    "storage_name": "ink_chamber"
-  }
+    "item": "ultimine_addition:pen"
+  },
+  "storage_name": "ink_chamber"
 }

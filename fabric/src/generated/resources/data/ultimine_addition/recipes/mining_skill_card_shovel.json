@@ -5,8 +5,7 @@
       "value": false
     }
   ],
-  "type": "ultimine_addition:mc_recipe",
-  "category": "misc",
+  "type": "ultimine_addition:mining_card_recipe",
   "group": "ultimine_addition",
   "ingredients": [
     {

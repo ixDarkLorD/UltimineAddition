@@ -1,7 +1,5 @@
 package net.ixdarklord.ultimine_addition.client.gui.layouts;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.layouts.AbstractLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -10,7 +8,7 @@ import net.minecraft.client.gui.layouts.LayoutSettings;
 
 import java.util.function.Consumer;
 
-@Environment(EnvType.CLIENT)
+// 1.20.1's LinearLayout has no spacing or vertical()/horizontal() factories: this is the newer one, on GridLayout.
 public class LinearLayout extends AbstractLayout {
     private final GridLayout wrapped;
     private final Orientation orientation;
@@ -92,7 +90,6 @@ public class LinearLayout extends AbstractLayout {
         return new LinearLayout(LinearLayout.Orientation.HORIZONTAL);
     }
 
-    @Environment(EnvType.CLIENT)
     public enum Orientation {
         HORIZONTAL,
         VERTICAL;

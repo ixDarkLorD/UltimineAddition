@@ -6,8 +6,8 @@
   "for_card_tier": 0,
   "for_card_type": "pickaxe",
   "required_amount": {
-    "max": 64,
-    "min": 25
+    "max": 32,
+    "min": 12
   },
   "targeted_blocks": [
     "minecraft:dripstone_block",

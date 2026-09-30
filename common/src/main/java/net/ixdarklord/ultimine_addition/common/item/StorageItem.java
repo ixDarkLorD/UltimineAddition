@@ -1,41 +1,38 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.coolcatlib.api.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.common.data.item.StorageItemData;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 public abstract class StorageItem extends DataAbstractItem<StorageItemData> {
     protected final String storageName;
-    protected final int initialMaxCapacity;
-
-    public StorageItem(Item.Properties properties, String storageName, int initialMaxCapacity, ComponentItem.ComponentType componentType) {
+    protected final int maxCapacity;
+    public StorageItem(Properties properties, StorageItemData storageData, ComponentType componentType) {
         super(properties, componentType);
-        this.storageName = storageName;
-        this.initialMaxCapacity = initialMaxCapacity;
+        this.storageName = storageData.getStorageName();
+        this.maxCapacity = storageData.getMaxCapacity();
     }
 
-    public boolean isBarVisible(@NotNull ItemStack itemStack) {
-        StorageItemData data = this.getData(itemStack);
-        return data.isFull();
+    public int getMaxCapacity() {
+        return maxCapacity;
     }
 
-    public int getBarWidth(@NotNull ItemStack itemStack) {
-        StorageItemData data = this.getData(itemStack);
-        return Math.round((float) data.getCapacity() / (float) data.getMaxCapacity() * 13.0F);
+    @Override
+    public boolean isBarVisible(ItemStack itemStack) {
+        return !getData(itemStack).isFull();
+    }
+    @Override
+    public int getBarWidth(ItemStack itemStack) {
+        var data = getData(itemStack);
+        return Math.round((float) data.getCapacity() / data.getMaxCapacity() * 13.0F);
+    }
+    @Override
+    public int getBarColor(ItemStack itemStack) {
+        return Mth.hsvToRgb(Math.max(0.0F, (getBarWidth(itemStack) / 13.0F)) / 3.0F, 1.0F, 1.0F);
     }
 
-    public int getBarColor(@NotNull ItemStack itemStack) {
-        return Mth.hsvToRgb(Math.max(0.0F, (float) this.getBarWidth(itemStack) / 13.0F) / 3.0F, 1.0F, 1.0F);
-    }
-
-    public int getInitialMaxCapacity() {
-        return this.initialMaxCapacity;
-    }
-
+    @Override
     public StorageItemData getData(ItemStack stack) {
-        return StorageItemData.load(this.storageName, stack);
+        return StorageItemData.load(storageName, maxCapacity, stack);
     }
 }

@@ -6,8 +6,8 @@
   "for_card_tier": 1,
   "for_card_type": "pickaxe",
   "required_amount": {
-    "max": 128,
-    "min": 64
+    "max": 32,
+    "min": 16
   },
   "targeted_blocks": [
     "#forge:ores/lapis"

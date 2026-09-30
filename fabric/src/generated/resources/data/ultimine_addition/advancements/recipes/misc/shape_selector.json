@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_card_blueprint": {
+    "has_compass": {
       "conditions": {
         "items": [
           {
             "items": [
-              "ultimine_addition:card_blueprint"
+              "minecraft:compass"
             ]
           }
         ]
@@ -22,7 +22,7 @@
   },
   "requirements": [
     [
-      "has_card_blueprint",
+      "has_compass",
       "has_the_recipe"
     ]
   ],

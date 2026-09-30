@@ -1,283 +1,259 @@
 package net.ixdarklord.ultimine_addition.common.recipe.ingredient;
 
-import com.google.gson.*;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntComparators;
-import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.world.item.Items;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
+import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.ixdarklord.coolcatcore.api.network.codec.ByteBufCodecs;
+import net.ixdarklord.coolcatcore.api.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public final class MCIngredient implements Predicate<ItemStack> {
-   public static final MCIngredient EMPTY = new MCIngredient(Stream.empty());
-   private final Value[] values;
-   private @Nullable ItemStack[] itemStacks;
-   private MiningSkillCardItem.Tier tier;
-   private @Nullable IntList stackingIds;
+    public static final MCIngredient EMPTY = new MCIngredient(Stream.empty());
+    public static final Codec<MCIngredient> CODEC;
+    public static final Codec<MCIngredient> CODEC_NONEMPTY;
+    public static final StreamCodec<FriendlyByteBuf, MCIngredient> CONTENTS_STREAM_CODEC;
 
-   private MCIngredient(Stream<? extends Value> stream) {
-      this.values = stream.toArray(Value[]::new);
-   }
+    private final Value[] values;
+    @Nullable
+    private ItemStack[] itemStacks;
+    private Optional<MiningSkillCardItem.Tier> tier;
 
-   public ItemStack[] getItems() {
-      this.dissolve();
-      return this.itemStacks;
-   }
+    private MCIngredient(Stream<? extends Value> stream) {
+        this.values = stream.toArray(Value[]::new);
+    }
 
-   public MiningSkillCardItem.Tier getTier() {
-      this.dissolve();
-      return this.tier;
-   }
+    private MCIngredient(Value[] values) {
+        this.values = values;
+    }
 
-   private void dissolve() {
-      if (this.itemStacks == null) {
-         this.itemStacks = Arrays.stream(this.values).flatMap((value) -> value.getItems().stream()).distinct().toArray(ItemStack[]::new);
-      }
+    public ItemStack[] getItems() {
+        this.dissolve();
+        return this.itemStacks;
+    }
 
-      this.tier = Arrays.stream(this.values).map(Value::tier).toList().get(0);
-   }
+    public Optional<MiningSkillCardItem.Tier> getTier() {
+        this.dissolve();
+        return this.tier;
+    }
 
-   public boolean test(@Nullable ItemStack stack) {
-      if (stack == null) {
-         return false;
-      } else {
-         this.dissolve();
-         if (this.itemStacks.length == 0) {
-            return stack.isEmpty();
-         } else {
-            ItemStack[] stacks = this.itemStacks;
+    private void dissolve() {
+        if (this.itemStacks == null) {
+            this.itemStacks = Arrays.stream(this.values).flatMap(value -> value.getItems().stream()).distinct().toArray(ItemStack[]::new);
+        }
+        this.tier = Arrays.stream(this.values).map(Value::getTier).toList().get(0);
+    }
 
-            for (ItemStack itemStack : stacks) {
-               if (itemStack.is(stack.getItem())) {
-                  if (this.tier == null) {
-                     return true;
-                  }
+    public boolean test(@Nullable ItemStack stack) {
+        if (stack == null) return false;
+        this.dissolve();
+        if (this.itemStacks.length == 0) return stack.isEmpty();
 
-                  if (itemStack.is(stack.getItem())) {
-                     MiningSkillCardData cardData = MiningSkillCardData.load(stack);
-                     return this.tier.equals(cardData.getTier());
-                  }
-               }
+        ItemStack[] stacks = this.itemStacks;
+        for (ItemStack itemStack : stacks) {
+            if (itemStack.is(stack.getItem())) {
+                if (this.tier.isPresent()) {
+                    var cardData = MiningSkillCardData.load(stack);
+                    return this.tier.get().equals(cardData.getTier());
+                } else return true;
             }
+        }
+        return false;
+    }
 
+
+    public boolean isEmpty() {
+        return this.values.length == 0;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof MCIngredient ingredient) {
+            return Arrays.equals(this.values, ingredient.values);
+        } else {
             return false;
-         }
-      }
-   }
+        }
+    }
 
-   public IntList getStackingIds() {
-      if (this.stackingIds == null) {
-         this.dissolve();
-         this.stackingIds = new IntArrayList(this.itemStacks.length);
-         ItemStack[] itemStack2 = this.itemStacks;
+    private static MCIngredient fromValues(Stream<? extends Value> stream) {
+        MCIngredient mcIngredient = new MCIngredient(stream);
+        return mcIngredient.values.length == 0 ? EMPTY : mcIngredient;
+    }
 
-         for (ItemStack itemStack : itemStack2) {
-            this.stackingIds.add(StackedContents.getStackingIndex(itemStack));
-         }
+    public static MCIngredient of() {
+        return EMPTY;
+    }
 
-         this.stackingIds.sort(IntComparators.NATURAL_COMPARATOR);
-      }
+    public static MCIngredient of(MiningSkillCardItem.Tier tier, ItemLike... items) {
+        // Built from items (not stacks): item components aren't bound yet during datagen.
+        return fromValues(Arrays.stream(items).map(ItemLike::asItem).filter(item -> item != Items.AIR)
+                .map(item -> new ItemValue(item, Optional.ofNullable(tier))));
+    }
 
-      return this.stackingIds;
-   }
+    public static MCIngredient of(MiningSkillCardItem.Tier tier, ItemStack... stacks) {
+        return of(tier, Arrays.stream(stacks));
+    }
 
-   public void toNetwork(FriendlyByteBuf buffer) {
-      this.dissolve();
-      buffer.writeBoolean(this.tier != null);
-      if (this.tier != null) {
-         buffer.writeInt(this.tier.getValue());
-      }
+    public static MCIngredient of(MiningSkillCardItem.Tier tier, Stream<ItemStack> stacks) {
+        return fromValues(stacks.filter(itemStack -> !itemStack.isEmpty()).map(stack -> new ItemValue(stack.getItem(), Optional.ofNullable(tier))));
+    }
 
-      buffer.writeCollection(Arrays.asList(this.itemStacks), FriendlyByteBuf::writeItem);
-   }
+    public static MCIngredient of(MiningSkillCardItem.Tier tier, TagKey<Item> tag) {
+        return fromValues(Stream.of(new TagValue(tag, Optional.ofNullable(tier))));
+    }
 
-   public JsonElement toJson() {
-      if (this.values.length == 1) {
-         return this.values[0].serialize();
-      } else {
-         JsonArray jsonArray = new JsonArray();
+    public static NonNullList<Ingredient> toNormal(NonNullList<MCIngredient> inputs) {
+        NonNullList<Ingredient> result = NonNullList.create();
 
-         for (Value value : this.values) {
-            jsonArray.add(value.serialize());
-         }
+        // Item Values
+        result.addAll(inputs.stream()
+                .filter(ingredient -> !Arrays.stream(ingredient.values)
+                        .filter(value -> value instanceof ItemValue).toList().isEmpty())
+                .map(ingredient -> Ingredient.of(Arrays.stream(ingredient.getItems()).map(ItemStack::getItem).toArray(Item[]::new)))
+                .toList()
+        );
 
-         return jsonArray;
-      }
-   }
+        // Tag Values
+        result.addAll(inputs.stream()
+                .map(ingredient -> Arrays.stream(ingredient.values)
+                        .filter(value -> value instanceof TagValue)
+                        .map(value -> ((TagValue) value).tag)
+                        .findFirst())
+                .flatMap(Optional::stream)
+                .map(Ingredient::of)
+                .toList()
+        );
+        return result;
+    }
 
-   public boolean isEmpty() {
-      return this.values.length == 0 && (this.itemStacks == null || this.itemStacks.length == 0) && (this.stackingIds == null || this.stackingIds.isEmpty());
-   }
+    private static Codec<MCIngredient> codec(boolean allowEmpty) {
+        Codec<Value[]> codec = Codec.list(Value.CODEC)
+                .comapFlatMap((list) -> !allowEmpty && list.isEmpty()
+                        ? DataResult.error(() -> "Item array cannot be empty, at least one item must be defined")
+                        : DataResult.success(list.toArray(new Value[0])), List::of);
 
-   private static MCIngredient fromValues(Stream<? extends Value> stream) {
-      MCIngredient DataIngredient = new MCIngredient(stream);
-      return DataIngredient.values.length == 0 ? EMPTY : DataIngredient;
-   }
+        return Codec.either(codec, Value.CODEC)
+                .flatComapMap((either) -> either.map(MCIngredient::new, (value) -> new MCIngredient(new Value[]{value})),
+                        (ingredient) -> {
+                            if (ingredient.values.length == 1)
+                                return DataResult.success(Either.right(ingredient.values[0]));
+                            else return ingredient.values.length == 0 && !allowEmpty
+                                    ? DataResult.error(() -> "Item array cannot be empty, at least one item must be defined")
+                                    : DataResult.success(Either.left(ingredient.values));
+                        }
+                );
+    }
 
-   public static MCIngredient of() {
-      return EMPTY;
-   }
-
-   public static MCIngredient of(MiningSkillCardItem.Tier tier, ItemLike... items) {
-      return of(tier, Arrays.stream(items).map(ItemStack::new));
-   }
-
-   public static MCIngredient of(MiningSkillCardItem.Tier tier, ItemStack... stacks) {
-      return of(tier, Arrays.stream(stacks));
-   }
-
-   public static MCIngredient of(MiningSkillCardItem.Tier tier, Stream<ItemStack> stacks) {
-      return fromValues(stacks.filter((itemStack) -> !itemStack.isEmpty()).map((stack) -> new ItemValue(stack, tier)));
-   }
-
-   public static MCIngredient of(MiningSkillCardItem.Tier tier, TagKey<Item> tag) {
-      return fromValues(Stream.of(new TagValue(tag, tier)));
-   }
-
-   public static NonNullList<Ingredient> toNormal(NonNullList<MCIngredient> inputs) {
-      NonNullList<Ingredient> result = NonNullList.create();
-      result.addAll(inputs.stream().filter((ingredient) -> !Arrays.stream(ingredient.values).filter((value) -> value instanceof ItemValue).toList().isEmpty()).map((ingredient) -> {
-         ItemStack[] items = Arrays.stream(ingredient.getItems()).peek((stack) -> {
-            Item item2 = stack.getItem();
-            if (item2 instanceof MiningSkillCardItem item) {
-               if (ingredient.getTier() != null) {
-                  item.getData(stack).setTier(ingredient.getTier()).save();
-               }
+    static {
+        CONTENTS_STREAM_CODEC = new StreamCodec<>() {
+            @Override
+            public @NotNull MCIngredient decode(FriendlyByteBuf buf) {
+                return MCIngredient.of(
+                        ByteBufCodecs.optional(MiningSkillCardItem.Tier.STREAM_CODEC).decode(buf).orElse(null),
+                        ByteBufCodecs.ITEM_STACK.apply(ByteBufCodecs.list()).decode(buf).stream());
             }
 
-         }).toArray(ItemStack[]::new);
-         return Ingredient.of(items);
-      }).toList());
-      result.addAll(inputs.stream().filter((ingredient) -> !Arrays.stream(ingredient.values).filter((value) -> value instanceof TagValue).toList().isEmpty()).map((ingredient) -> {
-         Stream<Ingredient.TagValue> tagValueStream = Arrays.stream(ingredient.values).filter((value) -> value instanceof TagValue).map((value) -> new Ingredient.TagValue(((TagValue) value).tag));
-         return Ingredient.fromValues(tagValueStream);
-      }).toList());
-      return result;
-   }
+            @Override
+            public void encode(FriendlyByteBuf buf, MCIngredient ingredient) {
+                ByteBufCodecs.optional(MiningSkillCardItem.Tier.STREAM_CODEC).encode(buf, ingredient.getTier());
+                ByteBufCodecs.ITEM_STACK.apply(ByteBufCodecs.list()).encode(buf, Arrays.stream(ingredient.getItems()).toList());
+            }
+        };
 
-   public static MCIngredient fromNetwork(FriendlyByteBuf buffer) {
-      MiningSkillCardItem.Tier tier = buffer.readBoolean() ? MiningSkillCardItem.Tier.fromInt(buffer.readInt()) : null;
-      return fromValues(buffer.readList(FriendlyByteBuf::readItem).stream().map((stack) -> new ItemValue(stack, tier)));
-   }
+        CODEC = codec(true);
 
-   public static MCIngredient fromJson(@Nullable JsonElement json) {
-      if (json != null && !json.isJsonNull()) {
-         if (json.isJsonObject()) {
-            return fromValues(Stream.of(valueFromJson(json.getAsJsonObject())));
-         } else if (json.isJsonArray()) {
-            JsonArray jsonArray = json.getAsJsonArray();
-            if (jsonArray.isEmpty()) {
-               throw new JsonSyntaxException("Item array cannot be empty, at least one item must be defined");
+        CODEC_NONEMPTY = codec(false);
+    }
+
+    private interface Value {
+        Codec<Value> CODEC = Codec.either(ItemValue.CODEC, TagValue.CODEC).xmap(either -> either.map(itemValue -> itemValue, tagValue -> tagValue), value -> {
+            if (value instanceof ItemValue itemValue) {
+                return Either.left(itemValue);
+            } else if (value instanceof TagValue tagValue) {
+                return Either.right(tagValue);
+            } else throw new UnsupportedOperationException("This is neither an item value nor a tag value.");
+        });
+
+        Collection<ItemStack> getItems();
+
+        Optional<MiningSkillCardItem.Tier> getTier();
+    }
+
+    private record TagValue(TagKey<Item> tag, Optional<MiningSkillCardItem.Tier> tier) implements Value {
+        static final Codec<TagValue> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                TagKey.codec(Registries.ITEM).fieldOf("tag").forGetter(TagValue::tag),
+                MiningSkillCardItem.Tier.CODEC.optionalFieldOf("card_tier").forGetter(TagValue::getTier)
+        ).apply(instance, TagValue::new));
+
+        @Override
+        public boolean equals(Object object) {
+            if (object instanceof TagValue tagValue) {
+                return tagValue.tag.location().equals(this.tag.location());
             } else {
-               return fromValues(StreamSupport.stream(jsonArray.spliterator(), false).map((jsonElement) -> valueFromJson(GsonHelper.convertToJsonObject(jsonElement, "item"))));
+                return false;
             }
-         } else {
-            throw new JsonSyntaxException("Expected item to be object or array of objects");
-         }
-      } else {
-         throw new JsonSyntaxException("Item cannot be null");
-      }
-   }
+        }
 
-   private static Value valueFromJson(JsonObject json) {
-      if (json.has("item") && json.has("tag")) {
-         throw new JsonParseException("An MCIngredient entry is either a tag or an item, not both");
-      } else if (json.has("item")) {
-         Item item = ShapedRecipe.itemFromJson(json);
-         MiningSkillCardItem.Tier tier = json.has("tier") ? MiningSkillCardItem.Tier.fromInt(GsonHelper.getAsInt(json, "tier")) : null;
-         return new ItemValue(new ItemStack(item), tier);
-      } else if (json.has("tag")) {
-         ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
-         TagKey<Item> tagKey = TagKey.create(Registries.ITEM, resourceLocation);
-         MiningSkillCardItem.Tier tier = json.has("tier") ? MiningSkillCardItem.Tier.fromInt(GsonHelper.getAsInt(json, "tier")) : null;
-         return new TagValue(tagKey, tier);
-      } else {
-         throw new JsonParseException("An MCIngredient entry needs either a tag or an item");
-      }
-   }
-
-   record TagValue(TagKey<Item> tag, MiningSkillCardItem.Tier tier) implements Value {
-
-      public Collection<ItemStack> getItems() {
-            List<ItemStack> list = new ArrayList<>();
-
-            for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
-               ItemStack stack = new ItemStack(holder);
-               if (this.tier != null && holder instanceof MiningSkillCardItem item) {
-                  item.getData(stack).setTier(this.tier).save();
-               }
-
-               list.add(stack);
+        public Collection<ItemStack> getItems() {
+            List<ItemStack> list = Lists.newArrayList();
+            for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
+                ItemStack stack = new ItemStack(item);
+                if (this.tier.isPresent() && stack.getItem() instanceof MiningSkillCardItem cardItem) {
+                    cardItem.getData(stack).setTier(this.tier.get()).writeComponent();
+                }
+                list.add(stack);
             }
-
             return list;
-      }
+        }
 
-      public JsonObject serialize() {
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("tag", this.tag.location().toString());
-         if (this.tier() != null) {
-            jsonObject.addProperty("tier", this.tier().getValue());
-         }
+        @Override
+        public Optional<MiningSkillCardItem.Tier> getTier() {
+            return this.tier;
+        }
 
-            return jsonObject;
-      }
-   }
+        @Override
+        public TagKey<Item> tag() {
+            return this.tag;
+        }
+    }
 
-   static class ItemValue implements Value {
-      private final ItemStack stack;
-      private final MiningSkillCardItem.Tier tier;
+    private record ItemValue(Item item, Optional<MiningSkillCardItem.Tier> tier) implements Value {
+        static final Codec<ItemValue> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(ItemValue::item),
+                MiningSkillCardItem.Tier.CODEC.optionalFieldOf("card_tier").forGetter(ItemValue::getTier)
+        ).apply(instance, ItemValue::new));
 
-      ItemValue(ItemStack stack, MiningSkillCardItem.@Nullable Tier tier) {
-         this.stack = stack;
-         this.tier = tier;
-      }
+        public Collection<ItemStack> getItems() {
+            ItemStack stack = new ItemStack(this.item);
+            if (this.tier.isPresent() && this.item instanceof MiningSkillCardItem cardItem) {
+                cardItem.getData(stack).setTier(this.tier.get()).writeComponent();
+            }
+            return Collections.singleton(stack);
+        }
 
-      public Collection<ItemStack> getItems() {
-         return Collections.singleton(this.stack);
-      }
-
-      public MiningSkillCardItem.@Nullable Tier tier() {
-         return this.tier;
-      }
-
-      public JsonObject serialize() {
-         JsonObject jsonObject = new JsonObject();
-         jsonObject.addProperty("item", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.stack.getItem())).toString());
-         MiningSkillCardItem.Tier tier = this.tier();
-         if (tier != null) {
-            jsonObject.addProperty("tier", tier.getValue());
-         }
-
-         return jsonObject;
-      }
-   }
-
-   interface Value {
-      Collection<ItemStack> getItems();
-
-      MiningSkillCardItem.Tier tier();
-
-      JsonObject serialize();
-   }
+        @Override
+        public Optional<MiningSkillCardItem.Tier> getTier() {
+            return this.tier;
+        }
+    }
 }

@@ -1,12 +1,7 @@
 package net.ixdarklord.ultimine_addition.core.forge;
 
-import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
-import net.ixdarklord.ultimine_addition.common.data.player.forge.PlayerUltimineCapabilityProvider;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
-import net.ixdarklord.ultimine_addition.network.PacketHandler;
-import net.ixdarklord.ultimine_addition.network.packets.PlayerAbilityPacket;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,42 +11,48 @@ import net.minecraftforge.common.ToolActions;
 import java.util.List;
 
 public final class ServicePlatformPlayersImpl implements ServicePlatform.Players {
-   public boolean isPlayerUltimineCapable(Player player) {
-      return player.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).map(PlayerAbilityData::getAbility).orElse(false);
-   }
 
-   public void setPlayerUltimineCapability(Player player, boolean state) {
-      player.getCapability(PlayerUltimineCapabilityProvider.CAPABILITY).ifPresent((capability) -> capability.setAbility(state));
-      if (player instanceof ServerPlayer serverPlayer) {
-         PacketHandler.sendToPlayer(new PlayerAbilityPacket(ServicePlatform.get().players().isPlayerUltimineCapable(serverPlayer)), serverPlayer);
-      }
+    @Override
+    public boolean isCorrectToolForBlock(ItemStack stack, BlockState state) {
+        return stack.isCorrectToolForDrops(state);
+    }
 
-   }
-
-   public boolean isCorrectToolForBlock(ItemStack stack, BlockState blockState) {
-      return stack.isCorrectToolForDrops(blockState);
-   }
-
-   public boolean isToolPaxel(ItemStack stack) {
-      if (!stack.is(PlatformTags.get().PAXELS()) && !stack.is(PlatformTags.get().TOOLS_PAXELS())) {
-         ToolAction PAXEL_DIG = ToolAction.get("paxel_dig");
-         if (stack.canPerformAction(PAXEL_DIG)) {
+    @Override
+    public boolean isToolPaxel(ItemStack stack) {
+        // Solution #1
+        // Lookup for paxel tag
+        if (stack.is(PlatformTags.get().PAXELS()) || stack.is(PlatformTags.get().TOOLS_PAXELS())) {
             return true;
-         } else {
-            for (ToolAction action : List.of(ToolActions.PICKAXE_DIG, ToolActions.AXE_DIG, ToolActions.SHOVEL_DIG, ToolActions.HOE_DIG)) {
-               if (!stack.canPerformAction(action)) {
-                  return false;
-               }
+        }
+
+        // Solution #2
+        // This is used by Mekanism
+        final ToolAction PAXEL_DIG = ToolAction.get("paxel_dig");
+        if (stack.canPerformAction(PAXEL_DIG)) {
+            return true;
+        }
+
+        // Solution #3
+        // Checking if the tool able to preform these actions
+        List<ToolAction> ACTIONS = List.of(
+                ToolActions.PICKAXE_DIG,
+                ToolActions.AXE_DIG,
+                ToolActions.SHOVEL_DIG,
+                ToolActions.HOE_DIG
+        );
+
+        for (ToolAction action : ACTIONS) {
+            if (!stack.canPerformAction(action)) {
+                return false;
             }
+        }
 
-            return true;
-         }
-      } else {
-         return true;
-      }
-   }
+        return true;
+    }
 
-   public double getBlockReachAttribute(Player player) {
-      return player.getBlockReach();
-   }
+    // Forge's reach attribute.
+    @Override
+    public double getBlockReach(Player player) {
+        return player.getBlockReach();
+    }
 }

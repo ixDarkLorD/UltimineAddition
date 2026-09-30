@@ -23,33 +23,36 @@ public class ChallengesToast extends SimpleToast {
         Minecraft.getInstance().getToasts().addToast(new ChallengesToast(challenge, stack));
     }
 
-    public ChallengesToast(MiningSkillCardData.Challenge challenge, ItemStack stack) {
+    public ChallengesToast(MiningSkillCardData.Challenge challengeIdentifier, ItemStack stack) {
         this.icon = ItemIcon.getItemIcon(stack);
-        if (challenge.getId().equals(new ResourceLocation("completed"))) {
-            this.title = Component.translatable("toast.ultimine_addition.challenge.all_completed");
-            this.desc = Component.translatable("toast.ultimine_addition.challenge.all_completed.info", stack.getHoverName());
-            this.sound = SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
+        if (challengeIdentifier.getId().equals(new ResourceLocation("completed"))) {
+            title = Component.translatable("toast.ultimine_addition.challenge.all_completed");
+            desc = Component.translatable("toast.ultimine_addition.challenge.all_completed.info", stack.getHoverName());
+            sound = SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
         } else {
-            this.title = Component.translatable("toast.ultimine_addition.challenge.completed");
-            this.desc = Component.translatable("toast.ultimine_addition.challenge.completed.info", challenge.getOrder(), stack.getHoverName());
-            this.sound = SimpleSoundInstance.forUI(SoundEvents.PLAYER_LEVELUP, 1.0F, 1.0F);
+            title = Component.translatable("toast.ultimine_addition.challenge.completed");
+            desc = Component.translatable("toast.ultimine_addition.challenge.completed.info", challengeIdentifier.getOrder(), stack.getHoverName());
+            sound = SimpleSoundInstance.forUI(SoundEvents.PLAYER_LEVELUP, 1.0F, 1.0F);
         }
-
     }
 
+    @Override
     public Component getTitle() {
-        return this.title;
+        return title;
     }
 
+    @Override
     public Component getSubtitle() {
-        return this.desc;
+        return desc;
     }
 
+    @Override
     public Icon getIcon() {
-        return this.icon;
+        return icon;
     }
 
+    @Override
     public void playSound(SoundManager handler) {
-        handler.play(this.sound);
+        handler.play(sound);
     }
 }

@@ -6,10 +6,10 @@
   "for_card_tier": 3,
   "for_card_type": "pickaxe",
   "required_amount": {
-    "max": 180,
-    "min": 128
+    "max": 64,
+    "min": 32
   },
   "targeted_blocks": [
-    "#forge:obsidian"
+    "minecraft:obsidian"
   ]
 }

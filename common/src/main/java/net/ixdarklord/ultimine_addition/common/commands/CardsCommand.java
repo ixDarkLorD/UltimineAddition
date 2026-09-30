@@ -1,5 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
+import net.ixdarklord.coolcatcore.api.platform.Platform;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -8,7 +10,9 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
-import dev.architectury.platform.Platform;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Consumer;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.CardHolderArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.CardTierArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.ChallengesArgument;
@@ -32,10 +36,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Consumer;
 
 public final class CardsCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
@@ -66,8 +66,9 @@ public final class CardsCommand {
             tierArg.then(tierInApi);
         }
 
-        FTBUltimineAddition.withCommandPrompt(dispatcher, 2, (builder) -> builder.then(
+        FTBUltimineAddition.withCommandPrompt(dispatcher, (builder) -> builder.then(
                 Commands.literal("mining_skill_card")
+                        .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.literal("challenge")
                                         .then(challengeArg))
@@ -134,10 +135,10 @@ public final class CardsCommand {
         int count = 0;
 
         try {
-            for (ServerPlayer player : targets) {
+            for(ServerPlayer player : targets) {
                 ItemStack main = location.getItem(player);
                 if (!main.isEmpty() && (main.getItem() instanceof SkillsRecordItem || main.getItem() instanceof MiningSkillCardItem)) {
-                    SkillsRecordData recordData = main.getItem() instanceof SkillsRecordItem ? SkillsRecordData.load(main) : null;
+                    SkillsRecordData recordData = main.getItem() instanceof SkillsRecordItem ? SkillsRecordData.get(main, player.level()) : null;
                     Optional<MiningSkillCardData> dataOptional = recordData == null ? Optional.of(MiningSkillCardData.load(main)) : (location.isCardInsideSkillsRecord() ? recordData.getCardData(location.cardHolder) : Optional.empty());
                     if (dataOptional.isEmpty()) {
                         fail(source, "command.ultimine_addition.cards.not_found");
@@ -161,9 +162,9 @@ public final class CardsCommand {
     private static void saveData(ServerPlayer player, @Nullable SkillsRecordData recordData, MiningSkillCardData cardData, CardLocation location) {
         if (recordData != null) {
             cardData.save();
-            recordData.sendToClient(player, location.slotIndex).save();
+            recordData.save();
         } else {
-            cardData.sendToClient(player, location.slotIndex).save();
+            cardData.save();
         }
 
     }
@@ -172,15 +173,15 @@ public final class CardsCommand {
         ServerPlayer self = source.getPlayer();
         if (player == self) {
             source.sendSuccess(() -> Component.translatable(baseKey + ".success", args).withStyle(ChatFormatting.DARK_AQUA), true);
-        } else if (!player.hasPermissions(2)) {
-            player.displayClientMessage(Component.translatable(baseKey + ".receiver", args).withStyle(ChatFormatting.GRAY), false);
+        } else if (!player.hasPermissions(Commands.LEVEL_GAMEMASTERS)) {
+            player.sendSystemMessage(Component.translatable(baseKey + ".receiver", args).withStyle(ChatFormatting.GRAY));
         }
 
         if (targets.size() > 1 && player == self) {
             source.sendSuccess(() -> Component.translatable(baseKey + ".sender", args).withStyle(ChatFormatting.GRAY), true);
             int x = 1;
 
-            for (ServerPlayer p : targets) {
+            for(ServerPlayer p : targets) {
                 if (p != self) {
                     int finalX = x++;
                     source.sendSuccess(() -> Component.literal(finalX + ": " + p.getName().getString()).withStyle(ChatFormatting.YELLOW), true);
@@ -194,8 +195,7 @@ public final class CardsCommand {
         source.sendFailure(Component.translatable(key, args).withStyle(ChatFormatting.RED));
     }
 
-    private record CommandContextData(ServerPlayer player, MiningSkillCardData cardData,
-                                      @Nullable SkillsRecordData recordData, ItemStack mainStack) {
+    private record CommandContextData(ServerPlayer player, MiningSkillCardData cardData, @Nullable SkillsRecordData recordData, ItemStack mainStack) {
     }
 
     private enum ChallengeModification {
@@ -221,7 +221,7 @@ public final class CardsCommand {
             if (this.slotIndex == -1) {
                 return ServicePlatform.get().slotAPI().isModLoaded() ? ServicePlatform.get().slotAPI().getSkillsRecordItem(player) : ItemStack.EMPTY;
             } else {
-                return player.getSlot(this.slotIndex).get();
+                return ItemUtils.getSlotItem(player, this.slotIndex);
             }
         }
 

@@ -6,8 +6,8 @@
   "for_card_tier": 2,
   "for_card_type": "pickaxe",
   "required_amount": {
-    "max": 32,
-    "min": 16
+    "max": 8,
+    "min": 4
   },
   "targeted_blocks": [
     "#forge:ores/emerald"

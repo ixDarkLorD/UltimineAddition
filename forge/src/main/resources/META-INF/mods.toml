@@ -1,68 +1,67 @@
-modLoader="javafml"
+modLoader = "javafml"
 loaderVersion = "[${min_forge_fml_version},)"
 issueTrackerURL = "${mod_issue_url}"
 license = "${mod_license}"
-logoFile="mod_logo.png"
 
 [[mods]]
 modId = "${modid}"
-version = "${mod_version}"
 displayName = "${mod_name}"
+version = "${mc_version}-${mod_version}"
 description = "${mod_description}"
 authors = "${mod_author}"
+logoFile = "mod_logo.png"
 displayURL = "${mod_page_url}"
 updateJSONURL = "${mod_forge_update_url}"
 displayTest = "${mod_forge_display_test}"
 
-[[dependencies.${ modid }]]
-modId="forge"
-mandatory=true
+[[dependencies.${modid}]]
+modId = "forge"
+mandatory = true
 versionRange = "[${min_forge_version},)"
-ordering="NONE"
-side="BOTH"
+ordering = "NONE"
+side = "BOTH"
 
-[[dependencies.${ modid }]]
-modId="minecraft"
-mandatory=true
+[[dependencies.${modid}]]
+modId = "minecraft"
+mandatory = true
 versionRange = "[${mc_version},) , (,${max_mc_version}]"
-ordering="NONE"
-side="BOTH"
-
-[[dependencies.${ modid }]]
-modId = "architectury"
-mandatory = true
-versionRange = "[${versions.architectury.get()},)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.${ modid }]]
-modId = "coolcatlib"
+[[dependencies.${modid}]]
+modId = "coolcatcore"
 mandatory = true
-versionRange = "[${coolcatlib_version},)"
+versionRange = "[${mc_version}-${coolcatlib_version},)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.${ modid }]]
+[[dependencies.${modid}]]
+modId = "coolcatcanvas"
+mandatory = true
+versionRange = "[${mc_version}-${coolcatlib_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${modid}]]
 modId = "ftbultimine"
 mandatory = true
 versionRange = "[${ftbultimine_version},)"
-ordering = "NONE"
+ordering = "AFTER"
 side = "BOTH"
 
-[[dependencies.${ modid }]]
+[[dependencies.${modid}]]
 modId = "jei"
 mandatory = false
 versionRange = "[${versions.jei.get()},)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.${ modid }]]
+[[dependencies.${modid}]]
 modId = "curios"
 mandatory = false
-versionRange = "[${versions.curios.version.get()},)"
+versionRange = "[${versions.curios.min.get()},)"
 ordering = "NONE"
 side = "BOTH"
 
-[modproperties.${ modid }]
-catalogueImageIcon="mod_logo.png"
-configuredBackground = "${modid}:textures/gui/adv_background.png"
+[modproperties.${modid}]
+catalogueImageIcon = "mod_logo.png"

@@ -5,28 +5,27 @@
       "value": false
     }
   ],
-  "type": "ultimine_addition:mc_recipe",
-  "category": "misc",
+  "type": "ultimine_addition:mining_card_recipe",
   "group": "ultimine_addition",
   "ingredients": [
     {
       "item": "minecraft:paper"
     },
     {
-      "item": "ultimine_addition:mining_skill_card_pickaxe",
-      "tier": 4
+      "card_tier": 4,
+      "item": "ultimine_addition:mining_skill_card_pickaxe"
     },
     {
-      "item": "ultimine_addition:mining_skill_card_axe",
-      "tier": 4
+      "card_tier": 4,
+      "item": "ultimine_addition:mining_skill_card_axe"
     },
     {
-      "item": "ultimine_addition:mining_skill_card_shovel",
-      "tier": 4
+      "card_tier": 4,
+      "item": "ultimine_addition:mining_skill_card_shovel"
     },
     {
-      "item": "ultimine_addition:mining_skill_card_hoe",
-      "tier": 4
+      "card_tier": 4,
+      "item": "ultimine_addition:mining_skill_card_hoe"
     }
   ],
   "result": {

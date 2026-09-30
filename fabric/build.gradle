@@ -1,4 +1,4 @@
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/fabric.gradle"
+apply from: "${rootProject.sharedScripts}/fabric.gradle"
 
 loom {
     runs {
@@ -14,16 +14,15 @@ loom {
 }
 
 dependencies {
-    modApi libs.architectury.fabric.get()
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-fabric:1.20.1-${coolcatlib_version}"
-    modApi libs.forgeconfigapiport.fabric.get()
+    // CoolCatLib: Core (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
+    // render utilities, easing), published from ../CoolCatLib-1.20.1.
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-core-fabric:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-canvas-fabric:${libs.versions.minecraft.get()}-${coolcatlib_version}"
 
-    modCompileOnlyApi libs.jei.api.fabric.get()
-    modRuntimeOnly libs.jei.fabric.get()
-    modCompileOnly libs.trinkets.fabric.get()
-
-    modImplementation libs.reachentityattributes.get()
-    include libs.reachentityattributes.get()
+    modCompileOnlyApi libs.jei.api.fabric
+    modRuntimeOnly libs.jei.fabric
+    // Compile only: Trinkets 3.7's mixins don't apply in 1.20.1 dev runs (its refmap isn't remapped to Mojang names).
+    modCompileOnly libs.trinkets.fabric
 
     modApi "dev.ftb.mods:ftb-ultimine-fabric:${ftbultimine_version}"
     modApi "dev.ftb.mods:ftb-library-fabric:${ftblibrary_version}"

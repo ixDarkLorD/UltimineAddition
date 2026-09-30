@@ -25,6 +25,7 @@ allprojects {
                 includeGroup "dev.ftb.mods"
             }
         }
+
         maven {
             url "https://maven.ftb.dev/snapshots"
             content {
@@ -34,4 +35,12 @@ allprojects {
     }
 }
 
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/main.gradle"
+// Java 17's tools default to the platform charset (not UTF-8 as from Java 18): Javadoc must read the sources as UTF-8.
+allprojects {
+    tasks.withType(Javadoc).configureEach {
+        options.encoding = "UTF-8"
+    }
+}
+
+// shared_scripts_url points the shared scripts at another copy, e.g. a local ModResources checkout.
+apply from: "${findProperty("shared_scripts_url") ?: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4"}/main.gradle"

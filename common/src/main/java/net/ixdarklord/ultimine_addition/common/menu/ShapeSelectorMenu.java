@@ -23,66 +23,68 @@ public class ShapeSelectorMenu extends AbstractContainerMenu {
         super(Registration.SHAPE_SELECTOR_CONTAINER.get(), id);
         this.player = player;
         this.addSlot(new Slot(new SimpleContainer(ItemStack.EMPTY), 0, 22, 35) {
-            public boolean mayPlace(@NotNull ItemStack stack) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
                 return ItemUtils.isToolItem(stack);
             }
         });
         this.addSlotListener(new ContainerListener() {
-            public void slotChanged(@NotNull AbstractContainerMenu containerToSend, int slotIndex, @NotNull ItemStack stack) {
+            @Override
+            public void slotChanged(AbstractContainerMenu containerToSend, int slotIndex, ItemStack stack) {
+
             }
 
-            public void dataChanged(@NotNull AbstractContainerMenu containerMenu, int dataSlotIndex, int value) {
+            @Override
+            public void dataChanged(AbstractContainerMenu containerMenu, int dataSlotIndex, int value) {
+
             }
         });
+
         this.addPlayerInventory(inventory);
         this.addPlayerHotbar(inventory);
     }
 
     public Player getPlayer() {
-        return this.player;
+        return player;
     }
 
-    public @NotNull ItemStack quickMoveStack(@NotNull Player player, int index) {
-        Slot sourceSlot = this.slots.get(index);
-        if (!sourceSlot.hasItem()) {
-            return ItemStack.EMPTY;
+    @Override
+    public @NotNull ItemStack quickMoveStack(Player player, int index) {
+        Slot sourceSlot = slots.get(index);
+        if (!sourceSlot.hasItem()) return ItemStack.EMPTY;
+
+        ItemStack sourceStack = sourceSlot.getItem();
+        ItemStack copyOfSourceStack = sourceStack.copy();
+
+        if (index == 0) {
+            if (!moveItemStackTo(sourceStack, 1, 4 * 9 + 1, false)) {
+                return ItemStack.EMPTY;
+            }
+        } else if (index > 0) {
+            if (!moveItemStackTo(sourceStack, 0, 4 * 9, false)) {
+                return ItemStack.EMPTY;
+            }
         } else {
-            ItemStack sourceStack = sourceSlot.getItem();
-            ItemStack copyOfSourceStack = sourceStack.copy();
-            if (index == 0) {
-                if (!this.moveItemStackTo(sourceStack, 1, 37, false)) {
-                    return ItemStack.EMPTY;
-                }
-            } else {
-                if (index <= 0) {
-                    return ItemStack.EMPTY;
-                }
-
-                if (!this.moveItemStackTo(sourceStack, 0, 36, false)) {
-                    return ItemStack.EMPTY;
-                }
-            }
-
-            return copyOfSourceStack;
+            return ItemStack.EMPTY;
         }
+
+        return copyOfSourceStack;
     }
 
-    public void removed(@NotNull Player player) {
+    @Override
+    public void removed(Player player) {
         super.removed(player);
-        if (player instanceof ServerPlayer serverPlayer) {
-            ItemStack stack = this.slots.get(0).getItem();
-            if (!stack.isEmpty()) {
-                if (serverPlayer.isAlive() && !serverPlayer.hasDisconnected()) {
-                    player.getInventory().placeItemBackInInventory(stack);
-                } else {
-                    serverPlayer.drop(stack, false);
-                }
+        if (!(player instanceof ServerPlayer serverPlayer)) return;
+        ItemStack stack = slots.get(0).getItem();
+        if (stack.isEmpty()) return;
 
-            }
-        }
+        if (serverPlayer.isAlive() && !serverPlayer.hasDisconnected()) {
+            player.getInventory().placeItemBackInInventory(stack);
+        } else serverPlayer.drop(stack, false);
     }
 
-    public boolean stillValid(@NotNull Player player) {
+    @Override
+    public boolean stillValid(Player player) {
         return true;
     }
 
@@ -92,13 +94,11 @@ public class ShapeSelectorMenu extends AbstractContainerMenu {
                 this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 9 + l * 18, 88 + i * 18));
             }
         }
-
     }
 
     private void addPlayerHotbar(Inventory playerInventory) {
         for (int i = 0; i < 9; ++i) {
             this.addSlot(new Slot(playerInventory, i, 9 + i * 18, 146));
         }
-
     }
 }

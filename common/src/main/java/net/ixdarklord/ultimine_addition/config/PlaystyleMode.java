@@ -1,7 +1,16 @@
 package net.ixdarklord.ultimine_addition.config;
 
-public enum PlaystyleMode {
+import net.ixdarklord.coolcatcore.api.config.type.EnumType;
+import net.minecraft.network.chat.Component;
+
+import java.util.Locale;
+
+public enum PlaystyleMode implements EnumType.Displayable {
     MODERN,
-    ONE_TIER_ONLY,
-    LEGACY
+    LEGACY;
+
+    @Override
+    public Component displayName() {
+        return Component.translatable("ultimine_addition.playstyle_mode." + this.name().toLowerCase(Locale.ROOT));
+    }
 }

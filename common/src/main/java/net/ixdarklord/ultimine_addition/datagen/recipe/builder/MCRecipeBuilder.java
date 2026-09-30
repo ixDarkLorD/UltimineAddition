@@ -1,165 +1,102 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe.builder;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.common.recipe.MCRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
-import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.Advancement.Builder;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.RequirementsStrategy;
-import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.data.recipes.CraftingRecipeBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
+import java.util.function.Consumer;
+import net.minecraft.advancements.AdvancementRewards;
+import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 
+// 1.20.1 recipe builders hand FinishedRecipes to a consumer (CodecRecipeResult writes them with the serializer's codec).
 public class MCRecipeBuilder extends CraftingRecipeBuilder implements RecipeBuilder {
-   private final RecipeCategory category;
-   private final Item result;
-   private final int count;
-   private final List<MCIngredient> ingredients = new ArrayList();
-   private final Advancement.Builder advancement = Builder.advancement();
-   private @Nullable String group;
+    private final RecipeCategory category;
+    private final Item result;
+    private final int count;
+    private final NonNullList<MCIngredient> ingredients = NonNullList.create();
+    private final Advancement.Builder advancement = Advancement.Builder.advancement();
+    @Nullable
+    private String group;
 
-   private MCRecipeBuilder(RecipeCategory category, ItemLike result, int count) {
-      this.category = category;
-      this.result = result.asItem();
-      this.count = count;
-   }
+    private MCRecipeBuilder(RecipeCategory category, ItemLike result, int count) {
+        this.category = category;
+        this.result = result.asItem();
+        this.count = count;
+    }
 
-   public static MCRecipeBuilder create(RecipeCategory category, ItemLike item) {
-      return new MCRecipeBuilder(category, item, 1);
-   }
+    public static MCRecipeBuilder create(RecipeCategory category, ItemLike item) {
+        return new MCRecipeBuilder(category, item, 1);
+    }
 
-   public static MCRecipeBuilder create(RecipeCategory category, ItemLike item, int count) {
-      return new MCRecipeBuilder(category, item, count);
-   }
+    public static MCRecipeBuilder create(RecipeCategory category, ItemLike item, int count) {
+        return new MCRecipeBuilder(category, item, count);
+    }
 
-   public MCRecipeBuilder requires(ItemLike item) {
-      return this.requires(item, null);
-   }
+    public MCRecipeBuilder requires(ItemLike item) {
+        return this.requires(item, null);
+    }
 
-   public MCRecipeBuilder requires(TagKey<Item> tagKey) {
-      return this.requires(MCIngredient.of(null, tagKey));
-   }
+    public MCRecipeBuilder requires(TagKey<Item> tagKey) {
+        return this.requires(MCIngredient.of(null, tagKey));
+    }
 
-   public MCRecipeBuilder requires(ItemLike item, MiningSkillCardItem.Tier tier) {
-      return this.requires(MCIngredient.of(tier, item));
-   }
+    public MCRecipeBuilder requires(ItemLike item, MiningSkillCardItem.Tier tier) {
+        return this.requires(MCIngredient.of(tier, item));
+    }
 
-   private MCRecipeBuilder requires(MCIngredient ingredient) {
-      for (int i = 0; i < 1; ++i) {
-         this.ingredients.add(ingredient);
-      }
+    private MCRecipeBuilder requires(MCIngredient ingredient) {
+        for (int i = 0; i < 1; ++i) {
+            this.ingredients.add(ingredient);
+        }
+        return this;
+    }
 
-      return this;
-   }
+    @Override
+    public @NotNull MCRecipeBuilder unlockedBy(@NotNull String name, @NotNull CriterionTriggerInstance criterion) {
+        this.advancement.addCriterion(name, criterion);
+        return this;
+    }
 
-   public @NotNull MCRecipeBuilder unlockedBy(@NotNull String key, @NotNull CriterionTriggerInstance criterionTriggerInstance) {
-      this.advancement.addCriterion(key, criterionTriggerInstance);
-      return this;
-   }
+    @Override
+    public @NotNull MCRecipeBuilder group(@Nullable String name) {
+        this.group = name;
+        return this;
+    }
 
-   public @NotNull MCRecipeBuilder group(@Nullable String name) {
-      this.group = name;
-      return this;
-   }
+    public @NotNull Item getResult() {
+        return this.result;
+    }
 
-   public @NotNull Item getResult() {
-      return this.result;
-   }
+    @Override
+    public void save(@NotNull Consumer<FinishedRecipe> consumer, @NotNull ResourceLocation id) {
+        this.ensureValid(id);
+        this.advancement.parent(ROOT_RECIPE_ADVANCEMENT).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id)).rewards(AdvancementRewards.Builder.recipe(id)).requirements(RequirementsStrategy.OR);
 
-   public void save(@NotNull Consumer<FinishedRecipe> consumer) {
-      ResourceLocation recipeId = Registration.ITEMS.getRegistrar().getId(this.getResult());
+        MCRecipe recipe = new MCRecipe(id, Objects.requireNonNullElse(this.group, ""), determineBookCategory(this.category), new ItemStack(this.result, this.count), this.ingredients);
+        consumer.accept(new CodecRecipeResult<>(id, MCRecipe.Serializer.INSTANCE, MCRecipe.Serializer.CODEC, recipe, this.advancement, id.withPrefix("recipes/" + this.category.getFolderName() + "/")));
+    }
 
-      assert recipeId != null;
-
-      this.save(consumer, recipeId);
-   }
-
-   public void save(Consumer<FinishedRecipe> consumer, @NotNull ResourceLocation recipeId) {
-      this.ensureValid(recipeId);
-      this.advancement.parent(ROOT_RECIPE_ADVANCEMENT).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipeId)).rewards(net.minecraft.advancements.AdvancementRewards.Builder.recipe(recipeId)).requirements(RequirementsStrategy.OR);
-      consumer.accept(new Result(recipeId, this.result, this.count, this.group == null ? "" : this.group, determineBookCategory(this.category), this.ingredients, this.advancement, recipeId.withPrefix("recipes/" + this.category.getFolderName() + "/")));
-   }
-
-   private void ensureValid(ResourceLocation resourceLocation) {
-      if (this.advancement.getCriteria().isEmpty()) {
-         throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
-      }
-   }
-
-   public static class Result extends CraftingRecipeBuilder.CraftingResult {
-      private final ResourceLocation id;
-      private final Item result;
-      private final int count;
-      private final String group;
-      private final List<MCIngredient> ingredients;
-      private final Advancement.Builder advancement;
-      private final ResourceLocation advancementId;
-
-      public Result(ResourceLocation id, Item result, int count, String group, CraftingBookCategory category, List<MCIngredient> ingredients, Advancement.Builder advancement, ResourceLocation advancementId) {
-         super(category);
-         this.id = id;
-         this.result = result;
-         this.count = count;
-         this.group = group;
-         this.ingredients = ingredients;
-         this.advancement = advancement;
-         this.advancementId = advancementId;
-      }
-
-      public void serializeRecipeData(@NotNull JsonObject json) {
-         super.serializeRecipeData(json);
-         if (!this.group.isEmpty()) {
-            json.addProperty("group", this.group);
-         }
-
-         JsonArray jsonarray = new JsonArray();
-
-         for (MCIngredient ingredient : this.ingredients) {
-            jsonarray.add(ingredient.toJson());
-         }
-
-         json.add("ingredients", jsonarray);
-         JsonObject jsonobject = new JsonObject();
-         jsonobject.addProperty("item", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.result)).toString());
-         if (this.count > 1) {
-            jsonobject.addProperty("count", this.count);
-         }
-
-         json.add("result", jsonobject);
-      }
-
-      public @NotNull RecipeSerializer<?> getType() {
-         return Registration.MC_RECIPE_SERIALIZER.get();
-      }
-
-      public @NotNull ResourceLocation getId() {
-         return this.id;
-      }
-
-      public JsonObject serializeAdvancement() {
-         return this.advancement.serializeToJson();
-      }
-
-      public ResourceLocation getAdvancementId() {
-         return this.advancementId;
-      }
-   }
+    private void ensureValid(ResourceLocation id) {
+        if (this.advancement.getCriteria().isEmpty()) {
+            throw new IllegalStateException("No way of obtaining recipe " + id);
+        }
+    }
 }

@@ -4,29 +4,44 @@ import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBlockTags;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * @see PlatformTags
+ */
 public final class PlatformTagsImpl implements PlatformTags {
+
     public static @NotNull PlatformTags get() {
         return new PlatformTagsImpl();
     }
 
     public @NotNull TagKey<Item> SLIME() {
-        return this.createCommonTag(Registries.ITEM, "slime");
+        return createCommonTag(Registries.ITEM, "slime");
     }
 
+    // Fabric API's 1.20.1 conventional tags have no seeds; a c: tag this mod generates.
+    public @NotNull TagKey<Item> SEEDS() {
+        return createCommonTag(Registries.ITEM, "seeds");
+    }
+
+    public @NotNull TagKey<Item> DYE(DyeColor color) {
+        return createCommonTag(Registries.ITEM, color.getSerializedName() + "_dyes");
+    }
+
+    // Fabric API's 1.20.1 conventional tags have no stones or cobblestones; they're c: tags this mod generates.
     public @NotNull TagKey<Block> STONES() {
-        return this.createCommonTag(Registries.BLOCK, "stones");
+        return createCommonTag(Registries.BLOCK, "stones");
     }
 
     public @NotNull TagKey<Block> COBBLESTONES() {
-        return this.createCommonTag(Registries.BLOCK, "cobblestones");
+        return createCommonTag(Registries.BLOCK, "cobblestones");
     }
 
     public @NotNull TagKey<Block> OBSIDIAN() {
-        return this.createCommonTag(Registries.BLOCK, "obsidian");
+        return createCommonTag(Registries.BLOCK, "obsidian");
     }
 
     public @NotNull TagKey<Block> ORES() {
@@ -34,35 +49,35 @@ public final class PlatformTagsImpl implements PlatformTags {
     }
 
     public @NotNull TagKey<Block> COAL_ORES() {
-        return this.createCommonTag(Registries.BLOCK, "ores/coal");
+        return createCommonTag(Registries.BLOCK, "ores/coal");
     }
 
     public @NotNull TagKey<Block> IRON_ORES() {
-        return this.createCommonTag(Registries.BLOCK, "ores/iron");
+        return createCommonTag(Registries.BLOCK, "ores/iron");
     }
 
     public @NotNull TagKey<Block> COPPER_ORES() {
-        return this.createCommonTag(Registries.BLOCK, "ores/copper");
+        return createCommonTag(Registries.BLOCK, "ores/copper");
     }
 
     public @NotNull TagKey<Block> GOLD_ORES() {
-        return this.createCommonTag(Registries.BLOCK, "ores/gold");
+        return createCommonTag(Registries.BLOCK, "ores/gold");
     }
 
     public @NotNull TagKey<Block> LAPIS_ORES() {
-        return this.createCommonTag(Registries.BLOCK, "ores/lapis");
+        return createCommonTag(Registries.BLOCK, "ores/lapis");
     }
 
     public @NotNull TagKey<Block> REDSTONE_ORES() {
-        return this.createCommonTag(Registries.BLOCK, "ores/redstone");
+        return createCommonTag(Registries.BLOCK, "ores/redstone");
     }
 
     public @NotNull TagKey<Block> DIAMOND_ORES() {
-        return this.createCommonTag(Registries.BLOCK, "ores/diamond");
+        return createCommonTag(Registries.BLOCK, "ores/diamond");
     }
 
     public @NotNull TagKey<Block> EMERALD_ORES() {
-        return this.createCommonTag(Registries.BLOCK, "ores/emerald");
+        return createCommonTag(Registries.BLOCK, "ores/emerald");
     }
 
     public @NotNull TagKey<Block> QUARTZ_ORES() {

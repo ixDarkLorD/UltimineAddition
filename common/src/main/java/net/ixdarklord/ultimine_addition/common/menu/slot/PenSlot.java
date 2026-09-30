@@ -10,6 +10,7 @@ public class PenSlot extends CustomSlot {
         super(container, slotID, x, y);
     }
 
+    @Override
     public boolean mayPlace(@NotNull ItemStack stack) {
         return stack.getItem() == ModItems.PEN;
     }

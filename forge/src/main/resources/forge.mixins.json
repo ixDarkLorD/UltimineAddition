@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "net.ixdarklord.ultimine_addition.mixin.forge",
+  "client": [
+    "client.MixinForgeGuiGraphics"
+  ],
+  "mixins": [
+    "MixinLegacyPlayerData"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

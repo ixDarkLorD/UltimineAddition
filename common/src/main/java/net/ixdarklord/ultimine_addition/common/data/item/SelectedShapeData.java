@@ -4,65 +4,36 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbultimine.shape.Shape;
-import net.ixdarklord.coolcatlib.api.data.ItemDataComponent;
-import net.ixdarklord.coolcatlib.api.utils.CodecUtils;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import io.netty.handler.codec.CodecException;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.network.FriendlyByteBuf;
+import net.ixdarklord.coolcatcore.api.network.codec.StreamCodec;
 
-import java.util.Optional;
-
-public final class SelectedShapeData extends ItemDataComponent<SelectedShapeData> {
-    public static final ResourceLocation DATA_ID = FTBUltimineAddition.id("selected_shape_data");
-    public static final Codec<Shape> SHAPE_CODEC;
-    public static final Codec<SelectedShapeData> CODEC;
-    private @Nullable Shape shape;
-
-    private SelectedShapeData(@Nullable Shape shape) {
-        super(DATA_ID, CODEC);
-        this.shape = shape;
-    }
-
-    private static SelectedShapeData create() {
-        return new SelectedShapeData(null);
-    }
-
-    public static SelectedShapeData load(ItemStack stack) {
-        CompoundTag tag = stack.getOrCreateTag().getCompound(DATA_ID.toString());
-        SelectedShapeData data = tag.isEmpty() ? create() : CodecUtils.decode(CODEC, tag);
-        return data.setStack(stack);
-    }
-
-    public static boolean hasData(ItemStack stack) {
-        if (stack != null && !stack.isEmpty()) {
-            return stack.getTagElement(DATA_ID.toString()) != null;
-        } else {
-            return false;
+public record SelectedShapeData(Shape shape) {
+    public static final Codec<Shape> SHAPE_CODEC = Codec.STRING.comapFlatMap(id -> {
+        for (Shape shape : FTBUltimineIntegration.getShapesList()) {
+            // The earlier 1.20.1 releases saved FTB Ultimine 2001's plain shape name ("small_tunnel").
+            if (FTBUltimineIntegration.shapeId(shape).toString().equals(id) || shape.getName().equals(id))
+                return DataResult.success(shape);
         }
-    }
+        return DataResult.error(() -> "Invalid shape ID: '" + id + "'.");
+    }, shape1 -> FTBUltimineIntegration.shapeId(shape1).toString());
 
-    public @Nullable Shape getShape() {
-        return this.shape;
-    }
+    public static final StreamCodec<FriendlyByteBuf, Shape> SHAPE_STREAM_CODEC = StreamCodec.of(
+            (buf, shape) -> buf.writeResourceLocation(FTBUltimineIntegration.shapeId(shape)),
+            buf -> {
+                Shape shape = FTBUltimineIntegration.getShape(buf.readResourceLocation());
+                if (shape == null) throw new CodecException("Shape is null!!");
+                return shape;
+            });
 
-    public SelectedShapeData setShape(@Nullable Shape shape) {
-        this.shape = shape;
-        return this;
-    }
+    public static final Codec<SelectedShapeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            SHAPE_CODEC.fieldOf("ShapeId").forGetter(SelectedShapeData::shape)
+    ).apply(instance, SelectedShapeData::new));
 
-    static {
-        SHAPE_CODEC = Codec.STRING.comapFlatMap((id) -> {
-            for (Shape shape : FTBUltimineIntegration.getShapesList()) {
-                if (shape.getName().equals(id)) {
-                    return DataResult.success(shape);
-                }
-            }
+    public static final StreamCodec<FriendlyByteBuf, SelectedShapeData> STREAM_CODEC = StreamCodec.composite(
+            SHAPE_STREAM_CODEC, SelectedShapeData::shape,
+            SelectedShapeData::new
+    );
 
-            return DataResult.error(() -> "Invalid shape ID: '" + id + "'");
-        }, Shape::getName);
-        CODEC = RecordCodecBuilder.create((instance) -> instance.group(SHAPE_CODEC.optionalFieldOf("ShapeId").forGetter((data) -> Optional.ofNullable(data.getShape()))).apply(instance, (shapeOpt) -> new SelectedShapeData(shapeOpt.orElse(null))));
-    }
 }

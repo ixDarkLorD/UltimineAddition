@@ -2,70 +2,81 @@ package net.ixdarklord.ultimine_addition.common.tag.forge;
 
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.Tags.Blocks;
-import net.minecraftforge.common.Tags.Items;
+import net.minecraftforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * @see PlatformTags
+ */
 public final class PlatformTagsImpl implements PlatformTags {
     public static @NotNull PlatformTags get() {
         return new PlatformTagsImpl();
     }
 
     public @NotNull TagKey<Item> SLIME() {
-        return Items.SLIMEBALLS;
+        return Tags.Items.SLIMEBALLS;
+    }
+
+    public @NotNull TagKey<Item> SEEDS() {
+        return Tags.Items.SEEDS;
+    }
+
+    public @NotNull TagKey<Item> DYE(DyeColor color) {
+        return color.getTag();
     }
 
     public @NotNull TagKey<Block> STONES() {
-        return Blocks.STONE;
+        return Tags.Blocks.STONE;
     }
 
     public @NotNull TagKey<Block> COBBLESTONES() {
-        return Blocks.COBBLESTONE;
+        return Tags.Blocks.COBBLESTONE;
     }
 
     public @NotNull TagKey<Block> OBSIDIAN() {
-        return Blocks.OBSIDIAN;
+        return Tags.Blocks.OBSIDIAN;
     }
 
     public @NotNull TagKey<Block> ORES() {
-        return Blocks.ORES;
+        return Tags.Blocks.ORES;
     }
 
     public @NotNull TagKey<Block> COAL_ORES() {
-        return Blocks.ORES_COAL;
+        return Tags.Blocks.ORES_COAL;
     }
 
     public @NotNull TagKey<Block> IRON_ORES() {
-        return Blocks.ORES_IRON;
+        return Tags.Blocks.ORES_IRON;
     }
 
     public @NotNull TagKey<Block> COPPER_ORES() {
-        return Blocks.ORES_COPPER;
+        return Tags.Blocks.ORES_COPPER;
     }
 
     public @NotNull TagKey<Block> GOLD_ORES() {
-        return Blocks.ORES_GOLD;
+        return Tags.Blocks.ORES_GOLD;
     }
 
     public @NotNull TagKey<Block> LAPIS_ORES() {
-        return Blocks.ORES_LAPIS;
+        return Tags.Blocks.ORES_LAPIS;
     }
 
     public @NotNull TagKey<Block> REDSTONE_ORES() {
-        return Blocks.ORES_REDSTONE;
+        return Tags.Blocks.ORES_REDSTONE;
     }
 
     public @NotNull TagKey<Block> DIAMOND_ORES() {
-        return Blocks.ORES_DIAMOND;
+        return Tags.Blocks.ORES_DIAMOND;
     }
 
     public @NotNull TagKey<Block> EMERALD_ORES() {
-        return Blocks.ORES_EMERALD;
+        return Tags.Blocks.ORES_EMERALD;
     }
 
     public @NotNull TagKey<Block> QUARTZ_ORES() {
-        return Blocks.ORES_QUARTZ;
+        return Tags.Blocks.ORES_QUARTZ;
     }
 }

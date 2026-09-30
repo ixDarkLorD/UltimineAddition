@@ -6,8 +6,8 @@
   "for_card_tier": 1,
   "for_card_type": "shovel",
   "required_amount": {
-    "max": 128,
-    "min": 64
+    "max": 64,
+    "min": 32
   },
   "targeted_blocks": [
     "minecraft:podzol"

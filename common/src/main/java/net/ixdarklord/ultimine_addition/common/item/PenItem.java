@@ -1,45 +1,43 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import org.jetbrains.annotations.Nullable;
+import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
+import net.ixdarklord.ultimine_addition.common.data.item.StorageItemData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class PenItem extends StorageItem {
-   public PenItem(Item.Properties properties) {
-      super(properties, "ink_chamber", 2000, ComponentType.TOOLS);
-   }
+    public PenItem(Properties properties) {
+        super(properties, StorageItemData.create("ink_chamber", 2000), ComponentType.TOOLS);
+    }
 
-   public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
-      if (!this.isLegacyMode() && !level.isClientSide()) {
-         if (!stack.hasTag() && entity instanceof ServerPlayer) {
-            this.getData(stack).save();
-         }
+    @Override
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotIndex, boolean isSelected) {
+        if (this.isLegacyMode()) return;
+        if (!StorageItemData.DATA_COMPONENT.has(stack) && entity instanceof ServerPlayer)
+            getData(stack).save();
+    }
 
-      }
-   }
-
-   public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
-      super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
-      if (Minecraft.getInstance().screen instanceof SkillsRecordScreen || stack.hasTag() || !this.isShiftButtonNotPressed(tooltipComponents)) {
-         if (!stack.hasTag()) {
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable Level context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
+        if (!(Minecraft.getInstance().screen instanceof SkillsRecordScreen) && !StorageItemData.DATA_COMPONENT.has(stack) && isShiftButtonNotPressed(tooltipComponents::add)) return;
+        if (!StorageItemData.DATA_COMPONENT.has(stack)) {
             Component component = Component.translatable("tooltip.ultimine_addition.pen.info").withStyle(ChatFormatting.GRAY);
-            List<Component> components = ComponentHelper.splitComponent(component, this.getSplitterLength());
+            List<Component> components = ComponentHelper.splitComponent(component, getSplitterLength());
             tooltipComponents.addAll(components);
-         } else {
-            tooltipComponents.add(Component.literal("§8• ").append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber", this.getData(stack).getCapacity()).withStyle(ChatFormatting.GRAY)));
-         }
-      }
-   }
+            return;
+        }
+        tooltipComponents.add(Component.literal("§8• ").append(Component.translatable("tooltip.ultimine_addition.pen.ink_chamber", getData(stack).getCapacity()).withStyle(ChatFormatting.GRAY)));
+    }
 }

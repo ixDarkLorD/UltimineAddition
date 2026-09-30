@@ -7,10 +7,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class TooltipInfo {
-    public Component component = Component.empty();
+    public Component component;
     public @Nullable TooltipComponent tooltipComponent;
 
+    public TooltipInfo() {
+        this.component = Component.empty();
+    }
+
     public Optional<TooltipComponent> getTooltipComponent() {
-        return Optional.ofNullable(this.tooltipComponent);
+        return Optional.ofNullable(tooltipComponent);
     }
 }

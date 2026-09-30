@@ -1,7 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "${modid}",
-  "version": "${mod_version}",
+  "version": "${mc_version}-${mod_version}",
+
   "name": "${mod_name}",
   "description": "${mod_description}",
   "authors": [
@@ -12,39 +13,32 @@
     "issues": "${mod_issue_url}",
     "sources": "${mod_source_url}"
   },
+
   "license": "${mod_license}",
   "icon": "mod_logo.png",
+
   "environment": "${mod_environment}",
   "entrypoints": {
-    "main": [
-      "net.ixdarklord.ultimine_addition.core.fabric.FabricSetup"
-    ],
-    "fabric-datagen": [
-      "net.ixdarklord.ultimine_addition.datagen.DataGeneration"
-    ],
+    "coolcatcore:common": ["net.ixdarklord.ultimine_addition.core.UltimineAdditionConstructor"],
+    "coolcatcore:client": ["net.ixdarklord.ultimine_addition.core.UltimineAdditionClientConstructor"],
+    "main": ["net.ixdarklord.ultimine_addition.core.fabric.FabricSetup"],
+    "client": ["net.ixdarklord.ultimine_addition.core.fabric.FabricClientSetup"],
+    "fabric-datagen": ["net.ixdarklord.ultimine_addition.datagen.DataGeneration"],
     "jei_mod_plugin": ["net.ixdarklord.ultimine_addition.integration.jei.JEIIntegration"]
   },
   "mixins": [
     "${modid}.fabric.mixins.json",
     "${modid}.common.mixins.json"
   ],
-  "accessWidener": "${modid}.accesswidener",
-  "custom": {
-    "loom:injected_interfaces": {
-      "net/minecraft/class_1657": [
-        "net/ixdarklord/ultimine_addition/common/data/player/IPlayerData"
-      ]
-    }
-  },
+  "accessWidener" : "${modid}.accesswidener",
 
   "depends": {
-    "java": ">=17",
+    "java": ">=${versions.java.get()}",
     "minecraft": ">=${mc_version} <=${max_mc_version}",
     "fabricloader": ">=${min_fabric_version}",
     "fabric-api": ">=${min_fabric_api_version}",
-    "forgeconfigapiport": ">=${versions.forgeconfigapiport.get()}",
-    "architectury": ">=${versions.architectury.get()}",
-    "coolcatlib": ">=${coolcatlib_version}",
+    "coolcatcore": ">=${mc_version}-${coolcatlib_version}",
+    "coolcatcanvas": ">=${mc_version}-${coolcatlib_version}",
     "ftbultimine": ">=${ftbultimine_version}"
   },
   "suggests": {

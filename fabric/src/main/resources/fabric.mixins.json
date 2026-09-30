@@ -2,12 +2,12 @@
   "required": true,
   "minVersion": "0.8",
   "compatibilityLevel": "JAVA_17",
-  "package": "net.ixdarklord.ultimine_addition.mixin.fabric",
+  "package": "net.ixdarklord.ultimine_addition.mixin",
   "mixins": [
-    "MixinAxeItem",
-    "MixinHoeItem",
-    "MixinPlayerData",
-    "MixinShovelItem"
+    "fabric.MixinAxeItem",
+    "fabric.MixinShovelItem",
+    "fabric.MixinHoeItem",
+    "fabric.MixinLegacyPlayerData"
   ],
   "injectors": {
     "defaultRequire": 1

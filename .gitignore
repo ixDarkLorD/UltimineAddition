@@ -8,6 +8,8 @@ out/
 output/
 bin/
 libs/
+.cache/
+build_numbers.json
 
 .classpath
 .project
@@ -17,3 +19,12 @@ classes/
 .vscode
 .settings
 *.launch
+
+package.json
+package-lock.json
+.husky
+commitlint.config.js
+node_modules
+
+# Claude Code project notes (local only)
+CLAUDE.md

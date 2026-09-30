@@ -6,6 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -13,43 +14,41 @@ import org.jetbrains.annotations.NotNull;
 public interface PlatformTags {
     @ExpectPlatform
     static @NotNull PlatformTags get() {
-        throw new AssertionError();
+        throw new UnsupportedOperationException("This loader is not supported!");
     }
 
+    // ITEM
     @NotNull TagKey<Item> SLIME();
+    @NotNull TagKey<Item> SEEDS();
+    /** Any dye of the color (other mods' too). */
+    @NotNull TagKey<Item> DYE(DyeColor color);
 
+    // BLOCKS
     @NotNull TagKey<Block> STONES();
-
     @NotNull TagKey<Block> COBBLESTONES();
-
     @NotNull TagKey<Block> OBSIDIAN();
 
+    // ORES
     @NotNull TagKey<Block> ORES();
-
     @NotNull TagKey<Block> COAL_ORES();
-
     @NotNull TagKey<Block> IRON_ORES();
-
     @NotNull TagKey<Block> COPPER_ORES();
-
     @NotNull TagKey<Block> GOLD_ORES();
-
     @NotNull TagKey<Block> LAPIS_ORES();
-
     @NotNull TagKey<Block> REDSTONE_ORES();
-
     @NotNull TagKey<Block> DIAMOND_ORES();
-
     @NotNull TagKey<Block> EMERALD_ORES();
-
     @NotNull TagKey<Block> QUARTZ_ORES();
 
-    default @NotNull TagKey<Item> PAXELS() {
-        return this.createCommonTag(Registries.ITEM, "paxels");
+    // TOOLS
+    @NotNull
+    default TagKey<Item> PAXELS() {
+        return createCommonTag(Registries.ITEM, "paxels");
     }
 
-    default @NotNull TagKey<Item> TOOLS_PAXELS() {
-        return this.createCommonTag(Registries.ITEM, "tools/paxel");
+    @NotNull
+    default TagKey<Item> TOOLS_PAXELS() {
+        return createCommonTag(Registries.ITEM, "tools/paxel");
     }
 
     default <T> TagKey<T> createCommonTag(ResourceKey<Registry<T>> registry, String name) {
