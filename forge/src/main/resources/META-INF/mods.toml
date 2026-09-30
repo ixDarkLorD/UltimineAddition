@@ -38,7 +38,7 @@ side = "BOTH"
 [[dependencies.${modid}]]
 modId = "coolcatcanvas"
 mandatory = true
-versionRange = "[${coolcatlib_version},)"
+versionRange = "[${coolcatlib_canvas_version},)"
 ordering = "NONE"
 side = "BOTH"
 

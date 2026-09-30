@@ -17,7 +17,7 @@ dependencies {
     // CoolCatLib: Core (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
     // render utilities, easing), published from ../CoolCatLib-1.20.1.
     modApi "net.ixdarklord.coolcatlib:coolcatlib-core-forge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-canvas-forge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-canvas-forge:${libs.versions.minecraft.get()}-${coolcatlib_canvas_version}"
 
     modCompileOnly "${libs.curios.forge.get()}:api"
     modRuntimeOnly libs.curios.forge

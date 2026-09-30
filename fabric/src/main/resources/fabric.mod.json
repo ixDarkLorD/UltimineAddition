@@ -38,7 +38,7 @@
     "fabricloader": ">=${min_fabric_version}",
     "fabric-api": ">=${min_fabric_api_version}",
     "coolcatcore": ">=${coolcatlib_version}",
-    "coolcatcanvas": ">=${coolcatlib_version}",
+    "coolcatcanvas": ">=${coolcatlib_canvas_version}",
     "ftbultimine": ">=${ftbultimine_version}"
   },
   "suggests": {
