@@ -1,16 +1,3 @@
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url "https://maven.architectury.dev/" }
-        maven { url "https://maven.fabricmc.net/" }
-        maven { url "https://maven.neoforged.net/releases/" }
-        maven { url "https://maven.minecraftforge.net/" }
-        maven { url "https://maven.firstdark.dev/releases" }
-    }
-}
-
 include('common')
 include(project_loaders.split(","))
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v2/settings.gradle"
-
-
+apply from: "${providers.gradleProperty("shared_scripts_url").getOrElse("https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4")}/settings.gradle"

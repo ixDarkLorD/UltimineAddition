@@ -1,6 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.potion;
 
-import net.ixdarklord.coolcatlib.api.item.ComponentItem;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.Util;
@@ -17,8 +18,8 @@ public class MineGoPotion extends Potion {
     private final ComponentItem.ComponentType componentType = ComponentItem.ComponentType.ABILITY;
     public MineGoPotion(MiningSkillCardItem.@NotNull Tier tier, MobEffectInstance mobEffectInstances) {
         super(Util.make(() -> {
-            ResourceLocation id = Registration.MOB_EFFECTS.getRegistrar().getId(mobEffectInstances.getEffect().value());
-            Holder<MobEffect> effect = Registration.MOB_EFFECTS.getRegistrar().getHolder(id);
+            ResourceLocation id = BuiltInRegistries.MOB_EFFECT.getKey(mobEffectInstances.getEffect().value());
+            Holder<MobEffect> effect = id == null ? null : BuiltInRegistries.MOB_EFFECT.getHolder(id).orElse(null);
             IllegalArgumentException exception = new IllegalArgumentException("Unknown MobEffect: " + id);
             if (effect == null) throw exception;
             ResourceKey<MobEffect> resourceKey = effect.unwrapKey()

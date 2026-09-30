@@ -3,9 +3,9 @@
   "display": {
     "firstperson_lefthand": {
       "rotation": [
-        -10,
-        -45,
-        0
+        -10.0,
+        -45.0,
+        0.0
       ],
       "scale": [
         0.65,
@@ -13,16 +13,16 @@
         0.65
       ],
       "translation": [
-        1,
-        4,
-        0
+        1.0,
+        4.0,
+        0.0
       ]
     },
     "firstperson_righthand": {
       "rotation": [
-        -10,
-        -45,
-        0
+        -10.0,
+        -45.0,
+        0.0
       ],
       "scale": [
         0.65,
@@ -30,16 +30,16 @@
         0.65
       ],
       "translation": [
-        1,
-        4,
-        0
+        1.0,
+        4.0,
+        0.0
       ]
     },
     "thirdperson_lefthand": {
       "rotation": [
-        45,
-        -10,
-        0
+        45.0,
+        -10.0,
+        0.0
       ],
       "scale": [
         0.75,
@@ -47,16 +47,16 @@
         0.75
       ],
       "translation": [
-        0,
-        4,
-        5
+        0.0,
+        4.0,
+        5.0
       ]
     },
     "thirdperson_righthand": {
       "rotation": [
-        45,
-        -10,
-        0
+        45.0,
+        -10.0,
+        0.0
       ],
       "scale": [
         0.75,
@@ -64,12 +64,110 @@
         0.75
       ],
       "translation": [
-        0,
-        4,
-        5
+        0.0,
+        4.0,
+        5.0
       ]
     }
   },
+  "overrides": [
+    {
+      "model": "ultimine_addition:item/skills_record_white",
+      "predicate": {
+        "ultimine_addition:color": 0.0625
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_orange",
+      "predicate": {
+        "ultimine_addition:color": 0.125
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_magenta",
+      "predicate": {
+        "ultimine_addition:color": 0.1875
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_light_blue",
+      "predicate": {
+        "ultimine_addition:color": 0.25
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_yellow",
+      "predicate": {
+        "ultimine_addition:color": 0.3125
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_lime",
+      "predicate": {
+        "ultimine_addition:color": 0.375
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_pink",
+      "predicate": {
+        "ultimine_addition:color": 0.4375
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_gray",
+      "predicate": {
+        "ultimine_addition:color": 0.5
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_light_gray",
+      "predicate": {
+        "ultimine_addition:color": 0.5625
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_cyan",
+      "predicate": {
+        "ultimine_addition:color": 0.625
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_purple",
+      "predicate": {
+        "ultimine_addition:color": 0.6875
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_blue",
+      "predicate": {
+        "ultimine_addition:color": 0.75
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_brown",
+      "predicate": {
+        "ultimine_addition:color": 0.8125
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_green",
+      "predicate": {
+        "ultimine_addition:color": 0.875
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_red",
+      "predicate": {
+        "ultimine_addition:color": 0.9375
+      }
+    },
+    {
+      "model": "ultimine_addition:item/skills_record_black",
+      "predicate": {
+        "ultimine_addition:color": 1.0
+      }
+    }
+  ],
   "textures": {
     "layer0": "ultimine_addition:item/skills_record"
   }

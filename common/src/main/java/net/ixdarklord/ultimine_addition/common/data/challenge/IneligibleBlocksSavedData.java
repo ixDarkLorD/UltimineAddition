@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.data.challenge;
 
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -23,18 +23,22 @@ import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 
 public class IneligibleBlocksSavedData extends SavedData {
     public static final String DATA_KEY = FTBUltimineAddition.MOD_ID + ".ineligible_blocks";
-    private final ServerLevel level;
-    private final Map<ChunkPos, List<BlockEntry>> chunkEntries; // Changed to Map<ChunkPos, List<BlockEntry>>
+    public static final Factory<IneligibleBlocksSavedData> FACTORY = new Factory<>(
+            IneligibleBlocksSavedData::new, (tag, registries) -> new IneligibleBlocksSavedData(deserializeChunkEntries(tag)), DataFixTypes.LEVEL);
+    private final Map<ChunkPos, List<BlockEntry>> chunkEntries;
 
-    public IneligibleBlocksSavedData(ServerLevel level, Map<ChunkPos, List<BlockEntry>> chunkEntries) {
-        this.level = level;
+    public IneligibleBlocksSavedData() {
+        this(new HashMap<>());
+    }
+
+    public IneligibleBlocksSavedData(Map<ChunkPos, List<BlockEntry>> chunkEntries) {
         this.chunkEntries = chunkEntries;
     }
 
     public void add(Entity entity, BlockInfo blockInfo) {
         ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
         UUID entityUUID = entity.getUUID();
-        ChunkPos chunkPos = level.getChunk(blockInfo.pos).getPos();
+        ChunkPos chunkPos = new ChunkPos(blockInfo.pos);
 
         List<BlockEntry> blockEntryList = chunkEntries.computeIfAbsent(chunkPos, k -> new ArrayList<>());
 
@@ -54,14 +58,14 @@ public class IneligibleBlocksSavedData extends SavedData {
             setDirty();
         }
 
-        if (ConfigHandler.SERVER.INELIGIBLE_BLOCKS_LOGGER.get()) {
+        if (UAServerConfig.INELIGIBLE_BLOCKS_LOGGER.get()) {
             ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(blockInfo.blockState.getBlock());
             LOGGER.debug("[Ineligible Blocks] Block added at: {} with ID: {} by {}", blockInfo.pos, blockId, entityId);
         }
     }
 
     public void remove(BlockPos pos) {
-        ChunkPos chunkPos = level.getChunk(pos).getPos();
+        ChunkPos chunkPos = new ChunkPos(pos);
         List<BlockEntry> blockEntryList = chunkEntries.get(chunkPos);
         if (blockEntryList == null) return;
 
@@ -95,7 +99,7 @@ public class IneligibleBlocksSavedData extends SavedData {
 
         if (isDirty) {
             setDirty();
-            if (ConfigHandler.SERVER.INELIGIBLE_BLOCKS_LOGGER.get() && removedBlockState != null) {
+            if (UAServerConfig.INELIGIBLE_BLOCKS_LOGGER.get() && removedBlockState != null) {
                 ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(removedBlockState.getBlock());
                 LOGGER.debug("[Ineligible Blocks] Block removed at: {} with ID: {}", pos, blockId);
             }
@@ -114,19 +118,7 @@ public class IneligibleBlocksSavedData extends SavedData {
     }
 
     public static IneligibleBlocksSavedData getOrCreate(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(getFactory(level), DATA_KEY);
-    }
-
-    public static Factory<IneligibleBlocksSavedData> getFactory(ServerLevel level) {
-        return new Factory<>(() -> create(level), (NBT, provider) -> load(level, NBT), DataFixTypes.LEVEL);
-    }
-
-    private static IneligibleBlocksSavedData create(ServerLevel level) {
-        return new IneligibleBlocksSavedData(level, new HashMap<>());
-    }
-
-    private static IneligibleBlocksSavedData load(ServerLevel level, CompoundTag NBT) {
-        return new IneligibleBlocksSavedData(level, deserializeChunkEntries(NBT));
+        return level.getDataStorage().computeIfAbsent(FACTORY, DATA_KEY);
     }
 
     @Override
@@ -275,7 +267,7 @@ public class IneligibleBlocksSavedData extends SavedData {
     public record BlockInfo(BlockPos pos, BlockState blockState) {
         @Override
         public String toString() {
-            return "{\"State\": \"%s\", \"Pos\": \"%s\"}".formatted(NbtUtils.writeBlockState(blockState), NbtUtils.writeBlockPos(pos));
+            return "{\"State\": \"%s\", \"Pos\": \"%s\"}".formatted(NbtUtils.writeBlockState(blockState), pos.toShortString());
         }
 
         @Override

@@ -1,0 +1,43 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "ultimine_addition:legacy_mode",
+      "value": false
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "ultimine_addition",
+  "key": {
+    "D": {
+      "tag": "c:dyes/purple"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "M": {
+      "item": "ultimine_addition:mining_skill_card_empty"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "W": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "NIN",
+    "PMP",
+    "WDW"
+  ],
+  "result": {
+    "components": {
+      "minecraft:base_color": "purple"
+    },
+    "count": 1,
+    "id": "ultimine_addition:skills_record"
+  }
+}

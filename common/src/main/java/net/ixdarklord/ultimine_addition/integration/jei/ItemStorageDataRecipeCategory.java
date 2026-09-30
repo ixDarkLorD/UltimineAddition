@@ -1,9 +1,17 @@
 package net.ixdarklord.ultimine_addition.integration.jei;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.block.Blocks;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.ITickTimer;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -16,8 +24,8 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.ixdarklord.coolcatlib.api.client.utils.MouseHelper;
-import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import net.ixdarklord.coolcatcore.api.client.utils.MouseHelper;
+import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.common.data.item.StorageItemData;
 import net.ixdarklord.ultimine_addition.common.item.StorageItem;
 import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
@@ -27,11 +35,6 @@ import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -39,8 +42,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -106,18 +107,22 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
         return this.title;
     }
 
-    @SuppressWarnings("removal")
     @Override
-    public @NotNull IDrawable getBackground() {
-        return this.background;
+    public int getWidth() {
+        return this.background.getWidth();
+    }
+
+    @Override
+    public int getHeight() {
+        return this.background.getHeight();
     }
 
     @Override
     public void setRecipe(@NotNull IRecipeLayoutBuilder builder, @NotNull ItemStorageDataRecipe recipe, @NotNull IFocusGroup focuses) {
         if (this.title.equals(Component.literal("Not Assigned!"))) {
-            this.title = Component.translatable(String.format("jei.ultimine_addition.category.item_storage.%s", Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(recipe.getResultItem().getItem())).getPath()));
+            this.title = Component.translatable(String.format("jei.ultimine_addition.category.item_storage.%s", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(recipe.getResultItem().getItem())).getPath()));
         }
-        List<ItemStack> items = DataIngredient.toNormal(recipe.getDataIngredients()).stream().map(Ingredient::getItems).flatMap(Arrays::stream).toList();
+        List<ItemStack> items = DataIngredient.toDisplayStacks(recipe.getDataIngredients());
         builder.addSlot(RecipeIngredientRole.INPUT, 9, 5).addItemStack(recipe.getResultItem());
         builder.addSlot(RecipeIngredientRole.INPUT, 103, 5).addIngredients(VanillaTypes.ITEM_STACK, items);
     }
@@ -138,6 +143,7 @@ public class ItemStorageDataRecipeCategory implements IRecipeCategory<ItemStorag
 
     @Override
     public void draw(@NotNull ItemStorageDataRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphics guiGraphics, double mouseX, double mouseY) {
+        this.background.draw(guiGraphics);
         new AnimatedCrafting(this.timer).draw(guiGraphics, 51, 0);
 
         guiGraphics.pose().pushPose();

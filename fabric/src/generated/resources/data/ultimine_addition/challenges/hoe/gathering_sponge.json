@@ -6,8 +6,8 @@
   "for_card_tier": 3,
   "for_card_type": "hoe",
   "required_amount": {
-    "max": 32,
-    "min": 16
+    "max": 12,
+    "min": 6
   },
   "targeted_blocks": [
     "minecraft:sponge",

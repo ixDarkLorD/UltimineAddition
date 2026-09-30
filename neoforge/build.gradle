@@ -1,4 +1,4 @@
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/neoforge.gradle"
+apply from: "${rootProject.sharedScripts}/neoforge.gradle"
 
 loom {
     runs {
@@ -14,14 +14,16 @@ loom {
 }
 
 dependencies {
-    modApi libs.architectury.neoforge.get()
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-neoforge:1.21-${coolcatlib_version}"
+    // CoolCatLib: Core (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
+    // render utilities, easing), published from ../CoolCatLib-1.21.
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-core-neoforge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-canvas-neoforge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
 
     modCompileOnly "${libs.curios.neoforge.get()}:api"
-    modRuntimeOnly libs.curios.neoforge.get()
+    modRuntimeOnly libs.curios.neoforge
 
-    modCompileOnlyApi libs.jei.api.neoforge.get()
-    modRuntimeOnly libs.jei.neoforge.get()
+    modCompileOnlyApi libs.jei.api.neoforge
+    modRuntimeOnly libs.jei.neoforge
 
     modApi "dev.ftb.mods:ftb-ultimine-neoforge:${ftbultimine_version}"
     modApi "dev.ftb.mods:ftb-library-neoforge:${ftblibrary_version}"

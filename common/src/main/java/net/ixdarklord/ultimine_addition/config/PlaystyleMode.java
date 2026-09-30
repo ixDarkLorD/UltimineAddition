@@ -1,14 +1,16 @@
 package net.ixdarklord.ultimine_addition.config;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.ixdarklord.coolcatcore.api.config.type.EnumType;
+import net.minecraft.network.chat.Component;
 
-public enum PlaystyleMode {
+import java.util.Locale;
+
+public enum PlaystyleMode implements EnumType.Displayable {
     MODERN,
-    ONE_TIER_ONLY,
     LEGACY;
 
-    public static final StreamCodec<ByteBuf, PlaystyleMode> STREAM_CODEC =
-            ByteBufCodecs.STRING_UTF8.map(PlaystyleMode::valueOf, PlaystyleMode::name);
+    @Override
+    public Component displayName() {
+        return Component.translatable("ultimine_addition.playstyle_mode." + this.name().toLowerCase(Locale.ROOT));
+    }
 }

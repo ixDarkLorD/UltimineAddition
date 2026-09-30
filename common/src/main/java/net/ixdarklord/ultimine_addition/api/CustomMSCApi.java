@@ -1,12 +1,11 @@
 package net.ixdarklord.ultimine_addition.api;
 
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import com.google.common.base.Stopwatch;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
-import dev.architectury.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.minecraft.world.item.Items;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,7 +57,7 @@ public class CustomMSCApi {
                             continue;
                         }
 
-                        if (type.getId().isEmpty() || type.getDefaultDisplayItem() == null || type.getDefaultDisplayItem() == Items.AIR) {
+                        if (type.getId().isEmpty()) {
                             throw new RuntimeException("Invalid data for card type: " + type.getId());
                         }
 
@@ -84,7 +83,7 @@ public class CustomMSCApi {
 
     @SuppressWarnings("unused")
     public static void printJson() {
-        var type = new MiningSkillCardItem.Type(true, "test", List.of(), Items.BARRIER);
+        var type = new MiningSkillCardItem.Type(true, "test", List.of());
         MiningSkillCardItem.Type.CARD_CODEC.encodeStart(JsonOps.INSTANCE, type).result().ifPresent(jsonElement ->
                 System.out.println(jsonElement.getAsJsonObject().toString()));
     }

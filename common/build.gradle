@@ -1,12 +1,20 @@
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/common.gradle"
+apply from: "${rootProject.sharedScripts}/common.gradle"
 
 dependencies {
-    modApi(libs.architectury.common.get())
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-common:1.21-${coolcatlib_version}"
-    modApi libs.forgeconfigapiport.common.get()
-    modApi libs.jei.libs.common.get()
-    modApi libs.jei.api.common.get()
+    // CoolCatLib: Core (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
+    // render utilities, easing), published from ../CoolCatLib-1.21.
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-core-common:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-canvas-common:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    modApi libs.jei.libs.common
+    modApi libs.jei.api.common
 
     modApi "dev.ftb.mods:ftb-ultimine:${ftbultimine_version}"
     modApi "dev.ftb.mods:ftb-library:${ftblibrary_version}"
+}
+
+// The shared main.gradle publishes every subproject's shadowJar. For common it must be a plain jar of this
+// module's own classes (Shadow's default bundles the whole runtime classpath under an "-all" classifier).
+shadowJar {
+    configurations = []
+    archiveClassifier = null
 }

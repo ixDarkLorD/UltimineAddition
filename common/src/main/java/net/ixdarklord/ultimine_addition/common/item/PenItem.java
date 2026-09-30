@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.data.item.StorageItemData;
 import net.minecraft.ChatFormatting;
@@ -21,8 +21,8 @@ public class PenItem extends StorageItem {
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
-        if (this.isLegacyMode() || level.isClientSide()) return;
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotIndex, boolean isSelected) {
+        if (this.isLegacyMode()) return;
         if (!stack.has(StorageItemData.DATA_COMPONENT) && entity instanceof ServerPlayer)
             getData(stack).save();
     }

@@ -1,7 +1,10 @@
 package net.ixdarklord.ultimine_addition.util;
 
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.Item;
+import net.minecraft.core.component.DataComponents;
 import com.google.common.collect.Lists;
-import net.ixdarklord.coolcatlib.api.utils.SlotReference;
+import net.ixdarklord.coolcatcore.api.utils.SlotReference;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
@@ -21,6 +24,7 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +32,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 public class ItemUtils {
+
     public record ItemSorter(ItemStack item, int slotId, int order){}
 
     public static Optional<BlockState> getAxeStrippingState(BlockState originalState) {
@@ -78,8 +83,27 @@ public class ItemUtils {
         return index;
     }
 
+    /**
+     * Finds the {@link Player#getSlot(int)} index holding this exact stack instance, or -1.
+     * {@code Item#inventoryTick} only gets the index within the stack's inventory section, so it is recovered by identity.
+     */
+    public static int findSlotIndex(Player player, ItemStack stack) {
+        var inventory = player.getInventory();
+        for (int i = 0; i < inventory.items.size(); i++) {
+            if (inventory.items.get(i) == stack) return i;
+        }
+        if (player.getOffhandItem() == stack) return getSlotIndex(InteractionHand.OFF_HAND);
+        return -1;
+    }
+
+    /** The item in a {@link Player#getSlot(int)} slot, or empty if the player has no such slot. */
+    public static ItemStack getSlotItem(Player player, int slotIndex) {
+        SlotAccess access = player.getSlot(slotIndex);
+        return access != null ? access.get() : ItemStack.EMPTY;
+    }
+
     public static ItemStack getSkillsRecord(Player player, @Nullable InteractionHand hand) {
-        return hand == null ? ServicePlatform.get().slotAPI().getSkillsRecordItem(player) : player.getSlot(getSlotIndex(hand)).get();
+        return hand == null ? ServicePlatform.get().slotAPI().getSkillsRecordItem(player) : getSlotItem(player, getSlotIndex(hand));
     }
 
     public static List<SlotReference.Player> getSlotReferences(Player player, Item item, boolean onlyInventory) {
@@ -101,7 +125,9 @@ public class ItemUtils {
             if (slotRange == null) continue;
             Integer slot = slotRange.slots().getFirst();
             boolean match = result.stream().anyMatch(ref -> ref.getIndex() == slot);
-            if (!match && predicate.test(player.getSlot(slot).get())) {
+            // Player#getSlot returns null (not SlotAccess.NULL) for slot names a player doesn't have.
+            SlotAccess access = player.getSlot(slot);
+            if (!match && access != null && predicate.test(access.get())) {
                 result.add(new SlotReference.Player(player, slot));
             }
         }
@@ -137,7 +163,7 @@ public class ItemUtils {
     }
 
     public static boolean isToolItem(ItemStack stack) {
-        return stack.getItem() instanceof DiggerItem;
+        return stack.has(DataComponents.TOOL);
     }
 
     public static boolean isItemInHandCustomCardValid(Player player) {
@@ -149,7 +175,7 @@ public class ItemUtils {
     }
     public static boolean isItemInHandPickaxe(Player player) {
         ItemStack stack = getItemInHand(player, true);
-        return isItemInHandPaxel(player) || stack.is(ItemTags.PICKAXES) || stack.getItem() instanceof PickaxeItem;
+        return isItemInHandPaxel(player) || stack.is(ItemTags.PICKAXES);
     }
 
     public static boolean isItemInHandAxe(Player player) {
@@ -165,6 +191,21 @@ public class ItemUtils {
     public static boolean isItemInHandHoe(Player player) {
         ItemStack stack = getItemInHand(player, true);
         return isItemInHandPaxel(player) || stack.is(ItemTags.HOES) || stack.getItem() instanceof HoeItem;
+    }
+
+    // The Mining Skill Card types whose tools include this item (a paxel counts for all four).
+    public static List<MiningSkillCardItem.Type> getToolTypes(ItemStack stack) {
+        List<MiningSkillCardItem.Type> types = new ArrayList<>();
+        if (stack.isEmpty()) return types;
+        boolean paxel = ServicePlatform.get().players().isToolPaxel(stack);
+        if (paxel || stack.is(ItemTags.PICKAXES)) types.add(MiningSkillCardItem.Type.PICKAXE);
+        if (paxel || stack.is(ItemTags.AXES) || stack.getItem() instanceof AxeItem) types.add(MiningSkillCardItem.Type.AXE);
+        if (paxel || stack.is(ItemTags.SHOVELS) || stack.getItem() instanceof ShovelItem) types.add(MiningSkillCardItem.Type.SHOVEL);
+        if (paxel || stack.is(ItemTags.HOES) || stack.getItem() instanceof HoeItem) types.add(MiningSkillCardItem.Type.HOE);
+        for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
+            if (type.isCustomType() && type.utilizeRequiredTools().contains(stack.getItem())) types.add(type);
+        }
+        return types;
     }
 
     public static boolean isItemInHandPaxel(Player player) {

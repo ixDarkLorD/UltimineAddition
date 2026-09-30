@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.mixin.client;
 
-import net.ixdarklord.coolcatlib.api.item.ComponentItem;
+import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -22,26 +22,31 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Places an item's tooltip image at the "ultimine_addition.tooltip_image" placeholder line
+ * instead of vanilla's fixed position (second line).
+ */
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 @Mixin(value = GuiGraphics.class)
 abstract class GuiGraphicsMixin {
-    @Shadow public abstract void renderTooltipInternal(Font font, List<ClientTooltipComponent> components, int mouseX, int mouseY, ClientTooltipPositioner tooltipPositioner);
     @Shadow @Final private Minecraft minecraft;
+
+    @Shadow
+    public abstract void renderTooltipInternal(Font font, List<ClientTooltipComponent> components, int mouseX, int mouseY, ClientTooltipPositioner tooltipPositioner);
 
     @Inject(method = "renderTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;II)V", at = @At("HEAD"), cancellable = true)
     private void UA$Inject$onRenderTooltip(Font font, List<Component> tooltipLines, Optional<TooltipComponent> visualTooltipComponent, int mouseX, int mouseY, CallbackInfo ci) {
-        List<ClientTooltipComponent> list = tooltipLines.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Collectors.toList());
-        if (visualTooltipComponent.isPresent()) {
-            TooltipComponent tooltipComponent = visualTooltipComponent.get();
-            if (this.minecraft.screen instanceof AbstractContainerScreen<?> screen && screen.hoveredSlot != null && screen.hoveredSlot.getItem().getItem() instanceof ComponentItem) {
-                for (int i = 0; i < tooltipLines.size(); i++) {
-                    if (tooltipLines.get(i).getString().equalsIgnoreCase(FTBUltimineAddition.MOD_ID + ".tooltip_image"))
-                        list.set(i, ClientTooltipComponent.create(tooltipComponent));
-                }
+        if (visualTooltipComponent.isEmpty()) return;
+        if (!(this.minecraft.screen instanceof AbstractContainerScreen<?> screen) || screen.hoveredSlot == null || !(screen.hoveredSlot.getItem().getItem() instanceof ComponentItem)) return;
 
-                this.renderTooltipInternal(font, list, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
-                ci.cancel();
-            }
+        List<ClientTooltipComponent> list = tooltipLines.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Collectors.toList());
+        TooltipComponent tooltipComponent = visualTooltipComponent.get();
+        for (int i = 0; i < tooltipLines.size(); i++) {
+            if (tooltipLines.get(i).getString().equalsIgnoreCase(FTBUltimineAddition.MOD_ID + ".tooltip_image"))
+                list.set(i, ClientTooltipComponent.create(tooltipComponent));
         }
+
+        this.renderTooltipInternal(font, list, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
+        ci.cancel();
     }
 }

@@ -1,9 +1,9 @@
 package net.ixdarklord.ultimine_addition.common.event;
 
-import dev.architectury.event.CompoundEventResult;
-import dev.architectury.event.EventResult;
-import dev.architectury.event.events.common.BlockEvent;
-import dev.architectury.event.events.common.TickEvent;
+import net.ixdarklord.coolcatcore.api.event.v2.common.BlockEvents;
+import net.ixdarklord.coolcatcore.api.event.v2.common.ServerTickEvents;
+import net.ixdarklord.coolcatcore.api.event.v2.core.EventResult;
+import net.ixdarklord.coolcatcore.api.event.v2.core.EventResultHolder;
 import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSavedData;
 import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -16,29 +16,25 @@ public class IneligibleBlocksEvents {
         AtomicBoolean i = new AtomicBoolean();
         BlockToolModificationEvent.EVENT.register((originalState, context, toolAction, simulate) -> {
             i.set(true);
-            return CompoundEventResult.pass();
+            return EventResultHolder.pass();
         });
 
-        BlockEvent.PLACE.register((level, pos, state, placer) -> {
+        BlockEvents.PLACED.register((level, pos, state, placer) -> {
             if (level instanceof ServerLevel serverLevel) {
-                if (state.is(Blocks.AIR)) return EventResult.pass();
+                if (state.is(Blocks.AIR)) return;
                 var data = IneligibleBlocksSavedData.getOrCreate(serverLevel);
                 if (!i.get() && placer != null) {
                     data.add(placer, new IneligibleBlocksSavedData.BlockInfo(pos, state));
                 }
                 i.set(false);
             }
+        });
+
+        BlockEvents.BREAK.register((level, pos, state, player) -> {
+            IneligibleBlocksSavedData.getOrCreate(level).remove(pos);
             return EventResult.pass();
         });
 
-        BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
-            if (level instanceof ServerLevel serverLevel) {
-                var data = IneligibleBlocksSavedData.getOrCreate(serverLevel);
-                data.remove(pos);
-            }
-            return EventResult.pass();
-        });
-
-        TickEvent.SERVER_LEVEL_PRE.register(instance -> IneligibleBlocksSavedData.getOrCreate(instance).validateBlocks(instance));
+        ServerTickEvents.START_LEVEL.register(instance -> IneligibleBlocksSavedData.getOrCreate(instance).validateBlocks(instance));
     }
 }

@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.datagen.challenge.builder;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import com.mojang.datafixers.util.Pair;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -48,7 +49,7 @@ public class ChallengesBuilder {
     }
 
     public ChallengesBuilder targetedBlocks(@NotNull Block... blocks) {
-        for (var block : blocks) this.targetedBlocks.add(Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(block.asItem())).toString());
+        for (var block : blocks) this.targetedBlocks.add(Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(block.asItem())).toString());
         return this;
     }
 

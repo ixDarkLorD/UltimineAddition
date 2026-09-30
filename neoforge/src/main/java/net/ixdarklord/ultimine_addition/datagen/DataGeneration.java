@@ -1,11 +1,11 @@
 package net.ixdarklord.ultimine_addition.datagen;
 
-import net.ixdarklord.coolcatlib.api.datagen.NeoForgeLanguageWrapper;
+import net.ixdarklord.coolcatcore.api.datagen.NeoForgeLanguageWrapper;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.advancement.AdvancementGenerator;
 import net.ixdarklord.ultimine_addition.datagen.challenge.ChallengeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.language.LanguageGenerator;
-import net.ixdarklord.ultimine_addition.datagen.model.ItemModelGenerator;
+import net.ixdarklord.ultimine_addition.datagen.model.ItemModelDataProvider;
 import net.ixdarklord.ultimine_addition.datagen.particle.ParticleGenerator;
 import net.ixdarklord.ultimine_addition.datagen.recipe.RecipeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.BlockTagGenerator;
@@ -36,7 +36,7 @@ public class DataGeneration {
         generator.addProvider(event.includeServer(), new AdvancementGenerator(output, lookupProvider));
         generator.addProvider(event.includeServer(), new ChallengeGenerator(output, lookupProvider));
         generator.addProvider(event.includeServer(), new RecipeGenerator(output, lookupProvider));
-        generator.addProvider(event.includeClient(), new ItemModelGenerator(output, existingFileHelper));
+        generator.addProvider(event.includeClient(), new ItemModelDataProvider(output));
         generator.addProvider(event.includeClient(), new NeoForgeLanguageWrapper(output, FTBUltimineAddition.MOD_ID, "en_us", new LanguageGenerator()));
         generator.addProvider(event.includeClient(), new ParticleGenerator(output));
     }

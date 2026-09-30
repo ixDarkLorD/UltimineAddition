@@ -9,9 +9,6 @@
   "category": "misc",
   "group": "ultimine_addition",
   "key": {
-    "C": {
-      "item": "minecraft:yellow_concrete"
-    },
     "I": {
       "item": "minecraft:iron_ingot"
     },
@@ -20,12 +17,18 @@
     },
     "N": {
       "item": "minecraft:iron_nugget"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "W": {
+      "tag": "minecraft:planks"
     }
   },
   "pattern": [
     "NIN",
-    "CMC",
-    "NCN"
+    "PMP",
+    "WWW"
   ],
   "result": {
     "count": 1,

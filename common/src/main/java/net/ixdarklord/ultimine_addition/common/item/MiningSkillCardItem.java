@@ -4,14 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.handler.codec.CodecException;
-import net.ixdarklord.coolcatlib.api.utils.ChatFormattingUtils;
-import net.ixdarklord.coolcatlib.api.utils.CodecUtils;
-import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import net.ixdarklord.coolcatcore.api.utils.ChatFormattingUtils;
+import net.ixdarklord.coolcatcore.api.utils.CodecUtils;
+import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
-import net.ixdarklord.ultimine_addition.client.handler.ItemRendererHandler;
-import net.ixdarklord.ultimine_addition.client.renderer.item.IItemRenderer;
-import net.ixdarklord.ultimine_addition.client.renderer.item.UAItemRenderer;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
@@ -44,7 +41,7 @@ import java.util.List;
 
 import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.Type.EMPTY;
 
-public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> implements IItemRenderer {
+public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
     private final Type type;
     public MiningSkillCardItem(Type type, Properties properties) {
         super(properties, ComponentType.CRAFTING);
@@ -53,18 +50,17 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
-        ItemStack stack = player.getItemInHand(usedHand);
-        return InteractionResultHolder.pass(stack);
+        return InteractionResultHolder.pass(player.getItemInHand(usedHand));
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotID, boolean isSelected) {
-        if (this.isLegacyMode() || level.isClientSide() || this.type == EMPTY) return;
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotIndex, boolean isSelected) {
+        if (this.isLegacyMode() || this.type == EMPTY) return;
 
         if (entity instanceof ServerPlayer) {
+            // A card without data yet (e.g. from /give): give it an identity; it's stored and rolls its challenges.
             if (!stack.has(MiningSkillCardData.DATA_COMPONENT)) {
-                if (getData(stack).getChallenges().isEmpty())
-                    getData(stack).initChallenges().save();
+                MiningSkillCardData.create(this.type).setStack(stack).save();
             }
         }
     }
@@ -85,7 +81,8 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
 
         MiningSkillCardData data = stack.get(MiningSkillCardData.DATA_COMPONENT);
-        if (type != EMPTY && data != null && !data.isCreativeItem() && data.getTier() != Tier.Unlearned && data.getTier() != Tier.Mastered) {
+        // Potion points live outside the item; skip the line until they've been synced.
+        if (type != EMPTY && data != null && !data.isCreativeItem() && data.getTier() != Tier.Unlearned && data.getTier() != Tier.Mastered && data.hasProgress()) {
             ChatFormatting formatting = ChatFormattingUtils.getProgressColor(data.getPotionPoints(), data.getMaxPotionPoints());
             component = Component.translatable("tooltip.ultimine_addition.skill_card.potion_point", Component.literal(String.valueOf(data.getPotionPoints())).withStyle(formatting));
             tooltipComponents.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
@@ -105,6 +102,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     public boolean isBarVisible(ItemStack itemStack) {
         var data = getData(itemStack);
         if (!itemStack.has(MiningSkillCardData.DATA_COMPONENT) || type == EMPTY || data.isCreativeItem() || data.getTier() == Tier.Unlearned || data.getTier() == Tier.Mastered) return false;
+        if (!data.hasProgress()) return false;  // potion points not synced yet
         return !data.isPotionPointsFull();
     }
 
@@ -117,11 +115,6 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     @Override
     public int getBarColor(ItemStack itemStack) {
         return Mth.hsvToRgb(Math.max(0.0F, (getBarWidth(itemStack) / 13.0F)) / 3.0F, 1.0F, 1.0F);
-    }
-
-    @Override
-    public UAItemRenderer createItemRenderer() {
-        return ItemRendererHandler.MiningSkillCardRenderer();
     }
 
     @Override
@@ -138,17 +131,16 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     }
 
     public static class Type {
-        public static final Type EMPTY = new Type(true, "empty", List.of(), Items.BARRIER);
-        public static final Type PICKAXE = new Type(true, "pickaxe", List.of(), Items.NETHERITE_PICKAXE);
-        public static final Type AXE = new Type(true, "axe", List.of(), Items.NETHERITE_AXE);
-        public static final Type SHOVEL = new Type(true, "shovel", List.of(), Items.NETHERITE_SHOVEL);
-        public static final Type HOE = new Type(true, "hoe", List.of(), Items.NETHERITE_HOE);
+        public static final Type EMPTY = new Type(true, "empty", List.of());
+        public static final Type PICKAXE = new Type(true, "pickaxe", List.of());
+        public static final Type AXE = new Type(true, "axe", List.of());
+        public static final Type SHOVEL = new Type(true, "shovel", List.of());
+        public static final Type HOE = new Type(true, "hoe", List.of());
         public static List<Type> TYPES = new ArrayList<>();
 
         private final boolean active;
         private final String id;
         private final List<String> requiredTools;
-        private final Item defaultDisplayItem;
         private final Color potionColor;
 
         public static final Codec<Type> CODEC = Codec.STRING.comapFlatMap(s -> {
@@ -163,24 +155,19 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
                 Codec.BOOL.fieldOf("active").forGetter(Type::isActive),
                 Codec.STRING.fieldOf("card_id").forGetter(Type::getId),
                 Codec.STRING.listOf().fieldOf("required_tools").forGetter(Type::getRequiredTools),
-                CodecUtils.COLOR_CODEC.optionalFieldOf("potion_color", Color.WHITE).forGetter(Type::getPotionColor),
-                CodecUtils.ITEM_CODEC.optionalFieldOf("default_display_item", Items.BARRIER).forGetter(Type::getDefaultDisplayItem)
+                CodecUtils.COLOR_CODEC.optionalFieldOf("potion_color", Color.WHITE).forGetter(Type::getPotionColor)
+                // (Older custom card files may still have a "default_display_item"; it's ignored.)
         ).apply(instance, Type::new));
 
         public Type(boolean active, String id, List<String> requiredTools) {
-            this(active, id, requiredTools, Color.WHITE, Items.BARRIER);
+            this(active, id, requiredTools, Color.WHITE);
         }
 
-        public Type(boolean active, String id, List<String> requiredTools, Item defaultDisplayItem) {
-            this(active, id, requiredTools, Color.WHITE, defaultDisplayItem);
-        }
-
-        public Type(boolean active, String id, List<String> requiredTools, Color potionColor, Item defaultDisplayItem) {
+        public Type(boolean active, String id, List<String> requiredTools, Color potionColor) {
             this.active = active;
             this.id = validateId(id);
             this.requiredTools = requiredTools;
             this.potionColor = potionColor;
-            this.defaultDisplayItem = defaultDisplayItem;
         }
 
         private String validateId(String input) {
@@ -213,9 +200,6 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
 
         public Color getPotionColor() {
             return potionColor;
-        }
-        public Item getDefaultDisplayItem() {
-            return defaultDisplayItem;
         }
 
         public static Type fromString(String input) {

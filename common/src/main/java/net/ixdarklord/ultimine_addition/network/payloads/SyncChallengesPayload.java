@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.network.payloads;
 
-import dev.architectury.networking.NetworkManager;
+import net.ixdarklord.coolcatcore.api.network.PacketContext;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -23,7 +23,7 @@ public record SyncChallengesPayload(Map<ResourceLocation, ChallengeData> dataMap
             CHALLENGES_STREAM_CODEC, SyncChallengesPayload::dataMap,
             SyncChallengesPayload::new);
 
-    public static void handle(SyncChallengesPayload message, NetworkManager.PacketContext context) {
+    public static void handle(SyncChallengesPayload message, PacketContext context) {
         context.queue(() -> ChallengesManager.INSTANCE.setChallenges(message.dataMap));
     }
 

@@ -6,8 +6,8 @@
   "for_card_tier": 2,
   "for_card_type": "axe",
   "required_amount": {
-    "max": 4,
-    "min": 2
+    "max": 2,
+    "min": 1
   },
   "targeted_blocks": [
     "minecraft:composter"

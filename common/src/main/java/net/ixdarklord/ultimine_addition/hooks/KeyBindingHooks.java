@@ -8,4 +8,10 @@ public class KeyBindingHooks {
     public static boolean isMatches(KeyMapping keyMapping, int keyCode, int scanCode) {
         throw new AssertionError();
     }
+
+    // A key mapping pressed with Ctrl, where the loader supports key modifiers (NeoForge); otherwise the plain key.
+    @ExpectPlatform
+    public static KeyMapping createControlKeyMapping(String name, int keyCode, String category) {
+        throw new AssertionError();
+    }
 }

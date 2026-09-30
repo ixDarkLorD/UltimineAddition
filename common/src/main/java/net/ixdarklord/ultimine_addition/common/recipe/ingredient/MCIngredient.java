@@ -1,13 +1,12 @@
 package net.ixdarklord.ultimine_addition.common.recipe.ingredient;
 
+import net.minecraft.world.item.Items;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntComparators;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.minecraft.core.Holder;
@@ -18,7 +17,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -40,8 +38,6 @@ public final class MCIngredient implements Predicate<ItemStack> {
     @Nullable
     private ItemStack[] itemStacks;
     private Optional<MiningSkillCardItem.Tier> tier;
-    @Nullable
-    private IntList stackingIds;
 
     private MCIngredient(Stream<? extends Value> stream) {
         this.values = stream.toArray(Value[]::new);
@@ -85,19 +81,6 @@ public final class MCIngredient implements Predicate<ItemStack> {
         return false;
     }
 
-    public IntList getStackingIds() {
-        if (this.stackingIds == null) {
-            ItemStack[] itemStacks = this.getItems();
-            this.stackingIds = new IntArrayList(itemStacks.length);
-            for (ItemStack itemStack : itemStacks) {
-                this.stackingIds.add(StackedContents.getStackingIndex(itemStack));
-            }
-
-            this.stackingIds.sort(IntComparators.NATURAL_COMPARATOR);
-        }
-
-        return this.stackingIds;
-    }
 
     public boolean isEmpty() {
         return this.values.length == 0;
@@ -122,7 +105,9 @@ public final class MCIngredient implements Predicate<ItemStack> {
     }
 
     public static MCIngredient of(MiningSkillCardItem.Tier tier, ItemLike... items) {
-        return of(tier, Arrays.stream(items).map(ItemStack::new));
+        // Built from items (not stacks): item components aren't bound yet during datagen.
+        return fromValues(Arrays.stream(items).map(ItemLike::asItem).filter(item -> item != Items.AIR)
+                .map(item -> new ItemValue(item, Optional.ofNullable(tier))));
     }
 
     public static MCIngredient of(MiningSkillCardItem.Tier tier, ItemStack... stacks) {
@@ -130,7 +115,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
     }
 
     public static MCIngredient of(MiningSkillCardItem.Tier tier, Stream<ItemStack> stacks) {
-        return fromValues(stacks.filter(itemStack -> !itemStack.isEmpty()).map(stack -> new ItemValue(stack, Optional.ofNullable(tier))));
+        return fromValues(stacks.filter(itemStack -> !itemStack.isEmpty()).map(stack -> new ItemValue(stack.getItem(), Optional.ofNullable(tier))));
     }
 
     public static MCIngredient of(MiningSkillCardItem.Tier tier, TagKey<Item> tag) {
@@ -144,23 +129,18 @@ public final class MCIngredient implements Predicate<ItemStack> {
         result.addAll(inputs.stream()
                 .filter(ingredient -> !Arrays.stream(ingredient.values)
                         .filter(value -> value instanceof ItemValue).toList().isEmpty())
-                .map(ingredient -> {
-                    ItemStack[] items = Arrays.stream(ingredient.getItems()).toArray(ItemStack[]::new);
-                    return Ingredient.of(items);
-                })
+                .map(ingredient -> Ingredient.of(Arrays.stream(ingredient.getItems()).map(ItemStack::getItem).toArray(Item[]::new)))
                 .toList()
         );
 
         // Tag Values
         result.addAll(inputs.stream()
-                .filter(ingredient -> !Arrays.stream(ingredient.values).filter(value -> value instanceof TagValue).toList().isEmpty())
-                .map(ingredient -> {
-                    Optional<TagKey<Item>> optional = Arrays.stream(ingredient.values)
-                            .filter(value -> value instanceof TagValue)
-                            .map(value -> ((TagValue) value).tag)
-                            .findFirst();
-                    return optional.map(Ingredient::of).orElse(Ingredient.EMPTY);
-                })
+                .map(ingredient -> Arrays.stream(ingredient.values)
+                        .filter(value -> value instanceof TagValue)
+                        .map(value -> ((TagValue) value).tag)
+                        .findFirst())
+                .flatMap(Optional::stream)
+                .map(Ingredient::of)
                 .toList()
         );
         return result;
@@ -190,13 +170,13 @@ public final class MCIngredient implements Predicate<ItemStack> {
             public @NotNull MCIngredient decode(RegistryFriendlyByteBuf buf) {
                 return MCIngredient.of(
                         ByteBufCodecs.optional(MiningSkillCardItem.Tier.STREAM_CODEC).decode(buf).orElse(null),
-                        ItemStack.LIST_STREAM_CODEC.decode(buf).stream());
+                        ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buf).stream());
             }
 
             @Override
             public void encode(RegistryFriendlyByteBuf buf, MCIngredient ingredient) {
                 ByteBufCodecs.optional(MiningSkillCardItem.Tier.STREAM_CODEC).encode(buf, ingredient.getTier());
-                ItemStack.LIST_STREAM_CODEC.encode(buf, Arrays.stream(ingredient.getItems()).toList());
+                ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buf, Arrays.stream(ingredient.getItems()).toList());
             }
         };
 
@@ -239,7 +219,7 @@ public final class MCIngredient implements Predicate<ItemStack> {
             for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
                 ItemStack stack = new ItemStack(item);
                 if (this.tier.isPresent() && stack.getItem() instanceof MiningSkillCardItem cardItem) {
-                    cardItem.getData(stack).setTier(this.tier.get()).save();
+                    cardItem.getData(stack).setTier(this.tier.get()).writeComponent();
                 }
                 list.add(stack);
             }
@@ -257,17 +237,18 @@ public final class MCIngredient implements Predicate<ItemStack> {
         }
     }
 
-    private record ItemValue(ItemStack stack, Optional<MiningSkillCardItem.Tier> tier) implements Value {
+    private record ItemValue(Item item, Optional<MiningSkillCardItem.Tier> tier) implements Value {
         static final Codec<ItemValue> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                ItemStack.SIMPLE_ITEM_CODEC.fieldOf("item").forGetter(ItemValue::stack),
+                BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(ItemValue::item),
                 MiningSkillCardItem.Tier.CODEC.optionalFieldOf("card_tier").forGetter(ItemValue::getTier)
         ).apply(instance, ItemValue::new));
 
         public Collection<ItemStack> getItems() {
-            if (this.tier.isPresent() && this.stack.getItem() instanceof MiningSkillCardItem cardItem) {
-                cardItem.getData(this.stack).setTier(this.tier.get()).save();
+            ItemStack stack = new ItemStack(this.item);
+            if (this.tier.isPresent() && this.item instanceof MiningSkillCardItem cardItem) {
+                cardItem.getData(stack).setTier(this.tier.get()).writeComponent();
             }
-            return Collections.singleton(this.stack);
+            return Collections.singleton(stack);
         }
 
         @Override

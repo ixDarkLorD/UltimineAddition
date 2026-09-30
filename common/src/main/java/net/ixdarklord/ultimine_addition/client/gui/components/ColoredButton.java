@@ -1,6 +1,7 @@
 package net.ixdarklord.ultimine_addition.client.gui.components;
 
-import net.ixdarklord.coolcatlib.api.client.gui.components.ColorableImageButton;
+import net.minecraft.client.gui.Font;
+import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -33,9 +34,9 @@ public class ColoredButton extends ColorableImageButton {
         final MutableComponent component = Component.literal("➤ ").withStyle(ChatFormatting.DARK_GRAY).append(getTooltipInfo().component);
         Optional<TooltipComponent> tooltipComponent = getTooltipInfo().getTooltipComponent();
 
-        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        Font font = Minecraft.getInstance().font;
         int y = mouseY + 9 - tooltipComponent.map(c -> ClientTooltipComponent.create(c).getHeight() / 2).orElse(0);
-        guiGraphics.renderTooltip(Minecraft.getInstance().font, List.of(component.withStyle(ChatFormatting.ITALIC)), tooltipComponent, mouseX, y);
+        guiGraphics.renderTooltip(font, List.of(component.withStyle(ChatFormatting.ITALIC)), tooltipComponent, mouseX, y);
     }
 
     public TooltipInfo getTooltipInfo() {

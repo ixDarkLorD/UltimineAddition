@@ -2,7 +2,7 @@ package net.ixdarklord.ultimine_addition.datagen.recipe.builder;
 
 import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.DataIngredient;
-import net.ixdarklord.ultimine_addition.core.Registration;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
@@ -91,7 +91,7 @@ public class ItemStorageDataRecipeBuilder implements RecipeBuilder {
 
     @Override
     public void save(RecipeOutput recipeOutput, ResourceLocation actualId) {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(actualId.getNamespace(), Objects.requireNonNull(Registration.ITEMS.getRegistrar().getId(this.result)).getPath() + "_" + actualId.getPath());
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(actualId.getNamespace(), Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(this.result)).getPath() + "_" + actualId.getPath());
         this.ensureValid(id);
 
         Advancement.Builder builder = recipeOutput.advancement().addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id)).rewards(AdvancementRewards.Builder.recipe(id)).requirements(AdvancementRequirements.Strategy.OR);

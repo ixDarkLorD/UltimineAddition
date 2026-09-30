@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.integration.jei;
 
+
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;

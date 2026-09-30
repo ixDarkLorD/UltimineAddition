@@ -16,9 +16,10 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.ixdarklord.ultimine_addition.datagen.record.SkillsRecordRecipes;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -30,22 +31,19 @@ public class RecipeGenerator extends FabricRecipeProvider {
 
     @Override
     public void buildRecipes(RecipeOutput output) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Registration.CARD_BLUEPRINT.get())
-                .define('A', Items.AMETHYST_SHARD)
+        // An empty card from a token of each tool's work around five papers: something a pickaxe digs (copper, iron or
+        // coal), dirt for the shovel, a log for the axe and seeds for the hoe.
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_EMPTY.get())
                 .define('P', Items.PAPER)
-                .define('L', ConventionalItemTags.LAPIS_GEMS)
-                .pattern("ALA")
-                .pattern("LPL")
-                .pattern("ALA")
+                .define('M', Ingredient.of(Items.COPPER_INGOT, Items.IRON_INGOT, Items.COAL))
+                .define('D', ItemTags.DIRT)
+                .define('L', ItemTags.LOGS)
+                .define('S', ConventionalItemTags.SEEDS)
+                .pattern("PMP")
+                .pattern("LPD")
+                .pattern("PSP")
                 .group(FTBUltimineAddition.MOD_ID)
-                .unlockedBy("has_amethyst_shard", inventoryTrigger(ItemPredicate.Builder.item().of(Items.AMETHYST_SHARD).build()))
-                .save(output);
-
-        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Registration.MINING_SKILL_CARD_EMPTY.get(), 2)
-                .requires(Registration.MINING_SKILL_CARD_EMPTY.get())
-                .requires(Registration.CARD_BLUEPRINT.get())
-                .group(FTBUltimineAddition.MOD_ID)
-                .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
+                .unlockedBy("has_paper", inventoryTrigger(ItemPredicate.Builder.item().of(Items.PAPER).build()))
                 .save(withConditions(output, new LegacyModeCondition(false)));
 
 
@@ -81,25 +79,16 @@ public class RecipeGenerator extends FabricRecipeProvider {
                 .define('N', Items.IRON_NUGGET)
                 .define('I', Items.IRON_INGOT)
                 .define('C', Items.GRAY_CONCRETE)
-                .define('M', Registration.CARD_BLUEPRINT.get())
+                .define('M', Items.COMPASS)
                 .pattern("NIN")
                 .pattern("CMC")
                 .pattern("NCN")
                 .group(FTBUltimineAddition.MOD_ID)
-                .unlockedBy("has_card_blueprint", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.CARD_BLUEPRINT.get()).build()))
+                .unlockedBy("has_compass", inventoryTrigger(ItemPredicate.Builder.item().of(Items.COMPASS).build()))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Registration.SKILLS_RECORD.get())
-                .define('N', Items.IRON_NUGGET)
-                .define('I', Items.IRON_INGOT)
-                .define('C', Items.YELLOW_CONCRETE)
-                .define('M', Registration.MINING_SKILL_CARD_EMPTY.get())
-                .pattern("NIN")
-                .pattern("CMC")
-                .pattern("NCN")
-                .group(FTBUltimineAddition.MOD_ID)
-                .unlockedBy("has_mining_skill_card", inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()))
-                .save(withConditions(output, new LegacyModeCondition(false)));
+        // A clipboard; a dye in its board makes that color's record.
+        SkillsRecordRecipes.save(withConditions(output, new LegacyModeCondition(false)), inventoryTrigger(ItemPredicate.Builder.item().of(Registration.MINING_SKILL_CARD_EMPTY.get()).build()));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Registration.INK_CHAMBER.get())
                 .define('I', Items.IRON_INGOT)

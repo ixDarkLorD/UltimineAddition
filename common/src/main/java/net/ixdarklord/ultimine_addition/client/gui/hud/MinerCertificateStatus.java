@@ -1,8 +1,7 @@
 package net.ixdarklord.ultimine_addition.client.gui.hud;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.ixdarklord.coolcatlib.api.utils.ChatFormattingUtils;
+import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
+import net.ixdarklord.coolcatcore.api.utils.ChatFormattingUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
@@ -20,7 +19,6 @@ import net.minecraft.world.item.ItemStack;
 import java.awt.*;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
 public class MinerCertificateStatus {
     public static final MinerCertificateStatus INSTANCE = new MinerCertificateStatus();
 
@@ -56,6 +54,6 @@ public class MinerCertificateStatus {
 
         ScreenRectangle rectangle = new ScreenRectangle(x, y, textWidth, 9);
         TooltipRenderUtil.renderTooltipBackground(guiGraphics, rectangle.left(), rectangle.top(), rectangle.width(), rectangle.height(), 0);
-        guiGraphics.drawString(font, component, x, y, Color.WHITE.getRGB());
+        GuiDraw.text(guiGraphics, font, component, x, y, Color.WHITE.getRGB());
     }
 }

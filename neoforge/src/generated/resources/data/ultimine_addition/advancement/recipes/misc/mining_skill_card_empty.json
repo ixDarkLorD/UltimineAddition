@@ -7,11 +7,11 @@
   ],
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_mining_skill_card": {
+    "has_paper": {
       "conditions": {
         "items": [
           {
-            "items": "ultimine_addition:mining_skill_card_empty"
+            "items": "minecraft:paper"
           }
         ]
       },
@@ -27,7 +27,7 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_mining_skill_card"
+      "has_paper"
     ]
   ],
   "rewards": {

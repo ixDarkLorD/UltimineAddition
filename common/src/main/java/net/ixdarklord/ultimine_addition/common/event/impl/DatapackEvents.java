@@ -1,17 +1,16 @@
 package net.ixdarklord.ultimine_addition.common.event.impl;
 
-import dev.architectury.event.Event;
-import dev.architectury.event.EventFactory;
+import net.ixdarklord.coolcatcore.api.event.v2.core.EventInvoker;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 
 public class DatapackEvents {
-    public static final Event<PreReload> PRE_RELOAD = EventFactory.createLoop();
-    public static final Event<SyncContents> SYNC = EventFactory.createLoop();
-    public static final Event<PostReload> POST_RELOAD = EventFactory.createLoop();
-    public static final Event<TagUpdate> TAG_UPDATE = EventFactory.createLoop();
+    public static final EventInvoker<PreReload> PRE_RELOAD = EventInvoker.create(PreReload.class);
+    public static final EventInvoker<SyncContents> SYNC = EventInvoker.create(SyncContents.class);
+    public static final EventInvoker<PostReload> POST_RELOAD = EventInvoker.create(PostReload.class);
+    public static final EventInvoker<TagUpdate> TAG_UPDATE = EventInvoker.create(TagUpdate.class);
 
     public interface PreReload {
         void init(MinecraftServer server, CloseableResourceManager resourceManager);

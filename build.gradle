@@ -35,4 +35,5 @@ allprojects {
     }
 }
 
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v1/main.gradle"
+// shared_scripts_url points the shared scripts at another copy, e.g. a local ModResources checkout.
+apply from: "${findProperty("shared_scripts_url") ?: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4"}/main.gradle"

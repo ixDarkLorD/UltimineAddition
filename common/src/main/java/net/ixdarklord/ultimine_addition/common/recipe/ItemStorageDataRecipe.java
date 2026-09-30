@@ -122,12 +122,17 @@ public class ItemStorageDataRecipe extends CustomRecipe {
         return width * height >= this.ingredients.size();
     }
 
+    @Override
+    public @NotNull String getGroup() {
+        return this.group;
+    }
+
     public CraftingBookCategory getCategory() {
         return category;
     }
 
     public ItemStack getResultItem() {
-        return result;
+        return result.copy();
     }
 
     public @NotNull NonNullList<DataIngredient> getDataIngredients() {
@@ -139,11 +144,13 @@ public class ItemStorageDataRecipe extends CustomRecipe {
     }
 
     @Override
-    public @NotNull RecipeSerializer<?> getSerializer() {
+    public @NotNull RecipeSerializer<ItemStorageDataRecipe> getSerializer() {
         return Registration.ITEM_DATA_STORAGE_RECIPE_SERIALIZER.get();
     }
 
     public static class Serializer implements RecipeSerializer<ItemStorageDataRecipe> {
+        public static final Serializer INSTANCE = new Serializer();
+
         public static final MapCodec<ItemStorageDataRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.STRING.optionalFieldOf("group", "").forGetter(ItemStorageDataRecipe::getGroup),
                 CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ItemStorageDataRecipe::category),

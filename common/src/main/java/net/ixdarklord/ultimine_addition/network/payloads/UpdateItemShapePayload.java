@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.network.payloads;
 
-import dev.architectury.networking.NetworkManager;
+import net.ixdarklord.coolcatcore.api.network.PacketContext;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import io.netty.buffer.ByteBuf;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
@@ -23,7 +23,7 @@ public record UpdateItemShapePayload(String shapeId) implements CustomPacketPayl
             UpdateItemShapePayload::new
     );
 
-    public static void handle(UpdateItemShapePayload message, NetworkManager.PacketContext context) {
+    public static void handle(UpdateItemShapePayload message, PacketContext context) {
         context.queue(() -> {
             if (!(context.getPlayer().containerMenu instanceof ShapeSelectorMenu menu)) return;
             ItemStack stack = menu.getSlot(0).getItem();

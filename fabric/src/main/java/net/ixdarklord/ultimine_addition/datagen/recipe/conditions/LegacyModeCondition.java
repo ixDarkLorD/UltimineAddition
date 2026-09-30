@@ -5,8 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.HolderLookup;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +23,7 @@ public record LegacyModeCondition(boolean value) implements ResourceCondition {
 
     @Override
     public boolean test(@Nullable HolderLookup.Provider registryLookup) {
-        boolean isLegacyMode = ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY;
+        boolean isLegacyMode = PlaystyleModes.isLegacy();
         return value == isLegacyMode;
     }
 }

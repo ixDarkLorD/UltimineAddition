@@ -1,10 +1,10 @@
 package net.ixdarklord.ultimine_addition.client.gui.tooltip;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
+import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -16,177 +16,38 @@ import net.minecraft.world.item.ItemStack;
 import java.awt.*;
 import java.util.Arrays;
 
-@Environment(EnvType.CLIENT)
 public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
-    public static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("container/bundle/background");
+    public static final ResourceLocation SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot");
+    private static final int SLOT_SIZE = 18;
+    private static final int ITEM_OFFSET = 1;
     private final NonNullList<ItemStack> items;
+    private final RecordTheme theme;
 
     public ClientSkillsRecordTooltip(SkillsRecordTooltip skillsRecordTooltip) {
         this.items = skillsRecordTooltip.getItems();
+        this.theme = RecordTheme.of(skillsRecordTooltip.getColor());
     }
 
     public int getHeight() {
-        return this.gridSizeY() * 20 + 2 + 4;
+        return SLOT_SIZE + 2;
     }
 
     public int getWidth(Font font) {
-        return this.gridSizeX() * 18 + 2;
+        return this.items.size() * SLOT_SIZE;
     }
 
     @Override
     public void renderImage(Font font, int x, int y, GuiGraphics guiGraphics) {
-        int i = this.gridSizeX();
-        int j = this.gridSizeY();
-        guiGraphics.blitSprite(BACKGROUND_SPRITE, x, y, this.backgroundWidth(), this.backgroundHeight());
-        int k = 0;
+        SkillsRecordScreen.OverlayColor overlayColor = this.theme.overlay();
+        int tint = ARGB.colorFromFloat(overlayColor.alpha(), overlayColor.red(), overlayColor.green(), overlayColor.blue());
 
-        for(int l = 0; l < j; ++l) {
-            for(int m = 0; m < i; ++m) {
-                int n = x + m * 18 + 1;
-                int o = y + l * 20 + 1;
-                this.renderSlot(n, o, k++, guiGraphics, font);
-            }
-        }
+        for (int i = 0; i < this.items.size(); i++) {
+            int slotX = x + i * SLOT_SIZE;
+            GuiDraw.blitSprite(guiGraphics, SLOT_SPRITE, slotX, y, SLOT_SIZE, SLOT_SIZE, tint);
 
-    }
-
-    private void renderSlot(int x, int y, int itemIndex, GuiGraphics guiGraphics, Font font) {
-        if (itemIndex >= this.items.size()) {
-            this.blit(guiGraphics, x, y);
-        } else {
-            ItemStack itemStack = this.items.get(itemIndex);
-            this.blit(guiGraphics, x, y);
-            guiGraphics.renderItem(itemStack, x + 1, y + 1, itemIndex);
-            guiGraphics.renderItemDecorations(font, itemStack, x + 1, y + 1);
-        }
-    }
-
-    private void blit(GuiGraphics guiGraphics, int x, int y) {
-        SkillsRecordScreen.OverlayColor overlayColor = ConfigHandler.CLIENT.BACKGROUND_COLOR.get();
-        RenderSystem.setShaderColor(overlayColor.red(), overlayColor.green(), overlayColor.blue(), overlayColor.alpha());
-        guiGraphics.blitSprite(Texture.SLOT.sprite, x, y, 0, Texture.SLOT.w, Texture.SLOT.h);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-    }
-
-    private int backgroundWidth() {
-        return this.gridSizeX() * 18 + 2;
-    }
-
-    private int backgroundHeight() {
-        return this.gridSizeY() * 20 + 2;
-    }
-
-    private int gridSizeX() {
-        return this.items.size();
-    }
-
-    private int gridSizeY() {
-        return 1;
-    }
-
-    private enum Texture {
-        SLOT(ResourceLocation.withDefaultNamespace("container/bundle/slot"), 18, 20);
-
-        public final ResourceLocation sprite;
-        public final int w;
-        public final int h;
-
-        Texture(final ResourceLocation sprite, final int w, final int h) {
-            this.sprite = sprite;
-            this.w = w;
-            this.h = h;
-        }
-    }
-
-    public static class Option implements ClientTooltipComponent {
-        private final int buttonId;
-        private final Component textComponent;
-
-        public Option(SkillsRecordTooltip.Option option) {
-            this.buttonId = option.buttonId();
-            this.textComponent = option.textComponent();
-        }
-
-        @Override
-        public void renderImage(Font font, int x, int y, GuiGraphics guiGraphics) {
-            switch (buttonId) {
-                case 0 -> this.renderBGColors(font, x, y, guiGraphics);
-                case 1 -> this.renderPanelPos(font, x, y, guiGraphics);
-            }
-        }
-
-        private void renderBGColors(Font font, int x, int y, GuiGraphics guiGraphics) {
-            int gridSize = 3;
-            int cellSpacing = 2;
-            int cellWidth = (getWidth(font) - gridSize * cellSpacing) / gridSize;
-            int cellHeight = (getHeight() - gridSize * cellSpacing) / gridSize;
-
-            SkillsRecordScreen.OverlayColor[] colors = SkillsRecordScreen.OverlayColor.values();
-            int colorIndex = 0;
-
-            for (int row = 0; row < gridSize; row++) {
-                for (int col = 0; col < gridSize; col++) {
-                    int adjuster = 2 + Math.max(0, font.width(textComponent)-getWidth(font))/2;
-                    int minX = x + col * (cellWidth + cellSpacing) + adjuster;
-                    int minY = y + row * (cellHeight + cellSpacing);
-                    int maxX = minX + cellWidth;
-                    int maxY = minY + cellHeight;
-
-                    colorIndex = row * gridSize + col;
-                    guiGraphics.fill(minX, minY, maxX, maxY, colors[colorIndex].convert().getRGB());
-
-                    ResourceLocation CONFIRM_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/confirm");
-                    int textureX = minX + (cellWidth - 18) / 2;
-                    int textureY = minY + (cellHeight - 18) / 2;
-                    if (colorIndex == ConfigHandler.CLIENT.BACKGROUND_COLOR.get().ordinal())
-                        guiGraphics.blitSprite(CONFIRM_SPRITE, textureX + 1, textureY, 18, 18);
-
-                    if (colorIndex >= colors.length-1) break;
-                }
-                if (colorIndex >= colors.length-1) break;
-            }
-        }
-
-        private void renderPanelPos(Font font, int x, int y, GuiGraphics guiGraphics) {
-            int gridSize = 3;
-            int cellSpacing = 2;
-            int cellWidth = (getWidth(font) - gridSize * cellSpacing) / gridSize;
-            int cellHeight = (getHeight() - gridSize * cellSpacing) / gridSize;
-            int[] disabledPositions = new int[]{1, 4, 7};
-
-            for (int row = 0; row < gridSize; row++) {
-                for (int col = 0; col < gridSize; col++) {
-                    int adjuster = 2 + Math.max(0, font.width(textComponent)-getWidth(font))/2;
-                    int minX = x + col * (cellWidth + cellSpacing) + adjuster;
-                    int minY = y + row * (cellHeight + cellSpacing);
-                    int maxX = minX + cellWidth;
-                    int maxY = minY + cellHeight;
-
-                    int selectedDirection = ConfigHandler.CLIENT.CHALLENGES_PANEL_ALIGNMENT.get().getPosIndex();
-                    int directionIndex = row * gridSize + col;
-                    Color color = selectedDirection == directionIndex ? Color.GREEN : Color.GRAY;
-                    if (Arrays.stream(disabledPositions).anyMatch(value ->  value == directionIndex))
-                        color = Color.DARK_GRAY.darker();
-
-                    guiGraphics.fill(minX, minY, maxX, maxY, color.getRGB());
-
-                    ResourceLocation CONFIRM_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/confirm");
-                    int textureX = minX + (cellWidth - 18) / 2;
-                    int textureY = minY + (cellHeight - 18) / 2;
-                    if (directionIndex == selectedDirection)
-                        guiGraphics.blitSprite(CONFIRM_SPRITE, textureX + 1, textureY, 18, 18);
-                }
-            }
-        }
-
-        @Override
-        public int getHeight() {
-            return 64;
-        }
-
-        @Override
-        public int getWidth(Font font) {
-            return 64 + Math.max(0, font.width(textComponent) - 64);
+            ItemStack itemStack = this.items.get(i);
+            guiGraphics.renderItem(itemStack, slotX + ITEM_OFFSET, y + ITEM_OFFSET, i);
+            guiGraphics.renderItemDecorations(font, itemStack, slotX + ITEM_OFFSET, y + ITEM_OFFSET);
         }
     }
 }

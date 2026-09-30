@@ -6,8 +6,8 @@
   "for_card_tier": 3,
   "for_card_type": "pickaxe",
   "required_amount": {
-    "max": 16,
-    "min": 8
+    "max": 8,
+    "min": 4
   },
   "targeted_blocks": [
     "minecraft:ancient_debris"

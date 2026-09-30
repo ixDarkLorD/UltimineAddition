@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.coolcatlib.api.utils.ComponentHelper;
+import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
@@ -57,7 +57,7 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotIndex, boolean isSelected) {
         if (entity instanceof ServerPlayer player)
-            getData(stack).tick(slotIndex, player);
+            getData(stack).tick(ItemUtils.findSlotIndex(player, stack), player);
     }
 
     @Override

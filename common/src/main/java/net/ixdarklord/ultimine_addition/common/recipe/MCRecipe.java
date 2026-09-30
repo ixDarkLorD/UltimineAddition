@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
 import net.ixdarklord.ultimine_addition.core.Registration;
@@ -32,7 +33,7 @@ public class MCRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public @NotNull RecipeSerializer<?> getSerializer() {
+    public @NotNull RecipeSerializer<MCRecipe> getSerializer() {
         return Registration.MC_RECIPE_SERIALIZER.get();
     }
 
@@ -51,6 +52,10 @@ public class MCRecipe extends ShapelessRecipe {
         return this.result;
     }
 
+    public @NotNull ItemStack getResultItem() {
+        return this.result.copy();
+    }
+
     @Override
     public @NotNull NonNullList<Ingredient> getIngredients() {
         return MCIngredient.toNormal(this.ingredients);
@@ -61,7 +66,7 @@ public class MCRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public boolean matches(CraftingInput input, Level level) {
+    public boolean matches(CraftingInput input, @NotNull Level level) {
         if (input.ingredientCount() != this.ingredients.size()) {
             return false;
         } else {
@@ -73,25 +78,21 @@ public class MCRecipe extends ShapelessRecipe {
     public @NotNull ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
         ItemStack stack = this.result.copy();
         if (stack.getItem() instanceof MiningSkillCardItem item) {
-            NonNullList<ItemStack> inputs = NonNullList.create();
-            for (ItemStack itemStack : input.items()) {
-                if (!itemStack.isEmpty() && !(itemStack.getItem() instanceof MiningSkillCardItem))
-                    inputs.add(itemStack.copy());
-            }
-
-            if (!inputs.isEmpty()) {
-                item.getData(stack).setDisplayItem(inputs.getFirst());
-            }
-            item.getData(stack).initChallenges().save();
+            MiningSkillCardData data = item.getData(stack);
+            // Component only: this also runs for the crafting preview. The card is stored (and rolls its challenges)
+            // once the player carries it.
+            data.writeComponent();
         }
         return stack;
     }
 
     public static class Serializer implements RecipeSerializer<MCRecipe> {
+        public static final Serializer INSTANCE = new Serializer();
+
         public static final MapCodec<MCRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.STRING.optionalFieldOf("group", "").forGetter(MCRecipe::getGroup),
                 CraftingBookCategory.CODEC.optionalFieldOf("category", CraftingBookCategory.MISC).forGetter(MCRecipe::category),
-                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(mcRecipe -> mcRecipe.result),
+                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
                 MCIngredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").flatXmap(list -> {
                     MCIngredient[] ingredients = list.stream().filter(ingredient -> !ingredient.isEmpty()).toArray(MCIngredient[]::new);
                     if (ingredients.length == 0) {
@@ -104,7 +105,13 @@ public class MCRecipe extends ShapelessRecipe {
                 }, DataResult::success).forGetter(MCRecipe::getMCIngredients)
         ).apply(instance, MCRecipe::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, MCRecipe> STREAM_CODEC = StreamCodec.of(Serializer::toNetwork, Serializer::fromNetwork);
+        public static final StreamCodec<RegistryFriendlyByteBuf, MCRecipe> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8, MCRecipe::getGroup,
+                CraftingBookCategory.STREAM_CODEC, MCRecipe::category,
+                ItemStack.STREAM_CODEC, recipe -> recipe.result,
+                MCIngredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.collection(NonNullList::createWithCapacity)), MCRecipe::getMCIngredients,
+                MCRecipe::new
+        );
 
         @Override
         public @NotNull MapCodec<MCRecipe> codec() {
@@ -114,22 +121,6 @@ public class MCRecipe extends ShapelessRecipe {
         @Override
         public @NotNull StreamCodec<RegistryFriendlyByteBuf, MCRecipe> streamCodec() {
             return STREAM_CODEC;
-        }
-
-        private static @NotNull MCRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
-            String group = buf.readUtf();
-            CraftingBookCategory craftingBookCategory = buf.readEnum(CraftingBookCategory.class);
-            NonNullList<MCIngredient> nonnulllist = MCIngredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.collection(NonNullList::createWithCapacity)).decode(buf);
-            ItemStack stack = ItemStack.STREAM_CODEC.decode(buf);
-            return new MCRecipe(group, craftingBookCategory, stack, nonnulllist);
-        }
-
-        private static void toNetwork(RegistryFriendlyByteBuf buf, MCRecipe recipe) {
-            buf.writeUtf(recipe.group);
-            buf.writeEnum(recipe.category);
-            buf.writeVarInt(recipe.ingredients.size());
-            MCIngredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.collection(NonNullList::createWithCapacity)).encode(buf, recipe.getMCIngredients());
-            ItemStack.STREAM_CODEC.encode(buf, recipe.result);
         }
     }
 }

@@ -1,15 +1,14 @@
 package net.ixdarklord.ultimine_addition.common.brewing;
 
-import net.ixdarklord.coolcatlib.api.brewing.BrewingBuilder;
-import net.ixdarklord.coolcatlib.api.brewing.BrewingRecipe;
-import net.ixdarklord.coolcatlib.api.event.v1.server.RegisterBrewingRecipesEvent;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
+import net.ixdarklord.coolcatcore.api.brewing.IBrewingRecipe;
+import net.ixdarklord.coolcatcore.api.brewing.BrewingBuilder;
+import net.ixdarklord.coolcatcore.api.event.v1.server.RegisterBrewingRecipesEvent;
 import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -25,25 +24,27 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.NotNull;
 
-public class MineGoJuiceRecipe extends BrewingRecipe {
+public class MineGoJuiceRecipe implements IBrewingRecipe {
     private final Holder<Potion> input;
     private final Ingredient ingredient;
     private final Holder<Potion> output;
+    private final ItemStack outputStack;
 
     public MineGoJuiceRecipe(Holder<Potion> input, Item ingredient, Holder<Potion> output) {
         this(input, ingredient.getDefaultInstance(), output);
     }
 
     public MineGoJuiceRecipe(Holder<Potion> input, ItemStack itemStack, Holder<Potion> output) {
-        super(Ingredient.of(PotionContents.createItemStack(Items.POTION, input)), Ingredient.of(itemStack), PotionContents.createItemStack(Items.POTION, output));
         this.input = input;
-        this.ingredient = Ingredient.of(itemStack);
+        this.ingredient = Ingredient.of(itemStack.getItem());
         this.output = output;
+        this.outputStack = PotionContents.createItemStack(Items.POTION, output);
     }
 
+    // Always registered: brewing is built once per server start, and the playstyle mode can change while it runs,
+    // so the recipes stop matching in the legacy mode instead (isInput).
     public static void register() {
         RegisterBrewingRecipesEvent.EVENT.register(event -> {
-            if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) return;
             BrewingBuilder builder = event.getBuilder();
             builder.addRecipe(new MineGoJuiceRecipe(Potions.WATER, Items.ENCHANTED_BOOK, getHolder(Registration.KNOWLEDGE_POTION.get())));
 
@@ -76,13 +77,30 @@ public class MineGoJuiceRecipe extends BrewingRecipe {
         for (int i = 0; i < TIERS.length; i++) {
             MiningSkillCardItem.Tier tier = TIERS[i];
             ItemStack itemStack = MiningSkillCardData.createForCreativeTab(card, tier);
-            Holder<Potion> potion = Registration.POTIONS.getRegistrar().getHolder(i > 0 ? ResourceLocation.parse(output + "_" + (i+1)) : output);
+            Holder<Potion> potion = BuiltInRegistries.POTION.getHolder(i > 0 ? ResourceLocation.parse(output + "_" + (i+1)) : output).orElse(null);
             builder.addRecipe(new MineGoJuiceRecipe(getHolder(Registration.KNOWLEDGE_POTION.get()), itemStack, potion));
         }
     }
 
+    // Vanilla ingredients only match items now; the potion and card tier checks live in isInput/getOutput.
+    @Override
+    public @NotNull Ingredient input() {
+        return Ingredient.of(Items.POTION);
+    }
+
+    @Override
+    public @NotNull Ingredient ingredient() {
+        return this.ingredient;
+    }
+
+    @Override
+    public @NotNull ItemStack output() {
+        return this.outputStack;
+    }
+
     @Override
     public boolean isInput(@NotNull ItemStack stack) {
+        if (PlaystyleModes.isLegacy()) return false;
         if (stack.getItem() instanceof PotionItem) {
             return stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion().orElse(null) == this.input;
         }

@@ -1,13 +1,13 @@
 package net.ixdarklord.ultimine_addition.common.data.item;
 
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.ixdarklord.coolcatlib.api.data.ItemDataComponent;
-import net.ixdarklord.coolcatlib.api.utils.ChatFormattingUtils;
+import net.ixdarklord.coolcatcore.api.data.ItemDataComponent;
+import net.ixdarklord.coolcatcore.api.utils.ChatFormattingUtils;
 import net.ixdarklord.ultimine_addition.client.handler.ClientHandler;
 import net.ixdarklord.ultimine_addition.common.item.MinerCertificateItem;
-import net.ixdarklord.ultimine_addition.config.ConfigHandler;
-import net.ixdarklord.ultimine_addition.config.PlaystyleMode;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.MinerCertificatePayload;
@@ -81,10 +81,10 @@ public final class MinerCertificateData extends ItemDataComponent<MinerCertifica
     }
 
     public void tick(int slotIndex, ServerPlayer player) {
-        if (ConfigHandler.COMMON.PLAYSTYLE_MODE.get() == PlaystyleMode.LEGACY) {
+        if (PlaystyleModes.isLegacy()) {
             if (this.legacy == null) {
-                int min = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getMin();
-                int max = ConfigHandler.SERVER.LEGACY_REQUIRED_AMOUNT.getMax();
+                int min = UAServerConfig.LEGACY_REQUIRED_MIN.get();
+                int max = UAServerConfig.LEGACY_REQUIRED_MAX.get();
                 this.legacy = new Legacy(RandomSource.create().nextIntBetweenInclusive(min, max));
                 this.save();
             }
@@ -211,9 +211,9 @@ public final class MinerCertificateData extends ItemDataComponent<MinerCertifica
 
             if (!isShiftPressed) {
                 if (!data.isAccomplished)
-                    tooltipComponents.add(1, createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.sealed").withStyle(ChatFormatting.GRAY)));
+                    tooltipComponents.add(createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.sealed").withStyle(ChatFormatting.GRAY)));
                 else
-                    tooltipComponents.add(1, createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.opened").withStyle(ChatFormatting.GOLD)));
+                    tooltipComponents.add(createBrackets(Component.translatable("tooltip.ultimine_addition.certificate.legacy.opened").withStyle(ChatFormatting.GOLD)));
             } else {
                 if (!data.isAccomplished) {
                     ChatFormatting formatting = ChatFormattingUtils.getProgressColor(minedBlocks, requiredAmount);
