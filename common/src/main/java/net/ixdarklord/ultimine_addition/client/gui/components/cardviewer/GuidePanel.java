@@ -220,7 +220,7 @@ final class GuidePanel extends Panel {
             outline(graphics, slotX + 1 - grow, slotY + 1 - grow, 16 + grow * 2, 16 + grow * 2, ARGB.color((1.0F - ripple) * 0.9F * intro, CLICK));
         }
         cursor(graphics, Math.round(mx), Math.round(my), pressed, intro);
-        mouse(graphics, sx + STAGE - 10, sy + STAGE - 13, pressed, intro);
+        mouse(graphics, sx + STAGE - 1, sy + STAGE - 1, pressed, intro);
         graphics.disableScissor();
     }
 
@@ -262,16 +262,22 @@ final class GuidePanel extends Panel {
         }
     }
 
-    // A small mouse (8 x 11) at x, y, showing which button to press: its right button lights up while pressed.
-    private static void mouse(GuiGraphicsExtractor graphics, int x, int y, boolean pressed, float intro) {
-        int body = ARGB.multiplyAlpha(0xFFD8D8D8, intro), edge = ARGB.multiplyAlpha(0xFF2A2A2A, intro);
-        graphics.fill(x + 1, y, x + 7, y + 11, edge);
-        graphics.fill(x, y + 1, x + 8, y + 10, edge);
-        graphics.fill(x + 1, y + 1, x + 7, y + 10, body);
-        graphics.fill(x + 1, y + 4, x + 7, y + 5, edge);
-        graphics.fill(x + 3, y + 1, x + 5, y + 4, edge);
-        int right = pressed ? CLICK : 0xFFB0B0B0;
-        graphics.fill(x + 5, y + 1, x + 7, y + 4, ARGB.multiplyAlpha(right, intro));
+    // The tutorial toast's mouse (vanilla's own sprites, so resource packs restyle it too), its bottom right corner at
+    // right, bottom. While pressed it shows the right click, with a couple of sparks popping off the button.
+    private static final Identifier MOUSE = Identifier.withDefaultNamespace("toast/mouse");
+    private static final Identifier MOUSE_RIGHT_CLICK = Identifier.withDefaultNamespace("toast/right_click");
+    // Where the drawn mouse sits in the 20 x 20 sprites: its body's right and bottom edges, and its right button's top.
+    private static final int MOUSE_RIGHT = 13, MOUSE_BOTTOM = 18;
+    private static final int BUTTON_X = 10, BUTTON_Y = 6;
+
+    private static void mouse(GuiGraphicsExtractor graphics, int right, int bottom, boolean pressed, float intro) {
+        int x = right - MOUSE_RIGHT, y = bottom - MOUSE_BOTTOM;
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, pressed ? MOUSE_RIGHT_CLICK : MOUSE, x, y, 20, 20, ARGB.color(intro, 0xFFFFFF));
+        if (!pressed) return;
+        int spark = ARGB.multiplyAlpha(CLICK, intro);
+        int bx = x + BUTTON_X, by = y + BUTTON_Y;
+        graphics.fill(bx + 1, by - 4, bx + 2, by - 2, spark);
+        graphics.fill(bx + 3, by - 2, bx + 4, by - 1, spark);
     }
 
     private static void chevron(GuiGraphicsExtractor graphics, int cx, int y, int color) {

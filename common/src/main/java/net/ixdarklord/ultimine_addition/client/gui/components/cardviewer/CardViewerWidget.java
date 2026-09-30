@@ -16,6 +16,7 @@ import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.record.CardHistory;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -50,7 +51,10 @@ import java.util.function.IntFunction;
 public final class CardViewerWidget extends AbstractMultiPanelWidget {
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault());
     private static final Identifier FRAME_SPRITE = FTBUltimineAddition.id("container/skills_record/card_viewer/frame");
-    private static final int ICON_SIZE = 11;
+    private static final int ICON_SIZE = ViewerButton.Icon.SIZE;
+    private static final WidgetSprites FIT_SPRITES = ViewerButton.Icon.sprites("fit");
+    private static final WidgetSprites EXPAND_SPRITES = ViewerButton.Icon.sprites("expand");
+    private static final WidgetSprites COLLAPSE_SPRITES = ViewerButton.Icon.sprites("collapse");
 
     public record State(boolean hasCards, ItemStack cardStack, @Nullable MiningSkillCardData card, @Nullable CardHistory history,
                         boolean consumeMode, List<ItemStack> missingItems, boolean notEnoughInk, boolean preview,
@@ -78,7 +82,8 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     private final MessagePanel banner;
     private final GuidePanel guide;
     // Opening a challenge's details slides the tree up and away while it fades into the viewer's background, then the
-    // details rise into place as they fade in; closing them fades them out to the background and the tree fades back in.
+    // details rise into place as they fade in; closing them slides the details down and away the same way, and the tree
+    // drops back into place.
     private enum Transition { NONE, TO_DETAILS, TO_TREE }
     private static final long TRANSITION_OUT_MS = 170L;
     private static final long TRANSITION_IN_MS = 230L;
@@ -91,6 +96,8 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     private ViewerButton.Icon expandButton;
     private ViewerButton.Icon fitButton;
     private boolean expanded;
+    // Where the compact viewer's buttons end: they line up to the left of this point, on the book's title bar.
+    private int toolbarRight, toolbarY;
 
     private State state = new State(false, ItemStack.EMPTY, null, null, false, List.of(), false, false, RecordTheme.WHITE, true);
     private @Nullable UUID shownCard;
@@ -112,13 +119,13 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
 
     @Override
     protected void init() {
-        this.expandButton = this.addRenderableWidget(new ViewerButton.Icon(ICON_SIZE,
+        this.expandButton = this.addRenderableWidget(new ViewerButton.Icon(
                 Component.translatable("gui.ultimine_addition.card_viewer.expand"),
-                (g, x, y, size, color) -> ViewerButton.Icon.corners(g, x, y, size, color, !this.expanded),
+                () -> this.expanded ? COLLAPSE_SPRITES : EXPAND_SPRITES, this::getAccentColor,
                 b -> this.setExpanded(!this.expanded)));
-        this.fitButton = this.addRenderableWidget(new ViewerButton.Icon(ICON_SIZE,
+        this.fitButton = this.addRenderableWidget(new ViewerButton.Icon(
                 Component.translatable("gui.ultimine_addition.card_viewer.fit"),
-                ViewerButton.Icon::target,
+                () -> FIT_SPRITES, this::getAccentColor,
                 b -> this.tree.requestFit()));
     }
 
@@ -186,7 +193,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             this.banner.show(List.of(Component.translatable("gui.ultimine_addition.skills_record.no_challenges").withStyle(ChatFormatting.GRAY)),
                     List.of(), 0xD0202020, true);
         } else {
-            this.banner.setVisible(false);
+            this.banner.hide();
         }
     }
 
@@ -283,7 +290,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         if (out) {
             float p = Easing.CUBIC_IN.apply(elapsed / (float) TRANSITION_OUT_MS);
             curtain = p;
-            if (this.transition == Transition.TO_DETAILS) slide = -p * r.height() * 0.35F;
+            slide = (this.transition == Transition.TO_DETAILS ? -p : p) * r.height() * 0.35F;
         } else {
             // Halfway: the panels swap behind the curtain.
             if (this.transition == Transition.TO_DETAILS && this.pendingDetails != null) {
@@ -294,7 +301,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             }
             float q = Math.min((elapsed - TRANSITION_OUT_MS) / (float) TRANSITION_IN_MS, 1.0F);
             curtain = 1.0F - Easing.CUBIC_OUT.apply(q);
-            if (this.transition == Transition.TO_DETAILS) slide = curtain * 16.0F;
+            slide = (this.transition == Transition.TO_DETAILS ? curtain : -curtain) * 16.0F;
             if (q >= 1.0F) this.transition = Transition.NONE;
         }
 
@@ -523,6 +530,18 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         }
     }
 
+    /** Puts the compact viewer's buttons on the book's title bar, ending at x (exclusive) on row y. */
+    public void setToolbarAnchor(int right, int y) {
+        this.toolbarRight = right;
+        this.toolbarY = y;
+    }
+
+    // The compact viewer's buttons sit outside it, on the book's title bar, and still belong to it.
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        return super.isMouseOver(mouseX, mouseY) || this.isMouseOverOwnWidget(mouseX, mouseY);
+    }
+
     public void setExpanded(boolean expanded) {
         if (this.expanded == expanded) return;
         this.expanded = expanded;
@@ -540,8 +559,8 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             this.expandButton.setPosition(r.right() - ICON_SIZE, this.y + 5);
             this.fitButton.setPosition(r.right() - ICON_SIZE * 2 - 2, this.y + 5);
         } else {
-            this.expandButton.setPosition(r.right() - ICON_SIZE - 1, r.top() + 1);
-            this.fitButton.setPosition(r.right() - ICON_SIZE * 2 - 3, r.top() + 1);
+            this.expandButton.setPosition(this.toolbarRight - ICON_SIZE, this.toolbarY);
+            this.fitButton.setPosition(this.toolbarRight - ICON_SIZE * 2 - 2, this.toolbarY);
         }
         boolean covered = !this.expanded && (this.isTransitioning() || this.details.isVisible() || this.shapeChoice.isVisible() || this.preview.isVisible());
         boolean treeControls = this.tree.isVisible() && !covered;
