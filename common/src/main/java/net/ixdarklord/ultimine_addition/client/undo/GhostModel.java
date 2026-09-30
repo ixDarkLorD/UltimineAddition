@@ -75,13 +75,14 @@ record GhostModel(BakedQuad[] quads, int[] colors) {
      * the camera when its normal points back towards the origin; the others are skipped.
      */
     void draw(VertexConsumer buffer, PoseStack.Pose pose, int light) {
-        this.draw(buffer, pose, light, false);
+        this.draw(buffer, pose, light, false, 1.0F);
     }
 
     /**
      * @param backFaces also draw the faces turned away, from behind (when the camera is inside the ghosts)
+     * @param alpha     multiplies each quad's own alpha
      */
-    void draw(VertexConsumer buffer, PoseStack.Pose pose, int light, boolean backFaces) {
+    void draw(VertexConsumer buffer, PoseStack.Pose pose, int light, boolean backFaces, float alpha) {
         Matrix4f matrix = pose.pose();
         for (int q = 0; q < this.quads.length; q++) {
             BakedQuad quad = this.quads[q];
@@ -100,7 +101,7 @@ record GhostModel(BakedQuad[] quads, int[] colors) {
             }
             boolean back = px * v0.x + py * v0.y + pz * v0.z >= 0.0F;
             if (back && !backFaces) continue;
-            int color = this.colors[q];
+            int color = alpha == 1.0F ? this.colors[q] : ARGB.multiplyAlpha(this.colors[q], alpha);
             // The back side: vertices in reverse (so it isn't culled) and the normal flipped.
             float sign = back ? -1.0F : 1.0F;
             for (int i = 0; i < 4; i++) {
