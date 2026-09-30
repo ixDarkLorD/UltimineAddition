@@ -1,7 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.effect;
 
 import net.ixdarklord.coolcatcore.api.registry.RegistryEntry;
-import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;

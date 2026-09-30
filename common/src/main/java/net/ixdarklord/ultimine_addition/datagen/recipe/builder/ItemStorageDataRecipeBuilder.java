@@ -22,8 +22,6 @@ import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
 
 // 1.20.1 recipe builders hand FinishedRecipes to a consumer (CodecRecipeResult writes them with the serializer's codec).

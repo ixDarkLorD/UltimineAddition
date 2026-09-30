@@ -2,7 +2,7 @@
 This file is for listing all the changes to this project
 <hr>
 
-## v2001.2.0.0 Release - Unreleased (Minecraft 1.20.1 backport)
+## v2001.2.0.0 Release - Sep 30, 2026 (Minecraft 1.20.1 backport)
 Backport of the 26.1.2 release: the same features on Minecraft 1.20.1, for Forge 47 and Fabric (FTB Ultimine 2001.1.8, FTB Library 2001.2.13). Replaces the 2001.1.5.x line; worlds, items and configs from it carry over (see "Updating from 2001.1.5.x").
 ### ✨ New Features
 - Redesigned the Skills Record's card viewer: the selected card's tiers and challenges are shown on a map you can pan (drag) and zoom (mouse wheel or `+`/`-`). Completed tiers, the current tier's live progress and locked tiers are all visible.

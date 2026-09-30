@@ -8,7 +8,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.ixdarklord.coolcatcore.api.network.codec.ByteBufCodecs;
 import net.ixdarklord.coolcatcore.api.network.codec.StreamCodec;
 import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
-import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;

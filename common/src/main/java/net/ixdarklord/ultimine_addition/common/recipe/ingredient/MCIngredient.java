@@ -1,7 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.recipe.ingredient;
 
 import net.minecraft.world.item.Items;
-import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;

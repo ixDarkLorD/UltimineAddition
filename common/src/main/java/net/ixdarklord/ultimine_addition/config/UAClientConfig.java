@@ -6,7 +6,6 @@ import net.ixdarklord.coolcatcore.api.config.ConfigScope;
 import net.ixdarklord.coolcatcore.api.config.ConfigValue;
 import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesPanel;
 import net.ixdarklord.ultimine_addition.client.gui.screens.ShapeSelectorScreen;
-import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 
 // Client only: it names client classes, so nothing on the server may load it.

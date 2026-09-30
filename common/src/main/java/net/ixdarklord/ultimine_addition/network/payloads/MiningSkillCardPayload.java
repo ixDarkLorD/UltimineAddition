@@ -1,8 +1,6 @@
 package net.ixdarklord.ultimine_addition.network.payloads;
 
 import net.ixdarklord.coolcatcore.api.network.PacketContext;
-import net.ixdarklord.ultimine_addition.util.ItemUtils;
-import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.network.FriendlyByteBuf;
 import net.ixdarklord.coolcatcore.api.network.codec.ByteBufCodecs;

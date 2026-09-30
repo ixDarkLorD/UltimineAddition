@@ -5,7 +5,6 @@ import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.minecraft.world.entity.player.Player;
 import net.ixdarklord.ultimine_addition.util.ARGB;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftbultimine.shape.Shape;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
@@ -47,7 +46,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMenu> {
     // The item's clipboard: a slate board with its clip, holding a blueprint sheet.

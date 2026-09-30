@@ -8,7 +8,6 @@ import net.ixdarklord.ultimine_addition.client.undo.UndoProgressHud;
 import net.ixdarklord.ultimine_addition.common.undo.UltimineUndo;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.ixdarklord.coolcatcore.api.network.codec.ByteBufCodecs;
 import net.ixdarklord.coolcatcore.api.network.codec.StreamCodec;

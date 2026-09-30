@@ -1,7 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.data.record;
 
 import net.ixdarklord.coolcatcore.api.network.codec.ByteBufCodecs;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.ixdarklord.coolcatcore.api.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;

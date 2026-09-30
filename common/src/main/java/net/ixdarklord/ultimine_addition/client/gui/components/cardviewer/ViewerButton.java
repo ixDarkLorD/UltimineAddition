@@ -6,7 +6,6 @@ import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.WidgetSprites;
-import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

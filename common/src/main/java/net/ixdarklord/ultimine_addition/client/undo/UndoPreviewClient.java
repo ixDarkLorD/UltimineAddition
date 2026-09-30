@@ -17,7 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.Util;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;

@@ -14,7 +14,6 @@ import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
-import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
 import java.util.Optional;
