@@ -6,7 +6,11 @@ import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
+import net.ixdarklord.coolcatcanvas.api.utils.Easing;
+import net.ixdarklord.ultimine_addition.util.ARGB;
+import net.minecraft.Util;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -28,6 +32,11 @@ final class MessagePanel extends Panel {
     private boolean centered = true;
     private List<FormattedCharSequence> wrapped = List.of();
     private int wrappedWidth = -1;
+    // A banner rises from the viewer's bottom edge when shown and sinks back when hidden (when animated).
+    private static final float SLIDE_SECONDS = 0.22F;
+    private boolean shown;
+    private float slide;
+    private long lastFrame = -1L;
 
     MessagePanel(CardViewerWidget viewer, Mode mode) {
         this.viewer = viewer;
@@ -48,7 +57,18 @@ final class MessagePanel extends Panel {
         this.background = background;
         this.backdrop = backdrop;
         this.centered = centered;
+        if (!this.isVisible()) {
+            this.slide = this.mode == Mode.BANNER && this.viewer.isAnimated() ? 0.0F : 1.0F;
+            this.lastFrame = -1L;
+        }
+        this.shown = true;
         this.setVisible(true);
+    }
+
+    /** Hides the panel; a banner slides away first when animated. */
+    void hide() {
+        this.shown = false;
+        if (this.mode != Mode.BANNER || !this.viewer.isAnimated()) this.setVisible(false);
     }
 
     private void rewrap(int width) {
@@ -70,17 +90,45 @@ final class MessagePanel extends Panel {
 
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
-        return this.area().containsPoint((int) mouseX, (int) mouseY);
+        return this.shown && this.area().containsPoint((int) mouseX, (int) mouseY);
     }
 
     @Override
     protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        long now = Util.getMillis();
+        float dt = this.lastFrame < 0 ? 0.0F : Math.min((now - this.lastFrame) / 1000.0F, 0.1F);
+        this.lastFrame = now;
+        if (!this.viewer.isAnimated()) this.slide = this.shown ? 1.0F : 0.0F;
+        this.slide = Mth.clamp(this.slide + (this.shown ? dt : -dt) / SLIDE_SECONDS, 0.0F, 1.0F);
+        if (!this.shown && this.slide <= 0.0F) {
+            this.setVisible(false);
+            return;
+        }
+        float eased = Easing.CUBIC_IN_OUT.apply(this.slide);
+
         ScreenRectangle area = this.area();
         this.rewrap(area.width() - PADDING * 2);
+        ScreenRectangle b = this.getBounds();
         if (this.backdrop != 0 && this.mode == Mode.BANNER) {
-            ScreenRectangle b = this.getBounds();
-            graphics.fill(b.left(), b.top(), b.right(), area.top(), this.backdrop);
+            graphics.fill(b.left(), b.top(), b.right(), area.top(), ARGB.multiplyAlpha(this.backdrop, eased));
         }
+        boolean sliding = this.mode == Mode.BANNER && eased < 1.0F;
+        if (sliding) {
+            // Pushed down by what's still hidden, and clipped at the viewer's bottom edge.
+            graphics.enableScissor(b.left(), b.top(), b.right(), b.bottom());
+            graphics.pose().pushPose();
+            graphics.pose().translate(0.0F, (1.0F - eased) * area.height(), 0.0F);
+        }
+        this.drawBody(graphics, area, sliding ? -1 : mouseX, sliding ? -1 : mouseY);
+        if (sliding) {
+            graphics.pose().popPose();
+            graphics.disableScissor();
+        }
+        // Panels drawn later cover its items.
+        GuiDraw.nextStratum(graphics);
+    }
+
+    private void drawBody(GuiGraphics graphics, ScreenRectangle area, int mouseX, int mouseY) {
         if (this.background != 0) {
             graphics.fill(area.left(), area.top(), area.right(), area.bottom(), this.background);
             if (this.mode == Mode.BANNER) graphics.fill(area.left(), area.top(), area.right(), area.top() + 1, 0x60FFFFFF);
@@ -105,8 +153,6 @@ final class MessagePanel extends Panel {
                 x += 18;
             }
         }
-        // Panels drawn later cover its items.
-        GuiDraw.nextStratum(graphics);
     }
 
     @Override

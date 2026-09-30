@@ -5,17 +5,21 @@ import net.minecraft.util.Mth;
 import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 final class ViewerButton extends AbstractButton {
     private final OnPress onPress;
@@ -82,24 +86,30 @@ final class ViewerButton extends AbstractButton {
         graphics.fill(x + width - 1, y, x + width, y + height, outline);
     }
 
+    /** A small square button drawn like the Skills Record's configuration button, in the record's color. */
     static final class Icon extends AbstractButton {
+        static final int SIZE = 10;
         private final Consumer<Icon> onPress;
-        private final IconPainter painter;
+        private final Supplier<WidgetSprites> sprites;
+        private final IntSupplier tint;
         // Fades in when shown and out when hidden, instead of popping.
         private static final float FADE_SECONDS = 0.15F;
         private boolean shown;
         private float fade;
         private long lastFrame = -1L;
 
-        interface IconPainter {
-            void paint(GuiGraphics graphics, int x, int y, int size, int color);
-        }
-
-        Icon(int size, Component tooltip, IconPainter painter, Consumer<Icon> onPress) {
-            super(0, 0, size, size, CommonComponents.EMPTY);
-            this.painter = painter;
+        Icon(Component tooltip, Supplier<WidgetSprites> sprites, IntSupplier tint, Consumer<Icon> onPress) {
+            super(0, 0, SIZE, SIZE, CommonComponents.EMPTY);
+            this.sprites = sprites;
+            this.tint = tint;
             this.onPress = onPress;
             this.setTooltip(net.minecraft.client.gui.components.Tooltip.create(tooltip));
+        }
+
+        static WidgetSprites sprites(String name) {
+            return new WidgetSprites(FTBUltimineAddition.id("container/skills_record/card_viewer_" + name + "_enabled"),
+                    FTBUltimineAddition.id("container/skills_record/card_viewer_" + name + "_disabled"),
+                    FTBUltimineAddition.id("container/skills_record/card_viewer_" + name + "_focused"));
         }
 
         @Override
@@ -125,49 +135,14 @@ final class ViewerButton extends AbstractButton {
                 this.visible = false;
                 return;
             }
-            int x = this.getX(), y = this.getY(), size = this.getWidth();
             boolean hovered = this.shown && this.isHoveredOrFocused();
-            drawFrame(graphics, x, y, size, size, hovered, this.fade);
-            this.painter.paint(graphics, x, y, size, ARGB.multiplyAlpha(hovered ? 0xFFFFFFFF : 0xFFB0B0B0, this.fade));
+            GuiDraw.blitSprite(graphics, this.sprites.get().get(true, hovered), this.getX(), this.getY(), SIZE, SIZE,
+                    ARGB.color(this.fade, ARGB.opaque(this.tint.getAsInt())));
         }
 
         @Override
         protected void updateWidgetNarration(NarrationElementOutput output) {
             this.defaultButtonNarrationText(output);
-        }
-
-        static void corners(GuiGraphics g, int x, int y, int size, int color, boolean outwards) {
-            int a = 2, b = size - 2, len = 3;
-            if (outwards) {
-                g.fill(x + a, y + a, x + a + len, y + a + 1, color);
-                g.fill(x + a, y + a, x + a + 1, y + a + len, color);
-                g.fill(x + b - len, y + a, x + b, y + a + 1, color);
-                g.fill(x + b - 1, y + a, x + b, y + a + len, color);
-                g.fill(x + a, y + b - 1, x + a + len, y + b, color);
-                g.fill(x + a, y + b - len, x + a + 1, y + b, color);
-                g.fill(x + b - len, y + b - 1, x + b, y + b, color);
-                g.fill(x + b - 1, y + b - len, x + b, y + b, color);
-            } else {
-                int m = size / 2;
-                g.fill(x + m - len, y + m - 2, x + m - 1, y + m - 1, color);
-                g.fill(x + m - 2, y + m - len, x + m - 1, y + m - 1, color);
-                g.fill(x + m + 1, y + m - 2, x + m + len, y + m - 1, color);
-                g.fill(x + m + 1, y + m - len, x + m + 2, y + m - 1, color);
-                g.fill(x + m - len, y + m + 1, x + m - 1, y + m + 2, color);
-                g.fill(x + m - 2, y + m + 1, x + m - 1, y + m + len, color);
-                g.fill(x + m + 1, y + m + 1, x + m + len, y + m + 2, color);
-                g.fill(x + m + 1, y + m + 1, x + m + 2, y + m + len, color);
-            }
-        }
-
-        static void target(GuiGraphics g, int x, int y, int size, int color) {
-            int a = 2, b = size - 2;
-            g.fill(x + a, y + a, x + b, y + a + 1, color);
-            g.fill(x + a, y + b - 1, x + b, y + b, color);
-            g.fill(x + a, y + a, x + a + 1, y + b, color);
-            g.fill(x + b - 1, y + a, x + b, y + b, color);
-            int m = size / 2;
-            g.fill(x + m - 1, y + m - 1, x + m + 1, y + m + 1, color);
         }
     }
 }

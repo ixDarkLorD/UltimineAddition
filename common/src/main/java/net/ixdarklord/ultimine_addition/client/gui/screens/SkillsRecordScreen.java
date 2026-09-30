@@ -122,6 +122,8 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         } else {
             this.viewer.setCompactBounds(this.leftPos + VIEWER_X, this.topPos + VIEWER_Y, VIEWER_WIDTH, VIEWER_HEIGHT);
         }
+        // Fit and expand go on the title bar, left of the configuration button.
+        this.viewer.setToolbarAnchor(this.configurationButton.getX() - 2, this.configurationButton.getY());
         this.addWidget(this.viewer);
     }
 
