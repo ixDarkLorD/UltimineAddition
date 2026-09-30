@@ -2,7 +2,7 @@
 This file is for listing all the changes to this project
 <hr>
 
-## v1.20.1-1 Release - Unreleased (Minecraft 1.20.1 backport)
+## v2001.2.0.0 Release - Unreleased (Minecraft 1.20.1 backport)
 Backport of the 26.1.2 release: the same features on Minecraft 1.20.1, for Forge 47 and Fabric (FTB Ultimine 2001.1.8, FTB Library 2001.2.13). Replaces the 2001.1.5.x line; worlds, items and configs from it carry over (see "Updating from 2001.1.5.x").
 ### ✨ New Features
 - Redesigned the Skills Record's card viewer: the selected card's tiers and challenges are shown on a map you can pan (drag) and zoom (mouse wheel or `+`/`-`). Completed tiers, the current tier's live progress and locked tiers are all visible.
@@ -35,7 +35,7 @@ Everything from the earlier 1.20.1 releases carries over on its own:
 
 ### ⚙️ Refactoring
 - Architectury API is no longer required by this mod (FTB Ultimine 2001 still brings it): events, registration, networking, menus and client registries now go through CoolCatLib's cross-loader layer. Forge Config API Port is no longer needed on Fabric.
-- Now requires both **CoolCatLib: Core** and **CoolCatLib: Canvas** 1.20.1-1 or newer (CoolCatLib was split in two; the old `coolcatlib` mod is no longer used), and Forge 47.4.0 or newer.
+- Now requires both **CoolCatLib: Core** and **CoolCatLib: Canvas** 2001.2.0.0 or newer (CoolCatLib was split in two; the old `coolcatlib` mod is no longer used), and Forge 47.4.0 or newer.
 - A player's Ultimine ability data (Miner Certificate, learned shapes) is now a CoolCatLib attachment, the same on both loaders, saved with the player, kept through death and synced to them whenever it changes. Existing saves are moved over when the player joins.
 
 ### 🐛 Bug Fixes & Improvements
