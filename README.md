@@ -43,16 +43,16 @@ See the [changelog](https://github.com/ixDarkLorD/UltimineAddition/blob/26.1.2/C
 
 ## Versions
 
-Each Minecraft version lives on its own branch.
+Each Minecraft version lives on its own branch. Discontinued versions get no more updates or fixes.
 
-| Minecraft | Loaders | Branch | Requires |
-|---|---|---|---|
-| 26.1.2 | NeoForge, Fabric | [`26.1.2`](https://github.com/ixDarkLorD/UltimineAddition/tree/26.1.2) | FTB Ultimine, CoolCatLib: Core, CoolCatLib: Canvas |
-| 1.21.1 | NeoForge, Fabric | [`1.21.1`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.21.1) | FTB Ultimine, Architectury API, CoolCatLib |
-| 1.21 | NeoForge, Fabric | [`1.21`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.21) | FTB Ultimine, Architectury API, CoolCatLib |
-| 1.20.1 | Forge, Fabric | [`1.20.1`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.20.1) | FTB Ultimine, Architectury API, CoolCatLib |
-| 1.19.2 | Forge, Fabric | [`1.19.2`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.19.2) | FTB Ultimine, Architectury API, CoolCatLib |
-| 1.18.2 | Forge, Fabric | [`1.18.2`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.18.2) | FTB Ultimine, Architectury API, CoolCatLib |
+| Minecraft | Loaders | Branch | Status | Requires |
+|---|---|---|---|---|
+| 26.1.2 | NeoForge, Fabric | [`26.1.2`](https://github.com/ixDarkLorD/UltimineAddition/tree/26.1.2) | Supported | FTB Ultimine, CoolCatLib: Core, CoolCatLib: Canvas |
+| 1.21.1 | NeoForge, Fabric | [`1.21.1`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.21.1) | Supported | FTB Ultimine, CoolCatLib: Core, CoolCatLib: Canvas |
+| 1.21 | NeoForge, Fabric | [`1.21`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.21) | Discontinued | FTB Ultimine, Architectury API, CoolCatLib |
+| 1.20.1 | Forge, Fabric | [`1.20.1`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.20.1) | Supported | FTB Ultimine, CoolCatLib: Core, CoolCatLib: Canvas |
+| 1.19.2 | Forge, Fabric | [`1.19.2`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.19.2) | Discontinued | FTB Ultimine, Architectury API, CoolCatLib |
+| 1.18.2 | Forge, Fabric | [`1.18.2`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.18.2) | Discontinued | FTB Ultimine, Architectury API, CoolCatLib |
 
 FTB Ultimine brings FTB Library with it. Before 26.1.2, the Fabric versions also need Forge Config API Port.
 

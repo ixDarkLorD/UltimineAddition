@@ -49,13 +49,11 @@ body:
   - type: dropdown
     attributes:
       label: Minecraft Version
-      description: Select the version of Minecraft you were using.
+      description: Select the version of Minecraft you were using. 1.21, 1.19.2 and 1.18.2 are discontinued.
       options:
-        - "1.18.2"
-        - "1.19.2"
-        - "1.20.1"
-        - "1.21"
+        - "26.1.2"
         - "1.21.1"
+        - "1.20.1"
     validations:
       required: true
   - type: dropdown
