@@ -34,7 +34,7 @@ import java.util.List;
 // Called from each loader's "after translucent blocks" render hook.
 public final class UndoGhostRenderer {
     private static final int MAX_GHOSTS = 512;
-    private static final int GHOST_COLOR = ((int) (0.45F * 255) << 24) | 0xFFFFFF;
+    private static final int GHOST_COLOR = ((int) (0.65F * 255) << 24) | 0xFFFFFF;
     private static final int FULL_BRIGHT = 0xF000F0;
 
     // The outline only changes with the preview, so it's built once per preview list.
@@ -51,9 +51,13 @@ public final class UndoGhostRenderer {
 
     private UndoGhostRenderer() {}
 
-    // The ghosts' slow breathing scale, just inside the block's space.
+    // Block entities sit just inside their block's space. The ghosts' own models fill it exactly, so neighbouring
+    // ghosts meet without a seam and a group reads as one solid shape.
+    private static final float BLOCK_ENTITY_SCALE = 0.998F;
+
+    // The ghosts' slow breathing, in their opacity.
     private static float pulse() {
-        return 0.9F + 0.03F * Mth.sin(Util.getMillis() / 260.0F);
+        return 0.925F + 0.075F * Mth.sin(Util.getMillis() / 260.0F);
     }
 
     // The ghosts' block entities (chests, signs...), solid but at the ghosts' scale. See UndoBlockEntities.
@@ -75,8 +79,7 @@ public final class UndoGhostRenderer {
             }
             blockEntities = created;
         }
-        float pulse = pulse();
-        for (BlockEntity blockEntity : blockEntities) UndoBlockEntities.draw(blockEntity, pulse, poseStack, buffers, partial);
+        for (BlockEntity blockEntity : blockEntities) UndoBlockEntities.draw(blockEntity, BLOCK_ENTITY_SCALE, poseStack, buffers, partial);
     }
 
     public static void render(PoseStack poseStack) {
@@ -107,11 +110,8 @@ public final class UndoGhostRenderer {
         for (Ghost ghost : models) {
             BlockPos pos = ghost.pos;
             poseStack.pushPose();
-            // Scaled around the block's centre so the ghost sits just inside the block's space.
-            poseStack.translate(pos.getX() - cam.x + 0.5, pos.getY() - cam.y + 0.5, pos.getZ() - cam.z + 0.5);
-            poseStack.scale(pulse, pulse, pulse);
-            poseStack.translate(-0.5, -0.5, -0.5);
-            ghost.model.draw(blocks, poseStack.last(), FULL_BRIGHT, inside);
+            poseStack.translate(pos.getX() - cam.x, pos.getY() - cam.y, pos.getZ() - cam.z);
+            ghost.model.draw(blocks, poseStack.last(), FULL_BRIGHT, inside, pulse);
             poseStack.popPose();
         }
         // Drawn now: the level renderer has already drawn its buffers at this point.
@@ -152,8 +152,8 @@ public final class UndoGhostRenderer {
         return edges;
     }
 
-    // Each ghost's model; a face against another ghost that would hide it (as in the world) is left out, so a
-    // solid group only shows its outside.
+    // Each ghost's model. A face is left out where the world would hide it: against another ghost (so a solid group
+    // only shows its outside) or against a real block that covers it (a face that can't be seen anyway).
     private static List<Ghost> buildModels(List<BlockPos> positions, List<BlockState> states, BlockAndTintGetter level) {
         Map<BlockPos, BlockState> byPos = new HashMap<>();
         for (int i = 0; i < positions.size(); i++) byPos.put(positions.get(i), states.get(i));
@@ -163,8 +163,10 @@ public final class UndoGhostRenderer {
             BlockState state = states.get(i);
             if (state.getRenderShape() != RenderShape.MODEL) continue;
             GhostModel model = GhostModel.build(state, pos, GHOST_COLOR, level, face -> {
-                BlockState neighbour = byPos.get(pos.relative(face));
-                return neighbour != null && !shouldRenderFace(state, neighbour, face);
+                BlockPos next = pos.relative(face);
+                BlockState neighbour = byPos.get(next);
+                if (neighbour == null) neighbour = level.getBlockState(next);
+                return !shouldRenderFace(state, neighbour, face);
             });
             if (!model.isEmpty()) ghosts.add(new Ghost(pos, model));
         }
