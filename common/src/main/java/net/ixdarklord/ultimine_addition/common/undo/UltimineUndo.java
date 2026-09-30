@@ -4,7 +4,6 @@ import net.ixdarklord.coolcatcore.api.event.v2.common.EntityEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerTickEvents;
-import net.ixdarklord.coolcatcore.api.event.v2.core.EventResult;
 import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSavedData;
 import net.ixdarklord.ultimine_addition.common.progression.UltimineNotice;
 import net.ixdarklord.ultimine_addition.config.UAServerConfig;

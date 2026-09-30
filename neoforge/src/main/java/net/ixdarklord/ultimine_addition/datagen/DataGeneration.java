@@ -10,12 +10,9 @@ import net.ixdarklord.ultimine_addition.datagen.particle.ParticleGenerator;
 import net.ixdarklord.ultimine_addition.datagen.recipe.RecipeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.BlockTagGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.ItemTagGenerator;
-import net.minecraft.core.HolderLookup;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
-
-import java.util.concurrent.CompletableFuture;
 
 @EventBusSubscriber(modid = FTBUltimineAddition.MOD_ID)
 public class DataGeneration {

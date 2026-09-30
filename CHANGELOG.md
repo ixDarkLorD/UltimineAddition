@@ -2,7 +2,7 @@
 This file is for listing all the changes to this project
 <hr>
 
-## v26.1.2-1 Release - Unreleased (Minecraft 26.1.2 port)
+## v26.1.2-1 Release - Sep 30, 2026 (Minecraft 26.1.2 port)
 ### ✨ New Features
 - Redesigned the Skills Record's card viewer: the selected card's tiers and challenges are shown on a map you can pan (drag) and zoom (mouse wheel or `+`/`-`). Completed tiers, the current tier's live progress and locked tiers are all visible.
 - Clicking a challenge opens its details (description, target blocks, progress, completion date) with Pin and Edit actions.

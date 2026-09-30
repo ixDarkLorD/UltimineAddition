@@ -7,7 +7,6 @@ import net.minecraft.util.ARGB;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.renderer.RenderPipelines;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
@@ -29,7 +28,6 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
@@ -39,7 +37,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +46,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMenu> {
     // The item's clipboard: a slate board with its clip, holding a blueprint sheet.

@@ -4,7 +4,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;

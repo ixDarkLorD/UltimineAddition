@@ -6,7 +6,6 @@ import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.SyncChallengesPayload;
-import net.minecraft.server.packs.PackType;
 
 public class ChallengesEvents {
     public static void init() {

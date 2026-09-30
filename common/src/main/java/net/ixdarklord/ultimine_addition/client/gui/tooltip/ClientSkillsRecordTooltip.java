@@ -1,7 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.tooltip;
 
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
-import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.minecraft.util.ARGB;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
@@ -9,12 +8,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.awt.*;
-import java.util.Arrays;
 
 public class ClientSkillsRecordTooltip implements ClientTooltipComponent {
     public static final Identifier SLOT_SPRITE = Identifier.withDefaultNamespace("container/slot");

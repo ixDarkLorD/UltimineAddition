@@ -2,7 +2,6 @@ package net.ixdarklord.ultimine_addition.common.effect;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
