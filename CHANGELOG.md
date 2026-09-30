@@ -2,7 +2,7 @@
 This file is for listing all the changes to this project
 <hr>
 
-## v1.21.1-1 Release - Unreleased (Minecraft 1.21.1 backport)
+## v2101.2.0.0 Release - Unreleased (Minecraft 1.21.1 backport)
 Backport of the 26.1.2 release: the same features on Minecraft 1.21.1, for Fabric and NeoForge (FTB Ultimine 2101.1.15).
 ### ✨ New Features
 - Redesigned the Skills Record's card viewer: the selected card's tiers and challenges are shown on a map you can pan (drag) and zoom (mouse wheel or `+`/`-`). Completed tiers, the current tier's live progress and locked tiers are all visible.
