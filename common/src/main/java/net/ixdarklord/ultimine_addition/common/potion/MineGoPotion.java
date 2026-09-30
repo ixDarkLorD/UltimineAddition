@@ -3,7 +3,6 @@ package net.ixdarklord.ultimine_addition.common.potion;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;

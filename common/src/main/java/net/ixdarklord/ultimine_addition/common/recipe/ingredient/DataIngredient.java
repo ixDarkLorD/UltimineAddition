@@ -1,7 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.recipe.ingredient;
 
 import net.minecraft.world.item.Items;
-import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -19,7 +18,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -3,7 +3,6 @@ package net.ixdarklord.ultimine_addition.client.gui.hud;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
-import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
 import net.ixdarklord.ultimine_addition.common.progression.UltimineNotice;

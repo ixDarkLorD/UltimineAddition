@@ -32,7 +32,6 @@ import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.SkillsRecordPayload;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -43,7 +42,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.util.Mth;
@@ -62,7 +60,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 
 public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu> implements CardViewerWidget.Actions {
     public static final WidgetSprites BUTTON_SPRITES = new WidgetSprites(FTBUltimineAddition.id("container/skills_record/button"), FTBUltimineAddition.id("container/skills_record/button_disabled"), FTBUltimineAddition.id("container/skills_record/button_focused"));

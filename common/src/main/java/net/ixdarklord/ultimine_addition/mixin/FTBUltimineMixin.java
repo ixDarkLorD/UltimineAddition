@@ -2,8 +2,9 @@ package net.ixdarklord.ultimine_addition.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.architectury.event.EventResult;
-import dev.architectury.utils.value.IntValue;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import dev.ftb.mods.ftbultimine.api.util.ItemCollector;
 import net.ixdarklord.ultimine_addition.common.undo.UltimineUndo;
@@ -55,8 +56,12 @@ public abstract class FTBUltimineMixin {
 
     // --- Undo recording (see UltimineUndo) ---
 
+    // FTB's blockBroken takes and returns Architectury types (IntValue, EventResult); only the arguments used are
+    // captured here, so this mod doesn't refer to Architectury itself.
     @Inject(method = "blockBroken", at = @At(value = "NEW", target = "dev/ftb/mods/ftbultimine/api/util/ItemCollector"))
-    private void UA$undoBegin(Level level, BlockPos origPos, BlockState state, ServerPlayer player, IntValue xp, CallbackInfoReturnable<EventResult> cir) {
+    private void UA$undoBegin(CallbackInfoReturnable<?> cir, @Local(argsOnly = true) ServerPlayer player, @Local(argsOnly = true) BlockPos origPos,
+                              @Share("undoRan") LocalBooleanRef ran) {
+        ran.set(true);
         UltimineUndo.begin(player, origPos);
     }
 
@@ -90,9 +95,11 @@ public abstract class FTBUltimineMixin {
         UltimineUndo.recordDrops(drops, spawned);
     }
 
-    // An operation that ran returns interruptFalse(); the nested block-break events it causes return pass().
+    // Whether an operation ran: FTB returns pass() on every check before building its drop collector, and
+    // interruptFalse() once it has (where undoBegin marks this call). The nested block-break events an operation
+    // causes are calls of their own, unmarked.
     @Inject(method = "blockBroken", at = @At("RETURN"))
-    private void UA$undoFinish(Level level, BlockPos origPos, BlockState state, ServerPlayer player, IntValue xp, CallbackInfoReturnable<EventResult> cir) {
-        UltimineUndo.finish(player, cir.getReturnValue().interruptsFurtherEvaluation());
+    private void UA$undoFinish(CallbackInfoReturnable<?> cir, @Local(argsOnly = true) ServerPlayer player, @Share("undoRan") LocalBooleanRef ran) {
+        UltimineUndo.finish(player, ran.get());
     }
 }
