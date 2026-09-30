@@ -284,9 +284,10 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
         this.update();
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        // Raised so the markers draw over slot items and highlights, but still under the carried item.
+        // Raised so the markers draw over slot items (up to z 250 plus the model's depth) and highlights, but still under
+        // the carried item (about z 382).
         guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0.0F, 0.0F, 250.0F);
+        guiGraphics.pose().translate(0.0F, 0.0F, 300.0F);
         this.renderSlotDecorations(guiGraphics, this.leftPos, this.topPos);
         guiGraphics.pose().popPose();
         if (!this.viewer.isExpandedWindow()) {

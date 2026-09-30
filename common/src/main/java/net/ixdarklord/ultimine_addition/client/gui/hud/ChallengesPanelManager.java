@@ -7,6 +7,7 @@ import com.mojang.blaze3d.platform.Window;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.AnimatedComponent;
 import net.ixdarklord.ultimine_addition.client.gui.components.ChallengesPanel;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
@@ -50,6 +51,13 @@ public final class ChallengesPanelManager {
                 }
 
                 this.validatePanels(stack);
+                // Every live panel comes from this record: paint them with its color (panels on their way out keep theirs).
+                if (!stack.isEmpty()) {
+                    RecordTheme theme = RecordTheme.of(stack);
+                    for (ChallengesPanel panel : this.panelMap.values()) {
+                        if (!panel.isAssignedToRemove()) panel.setTheme(theme);
+                    }
+                }
                 this.resizePanels();
                 this.adjustPanelsToFitScreen(window);
                 this.alignPanels(window);

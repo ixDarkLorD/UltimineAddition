@@ -1,7 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
-import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.minecraft.world.entity.player.Player;
@@ -20,11 +19,11 @@ import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.UpdateItemShapePayload;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractStringWidget;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -51,8 +50,46 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMenu> {
+    // The item's clipboard: a slate board with its clip, holding a blueprint sheet.
     private static final ResourceLocation BACKGROUND_TEXTURE = FTBUltimineAddition.getGuiTexture("container/shape_selector", "png");
-    private SkillsRecordScreen.OverlayColor color;
+    // Blueprint colors: the sheet's light line color, and the shape list's entries and scrollbar drawn in it.
+    private static final int BLUEPRINT_LINE = 0xC3E5F5;
+    private static final int BLUEPRINT_WASH = 0x7FD3F5;
+    // Where things sit on the sheet (the tool slot is placed by the menu): the list in its panel, with its scrollbar
+    // close to the panel's edge, and Set / Clear lined up with the panel's bottom.
+    private static final int LIST_X = 62, LIST_Y = 50, LIST_WIDTH = 100, LIST_HEIGHT = 57;
+    private static final int SCROLLBAR_GAP = 2;
+    private static final int BUTTONS_Y = 90;
+    // The buttons' pixel icons ('X' pixels), drawn in the blueprint's light color: Set, Clear and the list's filter.
+    private static final String[] CHECK_ICON = {
+            "........X",
+            ".......XX",
+            "X.....XX.",
+            "XX...XX..",
+            ".XX.XX...",
+            "..XXX....",
+            "...X.....",
+    };
+    private static final String[] CROSS_ICON = {
+            "XX...XX",
+            "XXX.XXX",
+            ".XXXXX.",
+            "..XXX..",
+            ".XXXXX.",
+            "XXX.XXX",
+            "XX...XX",
+    };
+    private static final String[] FILTER_ICON = {
+            "XXXXX",
+            ".XXX.",
+            "..X..",
+            "..X..",
+            "..X..",
+    };
+    // The room for the title inside its field (the field spans x 13 to 104 in the texture).
+    private static final int TITLE_ROOM = 86;
+    // The shape list's tooltip lines wrap at this width.
+    private static final int TOOLTIP_WIDTH = 160;
 
     private ColoredButton filterButton;
     private AbstractStringWidget emptyString;
@@ -62,22 +99,21 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
     public ShapeSelectorScreen(ShapeSelectorMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        this.imageWidth = 178;
-        this.imageHeight = 172;
+        this.imageWidth = 184;
+        this.imageHeight = 215;
     }
 
     @Override
     protected void init() {
-        // Set before the first frame, so the background has its color from the start.
-        this.color = RecordTheme.active().overlay();
         super.init();
 
-        this.titleLabelX = 6;
-        this.titleLabelY = 5;
-        this.inventoryLabelX = (this.imageWidth / 2) - (this.font.width(this.playerInventoryTitle) / 2);
-        this.inventoryLabelY = this.imageHeight - 96;
+        // The title in its field on the sheet, below the clip; the inventory's label centered on the board above its slots.
+        this.titleLabelX = 16;
+        this.titleLabelY = 35;
+        this.inventoryLabelX = (this.imageWidth - this.font.width(this.playerInventoryTitle)) / 2;
+        this.inventoryLabelY = 120;
 
-        this.filterButton = this.addWidget(new ColoredButton(this.leftPos + 165, this.topPos + 4, 9, 9, SkillsRecordScreen.CONFIGURATION_BUTTON_SPRITES,
+        this.filterButton = this.addWidget(new ColoredButton(this.leftPos + 161, this.topPos + 35, 9, 9, SkillsRecordScreen.CONFIGURATION_BUTTON_SPRITES,
                 button -> {
                     Filter filter = UAClientConfig.SHAPE_SELECTOR_FILTER.get();
                     UAClientConfig.SHAPE_SELECTOR_FILTER.set(Screen.hasShiftDown() ? filter.previous() : filter.next());
@@ -92,9 +128,15 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                     .append(": ")
                     .append(filterComponent)
                     .withStyle(ChatFormatting.WHITE);
-        }));
+        }) {
+            @Override
+            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                drawBlueprintButton(guiGraphics, this, FILTER_ICON);
+                this.renderTooltip(guiGraphics, mouseX, mouseY);
+            }
+        });
 
-        this.emptyString = this.addRenderableWidget(new AbstractStringWidget(this.leftPos + 61, this.topPos + 16, 102, 54,
+        this.emptyString = this.addRenderableWidget(new AbstractStringWidget(this.leftPos + LIST_X, this.topPos + LIST_Y, LIST_WIDTH, LIST_HEIGHT,
                 Component.translatable("gui.ultimine_addition.shape_selector.insert"), this.font) {
 
             @Override
@@ -112,17 +154,17 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 for (FormattedCharSequence sequence : sequences) {
                     int textWidth = font.width(sequence);
                     int centeredX = x + (width - textWidth) / 2;
-                    GuiDraw.text(guiGraphics, font, sequence, centeredX, y, Color.LIGHT_GRAY.getRGB());
+                    GuiDraw.text(guiGraphics, font, sequence, centeredX, y, ARGB.opaque(BLUEPRINT_LINE));
                     y += font.lineHeight;
                 }
 
             }
         });
 
-        this.selectBox = this.addRenderableWidget(new SelectBox(this.leftPos + 61, this.topPos + 16, 102, 54));
+        this.selectBox = this.addRenderableWidget(new SelectBox(this.leftPos + LIST_X, this.topPos + LIST_Y, LIST_WIDTH, LIST_HEIGHT));
         this.selectBox.visible = false;
 
-        this.setButton = this.addRenderableWidget(new ColorableImageButton(this.leftPos + 10, this.topPos + 54, 19, 19, SkillsRecordScreen.BUTTON_SPRITES, button -> {
+        this.setButton = this.addRenderableWidget(new ColorableImageButton(this.leftPos + 14, this.topPos + BUTTONS_Y, 19, 19, SkillsRecordScreen.BUTTON_SPRITES, button -> {
             SelectBox.ShapeEntry selected = this.selectBox.getSelected();
             if (selected != null) {
                 PayloadHandler.sendToServer(new UpdateItemShapePayload(selected.shape.getName().toString()));
@@ -131,21 +173,17 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         }) {
             @Override
             public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-                final ResourceLocation SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/confirm");
-                GuiDraw.blitSprite(guiGraphics, SPRITE, this.getX() + 1, this.getY(), 18, 18);
+                drawBlueprintButton(guiGraphics, this, CHECK_ICON);
             }
         });
 
-        this.clearButton = this.addRenderableWidget(new ColorableImageButton(this.leftPos + 32, this.topPos + 54, 19, 19, SkillsRecordScreen.BUTTON_SPRITES, button -> {
+        this.clearButton = this.addRenderableWidget(new ColorableImageButton(this.leftPos + 35, this.topPos + BUTTONS_Y, 19, 19, SkillsRecordScreen.BUTTON_SPRITES, button -> {
             this.selectBox.setSelected(null);
             PayloadHandler.sendToServer(new UpdateItemShapePayload(""));
         }) {
             @Override
             public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-                final ResourceLocation SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/cancel");
-                GuiDraw.blitSprite(guiGraphics, SPRITE, this.getX() + 1, this.getY(), 18, 18);
+                drawBlueprintButton(guiGraphics, this, CROSS_ICON);
             }
         });
 
@@ -158,8 +196,6 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         boolean slotEmpty = stack.isEmpty();
         SelectBox.ShapeEntry selected = this.selectBox.getSelected();
 
-        this.setButton.setColor(this.color.convert());
-        this.clearButton.setColor(this.color.convert());
 
         this.emptyString.visible = slotEmpty;
         this.selectBox.visible = !slotEmpty;
@@ -174,7 +210,6 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.color = RecordTheme.active().overlay();
         this.update();
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         this.filterButton.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -211,7 +246,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         }
 
         if (!components.isEmpty())
-            GuiDraw.tooltip(guiGraphics, font, components, mouseX, mouseY);
+            GuiDraw.tooltipLines(guiGraphics, font, wrapTooltip(components), mouseX, mouseY);
     }
 
     @Override
@@ -226,16 +261,49 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        GuiDraw.blit(guiGraphics, BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256,
-                ARGB.colorFromFloat(color.alpha(), color.red(), color.green(), color.blue()));
+        GuiDraw.blit(guiGraphics, BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
     }
 
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        Color color = ColorUtils.blend(new Color(0, 0, 0), this.color.convert(), 0.25);
-        GuiDraw.text(guiGraphics, this.font, this.title, this.titleLabelX, this.titleLabelY, color.getRGB(), false);
-        guiGraphics.fill(this.inventoryLabelX - 1, this.inventoryLabelY - 1, this.inventoryLabelX + this.font.width(this.playerInventoryTitle), this.inventoryLabelY + this.font.lineHeight, ColorUtils.rgbToRgba(color.getRGB(), 0.5F));
-        GuiDraw.text(guiGraphics, this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, color.getRGB(), false);
+        // White lettering on the blueprint; the inventory's label in the board's light slate.
+        // Shrunk to fit its field when too long (e.g. in other languages).
+        float scale = Math.min(1.0F, TITLE_ROOM / (float) Math.max(1, this.font.width(this.title)));
+        var pose = guiGraphics.pose();
+        pose.pushPose();
+        pose.translate(this.titleLabelX, this.titleLabelY + 4.0F - 4.0F * scale, 0.0F);
+        pose.scale(scale, scale, 1.0F);
+        GuiDraw.text(guiGraphics, this.font, this.title, 0, 0, 0xFFFFFFFF, true);
+        pose.popPose();
+        GuiDraw.text(guiGraphics, this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 0xFFD3D8E6, false);
+    }
+
+    // A button drawn on the blueprint: a blue plate framed in its line color, lit along the top and shaded along the
+    // bottom, lighter while hovered and dimmed when it can't be used, with a light pixel icon in the middle.
+    private static void drawBlueprintButton(GuiGraphics graphics, AbstractWidget button, String[] icon) {
+        int x = button.getX(), y = button.getY(), w = button.getWidth(), h = button.getHeight();
+        boolean active = button.active, hovered = active && button.isHoveredOrFocused();
+        graphics.fill(x, y, x + w, y + h, active ? ARGB.opaque(BLUEPRINT_LINE) : 0xFF6FB3D6);
+        graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, !active ? 0xFF2A8FC4 : hovered ? 0xFF3A9FD8 : 0xFF2586BD);
+        graphics.fill(x + 1, y + 1, x + w - 1, y + 2, active ? 0xFF55B4E6 : 0xFF3C9ACC);
+        graphics.fill(x + 1, y + h - 2, x + w - 1, y + h - 1, 0xFF1C6FA0);
+        int ix = x + (w - icon[0].length()) / 2, iy = y + (h - icon.length) / 2;
+        int color = active ? 0xFFFFFFFF : 0xFF8FC8E6;
+        for (int row = 0; row < icon.length; row++) {
+            for (int col = 0; col < icon[row].length(); col++) {
+                if (icon[row].charAt(col) == 'X') graphics.fill(ix + col, iy + row, ix + col + 1, iy + row + 1, color);
+            }
+        }
+    }
+
+    // Each line split to fit TOOLTIP_WIDTH (a blank line kept blank).
+    private List<FormattedCharSequence> wrapTooltip(List<Component> components) {
+        List<FormattedCharSequence> lines = new ArrayList<>();
+        for (Component component : components) {
+            if (component.getString().isEmpty()) lines.add(FormattedCharSequence.EMPTY);
+            else lines.addAll(this.font.split(component, TOOLTIP_WIDTH));
+        }
+        return lines;
     }
 
     public enum Filter implements EnumType.Displayable {
@@ -295,7 +363,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
         @Override
         protected int getScrollbarPosition() {
-            return this.getX() + width + 4;
+            return this.getX() + width + SCROLLBAR_GAP;
         }
 
         @Override
@@ -314,16 +382,16 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         }
 
         @Override
-        // Drawn over the list's own scrollbar, tinted like the book.
+        // Drawn over the list's own scrollbar, in the blueprint's colors.
         protected void renderDecorations(GuiGraphics guiGraphics, int mouseX, int mouseY) {
             if (this.scrollbarVisible()) {
                 int scrollerHeight = Mth.clamp((int) ((float) (this.height * this.height) / this.getMaxPosition()), 32, this.height - 8);
                 int scrollerY = Math.max(this.getY(), (int) this.getScrollAmount() * (this.height - scrollerHeight) / this.getMaxScroll() + this.getY());
-                final ResourceLocation SCROLLER_BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller_background");
-                final ResourceLocation SCROLLER_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller");
-                GuiDraw.blitSprite(guiGraphics, SCROLLER_BACKGROUND_SPRITE, this.getScrollbarPosition(), this.getY(), 6, this.getHeight());
-                int color = ShapeSelectorScreen.this.color.convert().brighter().getRGB();
-                GuiDraw.blitSprite(guiGraphics, SCROLLER_SPRITE, this.getScrollbarPosition(), scrollerY, 6, scrollerHeight, color);
+                // Drawn in the blueprint: a dark blue track and a thumb in its line color.
+                int x = this.getScrollbarPosition(), bottom = scrollerY + scrollerHeight;
+                guiGraphics.fill(x, this.getY(), x + 6, this.getY() + this.getHeight(), 0xFF1C6FA0);
+                guiGraphics.fill(x, scrollerY, x + 6, bottom, ARGB.opaque(BLUEPRINT_LINE));
+                guiGraphics.fill(x + 1, scrollerY + 1, x + 5, bottom - 1, ARGB.opaque(BLUEPRINT_WASH));
             }
         }
 
@@ -358,8 +426,9 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
             @Override
             // The list hands each row its box: the row height minus a 4px gap below it.
             public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isHovered, float partialTick) {
-                Color bgColor = new Color(0xBCBCBC);
-                Color borderColor = new Color(0xB5B5B5);
+                // Drawn in the blueprint's lines: a light wash framed in its line color.
+                Color bgColor = new Color(BLUEPRINT_WASH);
+                Color borderColor = new Color(BLUEPRINT_LINE);
 
                 if (!isAllowed()) {
                     bgColor = ColorUtils.blend(bgColor.darker(), new Color(0x701111), 0.4);
@@ -375,13 +444,21 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
                 Font font = SelectBox.this.minecraft.font;
                 Color color = isAllowed() ? Color.WHITE : new Color(0xD13E3E);
-                int ticks = (int) (Util.getMillis() / 10);
                 Style style = Style.EMPTY.withStrikethrough(!isAllowed());
                 int spacing = isShapeSelected() ? 9 : 0;
                 if (isShapeSelected()) {
                     GuiDraw.text(guiGraphics, font, Component.literal("➤"), left + 3, top + (height / 2) - 4, color.getRGB());
                 }
-                RenderUtils.drawScrollingString(guiGraphics, ticks, font, this.shape.getDisplayName().copy().withStyle(style), false, new ScreenRectangle(left + spacing, top, width - spacing, height), 3, color.getRGB(), true);
+                // Shrunk to fit when too long (e.g. in other languages), centered in the box's height.
+                Component name = this.shape.getDisplayName().copy().withStyle(style);
+                int room = width - spacing - 6;
+                float scale = Math.min(1.0F, room / (float) Math.max(1, font.width(name)));
+                var pose = guiGraphics.pose();
+                pose.pushPose();
+                pose.translate(left + spacing + 3, top + height / 2.0F - 4.0F * scale, 0.0F);
+                pose.scale(scale, scale, 1.0F);
+                GuiDraw.text(guiGraphics, font, name, 0, 0, color.getRGB(), true);
+                pose.popPose();
             }
 
             public @NotNull Component getNarration() {

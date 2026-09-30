@@ -419,6 +419,9 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         return Component.literal(font.plainSubstrByWidth(text, Math.max(0, maxWidth - font.width("..."))) + "...");
     }
 
+    // Put before a challenge's name wherever it is named: its tooltip and its details panel.
+    static final String CHALLENGE_GLYPH = "\ud83d\udcdd ";
+
     static Component challengeName(ChallengeNode node) {
         if (node.id() != null) {
             String key = "challenge.%s.%s.name".formatted(node.id().getNamespace(), node.id().getPath().replace('/', '.'));
@@ -430,7 +433,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     List<FormattedCharSequence> describeChallenge(ChallengeNode node) {
         List<FormattedCharSequence> header = new ArrayList<>();
         header.add(Component.translatable("challenge.ultimine_addition.title", node.order()).withStyle(ChatFormatting.GRAY).getVisualOrderText());
-        header.addAll(this.font.split(Component.literal("\ud83d\udcdd ").append(challengeName(node)).withStyle(Style.EMPTY.withColor(0xFBF1C1)), 200));
+        header.addAll(this.font.split(Component.literal(CHALLENGE_GLYPH).append(challengeName(node)).withStyle(Style.EMPTY.withColor(0xFBF1C1)), 200));
         if (node.pinned()) {
             header.add(Component.literal("◎ ").append(Component.translatable("gui.ultimine_addition.card_viewer.pinned")).withStyle(ChatFormatting.YELLOW).getVisualOrderText());
         }
@@ -562,8 +565,9 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         }
         boolean covered = !this.expanded && (this.isTransitioning() || this.details.isVisible() || this.shapeChoice.isVisible() || this.preview.isVisible());
         boolean treeControls = this.tree.isVisible() && !covered;
-        this.expandButton.setShown(this.visible && !covered && (treeControls || this.expanded), this.isAnimated());
-        this.fitButton.setShown(this.visible && treeControls, this.isAnimated());
+        // Always there beside the configuration button; only usable while browsing the challenges.
+        this.expandButton.setState(this.visible, !covered && (treeControls || this.expanded));
+        this.fitButton.setState(this.visible, treeControls);
     }
 
     @Override

@@ -207,6 +207,8 @@ final class GuidePanel extends Panel {
         this.drawSlot(graphics, slotX, slotY, 0.0F, SELECTED, intro);
         graphics.renderItem(card, slotX + (SLOT - 16) / 2, slotY + (SLOT - 16) / 2);
         if (selected > 0.0F) {
+            // Over the card (items draw after fills in a stratum), as over the record's card slots.
+            GuiDraw.nextStratum(graphics);
             // Standing on the slot's bevel, as over the record's card slots, with the same outline.
             int markerX = slotX + (SLOT - 4) / 2, markerY = slotY - 8;
             GuiDraw.blitSprite(graphics, SLOT_SELECT, markerX, markerY, 4, 8, ARGB.color(selected * intro, 0xFFFFFF));
@@ -227,7 +229,7 @@ final class GuidePanel extends Panel {
             outline(graphics, slotX + 1 - grow, slotY + 1 - grow, 16 + grow * 2, 16 + grow * 2, ARGB.color((1.0F - ripple) * 0.9F * intro, CLICK));
         }
         cursor(graphics, Math.round(mx), Math.round(my), pressed, intro);
-        mouse(graphics, sx + STAGE - 1, sy + STAGE - 1, pressed, intro);
+        mouse(graphics, sx + STAGE - 2, sy + STAGE - 2, pressed, intro);
         graphics.disableScissor();
     }
 
@@ -270,16 +272,25 @@ final class GuidePanel extends Panel {
     }
 
     // The tutorial toast's mouse (vanilla's own sprites, so resource packs restyle it too), its bottom right corner at
-    // right, bottom. While pressed it shows the right click, with a couple of sparks popping off the button.
+    // right, bottom. Its cord fades out upwards. While pressed it shows the right click, with a couple of sparks popping
+    // off the button.
     private static final ResourceLocation MOUSE = ResourceLocation.withDefaultNamespace("toast/mouse");
     private static final ResourceLocation MOUSE_RIGHT_CLICK = ResourceLocation.withDefaultNamespace("toast/right_click");
     // Where the drawn mouse sits in the 20 x 20 sprites: its body's right and bottom edges, and its right button's top.
     private static final int MOUSE_RIGHT = 13, MOUSE_BOTTOM = 18;
     private static final int BUTTON_X = 10, BUTTON_Y = 6;
 
+    private static final int CORD_ROWS = 5;
+
     private static void mouse(GuiGraphics graphics, int right, int bottom, boolean pressed, float intro) {
         int x = right - MOUSE_RIGHT, y = bottom - MOUSE_BOTTOM;
-        GuiDraw.blitSprite(graphics, pressed ? MOUSE_RIGHT_CLICK : MOUSE, x, y, 20, 20, ARGB.color(intro, 0xFFFFFF));
+        ResourceLocation sprite = pressed ? MOUSE_RIGHT_CLICK : MOUSE;
+        // The cord's rows above the body, drawn one by one, fainter towards the top.
+        for (int row = 0; row < CORD_ROWS; row++) {
+            float fade = (row + 1) / (CORD_ROWS + 1.0F);
+            GuiDraw.blitSprite(graphics, sprite, 20, 20, 0, row, x, y + row, 20, 1, ARGB.color(fade * intro, 0xFFFFFF));
+        }
+        GuiDraw.blitSprite(graphics, sprite, 20, 20, 0, CORD_ROWS, x, y + CORD_ROWS, 20, 20 - CORD_ROWS, ARGB.color(intro, 0xFFFFFF));
         if (!pressed) return;
         int spark = ARGB.multiplyAlpha(CLICK, intro);
         int bx = x + BUTTON_X, by = y + BUTTON_Y;

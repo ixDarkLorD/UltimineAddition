@@ -83,6 +83,11 @@ public final class GuiDraw {
         tinted(graphics, color, () -> graphics.blitSprite(sprite, x, y, width, height));
     }
 
+    /** Part of a sprite: the width x height region at u, v of a sprite laid out as textureWidth x textureHeight. */
+    public static void blitSprite(GuiGraphics graphics, ResourceLocation sprite, int textureWidth, int textureHeight, int u, int v, int x, int y, int width, int height, int color) {
+        tinted(graphics, color, () -> graphics.blitSprite(sprite, textureWidth, textureHeight, u, v, x, y, width, height));
+    }
+
     public static void blit(GuiGraphics graphics, ResourceLocation texture, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
         blit(graphics, texture, x, y, u, v, width, height, textureWidth, textureHeight, -1);
     }
