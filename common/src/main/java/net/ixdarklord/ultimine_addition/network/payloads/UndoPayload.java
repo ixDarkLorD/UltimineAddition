@@ -146,6 +146,61 @@ public final class UndoPayload {
         }
     }
 
+    // Asks for the list of operations the player can still undo.
+    public record HistoryRequest() implements CustomPacketPayload {
+        public static final Type<HistoryRequest> TYPE = new Type<>(FTBUltimineAddition.id("undo_history_request"));
+        public static final StreamCodec<FriendlyByteBuf, HistoryRequest> STREAM_CODEC = StreamCodec.unit(new HistoryRequest());
+
+        public static void handle(HistoryRequest msg, PacketContext ctx) {
+            ctx.queue(() -> {
+                if (ctx.getPlayer() instanceof ServerPlayer player) UltimineUndo.history(player);
+            });
+        }
+
+        @Override
+        public @NotNull Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    // One stored operation: an item standing for its blocks, how many come back, what it costs, how long it stays
+    // undoable, and whether the player could undo it now (state) and pay for all of it (affordable).
+    public record HistoryEntry(ItemStack icon, int blocks, List<ItemStack> cost, int xp, long expiresIn, boolean free, boolean affordable, int state) {
+        public static final int READY = 0, TOO_FAR = 1, BLOCKED = 2;
+        // Written out: StreamCodec.composite takes at most six fields here.
+        private static final StreamCodec<FriendlyByteBuf, List<ItemStack>> COST_CODEC = ByteBufCodecs.OPTIONAL_ITEM_STACK.apply(ByteBufCodecs.<ByteBuf, ItemStack>list()).cast();
+        public static final StreamCodec<FriendlyByteBuf, HistoryEntry> STREAM_CODEC = StreamCodec.of((buf, entry) -> {
+            ByteBufCodecs.OPTIONAL_ITEM_STACK.encode(buf, entry.icon());
+            buf.writeVarInt(entry.blocks());
+            COST_CODEC.encode(buf, entry.cost());
+            buf.writeVarInt(entry.xp());
+            buf.writeVarLong(entry.expiresIn());
+            buf.writeBoolean(entry.free());
+            buf.writeBoolean(entry.affordable());
+            buf.writeVarInt(entry.state());
+        }, buf -> new HistoryEntry(ByteBufCodecs.OPTIONAL_ITEM_STACK.decode(buf), buf.readVarInt(), COST_CODEC.decode(buf), buf.readVarInt(), buf.readVarLong(),
+                buf.readBoolean(), buf.readBoolean(), buf.readVarInt()));
+    }
+
+    // The player's stored operations, newest first (the order they are undone in).
+    public record History(List<HistoryEntry> entries, int maxHistory, boolean enabled) implements CustomPacketPayload {
+        public static final Type<History> TYPE = new Type<>(FTBUltimineAddition.id("undo_history"));
+        public static final StreamCodec<FriendlyByteBuf, History> STREAM_CODEC = StreamCodec.composite(
+                HistoryEntry.STREAM_CODEC.apply(ByteBufCodecs.list()), History::entries,
+                ByteBufCodecs.VAR_INT, History::maxHistory,
+                ByteBufCodecs.BOOL, History::enabled,
+                History::new);
+
+        public static void handle(History msg, PacketContext ctx) {
+            ctx.queue(() -> UndoPreviewClient.INSTANCE.openHistory(msg));
+        }
+
+        @Override
+        public @NotNull Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
     public record Close() implements CustomPacketPayload {
         public static final Type<Close> TYPE = new Type<>(FTBUltimineAddition.id("undo_close"));
         public static final StreamCodec<FriendlyByteBuf, Close> STREAM_CODEC = StreamCodec.unit(new Close());

@@ -208,6 +208,10 @@ public final class SkillsRecordData {
             int points = 1;
             if (hasCorrectGamemode) points += ChallengeBoosts.bonusPoints(player, challengeId, pos, state.getBlock().asItem().getDefaultInstance());
             cardData.addAmount(challengeId, points).save();
+            // Done when the card still lists it as accomplished, or moved on to its next tier with it.
+            if (cardData.getTier() != before || cardData.isChallengeAccomplished(challengeId)) {
+                net.ixdarklord.ultimine_addition.common.data.reward.DataRewards.onChallengeCompleted(player, cardData, before, challengeId);
+            }
             ProgressionRewards.checkTierUp(player, cardData, before);
             if (hasCorrectGamemode) this.consumeContents();
             return Pair.of(true, consuming);

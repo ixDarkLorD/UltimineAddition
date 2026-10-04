@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
+import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.ShapeDiagrams;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
@@ -328,6 +329,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
     // 1.20.1's selection lists have no visibility flag and no background toggles of the newer kind.
     private class SelectBox extends ObjectSelectionList<SelectBox.ShapeEntry> {
+        private static final int DIAGRAM_SIZE = 15;
         private boolean visible = true;
 
         public SelectBox(int x, int y, int width, int height) {
@@ -369,6 +371,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 this.addEntry(new ShapeEntry(shape));
             }
             this.setScrollAmount(this.getScrollAmount());
+            ShapeDiagrams.request(this.children().stream().map(entry -> FTBUltimineIntegration.shapeId(entry.shape)).toList());
         }
 
         @Override
@@ -468,7 +471,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 }
                 // Shrunk to fit when too long (e.g. in other languages), centered in the box's height.
                 Component name = FTBUltimineIntegration.shapeName(this.shape).copy().withStyle(style);
-                int room = width - spacing - 6;
+                int room = width - spacing - 6 - DIAGRAM_SIZE - 3;
                 float scale = Math.min(1.0F, room / (float) Math.max(1, font.width(name)));
                 var pose = guiGraphics.pose();
                 pose.pushPose();
@@ -476,6 +479,11 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 pose.scale(scale, scale, 1.0F);
                 GuiDraw.text(guiGraphics, font, name, 0, 0, color.getRGB(), true);
                 pose.popPose();
+
+                // The shape's diagram, at the row's right end.
+                int tint = isAllowed() ? 0xFFFFFFFF : 0xFFD13E3E;
+                ShapeDiagrams.draw(guiGraphics, FTBUltimineIntegration.shapeId(this.shape), left + width - DIAGRAM_SIZE - 3, top + (height - DIAGRAM_SIZE) / 2, DIAGRAM_SIZE,
+                        tint, 0xFFFBD25A, 0x50103A5C);
             }
 
             public @NotNull Component getNarration() {

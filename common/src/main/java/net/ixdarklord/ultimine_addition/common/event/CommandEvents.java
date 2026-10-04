@@ -14,6 +14,7 @@ public class CommandEvents {
             UltimineShapeCommand.register(dispatcher, registry, selection);
             ConfigCommand.register(dispatcher, registry, selection);
             SkillsRecordCommand.register(dispatcher, registry, selection);
+            net.ixdarklord.ultimine_addition.common.commands.TimedChallengeCommand.register(dispatcher, registry, selection);
         });
     }
 }

@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.event;
 
+import net.ixdarklord.ultimine_addition.common.progression.TimedChallenge;
 import net.ixdarklord.coolcatcore.api.event.v2.common.BlockEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
@@ -48,12 +49,15 @@ public class MSCEvents {
             validateCards(player);
             cardBonusEffect(player);
             SkillsRecordSync.tick(player);
+            // A few seconds after joining: the day's challenge, while it is still to do.
+            if (player.tickCount == 100) TimedChallenge.announce(player, false);
         });
         PlayerEvents.LEAVE.register(SkillsRecordSync::forget);
         PlayerEvents.LEAVE.register(ChallengeBoosts::forget);
         ServerLifecycleEvents.STOPPED.register(server -> SkillsRecordSync.clear());
 
         BlockEvents.BREAK.register((level, pos, state, player) -> {
+            TimedChallenge.onAction(player, state, pos, ChallengeData.Type.BREAK_BLOCK);
             List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
             if (slots.isEmpty()) return EventResult.pass();
             for (SlotReference.Player slot : slots) {
@@ -148,6 +152,10 @@ public class MSCEvents {
         if (player == null) return EventResultHolder.pass();
         if (Platform.isFakePlayer(player)) return EventResultHolder.pass();
         if (!context.getLevel().isClientSide()) {
+            ChallengeData.Type action = toolAction == ToolActions.AXE_STRIP ? ChallengeData.Type.STRIP_BLOCK
+                    : toolAction == ToolActions.SHOVEL_FLATTEN ? ChallengeData.Type.FLATTEN_BLOCK
+                    : toolAction == ToolActions.HOE_TILL && context.getLevel().getBlockState(context.getClickedPos().above()).isAir() ? ChallengeData.Type.TILLING_BLOCK : null;
+            if (action != null && !ignoredSimulate) TimedChallenge.onAction(player, originalState, context.getClickedPos(), action);
             List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, ModItems.SKILLS_RECORD, false);
             if (slots.isEmpty()) return EventResultHolder.pass();
 

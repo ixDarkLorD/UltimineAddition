@@ -17,6 +17,8 @@ public class KeyHandler {
     public static KeyMapping KEY_OPEN_SKILLS_RECORD = create(FTBUltimineAddition.id("open_skills_record"), InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, KEY_CATEGORY);
     // Ctrl + Z: a key modifier on Forge; Fabric has none, so there the mapping is plain Z and Ctrl is checked by hand.
     public static KeyMapping KEY_UNDO = KeyBindingHooks.createControlKeyMapping("key.%s.general.undo_ultimine".formatted(FTBUltimineAddition.MOD_ID), GLFW.GLFW_KEY_Z, KEY_CATEGORY);
+    // Ctrl + H: the list of operations that can still be undone.
+    public static KeyMapping KEY_UNDO_HISTORY = KeyBindingHooks.createControlKeyMapping("key.%s.general.undo_history".formatted(FTBUltimineAddition.MOD_ID), GLFW.GLFW_KEY_H, KEY_CATEGORY);
 
     public static KeyMapping create(ResourceLocation id, InputConstants.Type type, int key, String category) {
         return new KeyMapping("key.%s.%s".formatted(id.getNamespace(), id.getPath()), type, key, category);
@@ -36,6 +38,7 @@ public class KeyHandler {
 
     public static void register() {
         KeyMappingRegistry.register(KEY_UNDO);
+        KeyMappingRegistry.register(KEY_UNDO_HISTORY);
         if (ServicePlatform.get().slotAPI().isModLoaded())
             KeyMappingRegistry.register(KEY_OPEN_SKILLS_RECORD);
     }
