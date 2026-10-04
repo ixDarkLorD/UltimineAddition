@@ -178,7 +178,7 @@ public class FTBUltimineIntegration implements RestrictionHandler {
                 List<MiningSkillCardItem.Type> types = getCustomCardTypes(player);
                 for (int i = 0; i < types.size(); i++) {
                     if (i > 0) tools.append(", ");
-                    tools.append(Component.translatable("info.ultimine_addition.required_skill.%s".formatted(types.get(i).getId())));
+                    tools.append(types.get(i).displayName());
                 }
                 requiredTool = tools;
                 type = types.isEmpty() ? null : types.getFirst();
@@ -200,11 +200,10 @@ public class FTBUltimineIntegration implements RestrictionHandler {
             return;
         }
         if (type == null) return;
-        if (requiredTool == null) requiredTool = Component.translatable("info.ultimine_addition.required_skill." + type.getId());
+        if (requiredTool == null) requiredTool = type.displayName();
 
         // Names that tool's own Mine-Go Juice.
-        MobEffect juice = BuiltInRegistries.MOB_EFFECT.get(MineGoJuiceEffect.getId(type));
-        Component juiceName = (juice == null ? Component.translatable("info.ultimine_addition.notice.locked.juice") : juice.getDisplayName()).copy().withStyle(ChatFormatting.AQUA);
+        Component juiceName = MineGoJuiceEffect.juiceName(type).withStyle(ChatFormatting.AQUA);
         List<Component> lines = List.of(status,
                 Component.translatable("info.ultimine_addition.required_skill", requiredTool.copy().withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GRAY),
                 Component.translatable(isShapeCertificatesActive() ? "info.ultimine_addition.notice.locked.hint" : "info.ultimine_addition.notice.locked.hint_no_shapes", juiceName));
@@ -222,38 +221,19 @@ public class FTBUltimineIntegration implements RestrictionHandler {
     private static boolean isPlayerHasCustomCardValidEffect(Player player) {
         List<MiningSkillCardItem.Type> types = getCustomCardTypes(player);
         for (MiningSkillCardItem.Type type : types) {
-            Optional<Holder.Reference<MobEffect>> mobEffect = BuiltInRegistries.MOB_EFFECT.getHolder(MineGoJuiceEffect.getId(type));
-            if (mobEffect.isEmpty()) continue;
-            if (player.hasEffect(mobEffect.get()))
-                return true;
+            if (MineGoJuiceEffect.has(player, type)) return true;
         }
         return false;
     }
 
     public static int getMaxBlocks(ServerPlayer player) {
         if (UAServerConfig.CARD_TIER_BASED_MAX_BLOCKS.get()) {
-            List<MobEffectInstance> instances = new ArrayList<>(player.getActiveEffects().stream().filter((mobEffectInstance) -> mobEffectInstance.getEffect() instanceof MineGoJuiceEffect).toList());
+            List<MobEffectInstance> instances = new ArrayList<>(player.getActiveEffects().stream().filter((mobEffectInstance) -> mobEffectInstance.getEffect().value() instanceof MineGoJuiceEffect).toList());
             if (!ServicePlatform.get().players().isPlayerUltimineCapable(player) && !instances.isEmpty()) {
                 instances.sort(Comparator.comparingInt(MobEffectInstance::getAmplifier).reversed());
-                if (ItemUtils.isItemInHandCustomCardValid(player)) {
-                    instances.removeIf((instance) -> {
-                        ItemStack stack = ItemUtils.getItemInHand(player, true);
-                        Item item = stack.getItem();
-                        if (item instanceof MiningSkillCardItem cardItem) {
-                            return ((MineGoJuiceEffect) instance.getEffect()).getType() != cardItem.getType();
-                        } else {
-                            return false;
-                        }
-                    });
-                } else if (ItemUtils.isItemInHandPickaxe(player)) {
-                    instances.removeIf((instance) -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.PICKAXE);
-                } else if (ItemUtils.isItemInHandAxe(player)) {
-                    instances.removeIf((instance) -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.AXE);
-                } else if (ItemUtils.isItemInHandShovel(player)) {
-                    instances.removeIf((instance) -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.SHOVEL);
-                } else if (ItemUtils.isItemInHandHoe(player)) {
-                    instances.removeIf((instance) -> ((MineGoJuiceEffect) instance.getEffect()).getType() != MiningSkillCardItem.Type.HOE);
-                }
+                // Only the juices of the tool in hand count (a data pack type's generic juice is the player's).
+                List<MiningSkillCardItem.Type> held = ItemUtils.getToolTypes(ItemUtils.getItemInHand(player, true));
+                instances.removeIf(instance -> !held.contains(MineGoJuiceEffect.typeOf(instance.getEffect().value(), player)));
 
                 if (!instances.isEmpty()) {
                     try {

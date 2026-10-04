@@ -14,14 +14,15 @@ import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
 import net.ixdarklord.coolcatcore.api.core.commands.ArgumentTypeRegistry;
 import net.ixdarklord.coolcatcore.api.utils.ParticleTypes;
-import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.advancement.UltimineObtainTrigger;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.CardHolderArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.CardTierArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.ChallengesArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.UltimineShapeArgument;
 import net.ixdarklord.ultimine_addition.common.data.item.*;
-import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
+import net.ixdarklord.ultimine_addition.common.item.GenericMineGoJuiceItem;
+import net.ixdarklord.ultimine_addition.common.item.GenericMiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.common.recipe.DataCardRecipe;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffectInstance;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -95,38 +96,14 @@ public class Registration {
     }
 
     private static void registerItems() {
-        // Custom Mining Skills Card
-        for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
-            ITEMS.register(type.getRegistryId().getPath(), () -> new MiningSkillCardItem(type, new Item.Properties()
-                    .stacksTo(1)));
-        }
         ITEMS.register();
     }
 
-    private static final Map<String, RegistryEntry<MobEffect>> mineGoJuiceList = new HashMap<>();
-
     private static void registerMobEffects() {
-        // Custom Mine-Go Juice Effects
-        for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
-            String id = MineGoJuiceEffect.getId(type).getPath();
-            MobEffect mobEffect = new MineGoJuiceEffect(type, MobEffectCategory.BENEFICIAL, type.getPotionColor().getRGB());
-            mineGoJuiceList.put(id, MOB_EFFECTS.register(id, () -> mobEffect));
-        }
         MOB_EFFECTS.register();
     }
 
     private static void registerPotions() {
-        // Custom Mine-Go Juice Potions
-        for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
-            String id = MineGoJuiceEffect.getId(type).getPath();
-            RegistryEntry<MobEffect> mobEffect = mineGoJuiceList.get(id);
-            if (mobEffect == null) continue;
-
-            POTIONS.register(id, () -> new MineGoPotion(MiningSkillCardItem.Tier.Novice, new MineGoJuiceEffectInstance(mobEffect, 0)));
-            POTIONS.register(id + "_2", () -> new MineGoPotion(MiningSkillCardItem.Tier.Apprentice, new MineGoJuiceEffectInstance(mobEffect, 1)));
-            POTIONS.register(id + "_3", () -> new MineGoPotion(MiningSkillCardItem.Tier.Adept, new MineGoJuiceEffectInstance(mobEffect, 2)));
-        }
-        mineGoJuiceList.clear();
         POTIONS.register();
     }
 
@@ -142,7 +119,7 @@ public class Registration {
                         for (ShapeCertificateItem certificate : ShapeCertificateItem.all()) {
                             for (ResourceLocation shape : ShapeCertificateItem.tierList(certificate.getTier())) {
                                 for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
-                                    if (type != MiningSkillCardItem.Type.EMPTY) output.accept(certificate.create(type, shape));
+                                    if (type != MiningSkillCardItem.Type.EMPTY && !type.isData()) output.accept(certificate.create(type, shape));
                                 }
                             }
                         }
@@ -161,6 +138,7 @@ public class Registration {
                         ModItems.PEN.getData(pen).setToFullCapacity().save();
                         output.accept(pen);
                         for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
+                            if (type.isData()) continue;  // data pack types have no item of their own, and stay out of the tab
                             String name = "mining_skill_card_" + type.getId();
                             Item item = BuiltInRegistries.ITEM.get(FTBUltimineAddition.id(name));
                             if (item instanceof MiningSkillCardItem) output.accept(item);
@@ -183,12 +161,16 @@ public class Registration {
 
     public static final RegistryEntry<MiningSkillCardItem> MINING_SKILL_CARD_EMPTY = ITEMS.register("mining_skill_card_empty", () -> ModItems.MINING_SKILL_CARD_EMPTY);
     public static final RegistryEntry<MiningSkillCardItem> MINING_SKILL_CARD_PICKAXE = ITEMS.register("mining_skill_card_pickaxe", () -> ModItems.MINING_SKILL_CARD_PICKAXE);
+    // The card and the juice of the card types data packs define: in no creative tab (so not in JEI either).
+    public static final RegistryEntry<GenericMiningSkillCardItem> MINING_SKILL_CARD_GENERIC = ITEMS.register("mining_skill_card_generic", () -> ModItems.MINING_SKILL_CARD_GENERIC);
+    public static final RegistryEntry<GenericMineGoJuiceItem> MINE_GO_JUICE_GENERIC_ITEM = ITEMS.register("mine_go_juice_generic", () -> ModItems.MINE_GO_JUICE_GENERIC);
     public static final RegistryEntry<MiningSkillCardItem> MINING_SKILL_CARD_AXE = ITEMS.register("mining_skill_card_axe", () -> ModItems.MINING_SKILL_CARD_AXE);
     public static final RegistryEntry<MiningSkillCardItem> MINING_SKILL_CARD_SHOVEL = ITEMS.register("mining_skill_card_shovel", () -> ModItems.MINING_SKILL_CARD_SHOVEL);
     public static final RegistryEntry<MiningSkillCardItem> MINING_SKILL_CARD_HOE = ITEMS.register("mining_skill_card_hoe", () -> ModItems.MINING_SKILL_CARD_HOE);
 
     // Mob Effects
     public static final RegistryEntry<MobEffect> MINE_GO_JUICE_PICKAXE = MOB_EFFECTS.register("mine_go_juice_pickaxe", () -> ModMobEffects.MINE_GO_JUICE_PICKAXE);
+    public static final RegistryEntry<MobEffect> MINE_GO_JUICE_GENERIC = MOB_EFFECTS.register("mine_go_juice_generic", () -> ModMobEffects.MINE_GO_JUICE_GENERIC);
     public static final RegistryEntry<MobEffect> MINE_GO_JUICE_AXE = MOB_EFFECTS.register("mine_go_juice_axe", () -> ModMobEffects.MINE_GO_JUICE_AXE);
     public static final RegistryEntry<MobEffect> MINE_GO_JUICE_SHOVEL = MOB_EFFECTS.register("mine_go_juice_shovel", () -> ModMobEffects.MINE_GO_JUICE_SHOVEL);
     public static final RegistryEntry<MobEffect> MINE_GO_JUICE_HOE = MOB_EFFECTS.register("mine_go_juice_hoe", () -> ModMobEffects.MINE_GO_JUICE_HOE);
@@ -216,6 +198,7 @@ public class Registration {
     public static final RegistryEntry<RecipeSerializer<ItemStorageDataRecipe>> ITEM_DATA_STORAGE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("item_storage_data", () -> ItemStorageDataRecipe.Serializer.INSTANCE);
     public static final RegistryEntry<RecipeSerializer<MCRecipe>> MC_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("mining_card_recipe", () -> MCRecipe.Serializer.INSTANCE);
     public static final RegistryEntry<RecipeSerializer<SkillsRecordDyeRecipe>> SKILLS_RECORD_DYE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("skills_record_dyeing", () -> SkillsRecordDyeRecipe.SERIALIZER);
+    public static final RegistryEntry<RecipeSerializer<DataCardRecipe>> DATA_CARD_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("data_card", () -> DataCardRecipe.SERIALIZER);
 
     // Data Component
     // Same id as the pre-SavedData component, whose data it still reads for migration.
@@ -225,6 +208,8 @@ public class Registration {
     public static final RegistryEntry<DataComponentType<ShapeCertificateData>> SHAPE_CERTIFICATE_DATA = DATA_COMPONENT_TYPE.register("shape_certificate_data", () -> ShapeCertificateData.DATA_COMPONENT);
     public static final RegistryEntry<DataComponentType<ResourceLocation>> SHAPE_CERTIFICATE_SHAPE = DATA_COMPONENT_TYPE.register("shape_certificate_shape", () -> ShapeCertificateData.SHAPE_COMPONENT);
     public static final RegistryEntry<DataComponentType<StorageItemData>> ITEM_STORAGE_DATA = DATA_COMPONENT_TYPE.register("item_storage_data", () -> StorageItemData.DATA_COMPONENT);
+    public static final RegistryEntry<DataComponentType<String>> CARD_TYPE_COMPONENT = DATA_COMPONENT_TYPE.register("card_type", () -> GenericMiningSkillCardItem.TYPE_COMPONENT);
+    public static final RegistryEntry<DataComponentType<GenericMineGoJuiceItem.Juice>> GENERIC_JUICE_COMPONENT = DATA_COMPONENT_TYPE.register("generic_juice", () -> GenericMineGoJuiceItem.COMPONENT);
     public static final RegistryEntry<DataComponentType<SelectedShapeData>> SELECTED_SHAPE_COMPONENT = DATA_COMPONENT_TYPE.register("selected_shape", () -> DataComponentType.<SelectedShapeData>builder().persistent(SelectedShapeData.CODEC).networkSynchronized(SelectedShapeData.STREAM_CODEC).build());
 
     // Particles

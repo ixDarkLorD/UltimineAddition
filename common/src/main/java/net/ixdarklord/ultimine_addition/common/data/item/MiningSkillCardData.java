@@ -86,7 +86,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     // copy it last sent, and that copy shares the value, so a tier changed in place would never reach the client.
     // Changes land when saved (save / writeComponent), as a new value.
     public static MiningSkillCardData load(ItemStack stack) {
-        MiningSkillCardItem.Type type = stack.getItem() instanceof MiningSkillCardItem ? ((MiningSkillCardItem) stack.getItem()).getType() : MiningSkillCardItem.Type.EMPTY;
+        MiningSkillCardItem.Type type = stack.getItem() instanceof MiningSkillCardItem item ? item.getType(stack) : MiningSkillCardItem.Type.EMPTY;
         MiningSkillCardData stored = stack.get(DATA_COMPONENT);
         return (stored != null ? stored.copy() : create(type)).setStack(stack);
     }
@@ -141,7 +141,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     public MiningSkillCardItem.Type getType() {
-        return this.stack != null && this.stack.getItem() instanceof MiningSkillCardItem item ? item.getType() : MiningSkillCardItem.Type.EMPTY;
+        return this.stack != null && this.stack.getItem() instanceof MiningSkillCardItem item ? item.getType(this.stack) : MiningSkillCardItem.Type.EMPTY;
     }
 
     @Override

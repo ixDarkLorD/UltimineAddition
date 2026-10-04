@@ -23,35 +23,49 @@ public class PlayerAbilityData extends DataComponent<PlayerAbilityData> {
     public static final MapCodec<PlayerAbilityData> MAP_CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Codec.BOOL.fieldOf("is_unlocked").forGetter(PlayerAbilityData::getAbility),
             Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC.listOf()).optionalFieldOf("tool_shapes", Map.of()).forGetter(PlayerAbilityData::shapesAsLists),
-            Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("tool_certificate_tiers", Map.of()).forGetter(data -> data.certificateTiers)
+            Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("tool_certificate_tiers", Map.of()).forGetter(data -> data.certificateTiers),
+            Codec.STRING.optionalFieldOf("generic_juice", "").forGetter(PlayerAbilityData::getGenericJuice)
     ).apply(inst, PlayerAbilityData::new));
     public static final Codec<PlayerAbilityData> CODEC = MAP_CODEC.codec();
     public static final StreamCodec<RegistryFriendlyByteBuf, PlayerAbilityData> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL, PlayerAbilityData::getAbility,
             ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs.list())), PlayerAbilityData::shapesAsLists,
             ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.VAR_INT), data -> data.certificateTiers,
+            ByteBufCodecs.STRING_UTF8, PlayerAbilityData::getGenericJuice,
             PlayerAbilityData::new);
 
     private boolean isUnlocked;
     // Keyed by Mining Skill Card type id ("pickaxe", "axe", custom ones...): certificates unlock shapes per tool.
     private final Map<String, Set<ResourceLocation>> shapes = new HashMap<>();
     private final Map<String, Integer> certificateTiers = new HashMap<>();
+    // The data pack card type the player's generic Mine-Go Juice is for (they share one effect), or "".
+    private String genericJuice;
 
-    private PlayerAbilityData(boolean isUnlocked, Map<String, List<ResourceLocation>> shapes, Map<String, Integer> certificateTiers) {
+    private PlayerAbilityData(boolean isUnlocked, Map<String, List<ResourceLocation>> shapes, Map<String, Integer> certificateTiers, String genericJuice) {
         super(DATA_ID, CODEC);
         this.isUnlocked = isUnlocked;
         shapes.forEach((tool, list) -> this.shapes.put(tool, new LinkedHashSet<>(list)));
         this.certificateTiers.putAll(certificateTiers);
+        this.genericJuice = genericJuice;
     }
 
     public static PlayerAbilityData create() {
-        return new PlayerAbilityData(false, Map.of(), Map.of());
+        return new PlayerAbilityData(false, Map.of(), Map.of(), "");
     }
 
     private Map<String, List<ResourceLocation>> shapesAsLists() {
         Map<String, List<ResourceLocation>> map = new HashMap<>();
         this.shapes.forEach((tool, set) -> map.put(tool, List.copyOf(set)));
         return map;
+    }
+
+    public String getGenericJuice() {
+        return this.genericJuice;
+    }
+
+    public PlayerAbilityData setGenericJuice(String type) {
+        this.genericJuice = type;
+        return this;
     }
 
     public boolean getAbility() {

@@ -44,6 +44,8 @@ public final class UAItemModels {
             if (!(item instanceof MiningSkillCardItem)) continue;
             registry.register(item, MINING_SKILL_CARD_TIER, (stack, level, entity, seed) -> tierValue(MiningSkillCardData.load(stack).getTier()));
         }
+        // The card of the data pack types: it looks like the built-in cards, its tool drawn over it.
+        registry.register(ModItems.MINING_SKILL_CARD_GENERIC, MINING_SKILL_CARD_TIER, (stack, level, entity, seed) -> tierValue(MiningSkillCardData.load(stack).getTier()));
         registry.register(ModItems.SKILLS_RECORD, RECORD_COLOR, (stack, level, entity, seed) -> colorValue(stack.get(DataComponents.BASE_COLOR)));
         for (ShapeCertificateItem certificate : ShapeCertificateItem.all()) {
             registry.register(certificate, CERTIFICATE_TOOL, (stack, level, entity, seed) -> toolValue(ShapeCertificateData.getTool(stack)));

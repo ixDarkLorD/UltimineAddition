@@ -2,7 +2,6 @@ package net.ixdarklord.ultimine_addition.core;
 
 import dev.ftb.mods.ftbultimine.api.restriction.RegisterRestrictionHandlerEvent;
 import net.ixdarklord.coolcatcore.api.core.ModConstructor;
-import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.event.EventHandler;
 import net.ixdarklord.ultimine_addition.config.UAConfigs;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
@@ -13,7 +12,6 @@ public final class UltimineAdditionConstructor implements ModConstructor {
     // Registration, payloads and configs: NeoForge collects payloads and registries while mods are constructed.
     @Override
     public void onConstructMod() {
-        CustomMSCApi.init();
         UAConfigs.register();
         Registration.register();
         PayloadHandler.init();

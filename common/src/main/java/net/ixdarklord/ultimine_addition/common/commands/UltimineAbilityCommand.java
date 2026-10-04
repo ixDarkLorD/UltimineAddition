@@ -46,7 +46,7 @@ public final class UltimineAbilityCommand {
     private static LiteralArgumentBuilder<CommandSourceStack> grantTier(MiningSkillCardItem.Tier tier) {
         return Commands.literal(tier.name().toLowerCase())
                 .executes(context -> grantShapes(context.getSource(), EntityArgument.getPlayers(context, "targets"), tier, null))
-                .then(Commands.argument("tool", StringArgumentType.word())
+                .then(Commands.argument("tool", StringArgumentType.greedyString())  // greedy: a data pack type's id has a colon
                         .suggests((context, builder) -> SharedSuggestionProvider.suggest(MiningSkillCardItem.Type.TYPES.stream()
                                 .filter(type -> type != MiningSkillCardItem.Type.EMPTY).map(MiningSkillCardItem.Type::getId), builder))
                         .executes(context -> grantShapes(context.getSource(), EntityArgument.getPlayers(context, "targets"), tier, StringArgumentType.getString(context, "tool"))));

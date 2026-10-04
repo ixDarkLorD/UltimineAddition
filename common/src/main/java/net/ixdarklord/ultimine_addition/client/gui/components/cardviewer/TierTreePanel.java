@@ -15,6 +15,7 @@ import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTre
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
+import net.ixdarklord.ultimine_addition.common.item.GenericMiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
@@ -81,7 +82,7 @@ final class TierTreePanel extends ViewportPanel {
     private static final int CARD_BLOCK = 256;
 
     private final CardViewerWidget viewer;
-    private final Map<Item, Map<MiningSkillCardItem.Tier, ItemStack>> tierIcons = new HashMap<>();
+    private final Map<String, Map<MiningSkillCardItem.Tier, ItemStack>> tierIcons = new HashMap<>();
     private final Map<String, Float> hoverProgress = new HashMap<>();
     private @Nullable CardTree tree;
     private MiningSkillCardItem.@Nullable Tier pendingFocus;
@@ -496,7 +497,11 @@ final class TierTreePanel extends ViewportPanel {
         GuiDraw.blitSprite(graphics, mastered ? STAR_BORDER : BADGE_BORDER, bx, by, BADGE_SIZE, BADGE_SIZE, ARGB.multiplyAlpha(badgeColor, reveal));
         if (reveal > 0.5F) {
             ItemStack icon = node.state() == TierState.LOCKED ? ItemStack.EMPTY : this.tierIcon(node.tier());
-            if (!icon.isEmpty()) graphics.renderItem(icon, bx + (BADGE_SIZE - 16) / 2, by + (BADGE_SIZE - 16) / 2);
+            if (!icon.isEmpty()) {
+                graphics.renderItem(icon, bx + (BADGE_SIZE - 16) / 2, by + (BADGE_SIZE - 16) / 2);
+                // The card's tool, as its slot shows it.
+                net.ixdarklord.ultimine_addition.client.renderer.item.CardToolIcon.drawOver(graphics, icon, bx + (BADGE_SIZE - 16) / 2, by + (BADGE_SIZE - 16) / 2);
+            }
             else GuiDraw.centeredText(graphics, this.font, "?", bx + BADGE_SIZE / 2, by + (BADGE_SIZE - 8) / 2, ARGB.multiplyAlpha(0xFF8A8A8A, reveal));
         }
 
@@ -689,9 +694,15 @@ final class TierTreePanel extends ViewportPanel {
     private ItemStack tierIcon(MiningSkillCardItem.Tier tier) {
         ItemStack card = this.viewer.getSelectedCardStack();
         if (!(card.getItem() instanceof MiningSkillCardItem item)) return ItemStack.EMPTY;
-        // Separate stacks, so each tier's model shows without touching the real card.
-        return this.tierIcons.computeIfAbsent(item, k -> new EnumMap<>(MiningSkillCardItem.Tier.class))
-                .computeIfAbsent(tier, t -> MiningSkillCardData.createForCreativeTab(item, t));
+        // Separate stacks, so each tier's model shows without touching the real card. Kept per card type: the cards of
+        // data pack types are one item, their type on the stack, which the copies carry too (for the tool on the card).
+        String typeId = card.get(GenericMiningSkillCardItem.TYPE_COMPONENT);
+        return this.tierIcons.computeIfAbsent(item.getType(card).getId(), k -> new EnumMap<>(MiningSkillCardItem.Tier.class))
+                .computeIfAbsent(tier, t -> {
+                    ItemStack icon = MiningSkillCardData.createForCreativeTab(item, t);
+                    if (typeId != null) icon.set(GenericMiningSkillCardItem.TYPE_COMPONENT, typeId);
+                    return icon;
+                });
     }
 
     @Override

@@ -34,6 +34,12 @@ public final class NeoForgeClientSetup {
             event.registerSpriteSet(Registration.CELEBRATE_PARTICLE.get(), CelebrateParticle.Provider::new);
         }
 
+        // The generic Mine-Go Juice, in its card type's color.
+        @SubscribeEvent
+        private static void onRegisterItemColors(net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.Item event) {
+            event.register(net.ixdarklord.ultimine_addition.common.item.GenericMineGoJuiceItem::tint, net.ixdarklord.ultimine_addition.common.item.ModItems.MINE_GO_JUICE_GENERIC);
+        }
+
         @SubscribeEvent
         private static void onClientSetup(FMLClientSetupEvent event) {
             event.enqueueWork(() -> UAItemModels.registerProperties(ItemProperties::register));

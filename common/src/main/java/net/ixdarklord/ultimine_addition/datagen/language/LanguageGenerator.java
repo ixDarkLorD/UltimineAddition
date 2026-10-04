@@ -301,6 +301,13 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("info.ultimine_addition.legacy_mode", "You can't use this! The playstyle mode has been set to Legacy.");
         this.add("info.ultimine_addition.required_skill", "Required Skill for: %s");
         this.add("info.ultimine_addition.required_skill.many_tools", "List of Tools");
+        // The card and juice of card types from data packs: the type's name fills the %s.
+        this.add("effect.ultimine_addition.mine_go_juice_generic", "Mine-Go Juice");
+        this.add("effect.ultimine_addition.mine_go_juice_generic.of", "Mine-Go Juice: %s");
+        this.add("item.ultimine_addition.mine_go_juice_generic", "Mine-Go Juice");
+        this.add("item.ultimine_addition.mine_go_juice_generic.unknown", "Mine-Go Juice: Unknown");
+        this.add("item.ultimine_addition.mining_skill_card_generic", "Mining Skill Card: %s");
+        this.add("item.ultimine_addition.mining_skill_card_generic.unknown", "Unknown");
         this.add("info.ultimine_addition.required_skill.pickaxe", "Pickaxe");
         this.add("info.ultimine_addition.required_skill.axe", "Axe");
         this.add("info.ultimine_addition.required_skill.shovel", "Shovel");

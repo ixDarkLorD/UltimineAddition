@@ -30,7 +30,7 @@ public final class PotionPointPips implements ItemDecorator {
 
     @Override
     public void extract(GuiGraphics graphics, Font font, ItemStack stack, int x, int y) {
-        if (!(stack.getItem() instanceof MiningSkillCardItem item) || item.getType() == MiningSkillCardItem.Type.EMPTY
+        if (!(stack.getItem() instanceof MiningSkillCardItem item) || item.getType(stack) == MiningSkillCardItem.Type.EMPTY
                 || !stack.has(MiningSkillCardData.DATA_COMPONENT)) return;
         MiningSkillCardData data = item.getData(stack);
         MiningSkillCardItem.Tier tier = data.getTier();
