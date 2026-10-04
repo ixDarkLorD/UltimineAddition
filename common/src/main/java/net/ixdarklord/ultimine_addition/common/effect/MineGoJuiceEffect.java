@@ -5,6 +5,7 @@ import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
@@ -74,11 +75,13 @@ public class MineGoJuiceEffect extends MobEffect {
     /** The name of a type's juice, like "Mine-Go Juice: Rock Roulette". */
     public static MutableComponent juiceName(MiningSkillCardItem.Type type) {
         if (type.isData()) {
-            // "juice_name" is a translation key or plain text, like the type's name; without one, the juice is named
-            // after its tool.
-            return type.getJuiceName().isEmpty()
-                    ? Component.translatable("effect.ultimine_addition.mine_go_juice_generic.of", type.displayName())
-                    : Component.translatable(type.getJuiceName());
+            // "juice_name" is a translation key or plain text, like the type's name. Without one, a language file can
+            // still name the juice under the type's key with ".juice" (ultimine_addition.card_type.<namespace>.<path>.juice);
+            // failing that, the juice is named after its tool.
+            if (!type.getJuiceName().isEmpty()) return Component.translatable(type.getJuiceName());
+            String key = type.translationKey() + ".juice";
+            return Language.getInstance().has(key) ? Component.translatable(key)
+                    : Component.translatable("effect.ultimine_addition.mine_go_juice_generic.of", type.displayName());
         }
         return holder(type).map(effect -> effect.value().getDisplayName().copy())
                 .orElseGet(() -> Component.translatable("info.ultimine_addition.notice.locked.juice"));
