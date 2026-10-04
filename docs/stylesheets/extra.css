@@ -1,0 +1,153 @@
+/* FTB Ultimine Addition colors: deep stone blue, the certificates' gold and the cards' teal. */
+:root {
+  --ua-orange: #e0a83a;
+  --ua-purple: #2fa89a;
+  --ua-brown: #2c3e50;
+}
+
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #2c3e50;
+  --md-primary-fg-color--light: #3f5670;
+  --md-primary-fg-color--dark: #1d2a37;
+  --md-accent-fg-color: #2fa89a;
+  --md-typeset-a-color: #1f7f74;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-hue: 210;
+  --md-primary-fg-color: #1b2733;
+  --md-primary-fg-color--light: #27394a;
+  --md-primary-fg-color--dark: #121b24;
+  --md-accent-fg-color: #5fd6c6;
+  --md-typeset-a-color: #f0c060;
+  --md-default-bg-color: #10161c;
+  --md-code-bg-color: #18222b;
+}
+
+/* Header and tabs: a stone-to-teal gradient. */
+.md-header,
+.md-tabs {
+  background: linear-gradient(90deg, var(--md-primary-fg-color--dark), var(--md-primary-fg-color) 45%, #1f6f68);
+}
+
+/* ---- Home hero ---- */
+.ua-hero {
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+  margin: -1rem -0.8rem 1.5rem;
+  border-radius: 0 0 1.2rem 1.2rem;
+  background:
+    radial-gradient(60rem 20rem at 20% -10%, rgba(224, 168, 58, 0.22), transparent 60%),
+    radial-gradient(60rem 20rem at 80% -10%, rgba(47, 168, 154, 0.22), transparent 60%);
+}
+
+.ua-hero__logos {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.ua-hero__logos img {
+  width: 128px;
+  height: 128px;
+  border-radius: 1.4rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s ease;
+}
+
+.ua-hero__logos img:hover {
+  transform: translateY(-4px) rotate(-2deg);
+}
+
+.md-typeset .ua-hero__title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0.6rem 0 0.2rem;
+  background: linear-gradient(90deg, var(--ua-orange), var(--ua-purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.md-typeset .ua-hero__title .headerlink {
+  display: none;
+}
+
+.ua-hero__tagline {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.2rem 0 0.4rem;
+}
+
+.ua-hero__lead {
+  max-width: 38rem;
+  margin: 0 auto 1.2rem !important;
+  opacity: 0.85;
+}
+
+.ua-hero .md-button {
+  margin: 0.25rem;
+}
+
+.ua-hero__badges {
+  margin: 1rem 0 0 !important;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+/* Cards: lift on hover. */
+.md-typeset .grid.cards > ul > li {
+  border-radius: 0.8rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  transform: translateY(-3px);
+  border-color: var(--md-accent-fg-color);
+}
+
+/* Tables: rounded, with a tinted header. */
+.md-typeset table:not([class]) {
+  border-radius: 0.6rem;
+  overflow: hidden;
+}
+
+.md-typeset table:not([class]) th {
+  background: color-mix(in srgb, var(--md-accent-fg-color) 12%, transparent);
+}
+
+@media screen and (max-width: 44.9375em) {
+  .md-typeset .ua-hero__title { font-size: 2.2rem; }
+  .ua-hero__logos img { width: 88px; height: 88px; }
+}
+
+/* Buttons: readable outlines in both schemes, and the brand gradient on the primary one. */
+.md-typeset .md-button {
+  border-radius: 999px;
+  padding: 0.55em 1.4em;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .md-button:not(.md-button--primary) {
+  color: #e9dcf5;
+  border-color: rgba(197, 140, 255, 0.55);
+}
+
+.md-typeset .md-button--primary {
+  background: linear-gradient(90deg, var(--ua-orange), var(--ua-purple));
+  border-color: transparent;
+  color: #fff;
+}
+
+.md-typeset .md-button:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 6px 18px rgba(47, 168, 154, 0.3);
+}
+
+/* The download counters sit on their own row under the version and loader badges. */
+.md-typeset .ua-hero__badges--downloads {
+  margin-top: 0.4rem !important;
+}

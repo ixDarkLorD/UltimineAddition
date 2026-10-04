@@ -1,0 +1,109 @@
+site_name: FTB Ultimine Addition
+site_description: "Earn Ultimine: Mining Skill Cards, the Skills Record, certificates and Mine-Go Juice for FTB Ultimine."
+site_author: ixDarkLorD
+site_url: https://ixdarklord.github.io/UltimineAddition/
+repo_url: https://github.com/ixDarkLorD/UltimineAddition
+repo_name: ixDarkLorD/UltimineAddition
+edit_uri: edit/docs/docs/
+copyright: "Made by ixDarkLorD"
+
+theme:
+  name: material
+  logo: assets/favicon.png
+  favicon: assets/favicon.png
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Inter
+    code: JetBrains Mono
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.action.edit
+
+hooks:
+  - hooks/changelog.py
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ixDarkLorD/UltimineAddition
+      name: Source on GitHub
+    - icon: simple/curseforge
+      link: https://www.curseforge.com/minecraft/mc-mods/ultimine-addition
+      name: FTB Ultimine Addition on CurseForge
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Guide:
+      - Mining Skill Cards: guide/mining-skill-cards.md
+      - Skills Record: guide/skills-record.md
+      - Certificates and Mine-Go Juice: guide/unlocking-ultimine.md
+      - Ultimine Undo: guide/undo.md
+  - Pack Makers:
+      - Configuration: packs/configuration.md
+      - Challenges: packs/challenges.md
+      - Custom Cards: packs/custom-cards.md
+  - Changelog: changelog.md
