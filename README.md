@@ -41,6 +41,18 @@ Challenges are datapack-driven, so modpacks can add or change them, and other mo
 
 See the [changelog](https://github.com/ixDarkLorD/UltimineAddition/blob/26.1.2/CHANGELOG.md) for everything.
 
+## Downloads
+
+FTB Ultimine Addition is on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/ultimine-addition).
+
+The mods it requires:
+
+| Mod | CurseForge | Modrinth |
+|---|---|---|
+| **FTB Ultimine** | [ftb-ultimine-forge](https://www.curseforge.com/minecraft/mc-mods/ftb-ultimine-forge) | |
+| **CoolCatLib: Core** | [coolcatlib](https://www.curseforge.com/minecraft/mc-mods/coolcatlib) | [CoolCatLib: Core](https://modrinth.com/mod/ASkaoGC8) |
+| **CoolCatLib: Canvas** | [coolcatlib-canvas](https://www.curseforge.com/minecraft/mc-mods/coolcatlib-canvas) | [CoolCatLib: Canvas](https://modrinth.com/mod/NtytwOvv) |
+
 ## Versions
 
 Each Minecraft version lives on its own branch. Discontinued versions get no more updates or fixes.
