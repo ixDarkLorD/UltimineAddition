@@ -1,4 +1,10 @@
 {
+  "effect.ultimine_addition.mine_go_juice_generic": "Mine-Go Juice",
+  "effect.ultimine_addition.mine_go_juice_generic.of": "Mine-Go Juice: %s",
+  "item.ultimine_addition.mine_go_juice_generic": "Mine-Go Juice",
+  "item.ultimine_addition.mine_go_juice_generic.unknown": "Mine-Go Juice: Unknown",
+  "item.ultimine_addition.mining_skill_card_generic": "Mining Skill Card: %s",
+  "item.ultimine_addition.mining_skill_card_generic.unknown": "Unknown",
   "advancement.ultimine_addition.craft": "Craft a %s",
   "advancement.ultimine_addition.craft.card.axe": "Oh, I had an AXEIDENT! Did you get it?",
   "advancement.ultimine_addition.craft.card.hoe": "You can't sit with us.",

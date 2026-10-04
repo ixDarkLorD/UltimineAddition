@@ -91,7 +91,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     // A new object read from the stack's NBT (1.20.1 keeps item data in NBT); changes land when saved (save /
     // writeComponent).
     public static MiningSkillCardData load(ItemStack stack) {
-        MiningSkillCardItem.Type type = stack.getItem() instanceof MiningSkillCardItem ? ((MiningSkillCardItem) stack.getItem()).getType() : MiningSkillCardItem.Type.EMPTY;
+        MiningSkillCardItem.Type type = stack.getItem() instanceof MiningSkillCardItem item ? item.getType(stack) : MiningSkillCardItem.Type.EMPTY;
         MiningSkillCardData stored = DATA_COMPONENT.get(stack);
         return (stored != null ? stored : create(type)).setStack(stack);
     }
@@ -149,7 +149,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     public MiningSkillCardItem.Type getType() {
-        return this.stack != null && this.stack.getItem() instanceof MiningSkillCardItem item ? item.getType() : MiningSkillCardItem.Type.EMPTY;
+        return this.stack != null && this.stack.getItem() instanceof MiningSkillCardItem item ? item.getType(this.stack) : MiningSkillCardItem.Type.EMPTY;
     }
 
     @Override

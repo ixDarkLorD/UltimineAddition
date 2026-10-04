@@ -37,6 +37,10 @@ public class PayloadHandler {
         registerS2C(PlayConsumeEffectPayload.TYPE, PlayConsumeEffectPayload.STREAM_CODEC, PlayConsumeEffectPayload::handle);
         // Codec derived from the record by CoolCatLib.
         Network.registerClientbound(OpenConfigPayload.class, OpenConfigPayload::handle);
+        Network.registerServerbound(ShapeDiagramPayload.Request.class, ShapeDiagramPayload.Request::handle);
+        Network.registerClientbound(ShapeDiagramPayload.Diagrams.class, ShapeDiagramPayload.Diagrams::handle);
+        Network.registerClientbound(SyncShapesPayload.class, SyncShapesPayload::handle);
+        Network.registerClientbound(SyncCardTypesPayload.class, SyncCardTypesPayload::handle);
     }
 
     private static <T extends CustomPacketPayload> void registerC2S(CustomPacketPayload.Type<T> type, StreamCodec<? super FriendlyByteBuf, T> codec, PayloadReceiver<T> handler) {

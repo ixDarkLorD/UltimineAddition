@@ -52,9 +52,8 @@ public final class ProgressionRewards {
 
     private static boolean giveTaste(ServerPlayer player, MiningSkillCardItem.Type type, MiningSkillCardItem.Tier tier, int seconds) {
         if (type == MiningSkillCardItem.Type.EMPTY) return false;
-        MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(MineGoJuiceEffect.getId(type));
-        if (effect == null) return false;
+        if (MineGoJuiceEffect.holder(type).isEmpty()) return false;
         int amplifier = Mth.clamp(tier.getValue(), 1, MiningSkillCardItem.Tier.Adept.getValue()) - 1;
-        return player.addEffect(new MobEffectInstance(effect, seconds * 20, amplifier));
+        return MineGoJuiceEffect.grant(player, type, seconds * 20, amplifier);
     }
 }

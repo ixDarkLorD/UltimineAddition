@@ -2,7 +2,6 @@ package net.ixdarklord.ultimine_addition.core;
 
 import dev.ftb.mods.ftbultimine.integration.FTBUltiminePlugin;
 import net.ixdarklord.coolcatcore.api.core.ModConstructor;
-import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.event.BrewingEvents;
 import net.ixdarklord.ultimine_addition.common.event.EventHandler;
 import net.ixdarklord.ultimine_addition.config.UAConfigs;
@@ -14,7 +13,6 @@ public final class UltimineAdditionConstructor implements ModConstructor {
     // Registration, payloads and configs: Forge collects registries while mods are constructed.
     @Override
     public void onConstructMod() {
-        CustomMSCApi.init();
         UAConfigs.register();
         Registration.register();
         PayloadHandler.init();

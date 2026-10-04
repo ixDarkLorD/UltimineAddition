@@ -2,6 +2,7 @@ package net.ixdarklord.ultimine_addition.common.item;
 
 import net.ixdarklord.coolcatcore.api.client.gui.ItemDecorator;
 import net.ixdarklord.coolcatcore.api.item.DecoratedItem;
+import net.ixdarklord.ultimine_addition.client.renderer.item.CardToolIcon;
 import net.ixdarklord.ultimine_addition.client.renderer.item.PotionPointPips;
 import java.util.function.Consumer;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +13,6 @@ import io.netty.handler.codec.CodecException;
 import net.ixdarklord.coolcatcore.api.utils.ChatFormattingUtils;
 import net.ixdarklord.coolcatcore.api.utils.CodecUtils;
 import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
-import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -59,12 +59,13 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotIndex, boolean isSelected) {
-        if (this.isLegacyMode() || this.type == EMPTY) return;
+        MiningSkillCardItem.Type type = this.getType(stack);
+        if (this.isLegacyMode() || type == EMPTY) return;
 
         if (entity instanceof ServerPlayer) {
             // A card without data yet (e.g. from /give): give it an identity; it's stored and rolls its challenges.
             if (!MiningSkillCardData.DATA_COMPONENT.has(stack)) {
-                MiningSkillCardData.create(this.type).setStack(stack).save();
+                MiningSkillCardData.create(type).setStack(stack).save();
             }
         }
     }
@@ -111,6 +112,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     // CoolCatLib takes it on the client, the first time a card is drawn (never on a dedicated server).
     @Override
     public void registerDecorators(Consumer<ItemDecorator> registrar) {
+        registrar.accept(CardToolIcon.INSTANCE);
         registrar.accept(PotionPointPips.INSTANCE);
     }
 
@@ -119,8 +121,13 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         return MiningSkillCardData.load(stack);
     }
 
+    /** The item's own type. A stack's type is {@link #getType(ItemStack)}: the generic card keeps it on the stack. */
     public Type getType() {
         return type;
+    }
+
+    public Type getType(ItemStack stack) {
+        return this.type;
     }
 
     public static boolean isTierEqual(ItemStack stack, Tier tier) {
@@ -133,28 +140,30 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         public static final Type AXE = new Type(true, "axe", List.of());
         public static final Type SHOVEL = new Type(true, "shovel", List.of());
         public static final Type HOE = new Type(true, "hoe", List.of());
-        public static List<Type> TYPES = new ArrayList<>();
+        // The stand-in type of the generic card item and the generic Mine-Go Juice: a data pack card's real type is on
+        // its stack (GenericMiningSkillCardItem), and a generic juice's is with the player who drank it.
+        public static final Type GENERIC = new Type(true, "generic", List.of());
+        private static final List<Type> BUILT_IN = List.of(EMPTY, PICKAXE, AXE, SHOVEL, HOE);
+        // The built-in types and the ones data packs define (DataCardTypes), which come and go with the data packs.
+        public static List<Type> TYPES = new ArrayList<>(BUILT_IN);
 
         private final boolean active;
         private final String id;
         private final List<String> requiredTools;
         private final Color potionColor;
+        // Only data pack types: what players read, and the item drawn on the card.
+        private final boolean data;
+        private final String name;
+        private final String juiceName;
+        private final String icon;
 
         public static final Codec<Type> CODEC = Codec.STRING.comapFlatMap(s -> {
             try {
                 return DataResult.success(Type.fromString(s));
-            } catch (CodecException e) {
+            } catch (CodecException | IllegalArgumentException e) {
                 return DataResult.error(() -> s + " is not present.");
             }
         }, Type::getId);
-
-        public static final Codec<Type> CARD_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.BOOL.fieldOf("active").forGetter(Type::isActive),
-                Codec.STRING.fieldOf("card_id").forGetter(Type::getId),
-                Codec.STRING.listOf().fieldOf("required_tools").forGetter(Type::getRequiredTools),
-                CodecUtils.COLOR_CODEC.optionalFieldOf("potion_color", Color.WHITE).forGetter(Type::getPotionColor)
-                // (Older custom card files may still have a "default_display_item"; it's ignored.)
-        ).apply(instance, Type::new));
 
         public Type(boolean active, String id, List<String> requiredTools) {
             this(active, id, requiredTools, Color.WHITE);
@@ -165,6 +174,26 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
             this.id = validateId(id);
             this.requiredTools = requiredTools;
             this.potionColor = potionColor;
+            this.data = false;
+            this.name = "";
+            this.juiceName = "";
+            this.icon = "";
+        }
+
+        private Type(String id, String name, List<String> tools, Color juiceColor, String juiceName, String icon) {
+            this.active = true;
+            this.id = id;
+            this.requiredTools = List.copyOf(tools);
+            this.potionColor = juiceColor;
+            this.data = true;
+            this.name = name;
+            this.juiceName = juiceName;
+            this.icon = icon;
+        }
+
+        /** A card type from a data pack: its id is the file's, like "mypack:hammer". */
+        public static Type data(String id, String name, List<String> tools, int juiceColor, String juiceName, String icon) {
+            return new Type(id, name, tools, new Color(juiceColor), juiceName, icon);
         }
 
         private String validateId(String input) {
@@ -174,9 +203,80 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
             return input;
         }
 
-        public static void refreshTypes() {
-            TYPES = new ArrayList<>(List.of(EMPTY, PICKAXE, AXE, SHOVEL, HOE));
-            TYPES.addAll(CustomMSCApi.CUSTOM_TYPES);
+        /** Swaps the data pack types for these; the built-in ones stay. */
+        public static void setDataTypes(List<Type> types) {
+            List<Type> all = new ArrayList<>(BUILT_IN);
+            all.addAll(types);
+            TYPES = all;
+        }
+
+        public static List<Type> getDataTypes() {
+            return TYPES.stream().filter(Type::isData).toList();
+        }
+
+        /** The type of this id, or null: unlike {@link #fromString} it doesn't throw. */
+        public static @Nullable Type byId(String id) {
+            for (Type type : TYPES) {
+                if (type.getId().equals(id)) return type;
+            }
+            return null;
+        }
+
+        public boolean isData() {
+            return data;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getJuiceName() {
+            return juiceName;
+        }
+
+        public String getIcon() {
+            return icon;
+        }
+
+        /**
+         * The tool's name, as in "Required Skill for: Pickaxe". A data pack type's "name" is a translation key or plain
+         * text (a key with no translation shows as it is written); without one it is the key
+         * {@code ultimine_addition.card_type.<namespace>.<path>}, for a resource pack to translate.
+         */
+        public MutableComponent displayName() {
+            if (!this.data) return Component.translatable("info.ultimine_addition.required_skill." + this.id);
+            if (!this.name.isEmpty()) return Component.translatable(this.name);
+            String path = this.id.substring(this.id.indexOf(':') + 1);
+            return Component.translatableWithFallback(this.translationKey(), path.substring(path.lastIndexOf('/') + 1));
+        }
+
+        /** {@code ultimine_addition.card_type.<namespace>.<path>}: the default key of a data pack type's name. */
+        public String translationKey() {
+            return "ultimine_addition.card_type." + this.id.replace(':', '.').replace('/', '.');
+        }
+
+        /** The item drawn on the card's plate: the netherite tool for the built-in cards, a data pack card's "icon". */
+        public ItemStack iconStack() {
+            if (this == PICKAXE) return new ItemStack(Items.NETHERITE_PICKAXE);
+            if (this == AXE) return new ItemStack(Items.NETHERITE_AXE);
+            if (this == SHOVEL) return new ItemStack(Items.NETHERITE_SHOVEL);
+            if (this == HOE) return new ItemStack(Items.NETHERITE_HOE);
+            if (!this.data || this.icon.isEmpty()) return ItemStack.EMPTY;
+            ResourceLocation itemId = ResourceLocation.tryParse(this.icon);
+            Item item = itemId == null ? Items.AIR : BuiltInRegistries.ITEM.get(itemId);
+            return item == Items.AIR ? ItemStack.EMPTY : new ItemStack(item);
+        }
+
+        // Data pack types are made again on every reload (and on the client, from the server's list): the same id is
+        // the same type.
+        @Override
+        public boolean equals(Object other) {
+            return other instanceof Type type && type.id.equals(this.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.id.hashCode();
         }
 
         public boolean isActive() {
@@ -188,7 +288,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
         }
 
         public ResourceLocation getRegistryId() {
-            return FTBUltimineAddition.id("mining_skill_card_%s".formatted(id));
+            return FTBUltimineAddition.id("mining_skill_card_%s".formatted(this.data ? GENERIC.id : id));
         }
 
         public List<String> getRequiredTools() {

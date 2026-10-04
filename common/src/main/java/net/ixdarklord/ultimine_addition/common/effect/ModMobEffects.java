@@ -7,6 +7,8 @@ import net.minecraft.world.effect.MobEffectCategory;
 import java.awt.*;
 
 public class ModMobEffects {
+    // The juice of every data pack card type: see MineGoJuiceEffect.
+    public static final MobEffect MINE_GO_JUICE_GENERIC = new MineGoJuiceEffect(MiningSkillCardItem.Type.GENERIC, MobEffectCategory.BENEFICIAL, 0xFFFFFF);
     public static final MobEffect MINE_GO_JUICE_PICKAXE = new MineGoJuiceEffect(MiningSkillCardItem.Type.PICKAXE, MobEffectCategory.BENEFICIAL, new Color(0xF1E7CA).getRGB());
     public static final MobEffect MINE_GO_JUICE_AXE = new MineGoJuiceEffect(MiningSkillCardItem.Type.AXE, MobEffectCategory.BENEFICIAL, new Color(0x966F33).getRGB());
     public static final MobEffect MINE_GO_JUICE_SHOVEL = new MineGoJuiceEffect(MiningSkillCardItem.Type.SHOVEL, MobEffectCategory.BENEFICIAL, new Color(0x7CFC00).getRGB());

@@ -3,7 +3,6 @@ package net.ixdarklord.ultimine_addition.integration.jei;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.registration.ISubtypeRegistration;
-import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
@@ -22,13 +21,6 @@ public class MiningSkillsCardInterpreter implements IIngredientSubtypeInterprete
         registration.registerSubtypeInterpreter(ModItems.MINING_SKILL_CARD_AXE, new MiningSkillsCardInterpreter());
         registration.registerSubtypeInterpreter(ModItems.MINING_SKILL_CARD_SHOVEL, new MiningSkillsCardInterpreter());
         registration.registerSubtypeInterpreter(ModItems.MINING_SKILL_CARD_HOE, new MiningSkillsCardInterpreter());
-
-        for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
-            ResourceLocation location = new ResourceLocation(FTBUltimineAddition.MOD_ID + ":mining_skill_card_" + type.getId());
-            Item item = BuiltInRegistries.ITEM.get(location);
-            if (item == Items.AIR) continue;
-            registration.registerSubtypeInterpreter(item, new MiningSkillsCardInterpreter());
-        }
     }
 
     @Override

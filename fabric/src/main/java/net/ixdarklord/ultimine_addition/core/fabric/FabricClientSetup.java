@@ -16,6 +16,9 @@ public class FabricClientSetup implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         UAItemModels.registerProperties(FabricModelPredicateProviderRegistry::register);
+        // The generic Mine-Go Juice, in its card type's color.
+        net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register(net.ixdarklord.ultimine_addition.common.item.GenericMineGoJuiceItem::tint,
+                net.ixdarklord.ultimine_addition.common.item.ModItems.MINE_GO_JUICE_GENERIC);
         ParticleFactoryRegistry.getInstance().register(Registration.CELEBRATE_PARTICLE.get(), CelebrateParticle.Provider::new);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> UndoGhostRenderer.render(context.matrixStack()));
         // Just before the level's block entities, which the level renderer draws together with these.

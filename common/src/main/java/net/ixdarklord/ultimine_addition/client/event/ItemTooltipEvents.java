@@ -48,7 +48,7 @@ public final class ItemTooltipEvents {
                     .filter(effect -> effect instanceof MineGoJuiceEffect)
                     .findFirst()
                     .ifPresent(effect -> components.add(2, Component.translatable("tooltip.ultimine_addition.mine_go_juice.info",
-                            ShapeCertificateItem.toolName(((MineGoJuiceEffect) effect).getType().getId()).copy().withStyle(ChatFormatting.AQUA)).withStyle(ChatFormatting.GRAY)));
+                            ((MineGoJuiceEffect) effect).getType().displayName().withStyle(ChatFormatting.AQUA)).withStyle(ChatFormatting.GRAY)));
             if (PlaystyleModes.isLegacy()) {
                 components.add(1, Component.translatable("tooltip.ultimine_addition.legacy_mode.disabled_item").withStyle(ChatFormatting.RED));
             }

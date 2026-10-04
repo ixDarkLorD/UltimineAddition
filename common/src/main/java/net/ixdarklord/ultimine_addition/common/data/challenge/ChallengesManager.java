@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
+import net.ixdarklord.ultimine_addition.common.data.card.DataCardTypes;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.core.Holder;
@@ -45,6 +46,8 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
 
     @Override
     protected void apply(@NotNull Map<ResourceLocation, JsonElement> object, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+        // Challenges name card types: the data packs' own are read first.
+        DataCardTypes.load(resourceManager);
         challenges.clear();
         object.forEach((location, json) -> {
             AtomicReference<ChallengeData> challenge = new AtomicReference<>();
@@ -56,10 +59,39 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
             }
             challenges.put(location, challenge.get());
         });
+        this.dropCardTypesWithoutChallenges();
+    }
+
+    // A data pack card type needs challenges for every tier it climbs: a card with none to roll would have nothing to
+    // do. Such a type is left out (its cards are inert, like those of a removed type) and the log says which tier.
+    private void dropCardTypesWithoutChallenges() {
+        List<MiningSkillCardItem.Type> kept = new ArrayList<>();
+        for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.getDataTypes()) {
+            MiningSkillCardItem.Tier missing = null;
+            for (MiningSkillCardItem.Tier tier : List.of(MiningSkillCardItem.Tier.Unlearned, MiningSkillCardItem.Tier.Novice, MiningSkillCardItem.Tier.Apprentice, MiningSkillCardItem.Tier.Adept)) {
+                if (this.challenges.values().stream().noneMatch(data -> data.forCardType().equals(type) && data.forCardTier().isEligible(tier))) {
+                    missing = tier;
+                    break;
+                }
+            }
+            if (missing == null) {
+                kept.add(type);
+            } else {
+                LOGGER.error("Skipping the Mining Skill Card type {}: it has no challenges for the {} tier (challenge files with \"for_card_type\": \"{}\")",
+                        type.getId(), missing.name().toLowerCase(), type.getId());
+            }
+        }
+        MiningSkillCardItem.Type.setDataTypes(kept);
     }
 
     public Map<ResourceLocation, ChallengeData> getRandomChallenges(int quantity, MiningSkillCardItem.Type type, MiningSkillCardItem.Tier tier) {
-        if (quantity > challenges.values().stream().filter(data -> (data.forCardType().equals(type) && data.forCardTier().isEligible(tier))).toList().size()) {
+        int available = challenges.values().stream().filter(data -> (data.forCardType().equals(type) && data.forCardTier().isEligible(tier))).toList().size();
+        if (available > 0 && quantity > available) {
+            // Fewer challenges than the tier rolls (the server config's challenges_amount): the card gets them all.
+            LOGGER.warn("Only {} {} challenge(s) for tier {}, not the {} a card rolls: using all of them", available, type.getId(), tier.name().toLowerCase(), quantity);
+            quantity = available;
+        }
+        if (quantity > available) {
             String error = String.format("There aren't enough %s %s challenges for tier %s to add it to Mining Skill Card.", quantity, type.getId().toLowerCase(), tier.name().toLowerCase());
             throw new IllegalArgumentException(error);
         }
@@ -130,7 +162,8 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
 
     public boolean isCorrectTool(Player player, ChallengeData challengeData) {
         if (challengeData.forCardType().isCustomType()) {
-            return ItemUtils.isItemInHandCustomCardValid(player);
+            // The tools of this challenge's own type, not of any data pack type.
+            return challengeData.forCardType().utilizeRequiredTools().contains(ItemUtils.getItemInHand(player, true).getItem());
         } else if (challengeData.forCardType().equals(PICKAXE)) {
             return ItemUtils.isItemInHandPickaxe(player);
         } else if (challengeData.forCardType().equals(AXE)) {

@@ -4,7 +4,6 @@ import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.coolcatcore.api.brewing.IBrewingRecipe;
 import net.ixdarklord.coolcatcore.api.brewing.BrewingBuilder;
 import net.ixdarklord.coolcatcore.api.event.v1.server.RegisterBrewingRecipesEvent;
-import net.ixdarklord.ultimine_addition.api.CustomMSCApi;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
@@ -51,14 +50,8 @@ public class MineGoJuiceRecipe implements IBrewingRecipe {
             addTiers(builder, Registration.MINING_SKILL_CARD_SHOVEL.get(), Registration.MINE_GO_JUICE_SHOVEL_POTION.getId());
             addTiers(builder, Registration.MINING_SKILL_CARD_HOE.get(), Registration.MINE_GO_JUICE_HOE_POTION.getId());
 
-            for (MiningSkillCardItem.Type type : CustomMSCApi.CUSTOM_TYPES) {
-                Item item = BuiltInRegistries.ITEM.get(type.getRegistryId());
-                MiningSkillCardItem card = item instanceof MiningSkillCardItem ? (MiningSkillCardItem) item : null;
-                Potion potion = BuiltInRegistries.POTION.get(MineGoJuiceEffect.getId(type));
-
-                if (card == null || potion == null) continue;
-                addTiers(builder, card, MineGoJuiceEffect.getId(type));
-            }
+            // The card types data packs define brew into the generic juice.
+            builder.addRecipe(new GenericJuiceRecipe());
         });
     }
 
