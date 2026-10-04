@@ -60,6 +60,13 @@ Example, for the first card of the record in the first hotbar slot:
 /ultimine_addition mining_skill_card @s tier Adept in_inventory hotbar.0 skills_record.0
 ```
 
+## Daily challenge
+
+| Command | Who | Does |
+|---|---|---|
+| `/ultimine_addition challenge` | Any player | Shows the daily (or weekly) challenge, your progress and when the next one comes. |
+| `/ultimine_addition challenge add <amount>` | Operators | Adds to your progress, for trying out rewards. |
+
 ## Skills Record
 
 | Command | Who | Does |

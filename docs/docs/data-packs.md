@@ -14,10 +14,11 @@ Everything the mod reads from data packs. All of it reloads with `/reload`, and 
 | `data/<namespace>/challenges/` | Mining Skill Card challenges | [Challenges](../wiki/packs/challenges.md) |
 | `data/<namespace>/ultimine_shapes/` | Ultimine shapes | [Ultimine Shapes](../wiki/packs/shapes.md) |
 | `data/<namespace>/mining_skill_cards/` | Card types for other tools | [Custom Cards](../wiki/packs/custom-cards.md) |
+| `data/<namespace>/ultimine_rewards/` | Rewards for challenges, tiers and the daily challenge (26.1.2) | [Reward](#reward) |
 
 A file's id is its namespace and its path under the folder, without `.json`: `data/mypack/ultimine_shapes/wide_cut.json` is `mypack:wide_cut`. Subfolders become part of the path.
 
-On 1.20.1 and 1.21.1 the folders are the same.
+On 1.20.1 and 1.21.1 the folders are the same, except for the rewards.
 
 ## Load order
 
@@ -87,6 +88,32 @@ A shape needs a `pattern` or `blocks`. A mod's shape with the same id wins over 
 | `icon` | item id, optional | The item drawn on the card. Without it: the first item id in `tools`. |
 | `juice_color` | `"#RRGGBB"`, optional | White when left out. |
 | `juice_name` | string, optional | Plain text or a translation key. Without it: the key `ultimine_addition.card_type.<namespace>.<name>.juice`, or else "Mine-Go Juice: " and the tool's name. |
+
+## Reward
+
+`data/<namespace>/ultimine_rewards/<name>.json`. Hands something out as players progress. Only the server reads these files.
+
+```json
+{
+  "when": "challenge",
+  "challenge": "mypack:hammer/smashing_stone",
+  "loot_table": "mypack:rewards/gems",
+  "experience": 20,
+  "commands": ["say @s smashed a lot of stone"]
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `when` | string | `challenge`: a card's challenge is completed. `tier`: a card reaches a tier. `timed`: the player finishes the daily (or weekly) challenge. |
+| `challenge` | challenge id, optional | Only for this challenge. Not allowed with `"when": "tier"`. |
+| `card_type` | card type id, optional | Only for cards of this type (`pickaxe`, `mypack:hammer`...). |
+| `tier` | number, optional | Only at this tier: the tier the card was at for `challenge`, the tier it reached for `tier` (1 Novice, 2 Apprentice, 3 Adept, 4 Mastered). |
+| `loot_table` | loot table id, optional | Rolled with the `gift` parameters; the items go to the inventory, or to the ground when it is full. |
+| `experience` | number, optional | Experience points. |
+| `commands` | list of strings, optional | Run by the server at the player; `@s` is the player. |
+
+A reward needs at least one of `loot_table`, `experience` and `commands`. A filter left out matches everything, so `{ "when": "tier", "experience": 100 }` pays for every tier of every card. A file with a mistake is skipped, and the log says why.
 
 ## What is sent to clients
 

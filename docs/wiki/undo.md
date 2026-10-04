@@ -26,6 +26,10 @@ If you no longer have some of the drops, the undo still works for the rest:
 
 An undo is refused when the spots are no longer empty, or when you can't pay for any of the blocks.
 
+## Undo history
+
+Press **Ctrl + H** to see the Ultimines you can still undo, newest first: how many blocks each puts back, what it costs, and how long it stays undoable. An entry says so when you are too far from it or its spots are taken. Undos go in that order, so **Undo Newest** opens the preview of the first one.
+
 ## Limits
 
 - Only your most recent Ultimines can be undone, newest first, and only within a time window after each one.
