@@ -398,3 +398,10 @@
   background: var(--ua-gold);
   color: #241a12;
 }
+
+/* The tags under the title are all one height, the Discord badge (drawn live, smaller) included. */
+.md-typeset .ua-hero__badges:not(.ua-hero__badges--downloads) img {
+  width: auto;
+  height: 26px;
+  vertical-align: middle;
+}

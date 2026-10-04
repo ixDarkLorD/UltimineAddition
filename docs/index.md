@@ -23,8 +23,11 @@ hide:
 [:fontawesome-brands-github: Source](https://github.com/ixDarkLorD/UltimineAddition){ .md-button }
 
 <p class="ua-hero__badges">
-  <img alt="Minecraft" src="https://img.shields.io/badge/Minecraft-26.1.2%20%7C%201.21.1%20%7C%201.20.1-62B47A?style=flat-square">
-  <img alt="Loaders" src="https://img.shields.io/badge/Loaders-NeoForge%20%7C%20Forge%20%7C%20Fabric-E68C37?style=flat-square">
+  <img src="https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/badges/ftb-ultimine-addition/fabric.svg" alt="Fabric" height="26">
+  <img src="https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/badges/ftb-ultimine-addition/neoforge.svg" alt="NeoForge" height="26">
+  <img src="https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/badges/ftb-ultimine-addition/forge.svg" alt="Forge" height="26">
+  <img src="https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/badges/ftb-ultimine-addition/ftb-ultimine-add-on.svg" alt="FTB Ultimine add-on" height="26">
+  <a href="https://discord.gg/ZapGEPqm2V"><img src="https://img.shields.io/discord/1173075408556654592?style=flat&logo=discord&logoColor=white&label=&labelColor=f48255&color=3A3F58" alt="Discord" height="26"></a>
 </p>
 
 <p class="ua-hero__badges ua-hero__badges--downloads">
