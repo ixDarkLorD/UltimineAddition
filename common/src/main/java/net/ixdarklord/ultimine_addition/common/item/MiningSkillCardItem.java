@@ -1,9 +1,5 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.coolcatcore.api.client.gui.ItemDecorator;
-import net.ixdarklord.coolcatcore.api.item.DecoratedItem;
-import net.ixdarklord.ultimine_addition.client.renderer.item.CardToolIcon;
-import net.ixdarklord.ultimine_addition.client.renderer.item.PotionPointPips;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.server.level.ServerLevel;
@@ -48,7 +44,7 @@ import java.util.List;
 
 import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.Type.EMPTY;
 
-public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> implements DecoratedItem {
+public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
     private final Type type;
     public MiningSkillCardItem(Type type, Properties properties) {
         super(properties, ComponentType.CRAFTING);
@@ -110,13 +106,6 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> i
     @Override
     public boolean isBarVisible(ItemStack itemStack) {
         return false;
-    }
-
-    // CoolCatLib takes it on the client, the first time a card is drawn (never on a dedicated server).
-    @Override
-    public void registerDecorators(Consumer<ItemDecorator> registrar) {
-        registrar.accept(CardToolIcon.INSTANCE);
-        registrar.accept(PotionPointPips.INSTANCE);
     }
 
     @Override

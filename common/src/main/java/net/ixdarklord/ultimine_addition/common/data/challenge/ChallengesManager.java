@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import net.ixdarklord.ultimine_addition.common.data.card.DataCardTypes;
+import net.ixdarklord.ultimine_addition.common.data.reward.DataRewards;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.core.Holder;
@@ -61,6 +62,7 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener<JsonElem
             challenges.put(location, challenge.get());
         });
         this.dropCardTypesWithoutChallenges();
+        DataRewards.load(resourceManager);
     }
 
     // A data pack card type needs challenges for every tier it climbs: a card with none to roll would have nothing to

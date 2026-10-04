@@ -43,7 +43,8 @@ public class ItemModelDataProvider implements DataProvider {
         this.simpleItem(cache, "mining_skill_card_empty", "minecraft:item/generated", null);
 
         // Shape Certificates: the tool's plaque (as on its Mining Skill Card) picked from the certificate's tool;
-        // custom card tools fall back to the plain certificate.
+        // data pack card tools fall back to the plain certificate (their icon is drawn over it), and a tool no card
+        // type has (anymore) to one with a question mark.
         for (String tier : new String[]{"novice", "apprentice", "adept"}) {
             String base = "shape_certificate_" + tier;
             this.model(cache, base, "minecraft:item/generated", "item/" + base, null);
@@ -63,7 +64,13 @@ public class ItemModelDataProvider implements DataProvider {
             select.addProperty("property", "minecraft:component");
             select.addProperty("component", FTBUltimineAddition.id("shape_certificate_data").toString());
             select.add("cases", cases);
-            select.add("fallback", modelReference(base));
+            this.model(cache, base + "_unknown", "minecraft:item/generated", "item/" + base + "_unknown", null);
+            JsonObject known = new JsonObject();
+            known.addProperty("type", "minecraft:condition");
+            known.addProperty("property", FTBUltimineAddition.id("certificate_tool_known").toString());
+            known.add("on_true", modelReference(base));
+            known.add("on_false", modelReference(base + "_unknown"));
+            select.add("fallback", known);
             this.itemDefinition(cache, base, select);
         }
         // Skills Record: a model per dye (vanilla's base_color component, set by crafting it with a dye).

@@ -41,8 +41,16 @@
     ],
     "component": "ultimine_addition:shape_certificate_data",
     "fallback": {
-      "type": "minecraft:model",
-      "model": "ultimine_addition:item/shape_certificate_apprentice"
+      "type": "minecraft:condition",
+      "on_false": {
+        "type": "minecraft:model",
+        "model": "ultimine_addition:item/shape_certificate_apprentice_unknown"
+      },
+      "on_true": {
+        "type": "minecraft:model",
+        "model": "ultimine_addition:item/shape_certificate_apprentice"
+      },
+      "property": "ultimine_addition:certificate_tool_known"
     },
     "property": "minecraft:component"
   }

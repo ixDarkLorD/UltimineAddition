@@ -126,6 +126,25 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("config.ultimine_addition.server.progression.extra_shapes_certificate", "Plugin Shapes Certificate");
         this.add("config.ultimine_addition.server.progression.extra_shapes_certificate.tooltip", "Shapes added by other mods (FTB Ultimine plugins) that no certificate lists join this certificate. None leaves them to the Miner Certificate and Mine-Go Juice.");
         this.add("ultimine_addition.extra_shapes.none", "None");
+        this.add("ultimine_addition.timed_challenge.off", "Off");
+        this.add("ultimine_addition.timed_challenge.daily", "Daily");
+        this.add("ultimine_addition.timed_challenge.weekly", "Weekly");
+        this.add("config.ultimine_addition.server.progression.timed_challenge", "Daily Challenge");
+        this.add("config.ultimine_addition.server.progression.timed_challenge.tooltip", "A challenge everyone on the server shares, picked anew each day or each week. It needs no card: doing it with the right tool counts.");
+        this.add("config.ultimine_addition.server.progression.timed_challenge_experience", "Daily Challenge Experience");
+        this.add("config.ultimine_addition.server.progression.timed_challenge_experience.tooltip", "Experience points for finishing the daily challenge (four times as much for a weekly one).");
+        this.add("config.ultimine_addition.server.progression.timed_challenge_juice", "Daily Challenge Juice (s)");
+        this.add("config.ultimine_addition.server.progression.timed_challenge_juice.tooltip", "Seconds of Mine-Go Juice for the challenge's tool for finishing the daily challenge (four times as much for a weekly one). 0 disables it.");
+        this.add("info.ultimine_addition.timed.title.daily", "Daily Challenge");
+        this.add("info.ultimine_addition.timed.title.weekly", "Weekly Challenge");
+        this.add("info.ultimine_addition.timed.tool", "Tool: %s");
+        this.add("info.ultimine_addition.timed.progress", "Progress: %s / %s");
+        this.add("info.ultimine_addition.timed.done", "✔ Completed");
+        this.add("info.ultimine_addition.timed.resets", "Next one in %s");
+        this.add("info.ultimine_addition.timed.completed", "%s Complete!");
+        this.add("info.ultimine_addition.timed.reward.experience", "+%s experience");
+        this.add("info.ultimine_addition.timed.reward.juice", "%s for %s");
+        this.add("info.ultimine_addition.timed.none", "There is no daily challenge right now.");
         this.add("ultimine_addition.extra_shapes.novice", "Novice");
         this.add("ultimine_addition.extra_shapes.apprentice", "Apprentice");
         this.add("ultimine_addition.extra_shapes.adept", "Adept");
@@ -426,6 +445,14 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("config.ultimine_addition.server.undo.animation_blocks_per_tick", "Animation Speed");
         this.add("config.ultimine_addition.server.undo.animation_blocks_per_tick.tooltip", "How many blocks start growing back each tick.");
         this.add(KeyHandler.KEY_UNDO, "Undo Ultimine");
+        this.add(KeyHandler.KEY_UNDO_HISTORY, "Undo History");
+        this.add("gui.ultimine_addition.undo.history.title", "Undo History (%s/%s)");
+        this.add("gui.ultimine_addition.undo.history.blocks", "%s blocks");
+        this.add("gui.ultimine_addition.undo.history.next", "Next to undo");
+        this.add("gui.ultimine_addition.undo.history.too_far", "Too far away");
+        this.add("gui.ultimine_addition.undo.history.blocked", "Spots taken");
+        this.add("gui.ultimine_addition.undo.history.cost", "Costs %s");
+        this.add("gui.ultimine_addition.undo.history.undo", "Undo Newest");
     }
 
     private void addPickaxeChallenges() {

@@ -10,7 +10,6 @@ import net.ixdarklord.ultimine_addition.config.UAConfigs;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.coolcatcore.api.client.gui.ItemDecorator;
 import net.ixdarklord.coolcatcore.api.item.DecoratedItem;
-import net.ixdarklord.ultimine_addition.client.renderer.item.PotionPointPips;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.Minecraft;
@@ -108,8 +107,8 @@ public final class DevAutotest {
                         anyCard = item;
                         if (item instanceof DecoratedItem decorated) decorated.registerDecorators(decorators::add);
                     }
-                    check("every_card_hands_over_its_decorators", cards > 0 && decorators.size() == cards * 2
-                            && decorators.stream().filter(PotionPointPips.class::isInstance).count() == cards, decorators.size() + " decorators for " + cards + " cards");
+                    // On 26.1.2 the card's tool, stars and pips are layers of its item model: it has no decorators.
+                    check("cards_draw_through_their_model", cards > 0 && decorators.isEmpty(), decorators.size() + " decorators for " + cards + " cards");
                     // Checks that need an item stack. Since 26.1 a stack can't be made before a world is loaded (its
                     // components aren't bound at the title screen), so there they're skipped.
                     try {

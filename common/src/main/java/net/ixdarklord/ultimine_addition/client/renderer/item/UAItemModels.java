@@ -11,6 +11,7 @@ import java.util.function.BiConsumer;
 public final class UAItemModels {
     public static final Identifier MINING_SKILL_CARD = FTBUltimineAddition.id("mining_skill_card");
     public static final Identifier CERTIFICATE_OPENED = FTBUltimineAddition.id("certificate_opened");
+    public static final Identifier CERTIFICATE_TOOL_KNOWN = FTBUltimineAddition.id("certificate_tool_known");
 
     public static void registerModels(BiConsumer<Identifier, MapCodec<? extends ItemModel.Unbaked>> registry) {
         registry.accept(MINING_SKILL_CARD, MiningSkillCardItemModel.Unbaked.MAP_CODEC);
@@ -18,6 +19,7 @@ public final class UAItemModels {
 
     public static void registerConditionalProperties(BiConsumer<Identifier, MapCodec<? extends ConditionalItemModelProperty>> registry) {
         registry.accept(CERTIFICATE_OPENED, CertificateOpenedProperty.MAP_CODEC);
+        registry.accept(CERTIFICATE_TOOL_KNOWN, CertificateToolKnownProperty.MAP_CODEC);
     }
 
     private UAItemModels() {}

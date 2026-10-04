@@ -200,6 +200,27 @@ public final class UltimineUndo {
                 available, UAServerConfig.UNDO_HISTORY.get(), expiresIn, comesBack), player);
     }
 
+    // The operations the player can still undo, newest first, for the history screen.
+    public static void history(ServerPlayer player) {
+        List<UndoPayload.HistoryEntry> entries = new ArrayList<>();
+        boolean enabled = UAServerConfig.UNDO_ENABLED.get();
+        Deque<Operation> history = enabled ? HISTORY.get(player.getUUID()) : null;
+        if (history != null) {
+            long now = System.currentTimeMillis(), window = UAServerConfig.UNDO_WINDOW.get() * 1000L;
+            history.removeIf(op -> op.time < now - window);
+            ServerLevel level = player.level();
+            for (Operation op : history) {
+                Cost cost = cost(player, op);
+                int state = !level.dimension().equals(op.dimension) || player.position().distanceTo(op.origin.getCenter()) > MAX_DISTANCE ? UndoPayload.HistoryEntry.TOO_FAR
+                        : op.all().anyMatch(b -> !level.getBlockState(b.pos()).canBeReplaced()) ? UndoPayload.HistoryEntry.BLOCKED : UndoPayload.HistoryEntry.READY;
+                ItemStack icon = new ItemStack(op.blocks.getFirst().state().getBlock().asItem());
+                entries.add(new UndoPayload.HistoryEntry(icon, (int) op.all().count(), cost.items, op.xp, Math.max(0L, op.time + window - now),
+                        cost.free, cost.missing(player, op).isEmpty(), state));
+            }
+        }
+        PayloadHandler.sendToPlayer(new UndoPayload.History(entries, UAServerConfig.UNDO_HISTORY.get(), enabled), player);
+    }
+
     // partial: the player agreed to undo with items missing, so only the blocks they can pay for come back.
     public static void confirm(ServerPlayer player, boolean partial) {
         Operation op = latest(player);

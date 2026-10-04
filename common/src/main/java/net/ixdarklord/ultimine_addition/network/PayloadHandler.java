@@ -23,6 +23,7 @@ public class PayloadHandler {
         registerC2S(SkillsRecordPayload.RequestRecord.TYPE, SkillsRecordPayload.RequestRecord.STREAM_CODEC, SkillsRecordPayload.RequestRecord::handle);
         registerC2S(SkillsRecordPayload.RequestCard.TYPE, SkillsRecordPayload.RequestCard.STREAM_CODEC, SkillsRecordPayload.RequestCard::handle);
         registerC2S(UndoPayload.Request.TYPE, UndoPayload.Request.STREAM_CODEC, UndoPayload.Request::handle);
+        registerC2S(UndoPayload.HistoryRequest.TYPE, UndoPayload.HistoryRequest.STREAM_CODEC, UndoPayload.HistoryRequest::handle);
         registerC2S(UpdateItemShapePayload.TYPE, UpdateItemShapePayload.STREAM_CODEC, UpdateItemShapePayload::handle);
         registerS2C(SkillsRecordPayload.SyncRecord.TYPE, SkillsRecordPayload.SyncRecord.STREAM_CODEC, SkillsRecordPayload.SyncRecord::handle);
         registerS2C(SkillsRecordPayload.SyncCards.TYPE, SkillsRecordPayload.SyncCards.STREAM_CODEC, SkillsRecordPayload.SyncCards::handle);
@@ -31,6 +32,7 @@ public class PayloadHandler {
         registerS2C(SyncChallengesPayload.TYPE, SyncChallengesPayload.STREAM_CODEC, SyncChallengesPayload::handle);
         registerS2C(UndoPayload.Preview.TYPE, UndoPayload.Preview.STREAM_CODEC, UndoPayload.Preview::handle);
         registerS2C(UndoPayload.Close.TYPE, UndoPayload.Close.STREAM_CODEC, UndoPayload.Close::handle);
+        registerS2C(UndoPayload.History.TYPE, UndoPayload.History.STREAM_CODEC, UndoPayload.History::handle);
         registerS2C(UndoPayload.Progress.TYPE, UndoPayload.Progress.STREAM_CODEC, UndoPayload.Progress::handle);
         registerS2C(UndoPayload.Grow.TYPE, UndoPayload.Grow.STREAM_CODEC, UndoPayload.Grow::handle);
         registerS2C(UltimineNoticePayload.TYPE, UltimineNoticePayload.STREAM_CODEC, UltimineNoticePayload::handle);

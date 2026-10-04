@@ -20,6 +20,9 @@ public class KeyHandler {
     // Ctrl + Z through FTB Library, which supports key modifiers on NeoForge (and on Fabric with Amecs).
     public static KeyMapping KEY_UNDO = InputHelper.createSimpleKeyMapping("undo_ultimine", KEY_CATEGORY, GLFW.GLFW_KEY_Z, KeyModifier.CONTROL);
 
+    // Ctrl + H: the list of operations that can still be undone.
+    public static KeyMapping KEY_UNDO_HISTORY = InputHelper.createSimpleKeyMapping("undo_history", KEY_CATEGORY, GLFW.GLFW_KEY_H, KeyModifier.CONTROL);
+
     public static KeyMapping create(Identifier id, InputConstants.Type type, int key, KeyMapping.Category category) {
         return new KeyMapping("key.%s.%s".formatted(id.getNamespace(), id.getPath()), type, key, category);
     }
@@ -39,6 +42,7 @@ public class KeyHandler {
 
     public static void register() {
         KeyMappingRegistry.register(KEY_UNDO);
+        KeyMappingRegistry.register(KEY_UNDO_HISTORY);
         if (ServicePlatform.get().slotAPI().isModLoaded())
             KeyMappingRegistry.register(KEY_OPEN_SKILLS_RECORD);
     }

@@ -497,8 +497,6 @@ final class TierTreePanel extends ViewportPanel {
             ItemStack icon = node.state() == TierState.LOCKED ? ItemStack.EMPTY : this.tierIcon(node.tier());
             if (!icon.isEmpty()) {
                 graphics.item(icon, bx + (BADGE_SIZE - 16) / 2, by + (BADGE_SIZE - 16) / 2);
-                // The card's tool, as its slot shows it.
-                net.ixdarklord.ultimine_addition.client.renderer.item.CardToolIcon.drawOver(graphics, icon, bx + (BADGE_SIZE - 16) / 2, by + (BADGE_SIZE - 16) / 2);
             }
             else graphics.centeredText(this.font, "?", bx + BADGE_SIZE / 2, by + (BADGE_SIZE - 8) / 2, ARGB.multiplyAlpha(0xFF8A8A8A, reveal));
         }

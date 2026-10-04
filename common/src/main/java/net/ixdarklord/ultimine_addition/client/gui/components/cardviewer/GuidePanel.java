@@ -200,7 +200,6 @@ final class GuidePanel extends Panel {
 
         this.drawSlot(graphics, slotX, slotY, 0.0F, SELECTED, intro);
         graphics.item(card, slotX + (SLOT - 16) / 2, slotY + (SLOT - 16) / 2);
-        net.ixdarklord.ultimine_addition.client.renderer.item.CardToolIcon.drawOver(graphics, card, slotX + (SLOT - 16) / 2, slotY + (SLOT - 16) / 2);
         if (selected > 0.0F) {
             // Over the card (items draw after fills in a stratum), as over the record's card slots.
             graphics.nextStratum();

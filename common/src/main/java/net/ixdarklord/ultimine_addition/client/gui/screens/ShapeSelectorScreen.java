@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
+import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.ShapeDiagrams;
 import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.minecraft.world.entity.player.Player;
@@ -328,6 +329,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
     private class SelectBox extends ObjectSelectionList<SelectBox.ShapeEntry> {
         // Empty space below each entry's box; rows are laid out back to back, so it's taken out of the row height.
         private static final int ENTRY_GAP = 4;
+        private static final int DIAGRAM_SIZE = 15;
 
         public SelectBox(int x, int y, int width, int height) {
             super(Minecraft.getInstance(), width, height, y, 20);
@@ -346,6 +348,8 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 this.addEntry(new ShapeEntry(shape));
             }
             this.refreshScrollAmount();
+            // Each row shows its shape's diagram, worked out by the server.
+            ShapeDiagrams.request(this.children().stream().map(entry -> entry.shape.getName()).toList());
         }
 
         @Override
@@ -461,7 +465,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 }
                 // Shrunk to fit when too long (e.g. in other languages), centered in the box's height.
                 Component name = this.shape.getDisplayName().copy().withStyle(style);
-                int room = width - spacing - 6;
+                int room = width - spacing - 6 - DIAGRAM_SIZE - 3;
                 float scale = Math.min(1.0F, room / (float) Math.max(1, font.width(name)));
                 var pose = guiGraphics.pose();
                 pose.pushMatrix();
@@ -469,6 +473,11 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 pose.scale(scale, scale);
                 guiGraphics.text(font, name, 0, 0, color.getRGB(), true);
                 pose.popMatrix();
+
+                // The shape's diagram, at the row's right end.
+                int tint = isAllowed() ? 0xFFFFFFFF : 0xFFD13E3E;
+                ShapeDiagrams.draw(guiGraphics, this.shape.getName(), left + width - DIAGRAM_SIZE - 3, top + (height - DIAGRAM_SIZE) / 2, DIAGRAM_SIZE,
+                        tint, 0xFFFBD25A, 0x50103A5C);
             }
 
             public @NotNull Component getNarration() {
