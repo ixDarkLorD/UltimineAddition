@@ -64,9 +64,9 @@ Open the record again. The card is now **Novice**, it has a new set of challenge
 
 ![The card at Novice, with two new challenges and the certificate badge on the tier](../assets/wiki/record-novice.png){ .ua-shot .ua-shot--gui loading=lazy }
 
-Click the badge and pick a shape. Each tile shows a diagram of the shape (the gold cell is the block you break), its name, and the color of the tier it comes from. Shapes you pass over stay available at later tiers, which is why a later pick like the Adept one below still offers the earlier shapes.
+Click the badge and pick a shape. Each tile shows a diagram of the shape (the gold cell is the block you break), its name, and the color of the tier it comes from. Three shapes show at a time: scroll, or use the arrows beside Back, to see the rest. Shapes you pass over stay available at later tiers, which is why a later pick like the Adept one below still offers the earlier shapes.
 
-![Choosing a shape at Adept: Small Square, Escape Tunnel, Mining Tunnel, Small Tunnel or Large Tunnel](../assets/wiki/choose-shape.png){ .ua-shot .ua-shot--gui loading=lazy }
+![Choosing a shape at Adept: the first three of five shapes on offer](../assets/wiki/choose-shape.png){ .ua-shot .ua-shot--gui loading=lazy }
 
 The certificate lands in your inventory. **Use it** to learn the shape for that tool, for good.
 

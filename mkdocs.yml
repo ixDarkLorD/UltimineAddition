@@ -107,5 +107,6 @@ nav:
       - For Pack Makers:
           - Configuration: wiki/packs/configuration.md
           - Challenges: wiki/packs/challenges.md
+          - Ultimine Shapes: wiki/packs/shapes.md
           - Custom Cards: wiki/packs/custom-cards.md
   - Changelog: changelog.md

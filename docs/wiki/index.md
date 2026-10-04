@@ -60,4 +60,5 @@ Everything about playing with FTB Ultimine Addition, from the first card to the 
 |---|---|
 | [Configuration](packs/configuration.md) | Every server and client setting, and the commands that open them. |
 | [Challenges](packs/challenges.md) | The data pack format for adding, changing or removing challenges. |
+| [Ultimine Shapes](packs/shapes.md) | Adding Ultimine shapes from a data pack. |
 | [Custom Cards](packs/custom-cards.md) | Adding Mining Skill Cards for other tools. |
