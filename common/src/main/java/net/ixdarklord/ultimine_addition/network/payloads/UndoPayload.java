@@ -24,16 +24,19 @@ import java.util.UUID;
 public final class UndoPayload {
     private UndoPayload() {}
 
-    // First press asks for a preview; pressing again while it's shown confirms.
-    public record Request(boolean confirm) implements CustomPacketPayload {
+    // First press asks for a preview; pressing again while it's shown confirms. partial: the player agreed to undo
+    // with items missing (only what they can pay for comes back).
+    public record Request(boolean confirm, boolean partial) implements CustomPacketPayload {
         public static final Type<Request> TYPE = new Type<>(FTBUltimineAddition.id("undo_request"));
-        public static final StreamCodec<FriendlyByteBuf, Request> STREAM_CODEC =
-                ByteBufCodecs.BOOL.map(Request::new, Request::confirm).cast();
+        public static final StreamCodec<FriendlyByteBuf, Request> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, Request::confirm,
+                ByteBufCodecs.BOOL, Request::partial,
+                Request::new);
 
         public static void handle(Request msg, PacketContext ctx) {
             ctx.queue(() -> {
                 if (!(ctx.getPlayer() instanceof ServerPlayer player)) return;
-                if (msg.confirm) UltimineUndo.confirm(player);
+                if (msg.confirm) UltimineUndo.confirm(player, msg.partial);
                 else UltimineUndo.preview(player);
             });
         }
@@ -50,7 +53,10 @@ public final class UndoPayload {
                           int xp, boolean xpOnGround, boolean free,
                           // Undos stored for the player (this one included), the most the server keeps, and the
                           // milliseconds left before this one leaves the undo window.
-                          int available, int maxHistory, long expiresIn) implements CustomPacketPayload {
+                          int available, int maxHistory, long expiresIn,
+                          // For each of positions: whether it comes back when undoing with what's missing (all true
+                          // when nothing is). The others are the ones the preview shows in red.
+                          List<Boolean> comesBack) implements CustomPacketPayload {
         public static final Type<Preview> TYPE = new Type<>(FTBUltimineAddition.id("undo_preview"));
         // CoolCatLib's StreamCodec.composite (as 1.21.1's) takes at most six fields, so this one is written out.
         private static final StreamCodec<ByteBuf, List<BlockPos>> POSITIONS_CODEC = ByteBufCodecs.BLOCK_POS.apply(ByteBufCodecs.list());
@@ -68,8 +74,24 @@ public final class UndoPayload {
             buf.writeVarInt(msg.available());
             buf.writeVarInt(msg.maxHistory());
             buf.writeVarLong(msg.expiresIn());
+            buf.writeVarInt(msg.comesBack().size());
+            for (boolean back : msg.comesBack()) buf.writeBoolean(back);
         }, buf -> new Preview(POSITIONS_CODEC.decode(buf), STATES_CODEC.decode(buf), COST_CODEC.decode(buf), FROM_GROUND_CODEC.decode(buf),
-                buf.readVarInt(), buf.readBoolean(), buf.readBoolean(), buf.readVarInt(), buf.readVarInt(), buf.readVarLong()));
+                buf.readVarInt(), buf.readBoolean(), buf.readBoolean(), buf.readVarInt(), buf.readVarInt(), buf.readVarLong(), readFlags(buf)));
+
+        private static List<Boolean> readFlags(ByteBuf buf) {
+            int size = ByteBufCodecs.VAR_INT.decode(buf);
+            List<Boolean> flags = new java.util.ArrayList<>(size);
+            for (int i = 0; i < size; i++) flags.add(buf.readBoolean());
+            return flags;
+        }
+
+        // How many of positions come back.
+        public int restorable() {
+            int count = 0;
+            for (boolean back : this.comesBack) if (back) count++;
+            return count;
+        }
 
         public static void handle(Preview msg, PacketContext ctx) {
             ctx.queue(() -> UndoPreviewClient.INSTANCE.open(msg));

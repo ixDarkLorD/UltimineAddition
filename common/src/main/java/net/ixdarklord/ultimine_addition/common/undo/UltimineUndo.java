@@ -36,7 +36,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 // Undoing an Ultimine operation: blocks go back, paid for with the items (and experience) they dropped, taken from the
-// drops still on the ground first, then from the player's inventory. Nothing changes when something is missing.
+// drops still on the ground first, then from the player's inventory. When something is missing the player can still
+// undo what they can pay for: only the blocks whose own drops are all there come back.
 // The FTB Ultimine mixin records each operation; players preview it first, then confirm.
 public final class UltimineUndo {
     public static final String DISPLAY_TAG = "ultimine_addition.undo";
@@ -99,6 +100,7 @@ public final class UltimineUndo {
         // nothing of its own), and what hung on the block and popped off (a torch, a rail, a button...), whose dropped
         // items join the cost so undoing takes them back instead of duplicating them.
         List<BlockRecord> linked = new ArrayList<>();
+        List<ItemStack> attachedHere = new ArrayList<>();
         for (Direction direction : Direction.values()) {
             BlockPos neighbour = pos.relative(direction);
             BlockState neighbourBefore = neighboursBefore[direction.ordinal()];
@@ -111,6 +113,7 @@ public final class UltimineUndo {
                         entity -> entity.tickCount == 0 && !op.attachedEntities.contains(entity))) {
                     op.attachedEntities.add(dropped);
                     op.attachedDrops.add(dropped.getItem().copy());
+                    attachedHere.add(dropped.getItem().copy());
                 }
             }
         }
@@ -118,15 +121,22 @@ public final class UltimineUndo {
         op.blocks.add(record);
         op.recorded.put(record.pos(), record.state());
         for (BlockRecord half : linked) op.recorded.put(half.pos(), half.state());
-        if (contents.isEmpty() || blockDrops.isEmpty()) return;
-        List<ItemStack> spilled = merge(blockDrops);
-        for (ItemStack content : merge(contents)) {
-            for (ItemStack drop : spilled) {
-                if (!ItemStack.isSameItemSameTags(drop, content)) continue;
-                int count = Math.min(drop.getCount(), content.getCount());
-                if (count > 0) op.contents.add(content.copyWithCount(count));
+        List<ItemStack> spilledHere = new ArrayList<>();
+        if (!contents.isEmpty() && !blockDrops.isEmpty()) {
+            List<ItemStack> spilled = merge(blockDrops);
+            for (ItemStack content : merge(contents)) {
+                for (ItemStack drop : spilled) {
+                    if (!ItemStack.isSameItemSameTags(drop, content)) continue;
+                    int count = Math.min(drop.getCount(), content.getCount());
+                    if (count > 0) spilledHere.add(content.copyWithCount(count));
+                }
             }
+            op.contents.addAll(spilledHere);
         }
+        // What this block (and what popped off with it) costs on its own, for undoing only part of the operation.
+        List<ItemStack> own = new ArrayList<>(subtract(merge(blockDrops), spilledHere));
+        own.addAll(attachedHere);
+        op.blockCosts.add(merge(own));
     }
 
     // A block's six neighbours, by Direction ordinal, for recordBlock.
@@ -178,24 +188,61 @@ public final class UltimineUndo {
         if (op == null) return;
         Cost cost = cost(player, op);
         List<BlockPos> positions = op.all().map(BlockRecord::pos).toList();
+        // Which of those would come back when undoing with missing items (all of them when nothing is missing), in
+        // the positions' order: a block and what's linked to it share its answer.
+        boolean[] keep = cost.missing(player, op).isEmpty() ? null : plan(player, op);
+        List<Boolean> comesBack = new ArrayList<>(positions.size());
+        for (int i = 0; i < op.blocks.size(); i++) {
+            for (int part = op.blocks.get(i).withLinked().size(); part > 0; part--) comesBack.add(keep == null || keep[i]);
+        }
         List<BlockState> states = op.all().map(BlockRecord::state).toList();
         int available = HISTORY.getOrDefault(player.getUUID(), new ArrayDeque<>()).size();
         long expiresIn = Math.max(0L, op.time + UAServerConfig.UNDO_WINDOW.get() * 1000L - System.currentTimeMillis());
         PayloadHandler.sendToPlayer(new UndoPayload.Preview(positions, states, cost.items, cost.fromGround, op.xp, op.orb != null && op.orb.isAlive(), cost.free,
-                available, UAServerConfig.UNDO_HISTORY.get(), expiresIn), player);
+                available, UAServerConfig.UNDO_HISTORY.get(), expiresIn, comesBack), player);
     }
 
-    public static void confirm(ServerPlayer player) {
+    // partial: the player agreed to undo with items missing, so only the blocks they can pay for come back.
+    public static void confirm(ServerPlayer player, boolean partial) {
         Operation op = latest(player);
         if (op == null) return;
         Cost cost = cost(player, op);
         List<Component> missing = cost.missing(player, op);
-        if (!missing.isEmpty()) {
+        if (missing.isEmpty()) {
+            if (!cost.free) pay(player, op, cost.items, op.xp);
+            Objects.requireNonNull(HISTORY.get(player.getUUID())).removeFirst();
+            start(player, op);
+            return;
+        }
+        if (!partial) {
             fail(player, missing);
             return;
         }
-        if (!cost.free) cost.pay(player, op);
+        boolean[] keep = plan(player, op);
+        List<ItemStack> items = new ArrayList<>();
+        int kept = 0;
+        for (int i = 0; i < keep.length; i++) {
+            if (!keep[i]) continue;
+            kept++;
+            items.addAll(op.blockCosts.get(i));
+        }
+        if (kept == 0) {
+            fail(player, List.of(Component.translatable("info.ultimine_addition.undo.none_affordable")));
+            return;
+        }
+        // The experience is paid for the share of blocks coming back, and only as much as the player has.
+        pay(player, op, merge(items), Math.round(op.xp * (float) kept / op.blocks.size()));
         Objects.requireNonNull(HISTORY.get(player.getUUID())).removeFirst();
+        Operation restored = op.subset(keep);
+        start(player, restored);
+        long total = op.all().count(), back = restored.all().count();
+        new UltimineNotice(UltimineNotice.Kind.ACTION, UltimineNotice.actionsTitle(), List.of(
+                Component.translatable("info.ultimine_addition.undo.partial").withStyle(ChatFormatting.GOLD),
+                Component.translatable("info.ultimine_addition.undo.partial.blocks", back, total)), ItemStack.EMPTY).send(player);
+    }
+
+    // Queues the undo behind the one growing back now, or starts it.
+    private static void start(ServerPlayer player, Operation op) {
         if (isBusy(player)) {
             // Waits for the undo growing back now; the progress HUD shows how many are waiting.
             QUEUED.computeIfAbsent(player.getUUID(), uuid -> new ArrayDeque<>()).addLast(op);
@@ -342,6 +389,90 @@ public final class UltimineUndo {
         return merged;
     }
 
+    // Which of the operation's blocks the player can pay for, going through them in the order they were broken: a
+    // block comes back only when all of its own drops are still on the ground or in the inventory. A block that
+    // can't come back leaves what it would have taken for the blocks after it.
+    private static boolean[] plan(ServerPlayer player, Operation op) {
+        boolean[] keep = new boolean[op.blocks.size()];
+        if (player.isCreative() || op.creative) {
+            Arrays.fill(keep, true);
+            return keep;
+        }
+        // What's available of each distinct item, counted once when first needed.
+        List<ItemStack> pool = new ArrayList<>();
+        List<Integer> left = new ArrayList<>();
+        for (int i = 0; i < keep.length; i++) {
+            List<ItemStack> cost = op.blockCosts.get(i);
+            int[] slots = new int[cost.size()];
+            boolean ok = true;
+            for (int c = 0; c < cost.size(); c++) {
+                ItemStack needed = cost.get(c);
+                int slot = -1;
+                for (int k = 0; k < pool.size(); k++) {
+                    if (matches(pool.get(k), needed)) {
+                        slot = k;
+                        break;
+                    }
+                }
+                if (slot < 0) {
+                    int ground = 0;
+                    for (ItemEntity entity : op.dropEntities) {
+                        if (entity.isAlive() && matches(entity.getItem(), needed)) ground += entity.getItem().getCount();
+                    }
+                    pool.add(needed);
+                    left.add(ground + countInInventory(player, needed));
+                    slot = pool.size() - 1;
+                }
+                slots[c] = slot;
+                if (left.get(slot) < needed.getCount()) ok = false;
+            }
+            if (!ok) continue;
+            keep[i] = true;
+            for (int c = 0; c < cost.size(); c++) left.set(slots[c], left.get(slots[c]) - cost.get(c).getCount());
+        }
+        return keep;
+    }
+
+    // Takes the items from the ground first, then the inventory, and xp of the operation's experience: from its orb
+    // while it's still there (giving back what isn't owed), else from the player, as far as they have it.
+    private static void pay(ServerPlayer player, Operation op, List<ItemStack> items, int xp) {
+        List<ItemStack> refund = new ArrayList<>();
+        for (ItemStack needed : items) {
+            int left = needed.getCount();
+            for (ItemEntity entity : op.dropEntities) {
+                if (left <= 0) break;
+                ItemStack ground = entity.getItem();
+                if (!entity.isAlive() || !matches(ground, needed)) continue;
+                int take = Math.min(left, ground.getCount());
+                takeContents(ground, refund);
+                left -= take;
+                if (take >= ground.getCount()) entity.discard();
+                else entity.setItem(ground.copyWithCount(ground.getCount() - take));
+            }
+            List<ItemStack> slots = new ArrayList<>(player.getInventory().items);
+            slots.add(player.getOffhandItem());
+            for (ItemStack slot : slots) {
+                if (left <= 0) break;
+                if (!matches(slot, needed)) continue;
+                int take = Math.min(left, slot.getCount());
+                takeContents(slot, refund);
+                slot.shrink(take);
+                left -= take;
+            }
+        }
+        if (op.xp > 0) {
+            if (op.orb != null && op.orb.isAlive()) {
+                op.orb.discard();
+                if (op.xp > xp) player.giveExperiencePoints(op.xp - xp);
+            } else if (xp > 0) {
+                player.giveExperiencePoints(-Math.min(xp, player.totalExperience));
+            }
+        }
+        // What paid boxes held goes back to the player (dropped at their feet when there's no room).
+        for (ItemStack stack : refund) player.getInventory().placeItemBackInInventory(stack);
+        player.getInventory().setChanged();
+    }
+
     private record Cost(List<ItemStack> items, List<Integer> fromGround, boolean free) {
         List<Component> missing(ServerPlayer player, Operation op) {
             List<Component> lines = new ArrayList<>();
@@ -360,40 +491,6 @@ public final class UltimineUndo {
             if (!lines.isEmpty()) lines.add(0, Component.translatable("info.ultimine_addition.undo.missing"));
             return lines.size() > 6 ? List.of(lines.get(0), lines.get(1), lines.get(2), lines.get(3), lines.get(4),
                     Component.translatable("info.ultimine_addition.undo.missing_more", lines.size() - 5)) : lines;
-        }
-
-        void pay(ServerPlayer player, Operation op) {
-            List<ItemStack> refund = new ArrayList<>();
-            for (ItemStack needed : this.items) {
-                int left = needed.getCount();
-                for (ItemEntity entity : op.dropEntities) {
-                    if (left <= 0) break;
-                    ItemStack ground = entity.getItem();
-                    if (!entity.isAlive() || !matches(ground, needed)) continue;
-                    int take = Math.min(left, ground.getCount());
-                    takeContents(ground, refund);
-                    left -= take;
-                    if (take >= ground.getCount()) entity.discard();
-                    else entity.setItem(ground.copyWithCount(ground.getCount() - take));
-                }
-                List<ItemStack> slots = new ArrayList<>(player.getInventory().items);
-                slots.add(player.getOffhandItem());
-                for (ItemStack slot : slots) {
-                    if (left <= 0) break;
-                    if (!matches(slot, needed)) continue;
-                    int take = Math.min(left, slot.getCount());
-                    takeContents(slot, refund);
-                    slot.shrink(take);
-                    left -= take;
-                }
-            }
-            if (op.xp > 0) {
-                if (op.orb != null && op.orb.isAlive()) op.orb.discard();
-                else player.giveExperiencePoints(-op.xp);
-            }
-            // What paid boxes held goes back to the player (dropped at their feet when there's no room).
-            for (ItemStack stack : refund) player.getInventory().placeItemBackInInventory(stack);
-            player.getInventory().setChanged();
         }
     }
 
@@ -575,6 +672,8 @@ public final class UltimineUndo {
         private final boolean creative;
         private final long time = System.currentTimeMillis();
         private final List<BlockRecord> blocks = new ArrayList<>();
+        // What each of the blocks (with what popped off it) dropped, in the same order.
+        private final List<List<ItemStack>> blockCosts = new ArrayList<>();
         // Every recorded state by position, linked halves included.
         private final Map<BlockPos, BlockState> recorded = new HashMap<>();
         // Items that spilled out of broken containers: not part of the cost.
@@ -612,6 +711,24 @@ public final class UltimineUndo {
             this.dimension = player.level().dimension();
             this.origin = origin.immutable();
             this.creative = player.isCreative();
+        }
+
+        private Operation(Operation source) {
+            this.player = source.player;
+            this.dimension = source.dimension;
+            this.origin = source.origin;
+            this.creative = source.creative;
+        }
+
+        // The same operation with only the kept blocks, for putting back part of it (already paid for).
+        private Operation subset(boolean[] keep) {
+            Operation subset = new Operation(this);
+            for (int i = 0; i < this.blocks.size(); i++) {
+                if (!keep[i]) continue;
+                subset.blocks.add(this.blocks.get(i));
+                subset.blockCosts.add(this.blockCosts.get(i));
+            }
+            return subset;
         }
     }
 }

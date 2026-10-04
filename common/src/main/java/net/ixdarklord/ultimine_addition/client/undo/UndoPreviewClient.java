@@ -4,6 +4,7 @@ import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
 import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
 import net.ixdarklord.ultimine_addition.common.undo.UltimineUndo;
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.UndoPayload;
 import net.minecraft.ChatFormatting;
@@ -26,7 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 // The undo preview: ghosts of the blocks undo would put back, outlined, and what it costs next to the crosshair.
-// Pressing the undo key again confirms; sneaking, waiting or walking away cancels.
+// Pressing the undo key again confirms (with items missing, after asking: see UndoConfirmScreen); sneaking, waiting
+// or walking away cancels.
 public final class UndoPreviewClient {
     public static final UndoPreviewClient INSTANCE = new UndoPreviewClient();
     // Client-only display entities are cheap, but a huge operation shouldn't flood the level with them.
@@ -49,12 +51,21 @@ public final class UndoPreviewClient {
     }
 
     public void onUndoKey() {
-        if (this.isOpen()) {
-            PayloadHandler.sendToServer(new UndoPayload.Request(true));
-            this.close();
-        } else {
-            PayloadHandler.sendToServer(new UndoPayload.Request(false));
+        UndoPayload.Preview preview = this.preview;
+        Minecraft minecraft = Minecraft.getInstance();
+        if (preview == null) {
+            PayloadHandler.sendToServer(new UndoPayload.Request(false, false));
+            return;
         }
+        boolean affordable = minecraft.player == null || costRows(preview, minecraft.player).stream().allMatch(Row::ok);
+        if (!affordable && preview.restorable() > 0 && UAClientConfig.CONFIRM_MISSING_ITEMS.get()) {
+            // Asks first; the preview stays up behind the question.
+            minecraft.setScreen(new UndoConfirmScreen(preview, costRows(preview, minecraft.player)));
+            return;
+        }
+        // With nothing it can pay for, the server says so.
+        PayloadHandler.sendToServer(new UndoPayload.Request(true, !affordable));
+        this.close();
     }
 
     public void open(UndoPayload.Preview preview) {
@@ -72,6 +83,11 @@ public final class UndoPreviewClient {
     // What UndoGhostRenderer draws while the preview is open.
     public List<BlockPos> ghostPositions() {
         return this.preview == null ? List.of() : this.preview.positions();
+    }
+
+    // For each ghost: whether undoing with what's missing would put it back (the others are drawn in red).
+    public List<Boolean> ghostComesBack() {
+        return this.preview == null ? List.of() : this.preview.comesBack();
     }
 
     public List<BlockState> ghostStates() {
@@ -92,6 +108,8 @@ public final class UndoPreviewClient {
         if (down && !this.undoKeyWasDown && player != null && minecraft.screen == null && KeyHandler.undoModifierHeld()) this.onUndoKey();
         this.undoKeyWasDown = down;
         if (!this.isOpen()) return;
+        // Waits while the player answers the missing-items question.
+        if (minecraft.screen instanceof UndoConfirmScreen) return;
         if (player == null || minecraft.level == null || player.isShiftKeyDown() || Util.getMillis() - this.openedAt > TIMEOUT_MS
                 || this.center == null || player.position().distanceTo(this.center) > MAX_DISTANCE) {
             this.close();
@@ -107,22 +125,11 @@ public final class UndoPreviewClient {
             UndoProgressHud.INSTANCE.render(graphics);
             return;
         }
-        if (player == null || minecraft.options.hideGui) return;
+        if (player == null || minecraft.options.hideGui || minecraft.screen instanceof UndoConfirmScreen) return;
         Font font = minecraft.font;
 
         Component title = UndoHudTheme.withRevertIcon(Component.translatable("gui.ultimine_addition.undo.title", preview.positions().size()));
-        List<Row> rows = new ArrayList<>();
-        if (!preview.free()) {
-            for (int i = 0; i < preview.cost().size(); i++) {
-                ItemStack needed = preview.cost().get(i);
-                int have = preview.fromGround().get(i) + UltimineUndo.countInInventory(player, needed);
-                rows.add(new Row(needed, Math.min(have, needed.getCount()) + "/" + needed.getCount(), have >= needed.getCount()));
-            }
-            if (preview.xp() > 0) {
-                int have = preview.xpOnGround() ? preview.xp() : player.totalExperience;
-                rows.add(new Row(ItemStack.EMPTY, Component.translatable("gui.ultimine_addition.undo.xp", preview.xp()).getString(), have >= preview.xp()));
-            }
-        }
+        List<Row> rows = costRows(preview, player);
         boolean affordable = rows.stream().allMatch(Row::ok);
         int shown = Math.min(rows.size(), MAX_ROWS);
 
@@ -130,8 +137,10 @@ public final class UndoPreviewClient {
         Component keyName = KeyHandler.undoKeyName().copy().withStyle(ChatFormatting.YELLOW);
         List<Component> footer = new ArrayList<>();
         if (preview.free()) footer.add(Component.translatable("gui.ultimine_addition.undo.free").withStyle(ChatFormatting.GREEN));
-        footer.add(affordable ? Component.translatable("gui.ultimine_addition.undo.confirm", keyName).withStyle(ChatFormatting.WHITE)
-                : Component.translatable("gui.ultimine_addition.undo.missing").withStyle(ChatFormatting.RED));
+        if (affordable) footer.add(Component.translatable("gui.ultimine_addition.undo.confirm", keyName).withStyle(ChatFormatting.WHITE));
+        else if (preview.restorable() > 0) footer.add(Component.translatable("gui.ultimine_addition.undo.confirm_partial", keyName,
+                preview.restorable(), preview.positions().size()).withStyle(ChatFormatting.GOLD));
+        else footer.add(Component.translatable("gui.ultimine_addition.undo.missing").withStyle(ChatFormatting.RED));
         footer.add(Component.translatable("gui.ultimine_addition.undo.cancel").withStyle(style -> style.withColor(0xC8C8C8)));
         int footerWidth = footer.stream().mapToInt(font::width).max().orElse(0);
 
@@ -189,5 +198,21 @@ public final class UndoPreviewClient {
         UndoHudTheme.end(graphics);
     }
 
-    private record Row(ItemStack icon, String text, boolean ok) {}
+    // What the undo costs, one row per item (and the experience), with what the player has of it.
+    static List<Row> costRows(UndoPayload.Preview preview, LocalPlayer player) {
+        List<Row> rows = new ArrayList<>();
+        if (preview.free()) return rows;
+        for (int i = 0; i < preview.cost().size(); i++) {
+            ItemStack needed = preview.cost().get(i);
+            int have = preview.fromGround().get(i) + UltimineUndo.countInInventory(player, needed);
+            rows.add(new Row(needed, Math.min(have, needed.getCount()) + "/" + needed.getCount(), have >= needed.getCount()));
+        }
+        if (preview.xp() > 0) {
+            int have = preview.xpOnGround() ? preview.xp() : player.totalExperience;
+            rows.add(new Row(ItemStack.EMPTY, Component.translatable("gui.ultimine_addition.undo.xp", preview.xp()).getString(), have >= preview.xp()));
+        }
+        return rows;
+    }
+
+    record Row(ItemStack icon, String text, boolean ok) {}
 }

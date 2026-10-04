@@ -1,5 +1,9 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
+import net.ixdarklord.coolcatcore.api.client.gui.ItemDecorator;
+import net.ixdarklord.coolcatcore.api.item.DecoratedItem;
+import net.ixdarklord.ultimine_addition.client.renderer.item.PotionPointPips;
+import java.util.function.Consumer;
 import org.jetbrains.annotations.Nullable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -24,7 +28,6 @@ import net.ixdarklord.coolcatcore.api.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -42,7 +45,7 @@ import java.util.List;
 
 import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.Type.EMPTY;
 
-public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
+public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> implements DecoratedItem {
     private final Type type;
     public MiningSkillCardItem(Type type, Properties properties) {
         super(properties, ComponentType.CRAFTING);
@@ -99,23 +102,16 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
         }
     }
 
+    // No durability bar: the potion points show as pips on the card, drawn by its decorator.
     @Override
     public boolean isBarVisible(ItemStack itemStack) {
-        var data = getData(itemStack);
-        if (!MiningSkillCardData.DATA_COMPONENT.has(itemStack) || type == EMPTY || data.isCreativeItem() || data.getTier() == Tier.Unlearned || data.getTier() == Tier.Mastered) return false;
-        if (!data.hasProgress()) return false;  // potion points not synced yet
-        return !data.isPotionPointsFull();
+        return false;
     }
 
+    // CoolCatLib takes it on the client, the first time a card is drawn (never on a dedicated server).
     @Override
-    public int getBarWidth(ItemStack itemStack) {
-        var data = getData(itemStack);
-        return Math.round((float) data.getPotionPoints() / data.getMaxPotionPoints() * 13.0F);
-    }
-
-    @Override
-    public int getBarColor(ItemStack itemStack) {
-        return Mth.hsvToRgb(Math.max(0.0F, (getBarWidth(itemStack) / 13.0F)) / 3.0F, 1.0F, 1.0F);
+    public void registerDecorators(Consumer<ItemDecorator> registrar) {
+        registrar.accept(PotionPointPips.INSTANCE);
     }
 
     @Override

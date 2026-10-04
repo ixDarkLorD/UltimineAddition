@@ -30,6 +30,11 @@ public final class UAClientConfig {
             .comment("Shapes listed by the Shape Selector: all, or only the ones that aren't blacklisted.").build();
     static { BUILDER.pop(); }
 
+    static { BUILDER.push("undo"); }
+    public static final ConfigValue<Boolean> CONFIRM_MISSING_ITEMS = BUILDER.bool("confirm_missing_items", true)
+            .comment("Asks before an undo with missing items, which only puts back the blocks you can pay for.").build();
+    static { BUILDER.pop(); }
+
     static { BUILDER.push("debug"); }
     public static final ConfigValue<Boolean> SR_EDIT_MODE = BUILDER.bool("skills_record_edit_mode", false)
             .comment("Lets operators edit challenge progress from the Skills Record, and shows debug info in it.").build();
