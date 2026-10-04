@@ -6,6 +6,7 @@ import net.ixdarklord.coolcatcore.api.config.ConfigScope;
 import net.ixdarklord.coolcatcore.api.config.ConfigValue;
 import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.common.progression.TimedChallenge;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -74,6 +75,17 @@ public final class UAServerConfig {
     public static final ConfigValue<Integer> REROLL_INK_COST = BUILDER.intValue("reroll_ink_cost", 16).range(0, 1000)
             .comment("Ink taken from the Skills Record's pen for each reroll.")
             .enabledWhen(REROLLS_PER_TIER, rerolls -> rerolls > 0).build();
+    public static final ConfigValue<TimedChallenge.Period> TIMED_CHALLENGE = BUILDER.enumValue("timed_challenge", TimedChallenge.Period.DAILY)
+            .comment("A challenge everyone on the server shares, picked anew each day or each week (by the server's clock).",
+                    "It needs no card: doing it with the right tool counts. /ultimine_addition challenge shows it.",
+                    "Has no effect in the legacy playstyle mode.")
+            .build();
+    public static final ConfigValue<Integer> TIMED_CHALLENGE_EXPERIENCE = BUILDER.intValue("timed_challenge_experience", 50).range(0, 10000)
+            .comment("Experience points for finishing the daily challenge (four times as much for a weekly one).")
+            .enabledWhen(TIMED_CHALLENGE, period -> period != TimedChallenge.Period.OFF).build();
+    public static final ConfigValue<Integer> TIMED_CHALLENGE_JUICE = BUILDER.intValue("timed_challenge_juice", 180).range(0, 3600)
+            .comment("Seconds of Mine-Go Juice for the challenge's tool for finishing the daily challenge (four times as much for a weekly one). 0 disables it.")
+            .enabledWhen(TIMED_CHALLENGE, period -> period != TimedChallenge.Period.OFF).build();
     static { BUILDER.pop(); }
 
     public enum ExtraShapes implements EnumType.Displayable {
@@ -103,7 +115,7 @@ public final class UAServerConfig {
             .build();
     public static final ConfigValue<Integer> UNDO_WINDOW = BUILDER.intValue("window", 300).range(5, 3600)
             .comment("Seconds after an Ultimine operation during which it can be undone.").enabledWhen(UNDO_ENABLED).build();
-    public static final ConfigValue<Integer> UNDO_HISTORY = BUILDER.intValue("history", 3).range(1, 10).slider()
+    public static final ConfigValue<Integer> UNDO_HISTORY = BUILDER.intValue("history", 5).range(1, 10).slider()
             .comment("How many Ultimine operations per player can be undone, newest first.").enabledWhen(UNDO_ENABLED).build();
     public static final ConfigValue<Boolean> UNDO_ANIMATION = BUILDER.bool("animation", true)
             .comment("Blocks grow back into place one after another instead of appearing at once.").enabledWhen(UNDO_ENABLED).build();

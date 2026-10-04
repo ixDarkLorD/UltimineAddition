@@ -28,7 +28,13 @@ import java.util.List;
 import java.util.Set;
 
 // Unlocks its tier's Ultimine shapes for one tool: the Mining Skill Card type it was earned with.
-public class ShapeCertificateItem extends ModernItem {
+public class ShapeCertificateItem extends ModernItem implements net.ixdarklord.coolcatcore.api.item.DecoratedItem {
+    // CoolCatLib takes it on the client, the first time a certificate is drawn: a data pack tool's icon on the page.
+    @Override
+    public void registerDecorators(java.util.function.Consumer<net.ixdarklord.coolcatcore.api.client.gui.ItemDecorator> registrar) {
+        registrar.accept(net.ixdarklord.ultimine_addition.client.renderer.item.CertificateToolIcon.INSTANCE);
+    }
+
     private final MiningSkillCardItem.Tier tier;
 
     public ShapeCertificateItem(MiningSkillCardItem.Tier tier, Properties properties) {
@@ -99,7 +105,8 @@ public class ShapeCertificateItem extends ModernItem {
     public static Component toolName(String tool) {
         // A data pack card type names its own tool.
         MiningSkillCardItem.Type type = MiningSkillCardItem.Type.byId(tool);
-        return type != null ? type.displayName() : Component.translatable("info.ultimine_addition.required_skill." + tool);
+        // A tool no card type has (its data pack is gone) is "Unknown", like its generic card.
+        return type != null ? type.displayName() : Component.translatable("item.ultimine_addition.mining_skill_card_generic.unknown");
     }
 
     private static List<? extends String> listedIds(MiningSkillCardItem.Tier tier) {

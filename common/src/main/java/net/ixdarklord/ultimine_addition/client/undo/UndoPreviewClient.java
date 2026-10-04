@@ -44,6 +44,7 @@ public final class UndoPreviewClient {
     private @Nullable Vec3 center;
     // Held last tick: the key acts on the press only, not on the OS's key repeat while it's held.
     private boolean undoKeyWasDown;
+    private boolean historyKeyWasDown;
 
     private UndoPreviewClient() {}
 
@@ -67,6 +68,11 @@ public final class UndoPreviewClient {
         // With nothing it can pay for, the server says so.
         PayloadHandler.sendToServer(new UndoPayload.Request(true, !affordable));
         this.close();
+    }
+
+    public void openHistory(UndoPayload.History history) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.screen == null || minecraft.screen instanceof UndoHistoryScreen) minecraft.setScreen(new UndoHistoryScreen(history));
     }
 
     public void open(UndoPayload.Preview preview) {
@@ -108,6 +114,14 @@ public final class UndoPreviewClient {
         boolean down = KeyHandler.KEY_UNDO.isDown();
         if (down && !this.undoKeyWasDown && player != null && minecraft.screen == null && KeyHandler.undoModifierHeld()) this.onUndoKey();
         this.undoKeyWasDown = down;
+        while (KeyHandler.KEY_UNDO_HISTORY.consumeClick()) {
+            // As above.
+        }
+        boolean historyDown = KeyHandler.KEY_UNDO_HISTORY.isDown();
+        if (historyDown && !this.historyKeyWasDown && player != null && minecraft.screen == null && KeyHandler.undoModifierHeld()) {
+            PayloadHandler.sendToServer(new UndoPayload.HistoryRequest());
+        }
+        this.historyKeyWasDown = historyDown;
         if (!this.isOpen()) return;
         // Waits while the player answers the missing-items question.
         if (minecraft.screen instanceof UndoConfirmScreen) return;

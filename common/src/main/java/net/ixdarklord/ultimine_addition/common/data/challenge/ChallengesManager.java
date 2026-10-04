@@ -59,6 +59,7 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener {
             challenges.put(location, challenge.get());
         });
         this.dropCardTypesWithoutChallenges();
+        net.ixdarklord.ultimine_addition.common.data.reward.DataRewards.load(resourceManager);
     }
 
     // A data pack card type needs challenges for every tier it climbs: a card with none to roll would have nothing to
