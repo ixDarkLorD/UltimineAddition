@@ -3,9 +3,23 @@ This file is for listing all the changes to this project
 <hr>
 
 ## v26.1.2-5 Unreleased
+### ✨ New Features
+- **Mining Skill Cards from data packs**: `data/<namespace>/mining_skill_cards/<name>.json` adds a card type for other tools, with a `name`, its `tools` (item ids or `#tags`), an `icon` item for the card, and its Mine-Go Juice's `juice_color` and `juice_name`. Challenges name the type in `for_card_type` (`mypack:hammer`). The types reload with `/reload` and are sent to every player.
+  - `name` and `juice_name` can be translation keys, for a resource pack's language files (plain text shows as written); without a `name` the key is `ultimine_addition.card_type.<namespace>.<name>`.
+  - A type with no challenges for one of its tiers is skipped with a message in the log, and a tier with fewer challenges than a card rolls gives the card all of them (it used to crash the world).
+  - Their cards are one generic item (`mining_skill_card_generic`, the type on the stack), crafted from an empty card and one of the type's tools. Their Mine-Go Juice is one generic drink (`mine_go_juice_generic`) and one effect, in the type's color, brewed from the card like the others; a player has one data pack juice at a time. Neither is in the creative tab or JEI.
+- **Ultimine shapes from data packs**: `data/<namespace>/ultimine_shapes/<name>.json` adds a shape to FTB Ultimine's list. Draw it as a `pattern` of rows facing the block (`o` the block you break, `#` a block), list `blocks` as `[right, up, depth]` offsets, or both; `"repeat": "depth"` turns it into a tunnel, and `name` is what players see. The shapes reload with `/reload`, are sent to every player, can be taught by Shape Certificates through the server config's lists, and get a diagram in the Skills Record like any other.
+
 ### 🐛 Bug Fixes & Improvements
-- Redesigned the Skills Record's shape choice (picking a Shape Certificate's shape): each shape is a tile with a small diagram of the shape, its name and a stripe in the color of the tier it comes from, under a header in the tier's color. The hovered tile lifts and turns gold.
+- A Mining Skill Card shows its tool as an item on its plate (the netherite tool for the built-in cards), drawn by its item decorator, instead of a picture baked into the texture: the card textures leave the plate empty.
+- Mine-Go Juice now sets the Ultimine block limit of its tier again (the check for an active juice never matched on 26.1.2).
+- A challenge of a custom card type only counts with one of that type's own tools (any custom type's tool used to do).
+- Redesigned the Skills Record's shape choice (picking a Shape Certificate's shape): each shape is a tile with a small diagram of the shape, its name and a stripe in the color of the tier it comes from, under a header in the tier's color. The hovered tile lifts and turns gold. The diagrams aren't drawn by hand: the server asks FTB Ultimine for each shape's blocks and sends their outline, so shapes from other mods and plugins get one too.
+- The shape choice shows three shapes at a time, with their names at full size on up to two lines; the mouse wheel and the arrows beside Back scroll through the rest.
 - On Fabric, Glazed Menu's update check reads the mod's own Fabric update file.
+
+### ⚙️ Refactoring
+- Removed the custom card files in `config/ultimine_addition/custom_cards` and the `CustomMSCApi` / `IUAPlugin` API: card types come from data packs now. Cards and juices of the old custom types (their own items) are gone with them.
 
 ## v26.1.2-4 Release - Oct 4, 2026
 ### ✨ New Features

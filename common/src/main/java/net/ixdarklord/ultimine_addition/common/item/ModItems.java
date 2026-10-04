@@ -31,6 +31,12 @@ public class ModItems {
 
     public static final MiningSkillCardItem MINING_SKILL_CARD_EMPTY = new MiningSkillCardItem(MiningSkillCardItem.Type.EMPTY, properties("mining_skill_card_empty")
             .stacksTo(16));
+    public static final GenericMiningSkillCardItem MINING_SKILL_CARD_GENERIC = new GenericMiningSkillCardItem(properties("mining_skill_card_generic")
+            .stacksTo(1));
+    public static final GenericMineGoJuiceItem MINE_GO_JUICE_GENERIC = new GenericMineGoJuiceItem(properties("mine_go_juice_generic")
+            .stacksTo(1)
+            .component(net.minecraft.core.component.DataComponents.CONSUMABLE, net.minecraft.world.item.component.Consumables.DEFAULT_DRINK)
+            .usingConvertsTo(net.minecraft.world.item.Items.GLASS_BOTTLE));
     public static final MiningSkillCardItem MINING_SKILL_CARD_PICKAXE = new MiningSkillCardItem(MiningSkillCardItem.Type.PICKAXE, properties("mining_skill_card_pickaxe")
             .stacksTo(1));
     public static final MiningSkillCardItem MINING_SKILL_CARD_AXE = new MiningSkillCardItem(MiningSkillCardItem.Type.AXE, properties("mining_skill_card_axe")

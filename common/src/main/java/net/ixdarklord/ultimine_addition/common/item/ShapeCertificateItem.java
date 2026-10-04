@@ -99,7 +99,9 @@ public class ShapeCertificateItem extends ModernItem {
     }
 
     public static Component toolName(String tool) {
-        return Component.translatable("info.ultimine_addition.required_skill." + tool);
+        // A data pack card type names its own tool.
+        MiningSkillCardItem.Type type = MiningSkillCardItem.Type.byId(tool);
+        return type != null ? type.displayName() : Component.translatable("info.ultimine_addition.required_skill." + tool);
     }
 
     private static List<? extends String> listedIds(MiningSkillCardItem.Tier tier) {

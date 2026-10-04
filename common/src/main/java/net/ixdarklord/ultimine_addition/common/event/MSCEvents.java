@@ -80,7 +80,7 @@ public class MSCEvents {
 
     private static void cardBonusEffect(ServerPlayer player) {
         if (!UAServerConfig.CARD_MASTERED_EFFECT.get()) return;
-        List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || (stack.getItem() instanceof MiningSkillCardItem item && item.getType() != MiningSkillCardItem.Type.EMPTY), false);
+        List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || (stack.getItem() instanceof MiningSkillCardItem item && item.getType(stack) != MiningSkillCardItem.Type.EMPTY), false);
         List<MiningSkillCardData> dataList = slots.stream()
                 .map(SlotReference.Player::get)
                 .flatMap(itemStack -> {
@@ -93,12 +93,11 @@ public class MSCEvents {
                 })
                 .map(MiningSkillCardData::load)
                 .filter(data -> data.getTier() == MiningSkillCardItem.Tier.Mastered)
-                .filter(distinctByKey(data -> BuiltInRegistries.ITEM.getKey(data.getStack().getItem()) + ":" + data.getTier().name()))
+                .filter(distinctByKey(data -> data.getType().getId() + ":" + data.getTier().name()))
                 .toList();
 
         for (MiningSkillCardData data : dataList) {
-            MiningSkillCardItem item = (MiningSkillCardItem) data.getStack().getItem();
-            MineGoJuiceEffect.giveEffect(player, item.getType());
+            MineGoJuiceEffect.giveEffect(player, data.getType());
         }
     }
 
@@ -112,13 +111,13 @@ public class MSCEvents {
         List<SlotReference.Player> slots = ItemUtils.getSlotReferences(player, stack -> stack.is(ModItems.SKILLS_RECORD) || stack.getItem() instanceof MiningSkillCardItem, false);
 
         Function<ItemStack, Boolean> validateCardFunction = itemStack -> {
-            if (itemStack.isEmpty() || !(itemStack.getItem() instanceof MiningSkillCardItem cardItem) || cardItem.getType() == MiningSkillCardItem.Type.EMPTY)
+            if (itemStack.isEmpty() || !(itemStack.getItem() instanceof MiningSkillCardItem cardItem) || cardItem.getType(itemStack) == MiningSkillCardItem.Type.EMPTY)
                 return false;
 
             boolean needSync = false;
             MiningSkillCardData oldCardData = MiningSkillCardData.load(itemStack);
             if (oldCardData.isCreativeItem()) {
-                MiningSkillCardData newCardData = MiningSkillCardData.create(cardItem.getType()).setStack(itemStack);
+                MiningSkillCardData newCardData = MiningSkillCardData.create(cardItem.getType(itemStack)).setStack(itemStack);
                 newCardData.setTier(oldCardData.getTier()).initChallenges().save();
                 FTBUltimineAddition.LOGGER.debug("[Data Tracker] Card UUID have been changed! {}", "[O: %s | N: %s]".formatted(oldCardData.getUUID(), newCardData.getUUID()));
                 needSync = true;

@@ -1,0 +1,27 @@
+{
+  "model": {
+    "type": "ultimine_addition:mining_skill_card",
+    "classic": {
+      "adept": {
+        "type": "minecraft:model",
+        "model": "ultimine_addition:item/mining_skill_card_pickaxe_3"
+      },
+      "apprentice": {
+        "type": "minecraft:model",
+        "model": "ultimine_addition:item/mining_skill_card_pickaxe_2"
+      },
+      "mastered": {
+        "type": "minecraft:model",
+        "model": "ultimine_addition:item/mining_skill_card_pickaxe_mastered"
+      },
+      "novice": {
+        "type": "minecraft:model",
+        "model": "ultimine_addition:item/mining_skill_card_pickaxe_1"
+      },
+      "unlearned": {
+        "type": "minecraft:model",
+        "model": "ultimine_addition:item/mining_skill_card_pickaxe"
+      }
+    }
+  }
+}

@@ -98,7 +98,7 @@ public final class DevAutotest {
                 case 9 -> press(footer(screen, "Discard"));
                 case 10 -> {
                     check("discard_returns_to_title", screen instanceof TitleScreen, describe(screen));
-                    // The sealed Miner Certificate's name, and the card as a CoolCatLib DecoratedItem handing over its pips.
+                    // The sealed Miner Certificate's name, and the card as a CoolCatLib DecoratedItem handing over its decorators (its tool's icon and its pips).
                     List<ItemDecorator> decorators = new ArrayList<>();
                     int cards = 0;
                     Item anyCard = null;
@@ -108,8 +108,8 @@ public final class DevAutotest {
                         anyCard = item;
                         if (item instanceof DecoratedItem decorated) decorated.registerDecorators(decorators::add);
                     }
-                    check("every_card_hands_over_its_pips", cards > 0 && decorators.size() == cards
-                            && decorators.stream().allMatch(PotionPointPips.class::isInstance), decorators.size() + " of " + cards + " cards");
+                    check("every_card_hands_over_its_decorators", cards > 0 && decorators.size() == cards * 2
+                            && decorators.stream().filter(PotionPointPips.class::isInstance).count() == cards, decorators.size() + " decorators for " + cards + " cards");
                     // Checks that need an item stack. Since 26.1 a stack can't be made before a world is loaded (its
                     // components aren't bound at the title screen), so there they're skipped.
                     try {
