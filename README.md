@@ -29,13 +29,11 @@
 
 With [FTB Ultimine](https://www.curseforge.com/minecraft/mc-mods/ftb-ultimine-forge) alone, everyone can vein mine from the first minute. This add-on locks it, and turns it into a skill players work towards.
 
-| | |
-|---|---|
-| 🔒 **Locked by default** | No Ultimine until a player has earned it. |
-| 🎯 **Challenges to clear** | Mining goals for the pickaxe, axe, shovel and hoe. |
-| 📜 **Shapes to learn** | Each finished tier teaches one Ultimine shape for its tool. |
-| ↩️ **Ultimine undo** | Put a wrongly mined vein back. |
-| ⚙️ **Made for modpacks** | Synced server settings and data-driven challenges. |
+- 🔒 **Locked by default**: no Ultimine until a player has earned it
+- 🎯 **Challenges to clear**: mining goals for the pickaxe, axe, shovel and hoe
+- 📜 **Shapes to learn**: each finished tier teaches one Ultimine shape for its tool
+- ↩️ **Ultimine undo**: put a wrongly mined vein back
+- ⚙️ **Made for modpacks**: synced server settings and data-driven challenges
 
 ## ⛏️ How it works
 
