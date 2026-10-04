@@ -107,8 +107,17 @@ public final class DevAutotest {
                         anyCard = item;
                         if (item instanceof DecoratedItem decorated) decorated.registerDecorators(decorators::add);
                     }
-                    // On 26.1.2 the card's tool, stars and pips are layers of its item model: it has no decorators.
-                    check("cards_draw_through_their_model", cards > 0 && decorators.isEmpty(), decorators.size() + " decorators for " + cards + " cards");
+                    // On 26.1.2 the card's tool, stars and pips are layers of its item model: it has no decorators. The
+                    // older versions draw the tool and the pips with one decorator each.
+                    boolean drawnByDecorators;
+                    try {
+                        Class.forName("net.ixdarklord.ultimine_addition.client.renderer.item.PotionPointPips");
+                        drawnByDecorators = true;
+                    } catch (ClassNotFoundException e) {
+                        drawnByDecorators = false;
+                    }
+                    check("cards_have_their_decorations", cards > 0 && decorators.size() == (drawnByDecorators ? cards * 2 : 0),
+                            decorators.size() + " decorators for " + cards + " cards");
                     // Checks that need an item stack. Since 26.1 a stack can't be made before a world is loaded (its
                     // components aren't bound at the title screen), so there they're skipped.
                     try {
