@@ -5,8 +5,6 @@ description: One challenge a day for everyone
 
 # Daily Challenge
 
-*Minecraft 26.1.2 only for now.*
-
 Every day the server picks one challenge that everyone shares. It needs no Mining Skill Card and no Skills Record: do what it asks with the right tool and it counts.
 
 ## How it works

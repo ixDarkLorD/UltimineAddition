@@ -14,11 +14,11 @@ Everything the mod reads from data packs. All of it reloads with `/reload`, and 
 | `data/<namespace>/challenges/` | Mining Skill Card challenges | [Challenges](../wiki/packs/challenges.md) |
 | `data/<namespace>/ultimine_shapes/` | Ultimine shapes | [Ultimine Shapes](../wiki/packs/shapes.md) |
 | `data/<namespace>/mining_skill_cards/` | Card types for other tools | [Custom Cards](../wiki/packs/custom-cards.md) |
-| `data/<namespace>/ultimine_rewards/` | Rewards for challenges, tiers and the daily challenge (26.1.2) | [Reward](#reward) |
+| `data/<namespace>/ultimine_rewards/` | Rewards for challenges, tiers and the daily challenge | [Reward](#reward) |
 
 A file's id is its namespace and its path under the folder, without `.json`: `data/mypack/ultimine_shapes/wide_cut.json` is `mypack:wide_cut`. Subfolders become part of the path.
 
-On 1.20.1 and 1.21.1 the folders are the same, except for the rewards.
+On 1.20.1 and 1.21.1 the folders are the same.
 
 ## Load order
 
