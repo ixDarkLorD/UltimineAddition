@@ -2,6 +2,11 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v2101.2.0.4 Unreleased
+### 🐛 Bug Fixes & Improvements
+- Redesigned the Skills Record's shape choice (picking a Shape Certificate's shape): each shape is a tile with a small diagram of the shape, its name and a stripe in the color of the tier it comes from, under a header in the tier's color. The hovered tile lifts and turns gold.
+- On Fabric, Glazed Menu's update check reads the mod's own Fabric update file.
+
 ## v2101.2.0.3 Release - Oct 4, 2026
 ### ✨ New Features
 - The undo preview shows the blocks an undo with missing items can't put back as red ghosts, inside a red outline of their own; the ones that come back keep the usual look.
