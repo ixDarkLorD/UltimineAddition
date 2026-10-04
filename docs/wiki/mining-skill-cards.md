@@ -1,6 +1,6 @@
 # Mining Skill Cards
 
-A Mining Skill Card records your skill with one tool. There are four built in (pickaxe, axe, shovel and hoe), and packs can [add more](../packs/custom-cards.md).
+A Mining Skill Card records your skill with one tool. There are four built in (pickaxe, axe, shovel and hoe), and packs can [add more](packs/custom-cards.md).
 
 ## Getting a card
 
@@ -23,7 +23,7 @@ The card's texture shows its tier as stars along the top. The strip along the bo
 
 ## Challenges
 
-Each tier gives the card a set of challenges for its tool, picked at random from the ones [the data packs define](../packs/challenges.md). A challenge asks for an action on certain blocks a number of times:
+Each tier gives the card a set of challenges for its tool, picked at random from the ones [the data packs define](packs/challenges.md). A challenge asks for an action on certain blocks a number of times:
 
 - **Break** blocks (any tool the card accepts).
 - **Strip** logs with an axe.
@@ -31,6 +31,8 @@ Each tier gives the card a set of challenges for its tool, picked at random from
 - **Till** blocks with a hoe.
 
 Completing every challenge of the tier raises the card to the next one, with a new set.
+
+![The tier-up notice when a card reaches Novice](../assets/wiki/tier-up-notice.png){ .ua-shot loading=lazy }
 
 Things worth knowing:
 
@@ -40,7 +42,7 @@ Things worth knowing:
 - **Lucky finds**: now and then a challenge block counts double.
 - **Rerolls**: a challenge you haven't started can be swapped for another, a limited number of times per tier, for some of the pen's ink.
 
-How many challenges a tier has, the streak and lucky-find numbers, and the reroll limits are all [server settings](../packs/configuration.md).
+How many challenges a tier has, the streak and lucky-find numbers, and the reroll limits are all [server settings](packs/configuration.md).
 
 ## A Mastered card
 

@@ -16,6 +16,8 @@ Each time a Mining Skill Card reaches a new tier, it lets you claim one Shape Ce
 2.  Pick a shape. The choice is that tier's list, plus any shape from an earlier tier you passed over.
 3.  Use the certificate you receive. The shape is learned for that tool permanently.
 
+![Choosing the shape for a tier's certificate](../assets/wiki/choose-shape.png){ .ua-shot .ua-shot--gui loading=lazy }
+
 The default lists:
 
 | Tier | Shapes offered |
@@ -27,6 +29,8 @@ The default lists:
 Servers can change the lists, and decide which certificate picks up shapes that no list names (such as ones other mods add). A higher certificate tier also raises how many blocks one Ultimine can break with that tool.
 
 Holding a tool with no shape learned shows "No Shape Learned" in FTB Ultimine's shape display.
+
+![Ultimine active with the learned Small Square shape](../assets/wiki/ultimine-shape.png){ .ua-shot loading=lazy }
 
 ### Shape Selector
 
@@ -49,4 +53,4 @@ Craft it from a paper and all four **Mastered** cards (pickaxe, axe, shovel and 
 
 ### Completion Envelope (Legacy mode)
 
-In [Legacy mode](../getting-started.md#playstyle-modes) the certificate starts as a sealed **Completion Envelope**, crafted from paper and four tools. It asks you to mine a number of ores; once you have, it opens into the Miner Certificate.
+In [Legacy mode](getting-started.md#playstyle-modes) the certificate starts as a sealed **Completion Envelope**, crafted from paper and four tools. It asks you to mine a number of ores; once you have, it opens into the Miner Certificate.

@@ -7,7 +7,7 @@ hide:
 
 <div class="ua-hero" markdown>
 
-<div class="ua-hero__logos">
+<div class="ua-hero__logo">
   <img src="assets/logo.png" alt="FTB Ultimine Addition">
 </div>
 
@@ -17,7 +17,7 @@ hide:
 
 <p class="ua-hero__lead">An add-on for FTB Ultimine: players unlock the excavation skill by completing mining challenges, one tool and one shape at a time.</p>
 
-[Get started :material-arrow-right:](getting-started.md){ .md-button .md-button--primary }
+[Read the wiki :material-arrow-right:](wiki/index.md){ .md-button .md-button--primary }
 [:simple-curseforge: Download](https://www.curseforge.com/minecraft/mc-mods/ultimine-addition){ .md-button }
 [:fontawesome-brands-github: Source](https://github.com/ixDarkLorD/UltimineAddition){ .md-button }
 
@@ -42,7 +42,7 @@ hide:
 
     One card per tool: pickaxe, axe, shovel and hoe. Each holds mining challenges, and completing them raises the card from Unlearned to Mastered.
 
-    [:octicons-arrow-right-24: Mining Skill Cards](guide/mining-skill-cards.md)
+    [:octicons-arrow-right-24: Mining Skill Cards](wiki/mining-skill-cards.md)
 
 -   :material-book-open-variant:{ .lg .middle } **Skills Record**
 
@@ -50,7 +50,7 @@ hide:
 
     The book that holds your cards, shows their challenges on a pan-and-zoom map, and records your progress with pen and paper.
 
-    [:octicons-arrow-right-24: Skills Record](guide/skills-record.md)
+    [:octicons-arrow-right-24: Skills Record](wiki/skills-record.md)
 
 -   :material-certificate-outline:{ .lg .middle } **Certificates**
 
@@ -58,7 +58,7 @@ hide:
 
     Shape Certificates teach one Ultimine shape for one tool, for good. The Miner Certificate unlocks every shape with any item.
 
-    [:octicons-arrow-right-24: Unlocking Ultimine](guide/unlocking-ultimine.md)
+    [:octicons-arrow-right-24: Unlocking Ultimine](wiki/unlocking-ultimine.md)
 
 -   :material-bottle-tonic-outline:{ .lg .middle } **Mine-Go Juice**
 
@@ -66,7 +66,7 @@ hide:
 
     A potion brewed from a card's progress: Ultimine with every shape for that card's tool while the effect lasts.
 
-    [:octicons-arrow-right-24: Mine-Go Juice](guide/unlocking-ultimine.md#mine-go-juice)
+    [:octicons-arrow-right-24: Mine-Go Juice](wiki/unlocking-ultimine.md#mine-go-juice)
 
 -   :material-undo-variant:{ .lg .middle } **Ultimine undo**
 
@@ -74,7 +74,7 @@ hide:
 
     Press ++ctrl+z++ after an Ultimine to preview putting the blocks back, and again to confirm. The drops and experience are taken back.
 
-    [:octicons-arrow-right-24: Ultimine Undo](guide/undo.md)
+    [:octicons-arrow-right-24: Ultimine Undo](wiki/undo.md)
 
 -   :material-tune-variant:{ .lg .middle } **Made for modpacks**
 
@@ -82,7 +82,7 @@ hide:
 
     Challenges are data pack files, card types can be added from the config folder, and nearly every number is a server setting.
 
-    [:octicons-arrow-right-24: Configuration](packs/configuration.md)
+    [:octicons-arrow-right-24: Configuration](wiki/packs/configuration.md)
 
 </div>
 

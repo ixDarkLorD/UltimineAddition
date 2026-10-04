@@ -21,7 +21,11 @@ Optional:
 
 ## Your first Ultimine
 
-With the mod installed, holding the Ultimine key does nothing at first: a notice above the hotbar tells you what you still need. This is the usual road:
+With the mod installed, holding the Ultimine key does nothing at first: a notice above the hotbar tells you what you still need.
+
+![The Ultimine Locked notice above the hotbar](../assets/wiki/ultimine-locked.png){ .ua-shot loading=lazy }
+
+This is the usual road, and the [walkthrough](walkthrough.md) shows every step with screenshots:
 
 1.  **Craft an empty Mining Skill Card.** Paper around a token of each tool's work: copper, iron or coal for the pickaxe, dirt for the shovel, a log for the axe and seeds for the hoe.
 2.  **Turn it into a tool's card** by crafting it with that tool (a pickaxe, axe, shovel or hoe).
@@ -31,7 +35,7 @@ With the mod installed, holding the Ultimine key does nothing at first: a notice
 6.  **Claim a Shape Certificate** each time the card reaches a new tier, and use it: that shape is yours for that tool, for good.
 7.  **Master all four cards** and craft them with paper into the **Miner Certificate**, which unlocks Ultimine with every shape and any item.
 
-Along the way a card can be brewed into [Mine-Go Juice](guide/unlocking-ultimine.md#mine-go-juice) for a temporary, full Ultimine with its tool.
+Along the way a card can be brewed into [Mine-Go Juice](unlocking-ultimine.md#mine-go-juice) for a temporary, full Ultimine with its tool.
 
 !!! tip "Recipes"
     Install JEI to see every recipe in game. The item pages there also explain how each item is obtained.
@@ -41,7 +45,7 @@ Along the way a card can be brewed into [Mine-Go Juice](guide/unlocking-ultimine
 | Key | Default | Does |
 |---|---|---|
 | Open Skills Record | ++r++ | Opens the Skills Record in its Curios or Trinkets slot. Only there when one of those mods is installed. |
-| Undo Ultimine | ++ctrl+z++ | Previews and confirms [undoing](guide/undo.md) your last Ultimine. |
+| Undo Ultimine | ++ctrl+z++ | Previews and confirms [undoing](undo.md) your last Ultimine. |
 
 Both are under **FTB Ultimine Addition** in the controls screen. Ultimine itself still uses FTB Ultimine's own key.
 

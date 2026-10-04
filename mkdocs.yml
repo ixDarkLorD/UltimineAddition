@@ -14,7 +14,7 @@ theme:
   icon:
     repo: fontawesome/brands/github
   font:
-    text: Inter
+    text: Rubik
     code: JetBrains Mono
   palette:
     - media: "(prefers-color-scheme: light)"
@@ -96,14 +96,16 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Getting Started: getting-started.md
-  - Guide:
-      - Mining Skill Cards: guide/mining-skill-cards.md
-      - Skills Record: guide/skills-record.md
-      - Certificates and Mine-Go Juice: guide/unlocking-ultimine.md
-      - Ultimine Undo: guide/undo.md
-  - Pack Makers:
-      - Configuration: packs/configuration.md
-      - Challenges: packs/challenges.md
-      - Custom Cards: packs/custom-cards.md
+  - Wiki:
+      - wiki/index.md
+      - Getting Started: wiki/getting-started.md
+      - Walkthrough: wiki/walkthrough.md
+      - Mining Skill Cards: wiki/mining-skill-cards.md
+      - Skills Record: wiki/skills-record.md
+      - Certificates and Mine-Go Juice: wiki/unlocking-ultimine.md
+      - Ultimine Undo: wiki/undo.md
+      - For Pack Makers:
+          - Configuration: wiki/packs/configuration.md
+          - Challenges: wiki/packs/challenges.md
+          - Custom Cards: wiki/packs/custom-cards.md
   - Changelog: changelog.md

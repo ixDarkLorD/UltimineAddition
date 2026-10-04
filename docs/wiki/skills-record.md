@@ -18,14 +18,20 @@ The Skills Record is the book your cards live in. It shows their challenges, and
 
 Carry the record in your inventory, or in its Curios or Trinkets slot when one of those mods is installed. With one of them, the **Open Skills Record** key (++r++ by default) opens it from anywhere.
 
+![The Skills Record with a card, a Pen and paper inside](../assets/wiki/record-choose-card.png){ .ua-shot .ua-shot--gui loading=lazy }
+
 ## The card viewer
 
 Right-click a card inside the record to open its viewer: a map of the card's tiers and challenges that you can drag to pan and scroll to zoom.
+
+![The card viewer showing a card's tier and its challenge](../assets/wiki/record-card-selected.png){ .ua-shot .ua-shot--gui loading=lazy }
 
 - Click a challenge for its details: what to do, on which blocks, and how far you are.
 - Pin challenges to show them on your HUD while you play.
 - Reroll a challenge you haven't started, while the tier has rerolls left.
 - When a tier's reward is ready, claim its Shape Certificate here and pick the shape you want.
+
+![A challenge's details, with the Reroll and Pin buttons](../assets/wiki/challenge-details.png){ .ua-shot .ua-shot--gui loading=lazy }
 
 ## Dyeing
 
@@ -33,4 +39,4 @@ Craft a Skills Record with any dye to color it. The book's cover, the screen's t
 
 ## Settings
 
-The gear button in the record opens its settings: animations, text shadow and where pinned challenges sit on the HUD. They are the `skills_record` group of the [client config](../packs/configuration.md#client-settings).
+The gear button in the record opens its settings: animations, text shadow and where pinned challenges sit on the HUD. They are the `skills_record` group of the [client config](packs/configuration.md#client-settings).

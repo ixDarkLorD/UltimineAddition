@@ -7,6 +7,8 @@ Mined the wrong wall? An Ultimine can be undone for a short time afterwards.
 1.  Press ++ctrl+z++ (the **Undo Ultimine** key). A preview appears: ghost blocks where the mined blocks will return, and a HUD listing what the undo costs.
 2.  Press it again to confirm. The blocks grow back one after another.
 
+![The undo preview: the outline of the blocks that return, and the HUD with its cost](../assets/wiki/undo-preview.png){ .ua-shot loading=lazy }
+
 Undoing isn't free: it takes back what the Ultimine gave you. The dropped items are collected from the ground first and then from your inventory, and the experience is taken back too.
 
 ## When items are missing
@@ -23,4 +25,4 @@ An undo is refused when the spots are no longer empty, or when you can't pay for
 
 - Only your most recent Ultimines can be undone, newest first, and only within a time window after each one.
 - Blocks an undo puts back don't count towards challenges.
-- Servers can turn undo off, and set the history length, the time window and the placing animation in the [server settings](../packs/configuration.md#server-settings).
+- Servers can turn undo off, and set the history length, the time window and the placing animation in the [server settings](packs/configuration.md#server-settings).
