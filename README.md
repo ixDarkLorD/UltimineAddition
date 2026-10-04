@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://ixdarklord.github.io/UltimineAddition/">Website</a> ·
   <a href="https://www.curseforge.com/minecraft/mc-mods/ultimine-addition">CurseForge</a> ·
   <a href="https://github.com/ixDarkLorD/UltimineAddition/issues">Issues</a> ·
   <a href="https://www.curseforge.com/minecraft/mc-mods/ftb-ultimine-forge">FTB Ultimine</a>
