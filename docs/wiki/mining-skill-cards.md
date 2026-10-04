@@ -1,3 +1,8 @@
+---
+icon: material/cards-outline
+description: One card per tool, and its tiers
+---
+
 # Mining Skill Cards
 
 A Mining Skill Card records your skill with one tool. There are four built in (pickaxe, axe, shovel and hoe), and packs can [add more](packs/custom-cards.md).

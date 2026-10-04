@@ -1,3 +1,8 @@
+---
+icon: material/console-line
+description: The mod's commands
+---
+
 # Commands
 
 Everything is under `/ultimine_addition`. The root needs no permission; each subcommand sets its own.

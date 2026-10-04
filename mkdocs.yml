@@ -9,6 +9,7 @@ copyright: "Made by ixDarkLorD"
 
 theme:
   name: material
+  custom_dir: overrides
   logo: assets/favicon.png
   favicon: assets/favicon.png
   icon:
@@ -32,8 +33,6 @@ theme:
         icon: material/weather-night
         name: Switch to light mode
   features:
-    - navigation.tabs
-    - navigation.tabs.sticky
     - navigation.sections
     - navigation.instant
     - navigation.instant.progress
@@ -56,7 +55,15 @@ hooks:
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - javascripts/menu.js
+
 extra:
+  # The Menu's icons for pages without one of their own, by title (overrides/partials/header.html). The pages' own
+  # icons and the descriptions shown in the Menu are in their front matter.
+  menu_icons:
+    Home: material/home-outline
+    Changelog: material/history
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/ixDarkLorD/UltimineAddition

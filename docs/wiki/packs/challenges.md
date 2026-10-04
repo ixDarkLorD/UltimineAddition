@@ -1,3 +1,8 @@
+---
+icon: material/target
+description: Add or change challenges
+---
+
 # Challenges
 
 Challenges are data pack files, so a modpack can add its own, change the built-in ones or remove them. The mod ships with around ninety, spread over the four tools.

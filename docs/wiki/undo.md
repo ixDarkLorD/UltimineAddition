@@ -1,3 +1,8 @@
+---
+icon: material/undo-variant
+description: Put a mined vein back
+---
+
 # Ultimine Undo
 
 Mined the wrong wall? An Ultimine can be undone for a short time afterwards.

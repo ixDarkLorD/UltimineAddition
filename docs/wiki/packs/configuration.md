@@ -1,3 +1,8 @@
+---
+icon: material/cog-outline
+description: The mod's settings
+---
+
 # Configuration
 
 The mod has two config files, both TOML, in the `config` folder:

@@ -1,3 +1,8 @@
+---
+icon: material/certificate-outline
+description: Shape and Miner Certificates, and the juice
+---
+
 # Certificates and Mine-Go Juice
 
 There are three ways to Ultimine. They stack: whatever you have unlocked for the tool in your hand is what you can use.

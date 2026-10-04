@@ -1,3 +1,8 @@
+---
+icon: material/file-document-multiple-outline
+description: Reference for packs and commands
+---
+
 # Docs
 
 The technical reference for FTB Ultimine Addition: the files it reads, the commands it adds and the ids it registers. For how the mod plays, see the [Wiki](../wiki/index.md).

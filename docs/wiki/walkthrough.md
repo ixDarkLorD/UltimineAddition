@@ -1,3 +1,8 @@
+---
+icon: material/map-marker-path
+description: From the first card to the Miner Certificate
+---
+
 # Walkthrough
 
 Your first Mining Skill Card, from an empty record to your first Ultimine, one step at a time. The screenshots follow a Pickaxe card; the other tools work the same way.

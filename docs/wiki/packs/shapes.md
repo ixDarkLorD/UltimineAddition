@@ -1,3 +1,8 @@
+---
+icon: material/shape-outline
+description: The Ultimine shapes players learn
+---
+
 # Ultimine Shapes
 
 A data pack can add its own Ultimine shapes. They join FTB Ultimine's shape list like the built-in ones: players cycle to them with the Ultimine key held, Shape Certificates can teach them, and the Skills Record draws their diagram by itself.

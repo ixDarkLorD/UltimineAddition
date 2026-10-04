@@ -1,6 +1,21 @@
-/* FTB Ultimine Addition: a miner's journal. Parchment by day, a lit cave by night; square pixel edges, gold trim and a
-   pixel typeface for headings, like the mod's own certificates and cards. */
-@import url("https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&display=swap");
+/* FTB Ultimine Addition: a miner's journal. Parchment by day, a lit cave by night; square pixel edges, gold trim and
+   Minecraft's typeface for headings, like the mod's own certificates and cards. */
+
+/* Monocraft: Minecraft's typeface as an open font (github.com/IdreesInc/Monocraft, OFL-1.1). Until it loads, or if it
+   can't, headings use the body's font. */
+@font-face {
+  font-family: "Monocraft";
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/IdreesInc/Monocraft@v4.2.1/dist/Monocraft-ttf/Monocraft.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Monocraft";
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/IdreesInc/Monocraft@v4.2.1/dist/Monocraft-ttf/weights/Monocraft-Bold.ttf") format("truetype");
+}
 
 :root {
   --ua-gold: #d9a441;
@@ -8,7 +23,7 @@
   --ua-teal: #2fa89a;
   --ua-red: #c0503a;
   --ua-ink: #2b2118;
-  --ua-pixel: "Pixelify Sans", "Rubik", sans-serif;
+  --ua-pixel: "Monocraft", "Rubik", sans-serif;
   --ua-edge: 3px;
 }
 
@@ -62,22 +77,32 @@
 .md-typeset h2,
 .md-typeset h3,
 .md-header__title,
-.md-tabs__link,
+.pagemenu__button,
+.pagemenu__heading,
 .md-nav__title,
 .md-typeset .md-button {
   font-family: var(--ua-pixel);
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
 }
 
+/* The typeface is wide (every letter takes the same room), so headings are a little smaller than the theme's. */
 .md-typeset h1 {
-  font-weight: 700;
+  font-size: 1.7em;
+  font-weight: 400;
+  line-height: 1.25;
   color: var(--md-default-fg-color);
 }
 
 .md-typeset h2 {
-  font-weight: 700;
+  font-size: 1.25em;
+  font-weight: 400;
   padding-bottom: 0.3rem;
   border-bottom: var(--ua-edge) solid var(--ua-panel-edge);
+}
+
+.md-typeset h3 {
+  font-size: 1.02em;
+  font-weight: 400;
 }
 
 .md-typeset h2::before {
@@ -96,22 +121,6 @@
   background: var(--md-primary-fg-color--dark);
   border-bottom: var(--ua-edge) solid var(--ua-gold);
   box-shadow: none;
-}
-
-.md-tabs {
-  background: var(--md-primary-fg-color);
-  border-bottom: var(--ua-edge) solid var(--md-primary-fg-color--dark);
-}
-
-.md-tabs__link {
-  opacity: 0.75;
-  font-size: 0.8rem;
-}
-
-.md-tabs__item--active .md-tabs__link,
-.md-tabs__link:hover {
-  opacity: 1;
-  color: var(--ua-gold);
 }
 
 .md-header__button.md-logo img {
@@ -133,28 +142,43 @@
   border-radius: 0 !important;
 }
 
-/* ---- Buttons: raised blocks that press down ---- */
+/* ---- Buttons: Minecraft's own, a beveled stone block with shadowed lettering ---- */
 .md-typeset .md-button {
-  font-weight: 700;
-  border: var(--ua-edge) solid var(--ua-ink);
-  background: var(--ua-panel);
-  color: var(--md-default-fg-color);
-  box-shadow: 4px 4px 0 var(--ua-shadow);
-  transition: transform 80ms steps(2), box-shadow 80ms steps(2);
-}
-
-.md-typeset .md-button--primary {
-  background: var(--ua-gold);
-  color: #241a12;
+  padding: 0.6em 1.3em;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: #fff;
+  text-shadow: 1px 1px 0 #3f3f3f;
+  background: #6f6f6f;
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.35), inset -2px -4px 0 rgba(0, 0, 0, 0.35);
+  transition: none;
 }
 
 .md-typeset .md-button:hover,
 .md-typeset .md-button:focus {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 var(--ua-shadow);
-  border-color: var(--ua-ink);
-  background: var(--ua-gold);
+  color: #ffffa0;
+  background: #7b88c8;
+  border-color: #000;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.4), inset -2px -4px 0 rgba(0, 0, 0, 0.35);
+}
+
+.md-typeset .md-button:active {
+  box-shadow: inset 2px 4px 0 rgba(0, 0, 0, 0.35), inset -2px -2px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* The main button: the same block, in gold. */
+.md-typeset .md-button--primary {
   color: #241a12;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.35);
+  background: var(--ua-gold);
+}
+
+.md-typeset .md-button--primary:hover,
+.md-typeset .md-button--primary:focus {
+  color: #241a12;
+  background: #f0c060;
 }
 
 /* ---- Cards: item slots ---- */
@@ -192,6 +216,8 @@
 
 .md-typeset table:not([class]) th {
   font-family: var(--ua-pixel);
+  font-size: 0.9em;
+  font-weight: 400;
   background: var(--md-primary-fg-color);
   color: var(--md-primary-bg-color);
 }
@@ -212,6 +238,8 @@
 .md-typeset .admonition-title,
 .md-typeset summary {
   font-family: var(--ua-pixel);
+  font-size: 0.9em;
+  font-weight: 400;
 }
 
 .md-typeset kbd {
@@ -272,24 +300,30 @@
 }
 
 .md-typeset .ua-hero__title {
-  margin: 1.1rem 0 0.2rem;
-  font-size: 2.7rem;
+  margin: 1.2rem 0 0.4rem;
+  font-size: 2.3rem;
   font-weight: 700;
+  line-height: 1.15;
   color: var(--ua-gold);
-  text-shadow: 3px 3px 0 #000;
+  text-shadow: 3px 3px 0 #5a3d0c, 6px 6px 0 #000;
+}
+
+.md-typeset .ua-hero__title .headerlink {
+  display: none;
 }
 
 .ua-hero__tagline {
   font-family: var(--ua-pixel);
-  font-size: 1.2rem;
-  margin: 0.2rem 0 0.6rem;
-  color: #f3e6c8;
+  font-size: 1rem;
+  margin: 0.4rem 0 0.7rem;
+  color: #ffff55;
+  text-shadow: 2px 2px 0 #3f3f15;
 }
 
 .ua-hero__tagline em {
   font-style: normal;
-  color: var(--ua-teal);
-  text-shadow: 2px 2px 0 #000;
+  color: #55ffff;
+  text-shadow: 2px 2px 0 #153f3f;
 }
 
 .ua-hero__lead {
@@ -299,16 +333,7 @@
 }
 
 .ua-hero .md-button {
-  margin: 0.25rem;
-  background: #2b2118;
-  color: #f3e6c8;
-  border-color: #000;
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
-}
-
-.ua-hero .md-button--primary {
-  background: var(--ua-gold);
-  color: #241a12;
+  margin: 0.3rem;
 }
 
 .ua-hero__badges {
@@ -319,17 +344,18 @@
   margin: 0.15rem;
 }
 
-.ua-hero__badges--downloads {
-  margin-top: 0.3rem;
-}
-
 @media screen and (max-width: 44.9375em) {
   .md-typeset .ua-hero__title {
-    font-size: 1.9rem;
+    font-size: 1.35rem;
+    text-shadow: 2px 2px 0 #5a3d0c, 4px 4px 0 #000;
+  }
+
+  .ua-hero__tagline {
+    font-size: 0.8rem;
   }
 }
 
-/* ---- Top bars: a stone-brick beam, and the tabs as wooden signs hanging under it ---- */
+/* ---- Top bar: a stone-brick beam, with the Menu as a wooden sign on it ---- */
 .md-header {
   background:
     linear-gradient(rgba(18, 14, 10, 0.78), rgba(18, 14, 10, 0.9)),
@@ -339,8 +365,8 @@
 }
 
 .md-header__title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 400;
   color: var(--ua-gold);
   text-shadow: 2px 2px 0 #000;
 }
@@ -363,45 +389,203 @@
   background: #3a2c1f;
 }
 
-.md-tabs {
-  background: var(--md-primary-fg-color--dark);
-  border-bottom: none;
-  padding: 0.35rem 0 0.5rem;
+/* ---- The page menu: a wooden sign at the bar's left, opening a pane of every page ---- */
+.pagemenu {
+  display: block;
+  flex-shrink: 0;
+  order: -1;
+  margin: 0 0.6rem 0 0.2rem;
 }
 
-.md-tabs__list {
-  gap: 0.5rem;
-}
-
-.md-tabs__item {
-  height: auto;
-  padding: 0;
-}
-
-.md-tabs__link {
-  margin: 0;
-  padding: 0.25rem 0.75rem;
-  opacity: 1;
+.pagemenu__button {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 1.7rem;
+  padding: 0 0.7rem 0 0.5rem;
   color: #e9d9b4;
   background: #5a4532;
   border: 2px solid #000;
   box-shadow: 0 3px 0 #000, inset 0 2px 0 rgba(255, 255, 255, 0.12);
+  font-size: 0.65rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
   transition: transform 80ms steps(2);
 }
 
-.md-tabs__link:hover {
+.pagemenu__button::-webkit-details-marker {
+  display: none;
+}
+
+.pagemenu__button svg {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+}
+
+.pagemenu__button:hover {
   color: #fff;
   transform: translateY(2px);
 }
 
-.md-tabs__item--active .md-tabs__link {
+.pagemenu[open] .pagemenu__button {
   background: var(--ua-gold);
   color: #241a12;
 }
 
+.pagemenu__button:focus-visible {
+  outline: 2px solid var(--ua-gold);
+  outline-offset: 2px;
+}
+
+/* The pane hangs under the bar, as wide as the page's content: a panel with hard edges, like the mod's own. */
+.pagemenu__panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: max(0.8rem, calc(50% - 30.5rem));
+  right: max(0.8rem, calc(50% - 30.5rem));
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.4rem 1rem;
+  padding: 0.8rem 0.9rem 0.9rem;
+  color: var(--md-default-fg-color);
+  background: var(--ua-panel);
+  border: var(--ua-edge) solid var(--ua-panel-edge);
+  box-shadow: 6px 6px 0 var(--ua-shadow);
+}
+
+.pagemenu__group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pagemenu__heading,
+.pagemenu__subheading {
+  padding: 0.2rem 0.5rem 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: var(--md-accent-fg-color);
+}
+
+.pagemenu__subheading {
+  padding-top: 0.6rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--md-default-fg-color--lighter);
+}
+
+.pagemenu__link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.45rem;
+  border: 2px solid transparent;
+  color: inherit;
+}
+
+.pagemenu__link:hover,
+.pagemenu__link:focus-visible,
+.pagemenu__link--active {
+  border-color: var(--ua-panel-edge);
+  background: var(--md-code-bg-color);
+}
+
+.pagemenu__icon {
+  display: inline-flex;
+  flex: none;
+  padding: 0.3rem;
+  color: var(--md-accent-fg-color);
+  background: var(--md-code-bg-color);
+  border: 2px solid var(--ua-panel-edge);
+}
+
+.pagemenu__icon svg {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+}
+
+.pagemenu__link--active .pagemenu__icon {
+  color: #241a12;
+  background: var(--ua-gold);
+  border-color: #000;
+}
+
+.pagemenu__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.pagemenu__title {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.pagemenu__description {
+  font-size: 0.6rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* Narrow screens: the page menu takes the place of the theme's drawer button, the logo stays as the way home, and
+   the pane scrolls when it's taller than the screen. */
+@media screen and (max-width: 76.2344em) {
+  .md-header__button.md-icon[for="__drawer"] {
+    display: none;
+  }
+
+  .md-header__button.md-logo {
+    display: inline-block;
+  }
+
+  .pagemenu__panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: calc(100vh - 5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .pagemenu__description {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 29.9375em) {
+  .pagemenu__button {
+    padding: 0 0.45rem;
+  }
+
+  .pagemenu__button span {
+    display: none;
+  }
+
+  .pagemenu__panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* The tags under the title are all one height, the Discord badge (drawn live, smaller) included. */
-.md-typeset .ua-hero__badges:not(.ua-hero__badges--downloads) img {
+.md-typeset .ua-hero__badges img {
   width: auto;
   height: 26px;
   vertical-align: middle;
+}
+
+
+/* The download button, in CurseForge's orange. */
+.md-typeset .md-button.ua-button--curseforge {
+  color: #1a0d07;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.3);
+  background: #f16436;
+}
+
+.md-typeset .md-button.ua-button--curseforge:hover,
+.md-typeset .md-button.ua-button--curseforge:focus {
+  color: #1a0d07;
+  background: #f5825c;
 }

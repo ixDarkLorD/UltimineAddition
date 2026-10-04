@@ -1,3 +1,8 @@
+---
+icon: material/package-variant-closed
+description: The data pack formats
+---
+
 # Data Pack Reference
 
 Everything the mod reads from data packs. All of it reloads with `/reload`, and the server sends what clients need to every player on join and after a reload.

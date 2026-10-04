@@ -1,3 +1,8 @@
+---
+icon: material/translate
+description: Translation keys
+---
+
 # Translation Keys
 
 The mod's texts are in `assets/ultimine_addition/lang/en_us.json`. A resource pack can override any of them, and add the keys data pack content uses.

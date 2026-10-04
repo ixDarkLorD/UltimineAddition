@@ -1,3 +1,8 @@
+---
+icon: material/rocket-launch-outline
+description: What you need and your first steps
+---
+
 # Getting Started
 
 ## Installing

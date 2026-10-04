@@ -1,3 +1,8 @@
+---
+icon: material/clipboard-text-outline
+description: The book your cards live in
+---
+
 # Skills Record
 
 The Skills Record is the book your cards live in. It shows their challenges, and it is what turns your mining into progress: a card only advances while it is in a record you carry.

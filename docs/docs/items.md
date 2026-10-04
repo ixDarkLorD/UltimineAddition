@@ -1,3 +1,8 @@
+---
+icon: material/tag-outline
+description: Items and their ids
+---
+
 # Items and Ids
 
 The mod's namespace is `ultimine_addition`.

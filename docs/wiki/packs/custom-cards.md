@@ -1,3 +1,8 @@
+---
+icon: material/card-plus-outline
+description: Add your own card types
+---
+
 # Custom Cards
 
 Besides the four built-in tools, a data pack can add Mining Skill Cards for other tools: a hammer, a sickle, shears, a mod's own multi-tool. Each card type gets its own card, challenges, Shape Certificates and Mine-Go Juice.

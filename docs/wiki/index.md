@@ -1,3 +1,8 @@
+---
+icon: material/book-open-variant
+description: Playing with the mod, start to finish
+---
+
 # Wiki
 
 Everything about playing with FTB Ultimine Addition, from the first card to the Miner Certificate, and everything a modpack needs to shape it.
