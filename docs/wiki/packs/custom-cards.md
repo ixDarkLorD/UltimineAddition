@@ -25,13 +25,36 @@ The type's id is `<namespace>:<name>`, here `mypack:hammer`. Card types load wit
 
 | Field | Meaning |
 |---|---|
-| `name` | The tool's name, as players read it: "Mining Skill Card: Hammer", "Required Skill for: Hammer". |
+| `name` | The tool's name, as players read it: "Mining Skill Card: Hammer", "Required Skill for: Hammer". Plain text or a [translation key](#translating-the-names). Optional. |
 | `tools` | The tools the card works with: item ids, or item tags starting with `#`. At least one. |
 | `icon` | The item drawn on the card. Optional: without it, the first item in `tools` is used. |
 | `juice_color` | The color of this card's Mine-Go Juice, as `"#RRGGBB"`. Optional; white when left out. |
-| `juice_name` | The juice's name. Optional: without it, "Mine-Go Juice: " and the tool's name. |
+| `juice_name` | The juice's name. Plain text or a translation key. Optional: without it, "Mine-Go Juice: " and the tool's name. |
 
-A file with a mistake is skipped, and the server log says what is wrong with it.
+A file with a mistake is skipped, and the server log says what is wrong with it. So is a card type with no challenges for one of its tiers (see [Its challenges](#its-challenges)).
+
+## Translating the names
+
+`name` and `juice_name` are shown through the game's translations: write a translation key there and give it a text in a resource pack's language files. Text that isn't a key in any language file is shown as it is written, so plain names keep working.
+
+```json title="data/mypack/mining_skill_cards/hammer.json"
+{
+  "name": "mypack.card.hammer",
+  "juice_name": "mypack.card.hammer.juice",
+  "tools": ["#mymod:hammers"]
+}
+```
+
+```json title="assets/mypack/lang/en_us.json"
+{
+  "mypack.card.hammer": "Hammer",
+  "mypack.card.hammer.juice": "Mine-Go Juice: Smash Hit"
+}
+```
+
+Without a `name`, the type uses the key `ultimine_addition.card_type.<namespace>.<name>` (here `ultimine_addition.card_type.mypack.hammer`), and shows the file's name until a resource pack translates it.
+
+The card itself is named "Mining Skill Card: " and the tool's name; that wrapper is the mod's own translation (`item.ultimine_addition.mining_skill_card_generic`).
 
 ## The card
 
@@ -44,7 +67,7 @@ Every data pack card is the same item, `ultimine_addition:mining_skill_card_gene
 
 ## Its challenges
 
-A card with no challenges can't progress. Add [challenge files](challenges.md) whose `for_card_type` is the type's id, for every tier, at least as many as the tier rolls (`mining_skill_cards.challenges_amount`):
+A card type needs challenges for every tier it climbs (Unlearned, Novice, Apprentice and Adept). Add [challenge files](challenges.md) whose `for_card_type` is the type's id, ideally as many per tier as a card rolls (`mining_skill_cards.challenges_amount`); with fewer, the card gets the ones there are. A type with none for some tier is skipped, with a line in the server log naming the tier.
 
 ```json title="data/mypack/challenges/hammer/smashing_stone.json"
 {
