@@ -81,7 +81,7 @@ A shape needs a `pattern` or `blocks`. A mod's shape with the same id wins over 
 | `tools` | list of strings | Item ids, or item tags starting with `#`. At least one. |
 | `icon` | item id, optional | The item drawn on the card. Without it: the first item id in `tools`. |
 | `juice_color` | `"#RRGGBB"`, optional | White when left out. |
-| `juice_name` | string, optional | Plain text or a translation key. Without it: "Mine-Go Juice: " and the tool's name. |
+| `juice_name` | string, optional | Plain text or a translation key. Without it: the key `ultimine_addition.card_type.<namespace>.<name>.juice`, or else "Mine-Go Juice: " and the tool's name. |
 
 ## What is sent to clients
 

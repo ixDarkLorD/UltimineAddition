@@ -9,6 +9,7 @@ The mod's texts are in `assets/ultimine_addition/lang/en_us.json`. A resource pa
 | Whatever a card type's `name` holds | The tool's name, when `name` is a translation key. |
 | Whatever a card type's `juice_name` holds | The juice's name, when `juice_name` is a translation key. |
 | `ultimine_addition.card_type.<namespace>.<name>` | The tool's name of a card type with no `name`. |
+| `ultimine_addition.card_type.<namespace>.<name>.juice` | The juice's name of a card type with no `juice_name`. |
 | `ftbultimine.shape.<namespace>.<name>` | A data pack shape with no `name` (26.1.2 and 1.21.1). |
 | `ftbultimine.shape.<namespace>:<name>` | A data pack shape in FTB Ultimine's own shape display on 1.20.1. |
 | `challenge.<namespace>.<path>.name` | A challenge's title in the Skills Record, like `challenge.mypack.hammer.smashing_stone.name`. Without one it is shown as "Challenge 1", "Challenge 2"... |
@@ -22,7 +23,7 @@ These carry a `%s` the mod fills with a name from above. Override them to change
 | Key | English | `%s` |
 |---|---|---|
 | `item.ultimine_addition.mining_skill_card_generic` | Mining Skill Card: %s | The tool's name |
-| `effect.ultimine_addition.mine_go_juice_generic.of` | Mine-Go Juice: %s | The tool's name, when the type has no `juice_name` |
+| `effect.ultimine_addition.mine_go_juice_generic.of` | Mine-Go Juice: %s | The tool's name, when the type has no `juice_name` and no `.juice` key |
 | `info.ultimine_addition.required_skill` | Required Skill for: %s | The tool's name |
 | `tooltip.ultimine_addition.mine_go_juice.info` | Unlocks Ultimine with all shapes for %s tools while it lasts. | The tool's name |
 

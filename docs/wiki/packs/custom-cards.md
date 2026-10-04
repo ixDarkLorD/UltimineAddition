@@ -29,7 +29,7 @@ The type's id is `<namespace>:<name>`, here `mypack:hammer`. Card types load wit
 | `tools` | The tools the card works with: item ids, or item tags starting with `#`. At least one. |
 | `icon` | The item drawn on the card. Optional: without it, the first item in `tools` is used. |
 | `juice_color` | The color of this card's Mine-Go Juice, as `"#RRGGBB"`. Optional; white when left out. |
-| `juice_name` | The juice's name. Plain text or a translation key. Optional: without it, "Mine-Go Juice: " and the tool's name. |
+| `juice_name` | The juice's name. Plain text or a translation key. Optional: without it, the juice takes its name from the language files (see below), or else "Mine-Go Juice: " and the tool's name. |
 
 A file with a mistake is skipped, and the server log says what is wrong with it. So is a card type with no challenges for one of its tiers (see [Its challenges](#its-challenges)).
 
@@ -52,7 +52,19 @@ A file with a mistake is skipped, and the server log says what is wrong with it.
 }
 ```
 
-Without a `name`, the type uses the key `ultimine_addition.card_type.<namespace>.<name>` (here `ultimine_addition.card_type.mypack.hammer`), and shows the file's name until a resource pack translates it.
+The card file can also leave both names out and let the language files name everything, under the type's own keys:
+
+| Key | Names |
+|---|---|
+| `ultimine_addition.card_type.<namespace>.<name>` | The tool. Until a resource pack has it, the file's name is shown. |
+| `ultimine_addition.card_type.<namespace>.<name>.juice` | Its Mine-Go Juice. Until a resource pack has it, the juice is "Mine-Go Juice: " and the tool's name. |
+
+```json title="assets/mypack/lang/en_us.json"
+{
+  "ultimine_addition.card_type.mypack.hammer": "Hammer",
+  "ultimine_addition.card_type.mypack.hammer.juice": "Mine-Go Juice: Smash Hit"
+}
+```
 
 The card itself is named "Mining Skill Card: " and the tool's name; that wrapper is the mod's own translation (`item.ultimine_addition.mining_skill_card_generic`).
 
