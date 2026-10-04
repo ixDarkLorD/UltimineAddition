@@ -2,6 +2,26 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v26.1.2-4 Release - Oct 4, 2026
+### ✨ New Features
+- The undo preview shows the blocks an undo with missing items can't put back as red ghosts, inside a red outline of their own; the ones that come back keep the usual look.
+- A Mining Skill Card's potion points show as pips along the bottom of the card (one per point its tier holds, filled while it's left) instead of a durability bar. Requires CoolCatLib: Core and Canvas 26.1.2-3 (its new item decorators draw the pips).
+
+### 🐛 Bug Fixes & Improvements
+- Redrawn item textures, all sized like the Skills Record:
+  - Mining Skill Cards: a portrait card with the tier as stars at the top (red, green, teal, and gold once mastered), the tool's plaque, and an empty strip for the potion points' pips.
+  - Shape Certificates: a framed certificate page in the tier's color, the tool inked on it, the tier's shape mark and a gold rosette on a ribbon.
+  - Miner Certificate: before it's earned it's a sealed envelope with a wax seal, now named **Completion Envelope**; once earned, a gold-framed Miner Certificate with a picture of a miner in a lush cave.
+  - Pen and Ink Chamber: redrawn with rounded shading (the Ink Chamber as a glass refill of blue ink).
+
+## v26.1.2-3 Release - Oct 3, 2026
+### ✨ New Features
+- Undo works with items missing: it puts back only the blocks whose drops you still have (on the ground or in your inventory), takes the experience for those, and leaves the rest out. Before such an undo a popup shows what's missing and how many blocks will come back; its "Don't ask again" checkbox turns it off (`undo.confirm_missing_items` in the client config brings it back).
+
+### 🐛 Bug Fixes & Improvements
+- The Mine-Go Juice taste on a Mining Skill Card tier-up is now off by default: turn it on with the new `progression.tier_up_taste` server setting (`tier_up_taste_duration` still sets how long it lasts).
+- Requires CoolCatLib: Core and Canvas 26.1.2-2, where the config screens moved out of Core into Glazed Menu. The Skills Record's settings button still opens its settings popup without Glazed Menu: the mod has its own copy of it now. `/ultimine_addition config` opens the config screens when Glazed Menu or Configured is installed; without them it tells you how to change the config.
+
 ## v26.1.2-2 Release - Sep 30, 2026
 ### 🐛 Bug Fixes & Improvements
 - The undo preview's ghosts now form one solid, seamless shape: they fill their blocks exactly (they were shrunk, which opened gaps that showed missing faces inside the group), are easier to see, and skip faces hidden against real blocks.

@@ -57,8 +57,11 @@ public final class UAServerConfig {
             .comment("Shapes added by other mods (FTB Ultimine plugins) that no certificate lists above join this certificate.",
                     "none leaves them to the Miner Certificate and Mine-Go Juice.")
             .enabledWhen(SHAPE_CERTIFICATES).build();
+    public static final ConfigValue<Boolean> TIER_UP_TASTE = BUILDER.bool("tier_up_taste", false)
+            .comment("Grants a short Mine-Go Juice for the card's tool when a Mining Skill Card tiers up.").build();
     public static final ConfigValue<Integer> TIER_UP_TASTE_DURATION = BUILDER.intValue("tier_up_taste_duration", 60).range(0, 600)
-            .comment("Seconds of free Mine-Go Juice for the card's tool when a Mining Skill Card tiers up. 0 disables it.").build();
+            .comment("Seconds of free Mine-Go Juice for the card's tool when a Mining Skill Card tiers up. 0 disables it.")
+            .enabledWhen(TIER_UP_TASTE).build();
     public static final ConfigValue<Integer> STREAK_BONUS_INTERVAL = BUILDER.intValue("streak_bonus_interval", 5).range(0, 100)
             .comment("Every Nth challenge block broken in a streak counts one extra point. 0 disables streaks.").build();
     public static final ConfigValue<Integer> STREAK_WINDOW = BUILDER.intValue("streak_window", 3).range(1, 30)

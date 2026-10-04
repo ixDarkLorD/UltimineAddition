@@ -13,6 +13,7 @@ public class LanguageGenerator extends LanguageProvider {
     public void addTranslations() {
         this.add("itemGroup.ultimine_addition.tab", "FTB Ultimine Addition");
         this.add(Registration.MINER_CERTIFICATE.get(), "Miner Certificate");
+        this.add("item.ultimine_addition.completion_envelope", "Completion Envelope");
         this.add(Registration.SKILLS_RECORD.get(), "Skills Record");
         this.add(Registration.SHAPE_SELECTOR.get(), "Shape Selector");
         this.add(Registration.INK_CHAMBER.get(), "Ink Chamber");
@@ -128,6 +129,8 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("ultimine_addition.extra_shapes.novice", "Novice");
         this.add("ultimine_addition.extra_shapes.apprentice", "Apprentice");
         this.add("ultimine_addition.extra_shapes.adept", "Adept");
+        this.add("config.ultimine_addition.server.progression.tier_up_taste", "Tier-up Taste");
+        this.add("config.ultimine_addition.server.progression.tier_up_taste.tooltip", "Grants a short Mine-Go Juice for the card's tool when a Mining Skill Card tiers up.");
         this.add("config.ultimine_addition.server.progression.tier_up_taste_duration", "Tier-up Taste (s)");
         this.add("config.ultimine_addition.server.progression.tier_up_taste_duration.tooltip", "Seconds of free Mine-Go Juice for the card's tool when a card tiers up. 0 disables it.");
         this.add("config.ultimine_addition.server.progression.streak_bonus_interval", "Streak Bonus Interval");
@@ -158,9 +161,9 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("config.ultimine_addition.server.skills_record.paper_consumption_rate.tooltip", "Chance (0 to 1) for each challenge point to use up a paper.");
         this.add("config.ultimine_addition.server.legacy", "Legacy Mode");
         this.add("config.ultimine_addition.server.legacy.required_amount_min", "Min Required Ores");
-        this.add("config.ultimine_addition.server.legacy.required_amount_min.tooltip", "Lowest number of ores a sealed Miner Certificate can ask for.");
+        this.add("config.ultimine_addition.server.legacy.required_amount_min.tooltip", "Lowest number of ores a Completion Envelope can ask for.");
         this.add("config.ultimine_addition.server.legacy.required_amount_max", "Max Required Ores");
-        this.add("config.ultimine_addition.server.legacy.required_amount_max.tooltip", "Highest number of ores a sealed Miner Certificate can ask for.");
+        this.add("config.ultimine_addition.server.legacy.required_amount_max.tooltip", "Highest number of ores a Completion Envelope can ask for.");
         this.add("config.ultimine_addition.server.debugging", "Debugging");
         this.add("config.ultimine_addition.server.debugging.ineligible_blocks_logger", "Log Ineligible Blocks");
         this.add("config.ultimine_addition.server.debugging.challenge_manager_logger", "Log Challenge Manager");
@@ -176,6 +179,9 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("config.ultimine_addition.client.visuals", "Visuals");
         this.add("config.ultimine_addition.client.visuals.shape_selector_filter", "Shape Selector Filter");
         this.add("config.ultimine_addition.client.visuals.shape_selector_filter.tooltip", "Shapes listed by the Shape Selector: all, or only the ones that aren't blacklisted.");
+        this.add("config.ultimine_addition.client.undo", "Undo");
+        this.add("config.ultimine_addition.client.undo.confirm_missing_items", "Confirm Undo With Missing Items");
+        this.add("config.ultimine_addition.client.undo.confirm_missing_items.tooltip", "Asks before an undo with missing items, which only puts back the blocks you can pay for.");
         this.add("config.ultimine_addition.client.debug", "Debug");
         this.add("config.ultimine_addition.client.debug.skills_record_edit_mode", "Skills Record Edit Mode");
         this.add("config.ultimine_addition.client.debug.skills_record_edit_mode.tooltip", "Lets operators edit challenge progress from the Skills Record, and shows debug info in it.");
@@ -307,7 +313,7 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("command.ultimine_addition.shapes.unknown_tool", "Unknown tool: %s");
         this.add("ftbultimine.shape.ultimine_addition.no_shape", "No Shape Learned");
         this.add("info.ultimine_addition.notice.locked", "✖ Ultimine Locked");
-        this.add("info.ultimine_addition.notice.locked.legacy", "Unseal a Miner Certificate to learn the excavation skill.");
+        this.add("info.ultimine_addition.notice.locked.legacy", "Open a Completion Envelope to learn the excavation skill.");
         this.add("info.ultimine_addition.notice.locked.hint", "Earn a Shape Certificate for this tool or drink %s.");
         this.add("info.ultimine_addition.notice.locked.hint_no_shapes", "Obtain a Miner Certificate or drink %s.");
         this.add("info.ultimine_addition.notice.locked.hint_all", "Earn the Miner Certificate to Ultimine with any item.");
@@ -368,10 +374,29 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("info.ultimine_addition.undo.missing_item", "%s× %s");
         this.add("info.ultimine_addition.undo.missing_xp", "%s experience points");
         this.add("info.ultimine_addition.undo.missing_more", "and %s more...");
+        this.add("info.ultimine_addition.undo.none_affordable", "You don't have the items for any of those blocks.");
+        this.add("info.ultimine_addition.undo.partial", "↩ Partly Undone");
+        this.add("info.ultimine_addition.undo.partial.blocks", "%s of %s blocks are coming back; the rest needed items you don't have.");
         this.add("gui.ultimine_addition.undo.title", "Undo · %s blocks");
         this.add("gui.ultimine_addition.undo.xp", "%s XP");
         this.add("gui.ultimine_addition.undo.free", "Free in Creative");
         this.add("gui.ultimine_addition.undo.confirm", "Press %s again to confirm the undo");
+        this.add("gui.ultimine_addition.undo.confirm_partial", "Items missing: press %s to put back %s of %s blocks");
+        this.add("gui.ultimine_addition.undo.partial.title", "Undo With Missing Items?");
+        this.add("gui.ultimine_addition.undo.partial.message", "Only %s of %s blocks can come back: the ones whose items you don't have stay out. The experience is taken for the blocks that come back.");
+        this.add("gui.ultimine_addition.undo.partial.missing", "Missing:");
+        this.add("gui.ultimine_addition.undo.partial.dont_ask", "Don't ask again");
+        this.add("gui.ultimine_addition.undo.partial.confirm", "Undo Anyway");
+        this.add("gui.ultimine_addition.config.save", "Save");
+        this.add("gui.ultimine_addition.config.save.errors", "Fix the invalid values first:");
+        this.add("gui.ultimine_addition.config.reset.tooltip", "Sets the values shown here to their defaults");
+        this.add("gui.ultimine_addition.config.reset_value", "Reset to default");
+        this.add("gui.ultimine_addition.config.default", "Default: %s");
+        this.add("gui.ultimine_addition.config.status.errors", "%s invalid");
+        this.add("gui.ultimine_addition.config.status.modified", "%s unsaved");
+        this.add("gui.ultimine_addition.config.discard.title", "Discard changes?");
+        this.add("gui.ultimine_addition.config.discard.message", "%s unsaved changes will be lost.");
+        this.add("gui.ultimine_addition.config.discard.yes", "Discard");
         this.add("gui.ultimine_addition.undo.key_with_ctrl", "Ctrl + %s");
         this.add("gui.ultimine_addition.undo.missing", "Missing items: can't undo");
         this.add("gui.ultimine_addition.undo.cancel", "Sneak to cancel");
@@ -384,7 +409,7 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("gui.ultimine_addition.undo.expires", "⌛ %s");
         this.add("config.ultimine_addition.server.undo", "Undo");
         this.add("config.ultimine_addition.server.undo.enabled", "Undo");
-        this.add("config.ultimine_addition.server.undo.enabled.tooltip", "Lets players undo their last Ultimine operations (Ctrl + Z by default). Undoing puts the blocks back and takes the items and experience they dropped back, from the ground first, then from the inventory; it is refused when something is missing.");
+        this.add("config.ultimine_addition.server.undo.enabled.tooltip", "Lets players undo their last Ultimine operations (Ctrl + Z by default). Undoing puts the blocks back and takes the items and experience they dropped back, from the ground first, then from the inventory; when something is missing, only the blocks whose items you have come back.");
         this.add("config.ultimine_addition.server.undo.window", "Undo Window (s)");
         this.add("config.ultimine_addition.server.undo.window.tooltip", "Seconds after an Ultimine operation during which it can be undone.");
         this.add("config.ultimine_addition.server.undo.history", "Undo History");
