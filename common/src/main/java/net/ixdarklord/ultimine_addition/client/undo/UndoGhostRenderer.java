@@ -35,12 +35,15 @@ import java.util.List;
 public final class UndoGhostRenderer {
     private static final int MAX_GHOSTS = 512;
     private static final int GHOST_COLOR = ((int) (0.65F * 255) << 24) | 0xFFFFFF;
+    // A block the undo can't put back (its items are missing): its ghost in red.
+    private static final int MISSING_COLOR = ((int) (0.7F * 255) << 24) | 0xFF4A4A;
     private static final int FULL_BRIGHT = 0xF000F0;
 
     // The outline only changes with the preview, so it's built once per preview list.
     private static @Nullable List<BlockPos> cachedFor;
     private static BlockPos cachedOrigin = BlockPos.ZERO;
     private static List<float[]> cachedEdges = List.of();
+    private static List<float[]> cachedMissingEdges = List.of();
     // The ghosts' models, also per preview list.
     private static @Nullable List<BlockPos> modelsFor;
     private static List<Ghost> models = List.of();
@@ -95,7 +98,7 @@ public final class UndoGhostRenderer {
         int count = Math.min(MAX_GHOSTS, positions.size());
         if (positions != modelsFor && minecraft.level != null) {
             modelsFor = positions;
-            models = buildModels(positions.subList(0, count), states.subList(0, count), minecraft.level);
+            models = buildModels(positions.subList(0, count), states.subList(0, count), preview.ghostComesBack(), minecraft.level);
             AABB area = new AABB(positions.getFirst());
             for (int i = 1; i < count; i++) area = area.minmax(new AABB(positions.get(i)));
             modelsArea = area.inflate(0.5);
@@ -117,28 +120,43 @@ public final class UndoGhostRenderer {
         // Drawn now: the level renderer has already drawn its buffers at this point.
         buffers.endBatch(ghostType);
 
-        // One connected outline around the whole group, built like FTB Ultimine's selection outline.
+        // One connected outline around the blocks that come back, built like FTB Ultimine's selection outline, and a
+        // red one around those that don't.
         if (positions != cachedFor) {
             cachedFor = positions;
             cachedOrigin = positions.getFirst();
-            cachedEdges = outerEdges(positions.subList(0, count), cachedOrigin);
+            List<Boolean> comesBack = preview.ghostComesBack();
+            List<BlockPos> back = new ArrayList<>();
+            List<BlockPos> missing = new ArrayList<>();
+            for (int i = 0; i < count; i++) (comesBack(comesBack, i) ? back : missing).add(positions.get(i));
+            cachedEdges = back.isEmpty() ? List.of() : outerEdges(back, cachedOrigin);
+            cachedMissingEdges = missing.isEmpty() ? List.of() : outerEdges(missing, cachedOrigin);
         }
         VertexConsumer lines = buffers.getBuffer(RenderType.lines());
         poseStack.pushPose();
         poseStack.translate(cachedOrigin.getX() - cam.x, cachedOrigin.getY() - cam.y, cachedOrigin.getZ() - cam.z);
-        Matrix4f m = poseStack.last().pose();
-        for (float[] e : cachedEdges) {
+        drawEdges(lines, poseStack.last(), cachedEdges, 127, 212, 255);
+        drawEdges(lines, poseStack.last(), cachedMissingEdges, 255, 90, 90);
+        poseStack.popPose();
+        buffers.endBatch(RenderType.lines());
+    }
+
+    private static void drawEdges(VertexConsumer lines, PoseStack.Pose pose, List<float[]> edges, int red, int green, int blue) {
+        for (float[] e : edges) {
             float nx = e[3] - e[0], ny = e[4] - e[1], nz = e[5] - e[2];
             float len = Mth.sqrt(nx * nx + ny * ny + nz * nz);
             if (len == 0) continue;
             nx /= len;
             ny /= len;
             nz /= len;
-            lines.addVertex(m, e[0], e[1], e[2]).setColor(127, 212, 255, 255).setNormal(poseStack.last(), nx, ny, nz);
-            lines.addVertex(m, e[3], e[4], e[5]).setColor(127, 212, 255, 255).setNormal(poseStack.last(), nx, ny, nz);
+            lines.addVertex(pose.pose(), e[0], e[1], e[2]).setColor(red, green, blue, 255).setNormal(pose, nx, ny, nz);
+            lines.addVertex(pose.pose(), e[3], e[4], e[5]).setColor(red, green, blue, 255).setNormal(pose, nx, ny, nz);
         }
-        poseStack.popPose();
-        buffers.endBatch(RenderType.lines());
+    }
+
+    // Whether the ghost at an index comes back (true when the preview doesn't say).
+    private static boolean comesBack(List<Boolean> comesBack, int index) {
+        return index >= comesBack.size() || comesBack.get(index);
     }
 
     // The outer edges of the blocks merged into one shape, relative to origin.
@@ -154,7 +172,7 @@ public final class UndoGhostRenderer {
 
     // Each ghost's model. A face is left out where the world would hide it: against another ghost (so a solid group
     // only shows its outside) or against a real block that covers it (a face that can't be seen anyway).
-    private static List<Ghost> buildModels(List<BlockPos> positions, List<BlockState> states, BlockAndTintGetter level) {
+    private static List<Ghost> buildModels(List<BlockPos> positions, List<BlockState> states, List<Boolean> comesBack, BlockAndTintGetter level) {
         Map<BlockPos, BlockState> byPos = new HashMap<>();
         for (int i = 0; i < positions.size(); i++) byPos.put(positions.get(i), states.get(i));
         List<Ghost> ghosts = new ArrayList<>();
@@ -162,7 +180,7 @@ public final class UndoGhostRenderer {
             BlockPos pos = positions.get(i);
             BlockState state = states.get(i);
             if (state.getRenderShape() != RenderShape.MODEL) continue;
-            GhostModel model = GhostModel.build(state, pos, GHOST_COLOR, level, face -> {
+            GhostModel model = GhostModel.build(state, pos, comesBack(comesBack, i) ? GHOST_COLOR : MISSING_COLOR, level, face -> {
                 BlockPos next = pos.relative(face);
                 BlockState neighbour = byPos.get(next);
                 if (neighbour == null) neighbour = level.getBlockState(next);

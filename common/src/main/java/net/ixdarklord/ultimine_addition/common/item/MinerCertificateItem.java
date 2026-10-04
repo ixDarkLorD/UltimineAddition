@@ -77,6 +77,12 @@ public class MinerCertificateItem extends DataAbstractItem<MinerCertificateData>
         tooltipComponents.addAll(components);
     }
 
+    // Sealed, it's a Completion Envelope; the Miner Certificate is what's inside once it's earned.
+    @Override
+    public @NotNull Component getName(@NotNull ItemStack stack) {
+        return isAccomplished(stack) ? super.getName(stack) : Component.translatable("item.ultimine_addition.completion_envelope");
+    }
+
     @Override
     public boolean isFoil(@NotNull ItemStack stack) {
         return isAccomplished(stack);

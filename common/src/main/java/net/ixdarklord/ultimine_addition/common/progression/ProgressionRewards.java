@@ -40,7 +40,7 @@ public final class ProgressionRewards {
             lines.add(Component.translatable("info.ultimine_addition.notice.reward.certificate", reward.getHoverName().copy().withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GRAY));
         }
 
-        int seconds = UAServerConfig.TIER_UP_TASTE_DURATION.get();
+        int seconds = UAServerConfig.TIER_UP_TASTE.get() ? UAServerConfig.TIER_UP_TASTE_DURATION.get() : 0;
         if (seconds > 0 && giveTaste(player, card.getType(), tier, seconds)) {
             lines.add(Component.translatable("info.ultimine_addition.notice.reward.taste", seconds).withStyle(ChatFormatting.GRAY));
         }
