@@ -32,6 +32,12 @@
   ],
   "accessWidener" : "${modid}.accesswidener",
 
+  "custom": {
+    "glazedmenu": {
+      "update_json": "${mod_fabric_update_url}"
+    }
+  },
+
   "depends": {
     "java": ">=${versions.java.get()}",
     "minecraft": ">=${mc_version} <=${max_mc_version}",
