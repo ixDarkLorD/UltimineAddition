@@ -328,3 +328,73 @@
     font-size: 1.9rem;
   }
 }
+
+/* ---- Top bars: a stone-brick beam, and the tabs as wooden signs hanging under it ---- */
+.md-header {
+  background:
+    linear-gradient(rgba(18, 14, 10, 0.78), rgba(18, 14, 10, 0.9)),
+    repeating-linear-gradient(0deg, transparent 0 22px, rgba(0, 0, 0, 0.6) 22px 24px),
+    repeating-linear-gradient(90deg, #6f6a64 0 46px, #55514c 46px 48px),
+    #6f6a64;
+}
+
+.md-header__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ua-gold);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.md-header__button.md-logo {
+  padding: 0.15rem;
+  margin: 0.2rem 0.4rem 0.2rem 0.2rem;
+  background: #2b2118;
+  border: 2px solid var(--ua-gold);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.md-search__form {
+  background: #2b2118;
+  border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.md-search__form:hover {
+  background: #3a2c1f;
+}
+
+.md-tabs {
+  background: var(--md-primary-fg-color--dark);
+  border-bottom: none;
+  padding: 0.35rem 0 0.5rem;
+}
+
+.md-tabs__list {
+  gap: 0.5rem;
+}
+
+.md-tabs__item {
+  height: auto;
+  padding: 0;
+}
+
+.md-tabs__link {
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  opacity: 1;
+  color: #e9d9b4;
+  background: #5a4532;
+  border: 2px solid #000;
+  box-shadow: 0 3px 0 #000, inset 0 2px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 80ms steps(2);
+}
+
+.md-tabs__link:hover {
+  color: #fff;
+  transform: translateY(2px);
+}
+
+.md-tabs__item--active .md-tabs__link {
+  background: var(--ua-gold);
+  color: #241a12;
+}
