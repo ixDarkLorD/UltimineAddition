@@ -109,4 +109,10 @@ nav:
           - Challenges: wiki/packs/challenges.md
           - Ultimine Shapes: wiki/packs/shapes.md
           - Custom Cards: wiki/packs/custom-cards.md
+  - Docs:
+      - docs/index.md
+      - Data Packs: docs/data-packs.md
+      - Commands: docs/commands.md
+      - Items and Ids: docs/items.md
+      - Translation Keys: docs/translations.md
   - Changelog: changelog.md

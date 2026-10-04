@@ -18,6 +18,7 @@ hide:
 <p class="ua-hero__lead">An add-on for FTB Ultimine: players unlock the excavation skill by completing mining challenges, one tool and one shape at a time.</p>
 
 [Read the wiki :material-arrow-right:](wiki/index.md){ .md-button .md-button--primary }
+[:material-file-document-outline: Docs](docs/index.md){ .md-button }
 [:simple-curseforge: Download](https://www.curseforge.com/minecraft/mc-mods/ultimine-addition){ .md-button }
 [:fontawesome-brands-github: Source](https://github.com/ixDarkLorD/UltimineAddition){ .md-button }
 

@@ -3,7 +3,7 @@
 Besides the four built-in tools, a data pack can add Mining Skill Cards for other tools: a hammer, a sickle, shears, a mod's own multi-tool. Each card type gets its own card, challenges, Shape Certificates and Mine-Go Juice.
 
 !!! info "Since"
-    FTB Ultimine Addition **26.1.2-5**. It replaces the card files in `config/ultimine_addition/custom_cards`, which are no longer read.
+    FTB Ultimine Addition **26.1.2-5**, **2101.2.0.4** (1.21.1) and **2001.2.0.4** (1.20.1). It replaces the card files in `config/ultimine_addition/custom_cards`, which are no longer read.
 
 ## Adding a card type
 
@@ -61,7 +61,7 @@ The card itself is named "Mining Skill Card: " and the tool's name; that wrapper
 Every data pack card is the same item, `ultimine_addition:mining_skill_card_generic`, with its type on the stack. It looks like the built-in cards: the card of its tier, with the `icon` item drawn on its plate.
 
 - **Crafting**: an empty Mining Skill Card and one of the type's tools, anywhere in the grid.
-- **Giving one**: `/give @s ultimine_addition:mining_skill_card_generic[ultimine_addition:card_type="mypack:hammer"]`
+- **Giving one** (26.1.2 and 1.21.1): `/give @s ultimine_addition:mining_skill_card_generic[ultimine_addition:card_type="mypack:hammer"]`. On 1.20.1 the type is in the item's NBT: `{"ultimine_addition:card_type":"mypack:hammer"}`.
 - It is in no creative tab, and so not in JEI's item list.
 - A card whose type no longer exists (its data pack was removed) does nothing until the type is back.
 
