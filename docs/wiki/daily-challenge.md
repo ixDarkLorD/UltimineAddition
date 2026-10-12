@@ -18,8 +18,12 @@ Every day the server picks one challenge that everyone shares. It needs no Minin
 
 Finishing it gives experience and a few minutes of Mine-Go Juice for the challenge's tool, so you can Ultimine with that tool even before your card earns it.
 
+## With a team
+
+What one member does for the daily challenge also counts for the teammates who are online, so a team finishes it together and everyone gets the reward. A team is an FTB Teams party when that mod is installed, otherwise a vanilla scoreboard team (`/team`).
+
 ## For servers and packs
 
-In the [server settings](packs/configuration.md#server-settings), `progression.timed_challenge` is `daily`, `weekly` or `off`. A weekly challenge asks for more and pays four times as much. `timed_challenge_experience` and `timed_challenge_juice` set the reward.
+In the [server settings](packs/configuration.md#server-settings), `progression.timed_challenge` is `daily`, `weekly` or `off`. A weekly challenge asks for more and pays four times as much. `timed_challenge_experience` and `timed_challenge_juice` set the reward, and `timed_challenge_team` turns the team sharing on or off.
 
-Data packs can add their own reward with `"when": "timed"`: see [Rewards](../docs/data-packs.md#reward).
+Data packs can add their own reward with `"when": "timed"`: see [Rewards](../docs/data-packs.md#reward). Functions and scripts can react to it too: see [Hooks](packs/hooks.md).

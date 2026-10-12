@@ -5,7 +5,8 @@ description: Perks for your tools, and starting a card over
 
 # Perks and Prestige
 
-*Minecraft 26.1.2 only for now.*
+!!! info "Since"
+    FTB Ultimine Addition **26.1.2-5**, **2101.2.0.4** (1.21.1) and **2001.2.0.4** (1.20.1).
 
 A Mining Skill Card gives more than shapes on its way up: a perk at each tier, and once Mastered, the choice to start over for a lasting bonus.
 
@@ -13,12 +14,20 @@ A Mining Skill Card gives more than shapes on its way up: a perk at each tier, a
 
 When a card reaches Novice, Apprentice or Adept, its tier box in the Skills Record offers a perk after the Shape Certificate is claimed. Click the box and pick one of the two on offer. The one you leave may come back at a later tier or on another card of the same tool.
 
-| Perk | What it does |
-|---|---|
-| **Reach** | A quarter more blocks in every Ultimine with this tool. |
-| **Magnet** | An Ultimine's drops go straight into your inventory. |
-| **Fortune** | Lucky finds come twice as often in this tool's challenges. |
-| **Vigor** | A few seconds of Haste after every Ultimine with this tool. |
+Every perk belongs to a tier and is only offered from that tier on, so the small comforts come first and the strong ones last. A tier's box offers its own tier's perks before any left over from earlier tiers.
+
+| Tier | Perk | What it does |
+|---|---|---|
+| Novice | **Magnet** | An Ultimine's drops go straight into your inventory. |
+| Novice | **Vigor** | A few seconds of Haste after every Ultimine with this tool. |
+| Novice | **Sated** | An Ultimine with this tool makes you half as hungry. |
+| Novice | **Thrifty** | An Ultimine wears this tool a quarter less. |
+| Apprentice | **Reach** | A quarter more blocks in every Ultimine with this tool. |
+| Apprentice | **Fortune** | Lucky finds come twice as often in this tool's challenges. |
+| Apprentice | **Insight** | A point of experience for every 8 blocks of an Ultimine with this tool. |
+| Adept | **Expanse** | Another quarter more blocks, on top of Reach. |
+| Adept | **Frenzy** | A few seconds of Haste II after every Ultimine with this tool. |
+| Adept | **Tireless** | An Ultimine with this tool doesn't make you hungrier. |
 
 A perk belongs to you and to that tool, for good. It does not sit on the card, so losing the card doesn't lose the perk. `/ultimine_addition stats` lists the perks you have.
 
@@ -27,7 +36,7 @@ A perk belongs to you and to that tool, for good. It does not sit on the card, s
 A Mastered card shows a star on its Mastered box. Click it twice to start the card over as Unlearned. This can't be undone.
 
 - Each prestige adds 5% to the blocks an Ultimine with that card's tool can take, for good. A card can do it five times.
-- The card's challenges start again from the first tier, and its perks and Shape Certificates can be claimed again on the way back up. That is how you get the fourth perk.
+- The card's challenges start again from the first tier, and its perks and Shape Certificates can be claimed again on the way back up. That is how you get more than three perks for a tool.
 - While the card climbs back, you lose what carrying a Mastered card gives.
 
 ## Tool affinity

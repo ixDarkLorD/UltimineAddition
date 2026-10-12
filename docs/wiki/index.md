@@ -49,6 +49,22 @@ Everything about playing with FTB Ultimine Addition, from the first card to the 
 
     [:octicons-arrow-right-24: Unlocking Ultimine](unlocking-ultimine.md)
 
+-   :material-star-four-points:{ .lg .middle } **Perks and Prestige**
+
+    ---
+
+    A perk at each tier, and starting a Mastered card over for a lasting bonus.
+
+    [:octicons-arrow-right-24: Perks and Prestige](perks-and-prestige.md)
+
+-   :material-pencil-ruler:{ .lg .middle } **Shape Designer**
+
+    ---
+
+    Draw Ultimine shapes of your own, keep them and share them.
+
+    [:octicons-arrow-right-24: Shape Designer](shape-designer.md)
+
 -   :material-undo-variant:{ .lg .middle } **Ultimine Undo**
 
     ---
@@ -67,3 +83,4 @@ Everything about playing with FTB Ultimine Addition, from the first card to the 
 | [Challenges](packs/challenges.md) | The data pack format for adding, changing or removing challenges. |
 | [Ultimine Shapes](packs/shapes.md) | Adding Ultimine shapes from a data pack. |
 | [Custom Cards](packs/custom-cards.md) | Adding Mining Skill Cards for other tools. |
+| [Hooks](packs/hooks.md) | Function tags and KubeJS events for progress, and stages. |

@@ -30,6 +30,8 @@ The editor screens come from **Glazed Menu** or **Configured**. Without either, 
 |---|---|
 | `general.playstyle_mode` | How players unlock Ultimine: `MODERN` or `LEGACY`. See [Playstyle modes](../getting-started.md#playstyle-modes). Applies at once. |
 | `general.blacklisted_shapes` | Ultimine shapes nobody can use, by shape ID (e.g. `ftbultimine:shapeless`). |
+| `general.ultimine_sound` | A chime after a big Ultimine. |
+| `general.drops_to_inventory` | An Ultimine's drops go straight into the player's inventory. Off by default. |
 | `general.is_placed_by_entity_condition` | Blocks placed by players or other entities don't count towards challenges. |
 | `general.challenge_validator` | How often, in seconds, cards are checked for challenges that no longer exist. |
 
@@ -41,6 +43,8 @@ The editor screens come from **Glazed Menu** or **Configured**. Without either, 
 | `mining_skill_cards.max_blocks` | Ultimine block limit for each tier, used by Mine-Go Juice and Shape Certificates. |
 | `mining_skill_cards.potion_durations` | Seconds a Mine-Go Juice lasts, by the tier of the card it was brewed with. |
 | `mining_skill_cards.mastered_effect` | Carrying a Mastered card grants Ultimine for its tool. |
+| `mining_skill_cards.prestige` | A Mastered card can start over for a lasting bonus. See [Perks and Prestige](../perks-and-prestige.md). |
+| `mining_skill_cards.bind_to_player` | A card belongs to the first player who makes progress on it. Off by default. |
 
 ### Progression
 
@@ -55,6 +59,14 @@ The editor screens come from **Glazed Menu** or **Configured**. Without either, 
 | `progression.rerolls_per_tier` | How many unstarted challenges a card can swap per tier. `0` disables rerolls. |
 | `progression.reroll_ink_cost` | Ink taken from the pen for each reroll. |
 | `progression.tier_up_taste`, `tier_up_taste_duration` | A short free Mine-Go Juice when a card tiers up, and how many seconds it lasts. Off by default. |
+| `progression.card_perks` | Cards offer a perk at each tier. See [Perks and Prestige](../perks-and-prestige.md). |
+| `progression.tool_affinity` | Tools count the blocks Ultimined with them and earn a small bonus. |
+| `progression.juice_idle_pause` | With a number of seconds, a drunk Mine-Go Juice only runs down for that long after each Ultimine. `0` is off. |
+| `progression.custom_shapes_per_player` | How many shapes a player may keep from the [Shape Designer](../shape-designer.md). `0` turns it off. |
+| `progression.custom_shapes_max_blocks` | How many blocks a shape of a player's own may have. |
+| `progression.timed_challenge` | The [daily challenge](../daily-challenge.md): `daily`, `weekly` or `off`. |
+| `progression.timed_challenge_team` | A teammate's work on the daily challenge counts for the team's online members. |
+| `progression.timed_challenge_experience`, `timed_challenge_juice` | The daily challenge's reward: experience, and seconds of Mine-Go Juice. |
 
 ### Skills Record
 

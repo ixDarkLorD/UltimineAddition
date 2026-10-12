@@ -69,8 +69,6 @@ Example, for the first card of the record in the first hotbar slot:
 
 ## Statistics and favourites
 
-*Minecraft 26.1.2 only for now.*
-
 | Command | Who | Does |
 |---|---|---|
 | `/ultimine_addition stats` | Any player | Your blocks Ultimined, largest Ultimine, challenges, daily challenges, undos, and the perks you have. |
@@ -78,6 +76,15 @@ Example, for the first card of the record in the first hotbar slot:
 | `/ultimine_addition favorite <shape>` | Any player | Marks or unmarks a shape. With any marked, cycling shapes only goes through those. |
 | `/ultimine_addition favorite` | Any player | Lists your favourite shapes. |
 | `/ultimine_addition favorite clear` | Any player | Unmarks them all. |
+
+The Shape Selector's star marks favourites too.
+
+## Your own shapes
+
+| Command | Who | Does |
+|---|---|---|
+| `/ultimine_addition my_shapes` | Any player | Lists the shapes you drew in the [Shape Designer](../wiki/shape-designer.md), numbered. |
+| `/ultimine_addition my_shapes delete <number>` | Any player | Deletes one of them. |
 
 ## Skills Record
 

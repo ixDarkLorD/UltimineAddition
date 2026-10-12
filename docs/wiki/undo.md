@@ -32,8 +32,6 @@ Press **Ctrl + H** to see the Ultimines you can still undo, newest first: how ma
 
 ## Tool actions
 
-*Minecraft 26.1.2 only for now.*
-
 Stripping logs, tilling and making paths with Ultimine can be undone the same way. It costs nothing: the blocks that are still as the tool left them are turned back. The tool's wear is not given back.
 
 ## Limits
