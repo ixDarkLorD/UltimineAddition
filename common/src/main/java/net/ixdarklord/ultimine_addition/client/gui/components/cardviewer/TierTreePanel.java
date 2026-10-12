@@ -513,8 +513,10 @@ final class TierTreePanel extends ViewportPanel {
         int textX = x + BADGE_SIZE / 2 + 4;
         Component name = node.tier().getDisplayName();
         if (node.state() == TierState.LOCKED) name = name.copy().withStyle(ChatFormatting.DARK_GRAY);
-        graphics.text(this.font, name, textX, y + 7, ARGB.multiplyAlpha(RenderUtils.textColor(0xFFFFFF), reveal), shadow);
-        graphics.text(this.font, this.tierStatus(node), textX, y + 18, ARGB.multiplyAlpha(RenderUtils.textColor(0xAAAAAA), reveal), shadow);
+        // Both lines keep clear of the slot on the box's right (a certificate, a perk, the prestige star), shrinking to fit.
+        int room = x + w - SMALL_SLOT_SIZE - 9 - textX;
+        this.fitText(graphics, name, textX, y + 7, room, ARGB.multiplyAlpha(RenderUtils.textColor(0xFFFFFF), reveal), shadow);
+        this.fitText(graphics, this.tierStatus(node), textX, y + 18, room, ARGB.multiplyAlpha(RenderUtils.textColor(0xAAAAAA), reveal), shadow);
 
         // An unclaimed Shape Certificate waits on the box's right, glowing gold.
         ItemStack reward = this.viewer.claimableCertificate(node);
@@ -637,6 +639,17 @@ final class TierTreePanel extends ViewportPanel {
             int color = progressColor(Math.round(progress * 100));
             graphics.fillGradient(x + 1, y + 1, x + 1 + fill, y + PROGRESS_BAR_HEIGHT - 1, ARGB.color(0.75F, color), ARGB.color(0.55F, color));
         }
+    }
+
+    // A line of text, scaled down (around its middle height) when it is wider than the room it has.
+    private void fitText(GuiGraphicsExtractor graphics, Component text, int x, int y, int room, int color, boolean shadow) {
+        float scale = Math.min(1.0F, room / (float) Math.max(1, this.font.width(text)));
+        var pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(x, y + (1.0F - scale) * 4.0F);
+        pose.scale(scale, scale);
+        graphics.text(this.font, text, 0, 0, color, shadow);
+        pose.popMatrix();
     }
 
     private Component tierStatus(TierNode node) {

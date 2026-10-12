@@ -2,7 +2,6 @@ package net.ixdarklord.ultimine_addition.network.payloads;
 
 import net.ixdarklord.coolcatcore.api.network.PacketContext;
 import net.ixdarklord.ultimine_addition.common.data.shape.CustomShapes;
-import net.ixdarklord.ultimine_addition.common.item.ShapeSelectorItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -63,26 +62,6 @@ public final class ShapePayload {
                 if (context.getPlayer() instanceof ServerPlayer player) {
                     CustomShapes.delete(player.level().getServer(), player.getUUID(), false, message.shape);
                     CustomShapes.sendMine(player);
-                }
-            });
-        }
-
-        @Override
-        public @NotNull Type<? extends CustomPacketPayload> type() {
-            return TYPE;
-        }
-    }
-
-    // Back from the Shape Designer to the Shape Selector it was opened from (the selector is a menu, so the server
-    // opens it): for a player still holding one.
-    public record OpenSelector(boolean back) implements CustomPacketPayload {
-        public static final Type<OpenSelector> TYPE = new Type<>(FTBUltimineAddition.id("open_shape_selector"));
-
-        public static void handle(OpenSelector message, PacketContext context) {
-            context.queue(() -> {
-                if (context.getPlayer() instanceof ServerPlayer player
-                        && (player.getMainHandItem().getItem() instanceof ShapeSelectorItem || player.getOffhandItem().getItem() instanceof ShapeSelectorItem)) {
-                    ShapeSelectorItem.open(player);
                 }
             });
         }

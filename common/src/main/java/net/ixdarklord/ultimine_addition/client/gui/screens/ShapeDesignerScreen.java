@@ -84,8 +84,13 @@ public final class ShapeDesignerScreen extends Screen {
     // How deep the preview frames, eased so it doesn't jump when a layer is added.
     private float shownDepth = 1.0F;
 
-    public ShapeDesignerScreen() {
+    // The Shape Selector it pops up over: drawn dimmed behind it, and shown again when it closes. Its menu stays open
+    // meanwhile, so a tool in its slot stays there.
+    private final Screen parent;
+
+    public ShapeDesignerScreen(Screen parent) {
         super(Component.translatable("gui.ultimine_addition.shape_designer.title"));
+        this.parent = parent;
     }
 
     private int blocks() {
@@ -280,6 +285,7 @@ public final class ShapeDesignerScreen extends Screen {
 
     @Override
     protected void init() {
+        if (this.parent != null && (this.parent.width != this.width || this.parent.height != this.height)) this.parent.resize(this.width, this.height);
         this.left = Math.max(0, (this.width - WIDTH - SIDE_GAP - SIDE_WIDTH) / 2);
         this.top = (this.height - HEIGHT) / 2;
         String typed = this.name == null ? "" : this.name.getValue();
@@ -444,7 +450,16 @@ public final class ShapeDesignerScreen extends Screen {
 
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+        // A popup: the selector behind it (which blurs the world, once a frame), dimmed, and the designer in a stratum
+        // of its own so the selector's items and text stay under it.
+        if (this.parent != null) {
+            this.parent.extractBackground(graphics, -1, -1, partialTick);
+            this.parent.extractRenderState(graphics, -1, -1, partialTick);
+            graphics.nextStratum();
+            graphics.fill(0, 0, this.width, this.height, 0x90101418);
+        } else {
+            super.extractBackground(graphics, mouseX, mouseY, partialTick);
+        }
         int left = this.left, top = this.top;
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND_TEXTURE, left, top, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
 
@@ -699,11 +714,11 @@ public final class ShapeDesignerScreen extends Screen {
         }
     }
 
-    // Closing goes back to the Shape Selector the designer was opened from.
+    // Closing shows the Shape Selector it popped up over again.
     @Override
     public void onClose() {
-        super.onClose();
-        PayloadHandler.sendToServer(new ShapePayload.OpenSelector(true));
+        if (this.parent != null) this.minecraft.setScreen(this.parent);
+        else super.onClose();
     }
 
     @Override

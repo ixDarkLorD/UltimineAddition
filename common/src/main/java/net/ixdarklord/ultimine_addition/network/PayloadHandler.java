@@ -44,7 +44,6 @@ public class PayloadHandler {
         Network.registerServerbound(ShapeDiagramPayload.Request.class, ShapeDiagramPayload.Request::handle);
         Network.registerServerbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Favorite.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Favorite::handle);
         Network.registerServerbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Design.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Design::handle);
-        Network.registerServerbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.OpenSelector.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.OpenSelector::handle);
         Network.registerServerbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Delete.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Delete::handle);
         Network.registerServerbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.ListRequest.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.ListRequest::handle);
         Network.registerClientbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Mine.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Mine::handle);

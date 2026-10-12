@@ -144,9 +144,8 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         // The Shape Designer, for a shape of one's own (where the server allows them).
         this.designButton = this.addWidget(new ColoredButton(this.leftPos + 150, this.topPos + 35, 9, 9, SkillsRecordScreen.CONFIGURATION_BUTTON_SPRITES,
                 button -> {
-                    // Closed first, so the server hands back the tool in the slot.
-                    this.onClose();
-                    Minecraft.getInstance().setScreen(new ShapeDesignerScreen());
+                    // A popup over this screen: the menu stays open under it.
+                    Minecraft.getInstance().setScreen(new ShapeDesignerScreen(this));
                 }, Component.empty(),
                 tooltipInfo -> tooltipInfo.component = Component.translatable("gui.ultimine_addition.shape_designer.open").withStyle(ChatFormatting.WHITE)) {
             @Override
