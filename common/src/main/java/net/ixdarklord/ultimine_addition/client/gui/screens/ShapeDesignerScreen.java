@@ -465,7 +465,7 @@ public final class ShapeDesignerScreen extends Screen {
         // blur must run once a frame), dimmed, and the designer in a stratum of its own so the selector's items and
         // text stay under it.
         if (this.parent != null) {
-            this.parent.render(graphics, -1, -1, partialTick);
+            this.parent.render(graphics, -10000, -10000, partialTick);
             GuiDraw.nextStratum(graphics);
             graphics.fill(0, 0, this.width, this.height, 0x90101418);
         } else {

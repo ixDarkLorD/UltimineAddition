@@ -256,6 +256,12 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     }
 
     @Override
+    public void setChallengeProgress(ResourceLocation challengeId, int value) {
+        if (this.selectedSlot < 0) return;
+        PayloadHandler.sendToServer(new SkillsRecordPayload.EditChallenge(this.selectedSlot, challengeId, value));
+    }
+
+    @Override
     public void rerollChallenge(ResourceLocation challengeId) {
         if (this.selectedSlot < 0) return;
         PayloadHandler.sendToServer(new SkillsRecordPayload.RerollChallenge(this.selectedSlot, challengeId));

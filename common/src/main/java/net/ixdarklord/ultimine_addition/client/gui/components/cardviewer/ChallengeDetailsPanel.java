@@ -56,8 +56,8 @@ final class ChallengeDetailsPanel extends ScrollPanel {
     // The footer buttons' icons, in front of their labels.
     private static final String ICON_BACK = "◀", ICON_PIN = "◎", ICON_UNPIN = "✕", ICON_EDIT = "✎";
     // Drawn from the mod's icons font (a pixel glyph), as the text font has no clear reroll symbol.
-    private static final ResourceLocation ICON_FONT = FTBUltimineAddition.id("icons");
-    private static final String ICON_REROLL = "";
+    static final ResourceLocation ICON_FONT = FTBUltimineAddition.id("icons");
+    static final String ICON_REROLL = "";
 
     private static Component withIcon(String icon, Component label) {
         return Component.literal(icon + " ").append(label);
