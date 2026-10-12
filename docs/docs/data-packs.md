@@ -48,6 +48,22 @@ A file that fails to parse is skipped with an error in the log; the rest still l
 | `for_card_tier` | integer | `0` Unlearned, `1` Novice, `2` Apprentice, `3` Adept. |
 | `required_amount.min`, `.max` | integer | Each card rolls its own number in the range. |
 | `targeted_blocks` | list of block ids | The blocks that count. |
+| `conditions` | object, optional | Where it counts (26.1.2): `dimensions` (list of ids), `biomes` (ids, or tags starting with `#`), `min_y`, `max_y`. Anything left out doesn't matter. |
+| `requires` | list of challenge ids, optional | A chain (26.1.2): a card only rolls this challenge once it has completed the ones listed. The daily challenge never picks a chained one. |
+
+```json
+{
+  "challenge_type": { "id": "break_block", "consume_block": false },
+  "for_card_type": "pickaxe",
+  "for_card_tier": 1,
+  "required_amount": { "min": 16, "max": 32 },
+  "targeted_blocks": ["minecraft:ancient_debris"],
+  "conditions": { "dimensions": ["minecraft:the_nether"], "max_y": 24 },
+  "requires": ["mypack:pickaxe/first_netherrack"]
+}
+```
+
+A card type still needs at least one challenge without `requires` for each tier, so a fresh card has something to roll.
 
 ## Shape
 
@@ -112,6 +128,7 @@ A shape needs a `pattern` or `blocks`. A mod's shape with the same id wins over 
 | `loot_table` | loot table id, optional | Rolled with the `gift` parameters; the items go to the inventory, or to the ground when it is full. |
 | `experience` | number, optional | Experience points. |
 | `commands` | list of strings, optional | Run by the server at the player; `@s` is the player. |
+| `description` | string, optional | Plain text or a translation key (26.1.2). Shown in the card viewer as the challenge's reward before it is earned. Without it the preview names the experience and says whether there are items. |
 
 A reward needs at least one of `loot_table`, `experience` and `commands`. A filter left out matches everything, so `{ "when": "tier", "experience": 100 }` pays for every tier of every card. A file with a mistake is skipped, and the log says why.
 

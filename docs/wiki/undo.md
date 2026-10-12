@@ -30,8 +30,14 @@ An undo is refused when the spots are no longer empty, or when you can't pay for
 
 Press **Ctrl + H** to see the Ultimines you can still undo, newest first: how many blocks each puts back, what it costs, and how long it stays undoable. An entry says so when you are too far from it or its spots are taken. Undos go in that order, so **Undo Newest** opens the preview of the first one.
 
+## Tool actions
+
+*Minecraft 26.1.2 only for now.*
+
+Stripping logs, tilling and making paths with Ultimine can be undone the same way. It costs nothing: the blocks that are still as the tool left them are turned back. The tool's wear is not given back.
+
 ## Limits
 
 - Only your most recent Ultimines can be undone, newest first, and only within a time window after each one.
-- Blocks an undo puts back don't count towards challenges.
+- Blocks an undo puts back never count towards challenges again, card challenges and the daily one alike, whatever the server's placed-block setting says.
 - Servers can turn undo off, and set the history length, the time window and the placing animation in the [server settings](packs/configuration.md#server-settings).

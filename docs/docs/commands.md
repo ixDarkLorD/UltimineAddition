@@ -67,6 +67,18 @@ Example, for the first card of the record in the first hotbar slot:
 | `/ultimine_addition challenge` | Any player | Shows the daily (or weekly) challenge, your progress and when the next one comes. |
 | `/ultimine_addition challenge add <amount>` | Operators | Adds to your progress, for trying out rewards. |
 
+## Statistics and favourites
+
+*Minecraft 26.1.2 only for now.*
+
+| Command | Who | Does |
+|---|---|---|
+| `/ultimine_addition stats` | Any player | Your blocks Ultimined, largest Ultimine, challenges, daily challenges, undos, and the perks you have. |
+| `/ultimine_addition top [blocks\|largest\|challenges\|dailies\|undos]` | Anyone | The best ten of the players seen since the server started. |
+| `/ultimine_addition favorite <shape>` | Any player | Marks or unmarks a shape. With any marked, cycling shapes only goes through those. |
+| `/ultimine_addition favorite` | Any player | Lists your favourite shapes. |
+| `/ultimine_addition favorite clear` | Any player | Unmarks them all. |
+
 ## Skills Record
 
 | Command | Who | Does |
