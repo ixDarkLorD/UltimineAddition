@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +97,19 @@ final class TierTreePanel extends ViewportPanel {
     private @Nullable CardTree tree;
     private MiningSkillCardItem.@Nullable Tier pendingFocus;
     private @Nullable ChallengeNode hoveredChallenge;
+    // The menu a right click on a challenge opens, in screen space: a raised plate in the record's color, headed by the
+    // challenge's name, with a line for each thing that can be done with it.
+    private final List<MenuEntry> menu = new ArrayList<>();
+    private Component menuTitle = Component.empty();
+    private int menuX, menuY, menuWidth;
+    private long menuOpened;
+    private static final int MENU_ROW = 12, MENU_HEADER = 14, MENU_SPLIT = 5;
+
+    // One line of the menu: a small sign and what it does. The ones only operators get (with the edit mode on) come
+    // after a line, in their own color.
+    private record MenuEntry(Component icon, Component label, boolean enabled, boolean debug, Runnable action) {
+    }
+
     private @Nullable TierNode hoveredTier;
     private long revealStart = -1L;
     private long lastFrame = -1L;
@@ -111,6 +125,174 @@ final class TierTreePanel extends ViewportPanel {
 
     private static Identifier sprite(String name) {
         return FTBUltimineAddition.id("container/skills_record/card_viewer/" + name);
+    }
+
+    private static Component sign(String glyph) {
+        return Component.literal(glyph);
+    }
+
+    private void openMenu(ChallengeNode node, double screenX, double screenY) {
+        this.menu.clear();
+        Identifier id = node.id();
+        this.menuTitle = CardViewerWidget.challengeName(node);
+        this.menuOpened = Util.getMillis();
+        this.menu.add(new MenuEntry(sign("≡"), Component.translatable("gui.ultimine_addition.card_viewer.menu.details"), true, false, () -> this.viewer.openDetails(node)));
+        boolean current = id != null && this.viewer.isCurrent(node);
+        if (current && node.state() != ChallengeState.COMPLETED) {
+            this.menu.add(new MenuEntry(sign(node.pinned() ? "✕" : "◎"),
+                    Component.translatable(node.pinned() ? "gui.ultimine_addition.card_viewer.unpin" : "gui.ultimine_addition.card_viewer.pin"), true, false,
+                    () -> this.viewer.togglePin(id)));
+        }
+        CardViewerWidget.RerollInfo reroll = current ? this.viewer.rerollInfo(node) : null;
+        if (reroll != null) {
+            this.menu.add(new MenuEntry(Component.literal(ChallengeDetailsPanel.ICON_REROLL).withStyle(style -> style.withFont(ChallengeDetailsPanel.ICON_FONT)),
+                    Component.translatable("gui.ultimine_addition.card_viewer.menu.reroll", reroll.left()), reroll.blocked() == null, false,
+                    () -> this.viewer.rerollChallenge(id)));
+        }
+        if (id != null && this.viewer.canEdit()) {
+            if (current) {
+                this.menu.add(new MenuEntry(sign("✎"), Component.translatable("gui.ultimine_addition.card_viewer.menu.edit"), true, true, () -> this.viewer.editChallenge(id)));
+                this.menu.add(new MenuEntry(sign("✔"), Component.translatable("gui.ultimine_addition.card_viewer.menu.complete"), node.state() != ChallengeState.COMPLETED, true,
+                        () -> this.viewer.setChallengeProgress(id, node.requiredPoints())));
+                this.menu.add(new MenuEntry(sign("«"), Component.translatable("gui.ultimine_addition.card_viewer.menu.reset"), node.currentPoints() > 0, true,
+                        () -> this.viewer.setChallengeProgress(id, 0)));
+            }
+            this.menu.add(new MenuEntry(sign("#"), Component.translatable("gui.ultimine_addition.card_viewer.menu.copy_id"), true, true,
+                    () -> Minecraft.getInstance().keyboardHandler.setClipboard(id.toString())));
+        }
+        this.placeMenu(screenX, screenY);
+    }
+
+    // A tier box's menu: what waits on the box (its certificate, its perk), and for the tier the card is on, its
+    // challenges all at once: pinned or unpinned, and for operators with the edit mode on, completed or reset. Nothing
+    // opens for a tier with none of these.
+    private boolean openTierMenu(TierNode tier, double screenX, double screenY) {
+        this.menu.clear();
+        this.menuTitle = tier.tier().getDisplayName();
+        this.menuOpened = Util.getMillis();
+        if (!this.viewer.claimableCertificate(tier).isEmpty()) {
+            this.menu.add(new MenuEntry(sign("✉"), Component.translatable("gui.ultimine_addition.card_viewer.menu.claim"), true, false, () -> this.viewer.openShapeChoice(tier)));
+        } else if (!this.viewer.perkOffer(tier).isEmpty()) {
+            this.menu.add(new MenuEntry(sign("★"), Component.translatable("gui.ultimine_addition.card_viewer.menu.perk"), true, false, () -> this.viewer.openPerkChoice(tier)));
+        }
+        // The challenges the card is working on in this tier.
+        List<ChallengeNode> current = tier.challenges().stream().filter(node -> node.id() != null && this.viewer.isCurrent(node)).toList();
+        List<ChallengeNode> open = current.stream().filter(node -> node.state() != ChallengeState.COMPLETED).toList();
+        if (!open.isEmpty()) {
+            boolean allPinned = open.stream().allMatch(ChallengeNode::pinned);
+            this.menu.add(new MenuEntry(sign(allPinned ? "✕" : "◎"),
+                    Component.translatable(allPinned ? "gui.ultimine_addition.card_viewer.menu.unpin_all" : "gui.ultimine_addition.card_viewer.menu.pin_all"), true, false, () -> {
+                for (ChallengeNode node : open) if (node.pinned() == allPinned) this.viewer.togglePin(node.id());
+            }));
+        }
+        if (!current.isEmpty() && this.viewer.canEdit()) {
+            this.menu.add(new MenuEntry(sign("✔"), Component.translatable("gui.ultimine_addition.card_viewer.menu.complete_all"), !open.isEmpty(), true, () -> {
+                for (ChallengeNode node : open) this.viewer.setChallengeProgress(node.id(), node.requiredPoints());
+            }));
+            this.menu.add(new MenuEntry(sign("«"), Component.translatable("gui.ultimine_addition.card_viewer.menu.reset_all"),
+                    current.stream().anyMatch(node -> node.currentPoints() > 0), true, () -> {
+                for (ChallengeNode node : current) if (node.currentPoints() > 0) this.viewer.setChallengeProgress(node.id(), 0);
+            }));
+        }
+        if (this.menu.isEmpty()) return false;
+        this.placeMenu(screenX, screenY);
+        return true;
+    }
+
+    // Sizes the menu to its lines and keeps it inside the viewer, opening from the mouse.
+    private void placeMenu(double screenX, double screenY) {
+        this.menuWidth = Math.min(110, this.font.width(this.menuTitle) + 12);
+        for (MenuEntry entry : this.menu) this.menuWidth = Math.max(this.menuWidth, this.font.width(entry.label()) + 24);
+        ScreenRectangle b = this.getBounds();
+        this.menuX = Mth.clamp((int) screenX, b.left() + 1, Math.max(b.left() + 1, b.right() - this.menuWidth - 3));
+        this.menuY = Mth.clamp((int) screenY, b.top() + 1, Math.max(b.top() + 1, b.bottom() - this.menuHeight() - 3));
+    }
+
+    private boolean menuSplit() {
+        return this.menu.stream().anyMatch(MenuEntry::debug) && this.menu.stream().anyMatch(entry -> !entry.debug());
+    }
+
+    private int menuHeight() {
+        return MENU_HEADER + 2 + this.menu.size() * MENU_ROW + (this.menuSplit() ? MENU_SPLIT : 0) + 1 + ChoiceChrome.LIP;
+    }
+
+    // Where a menu line is drawn: the operators' lines sit a little lower, under the line that sets them apart.
+    private int menuRowY(int index) {
+        int y = this.menuY + MENU_HEADER + 2 + index * MENU_ROW;
+        if (this.menu.get(index).debug() && this.menuSplit()) y += MENU_SPLIT;
+        return y;
+    }
+
+    private int menuEntryAt(double x, double y) {
+        if (x < this.menuX || x >= this.menuX + this.menuWidth) return -1;
+        for (int i = 0; i < this.menu.size(); i++) {
+            int top = this.menuRowY(i);
+            if (y >= top && y < top + MENU_ROW) return i;
+        }
+        return -1;
+    }
+
+    // While the menu is open the next press is its own: on a line it does that, anywhere else it only closes the menu.
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (!this.menu.isEmpty()) {
+            int index = this.menuEntryAt(event.x(), event.y());
+            MenuEntry entry = index < 0 ? null : this.menu.get(index);
+            this.menu.clear();
+            if (entry != null && entry.enabled()) {
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                entry.action().run();
+            }
+            return true;
+        }
+        return super.mouseClicked(event, doubleClick);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        this.menu.clear();
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    private void drawMenu(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        // Over the tree's own text, which a stratum would otherwise draw on top of the menu's plate.
+        graphics.nextStratum();
+        // It drops into place as it opens.
+        float opened = this.animated() ? Math.min(1.0F, (Util.getMillis() - this.menuOpened) / 120.0F) : 1.0F;
+        int x = this.menuX, y = this.menuY - Math.round((1.0F - opened) * (1.0F - opened) * 5.0F), width = this.menuWidth, height = this.menuHeight();
+        int shift = y - this.menuY;
+        ChoiceChrome.plate(graphics, this.viewer, x, y, width, height, 0.0F, true);
+
+        // The head: the challenge's name on a darker band, closed by a line.
+        graphics.fill(x + 1, y + 1, x + width - 1, y + MENU_HEADER, this.viewer.themed(ChallengeDetailsPanel.FOOTER_FILL));
+        graphics.fill(x + 2, y + 1, x + width - 2, y + 2, 0x30FFFFFF);
+        graphics.fill(x + 1, y + MENU_HEADER, x + width - 1, y + MENU_HEADER + 1, this.viewer.themed(ChallengeDetailsPanel.FOOTER_EDGE));
+        graphics.fill(x + 1, y + MENU_HEADER + 1, x + width - 1, y + MENU_HEADER + 2, 0x20FFFFFF);
+        String title = this.menuTitle.getString();
+        CardViewerWidget.drawFittedText(graphics, this.font, this.menuTitle, w -> CardViewerWidget.ellipsize(this.font, title, w), x + 5, y + 4, width - 10,
+                RenderUtils.textColor(ChoiceChrome.TITLE), this.viewer.hasTextShadow());
+
+        int hovered = this.menuEntryAt(mouseX, mouseY);
+        boolean lined = false;
+        for (int i = 0; i < this.menu.size(); i++) {
+            MenuEntry entry = this.menu.get(i);
+            int rowY = this.menuRowY(i) + shift;
+            if (entry.debug() && !lined && this.menuSplit()) {
+                graphics.fill(x + 4, rowY - 3, x + width - 4, rowY - 2, 0x50000000);
+                graphics.fill(x + 4, rowY - 2, x + width - 4, rowY - 1, 0x20FFFFFF);
+                lined = true;
+            }
+            boolean lit = i == hovered && entry.enabled();
+            if (lit) {
+                // The line under the mouse: a lighter band with a gold bar at its left.
+                graphics.fill(x + 1, rowY, x + width - 1, rowY + MENU_ROW, 0x30FFFFFF);
+                graphics.fill(x + 1, rowY, x + 3, rowY + MENU_ROW, ChoiceChrome.GOLD);
+            }
+            int color = !entry.enabled() ? 0xFF7A766C : lit ? ChoiceChrome.GOLD : entry.debug() ? 0xFF9FDCFF : 0xFFFFFFFF;
+            int iconColor = !entry.enabled() ? 0xFF6A665E : lit ? ChoiceChrome.GOLD : ChoiceChrome.MUTED;
+            graphics.text(this.font, entry.icon(), x + 6 + (8 - Math.min(8, this.font.width(entry.icon()))) / 2, rowY + 2, iconColor, false);
+            graphics.text(this.font, entry.label(), x + 18, rowY + 2, color, false);
+        }
     }
 
     void setTree(@Nullable CardTree tree, boolean reveal) {
@@ -745,6 +927,10 @@ final class TierTreePanel extends ViewportPanel {
 
     @Override
     protected void extractViewForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        if (!this.menu.isEmpty()) {
+            this.drawMenu(graphics, mouseX, mouseY);
+            return;
+        }
         if (this.hoveredChallenge != null) {
             graphics.setTooltipForNextFrame(this.font, this.viewer.describeChallenge(this.hoveredChallenge), mouseX, mouseY);
         } else if (this.hoveredTier != null) {
@@ -758,6 +944,25 @@ final class TierTreePanel extends ViewportPanel {
     @Override
     protected boolean worldClicked(double worldX, double worldY, MouseButtonEvent event) {
         if (this.tree == null) return false;
+        // A right click on a challenge or a tier box opens its menu; anywhere else it does nothing.
+        if (event.button() == 1) {
+            for (TierNode tier : this.tree.tiers) {
+                if (tier.contains(worldX, worldY)) {
+                    if (this.openTierMenu(tier, event.x(), event.y())) {
+                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.2F));
+                    }
+                    return true;
+                }
+                for (ChallengeNode challenge : tier.challenges()) {
+                    if (challenge.state() != ChallengeState.LOCKED && challenge.contains(worldX, worldY)) {
+                        this.openMenu(challenge, event.x(), event.y());
+                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.2F));
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         for (TierNode tier : this.tree.tiers) {
             if (tier.contains(worldX, worldY)) {
                 ItemStack reward = this.viewer.claimableCertificate(tier);

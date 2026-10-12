@@ -46,6 +46,8 @@ This file is for listing all the changes to this project
 - Removed the half-transparent shadow pixels along the right and bottom edges of the Mining Skill Card textures (they showed as see-through pixels on a held card).
 - A Shape Certificate you carry and haven't used yet is no longer offered again by the next tier's certificate for the same tool.
 - The card viewer's Mastered box no longer says "Mastered" twice.
+- Right-clicking a challenge in the card viewer opens a menu: details, pin, reroll, and for operators with the edit mode on, edit, complete, reset and copy its id. Right-clicking a tier box opens one for the tier: claim its certificate or perk, pin or unpin all its challenges, and for operators, complete or reset them all.
+- The Choose a Shape and Choose a Perk panels are redrawn: a cleaner header with the tier as a chip, perks as rows that say what they do, and shapes on plates with dots for the rest of the list.
 - The Mine-Go Juice effect icons show the redrawn Mining Skill Card (a mastered card with the juice's tool) instead of the old card.
 - The Shape Designer is drawn on the Shape Selector's blueprint, with its layers in a column beside the grid; dragging over the grid draws or erases a stroke and the wheel steps through the layers.
 - Mine-Go Juice now sets the Ultimine block limit of its tier again (the check for an active juice never matched on 26.1.2).

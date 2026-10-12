@@ -65,6 +65,9 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
 
         void editChallenge(Identifier challengeId);
 
+        // Sets a challenge's progress outright (operators with the edit mode on; the server checks).
+        void setChallengeProgress(Identifier challengeId, int value);
+
         void rerollChallenge(Identifier challengeId);
 
         void claimCertificate(MiningSkillCardItem.Tier tier, Identifier shape);
@@ -345,6 +348,16 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
 
     void rerollChallenge(Identifier challengeId) {
         this.actions.rerollChallenge(challengeId);
+    }
+
+    void setChallengeProgress(Identifier challengeId, int value) {
+        this.actions.setChallengeProgress(challengeId, value);
+    }
+
+    // Whether the challenge is one the card is working on now (not one from a tier it has left).
+    boolean isCurrent(ChallengeNode node) {
+        MiningSkillCardData card = this.state.card();
+        return card != null && node.id() != null && card.getChallenge(node.id()).isPresent();
     }
 
     // The Shape Certificate this tier's box hands out, or empty when there's nothing to claim.

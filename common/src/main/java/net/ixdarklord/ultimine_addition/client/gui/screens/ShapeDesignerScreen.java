@@ -453,8 +453,8 @@ public final class ShapeDesignerScreen extends Screen {
         // A popup: the selector behind it (which blurs the world, once a frame), dimmed, and the designer in a stratum
         // of its own so the selector's items and text stay under it.
         if (this.parent != null) {
-            this.parent.extractBackground(graphics, -1, -1, partialTick);
-            this.parent.extractRenderState(graphics, -1, -1, partialTick);
+            this.parent.extractBackground(graphics, -10000, -10000, partialTick);
+            this.parent.extractRenderState(graphics, -10000, -10000, partialTick);
             graphics.nextStratum();
             graphics.fill(0, 0, this.width, this.height, 0x90101418);
         } else {
