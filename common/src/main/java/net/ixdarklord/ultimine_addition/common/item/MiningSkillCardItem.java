@@ -92,6 +92,17 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
             tooltipComponents.accept(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
         }
 
+        if (type != EMPTY && data != null && !data.isCreativeItem() && data.hasProgress()) {
+            if (data.getPrestige() > 0) {
+                component = Component.translatable("tooltip.ultimine_addition.skill_card.prestige", Component.literal(String.valueOf(data.getPrestige())).withStyle(ChatFormatting.GOLD));
+                tooltipComponents.accept(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
+            }
+            if (!data.getOwnerName().isEmpty() && net.ixdarklord.ultimine_addition.config.UAServerConfig.BIND_CARDS.get()) {
+                component = Component.translatable("tooltip.ultimine_addition.skill_card.owner", Component.literal(data.getOwnerName()).withStyle(ChatFormatting.AQUA));
+                tooltipComponents.accept(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
+            }
+        }
+
         if (Minecraft.getInstance().screen instanceof SkillsRecordScreen screen &&
                 screen.getMenu().getCardSlots().stream().anyMatch(slot -> slot.getItem().equals(stack))) return;
 

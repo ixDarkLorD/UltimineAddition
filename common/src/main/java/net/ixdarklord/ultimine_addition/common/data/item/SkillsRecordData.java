@@ -193,12 +193,29 @@ public final class SkillsRecordData {
                 LOGGER.debug("/----------------------------------------/");
             }
 
-            boolean eligible = !isMissingRequiredItems && !notEnoughInk && !isChallengeAccomplished && isCorrectAction && isValidBlock && isCorrectTool;
+            // Where the challenge counts: its dimensions, biomes and heights.
+            boolean isRightPlace = challengeData.conditions().test(player.level(), pos);
+            boolean eligible = !isMissingRequiredItems && !notEnoughInk && !isChallengeAccomplished && isCorrectAction && isValidBlock && isCorrectTool && isRightPlace;
             if (!eligible) continue;
 
+            // What an undo put back never counts again, whatever the setting above and its tag say.
+            if (hasCorrectGamemode && savedData.isRestoredByUndo(pos)) {
+                player.sendOverlayMessage(Component.literal("[").append(SkillsRecordItem.TITLE.copy().withStyle(ChatFormatting.YELLOW)).append("] ").withStyle(ChatFormatting.GRAY)
+                        .append(Component.translatable("info.ultimine_addition.restored_by_undo").withStyle(ChatFormatting.RED)));
+                continue;
+            }
             if (isBlockPlacedByEntity) {
                 this.notifyPlacedByEntity(savedData, pos, player);
                 continue;
+            }
+            // Where the server binds cards, only the first player to progress one can.
+            if (UAServerConfig.BIND_CARDS.get() && hasCorrectGamemode) {
+                if (!cardData.isOwnedBy(player)) {
+                    player.sendOverlayMessage(Component.literal("[").append(SkillsRecordItem.TITLE.copy().withStyle(ChatFormatting.YELLOW)).append("] ").withStyle(ChatFormatting.GRAY)
+                            .append(Component.translatable("info.ultimine_addition.card_bound", cardData.getOwnerName()).withStyle(ChatFormatting.RED)));
+                    continue;
+                }
+                cardData.bindTo(player);
             }
 
             boolean consuming = challengeData.challengeType().isConsuming();
@@ -211,6 +228,7 @@ public final class SkillsRecordData {
             // Done when the card still lists it as accomplished, or moved on to its next tier with it.
             if (cardData.getTier() != before || cardData.isChallengeAccomplished(challengeId)) {
                 net.ixdarklord.ultimine_addition.common.data.reward.DataRewards.onChallengeCompleted(player, cardData, before, challengeId);
+                if (hasCorrectGamemode) net.ixdarklord.ultimine_addition.common.progression.UltimineStats.onChallenge(player);
             }
             ProgressionRewards.checkTierUp(player, cardData, before);
             if (hasCorrectGamemode) this.consumeContents();

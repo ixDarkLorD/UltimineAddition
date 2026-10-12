@@ -25,7 +25,11 @@ public class PlayerAbilityData extends DataComponent<PlayerAbilityData> {
             Codec.unboundedMap(Codec.STRING, Identifier.CODEC.listOf()).optionalFieldOf("tool_shapes", Map.of()).forGetter(PlayerAbilityData::shapesAsLists),
             Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("tool_certificate_tiers", Map.of()).forGetter(data -> data.certificateTiers),
             Codec.STRING.optionalFieldOf("generic_juice", "").forGetter(PlayerAbilityData::getGenericJuice),
-            Timed.CODEC.optionalFieldOf("timed_challenge", Timed.NONE).forGetter(PlayerAbilityData::getTimed)
+            Timed.CODEC.optionalFieldOf("timed_challenge", Timed.NONE).forGetter(PlayerAbilityData::getTimed),
+            Stats.CODEC.optionalFieldOf("stats", Stats.NONE).forGetter(PlayerAbilityData::getStats),
+            Codec.unboundedMap(Codec.STRING, Codec.STRING.listOf()).optionalFieldOf("tool_perks", Map.of()).forGetter(PlayerAbilityData::perksAsLists),
+            Identifier.CODEC.listOf().optionalFieldOf("favorite_shapes", List.of()).forGetter(PlayerAbilityData::getFavoriteShapes),
+            Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("tool_prestige", Map.of()).forGetter(data -> data.prestige)
     ).apply(inst, PlayerAbilityData::new));
     public static final Codec<PlayerAbilityData> CODEC = MAP_CODEC.codec();
     public static final StreamCodec<RegistryFriendlyByteBuf, PlayerAbilityData> STREAM_CODEC = StreamCodec.composite(
@@ -34,7 +38,32 @@ public class PlayerAbilityData extends DataComponent<PlayerAbilityData> {
             ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.VAR_INT), data -> data.certificateTiers,
             ByteBufCodecs.STRING_UTF8, PlayerAbilityData::getGenericJuice,
             Timed.STREAM_CODEC, PlayerAbilityData::getTimed,
+            Stats.STREAM_CODEC, PlayerAbilityData::getStats,
+            ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list())), PlayerAbilityData::perksAsLists,
+            Identifier.STREAM_CODEC.apply(ByteBufCodecs.list()), PlayerAbilityData::getFavoriteShapes,
+            ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.VAR_INT), data -> data.prestige,
             PlayerAbilityData::new);
+
+    // What the player has done with Ultimine, for /ultimine_addition stats and top (UltimineStats).
+    public record Stats(long blocks, int operations, int largest, int undos, int dailies, int challenges) {
+        public static final Stats NONE = new Stats(0L, 0, 0, 0, 0, 0);
+        public static final Codec<Stats> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+                Codec.LONG.optionalFieldOf("blocks", 0L).forGetter(Stats::blocks),
+                Codec.INT.optionalFieldOf("operations", 0).forGetter(Stats::operations),
+                Codec.INT.optionalFieldOf("largest", 0).forGetter(Stats::largest),
+                Codec.INT.optionalFieldOf("undos", 0).forGetter(Stats::undos),
+                Codec.INT.optionalFieldOf("dailies", 0).forGetter(Stats::dailies),
+                Codec.INT.optionalFieldOf("challenges", 0).forGetter(Stats::challenges)
+        ).apply(inst, Stats::new));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Stats> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_LONG, Stats::blocks,
+                ByteBufCodecs.VAR_INT, Stats::operations,
+                ByteBufCodecs.VAR_INT, Stats::largest,
+                ByteBufCodecs.VAR_INT, Stats::undos,
+                ByteBufCodecs.VAR_INT, Stats::dailies,
+                ByteBufCodecs.VAR_INT, Stats::challenges,
+                Stats::new);
+    }
 
     // The player's progress in a daily or weekly challenge (TimedChallenge): which period and challenge it is for,
     // so a new day's challenge starts from nothing.
@@ -61,24 +90,94 @@ public class PlayerAbilityData extends DataComponent<PlayerAbilityData> {
     // The data pack card type the player's generic Mine-Go Juice is for (they share one effect), or "".
     private String genericJuice;
     private Timed timed;
+    private Stats stats;
+    // Card perks (CardPerk ids) learned per card type.
+    private final Map<String, Set<String>> perks = new HashMap<>();
+    // The shapes the player wants to cycle through; with none marked, all they can use.
+    private final Set<Identifier> favoriteShapes = new LinkedHashSet<>();
+    // How many times the player took a card of each type from Mastered back to Unlearned.
+    private final Map<String, Integer> prestige = new HashMap<>();
 
-    private PlayerAbilityData(boolean isUnlocked, Map<String, List<Identifier>> shapes, Map<String, Integer> certificateTiers, String genericJuice, Timed timed) {
+    private PlayerAbilityData(boolean isUnlocked, Map<String, List<Identifier>> shapes, Map<String, Integer> certificateTiers, String genericJuice, Timed timed, Stats stats,
+                              Map<String, List<String>> perks, List<Identifier> favoriteShapes, Map<String, Integer> prestige) {
         super(DATA_ID, CODEC);
         this.isUnlocked = isUnlocked;
         shapes.forEach((tool, list) -> this.shapes.put(tool, new LinkedHashSet<>(list)));
         this.certificateTiers.putAll(certificateTiers);
         this.genericJuice = genericJuice;
         this.timed = timed;
+        this.stats = stats;
+        perks.forEach((tool, list) -> this.perks.put(tool, new LinkedHashSet<>(list)));
+        this.favoriteShapes.addAll(favoriteShapes);
+        this.prestige.putAll(prestige);
     }
 
     public static PlayerAbilityData create() {
-        return new PlayerAbilityData(false, Map.of(), Map.of(), "", Timed.NONE);
+        return new PlayerAbilityData(false, Map.of(), Map.of(), "", Timed.NONE, Stats.NONE, Map.of(), List.of(), Map.of());
     }
 
     private Map<String, List<Identifier>> shapesAsLists() {
         Map<String, List<Identifier>> map = new HashMap<>();
         this.shapes.forEach((tool, set) -> map.put(tool, List.copyOf(set)));
         return map;
+    }
+
+    private Map<String, List<String>> perksAsLists() {
+        Map<String, List<String>> map = new HashMap<>();
+        this.perks.forEach((tool, set) -> map.put(tool, List.copyOf(set)));
+        return map;
+    }
+
+    public int getPrestige(String tool) {
+        return this.prestige.getOrDefault(tool, 0);
+    }
+
+    public PlayerAbilityData addPrestige(String tool) {
+        this.prestige.merge(tool, 1, Integer::sum);
+        return this;
+    }
+
+    public List<Identifier> getFavoriteShapes() {
+        return List.copyOf(this.favoriteShapes);
+    }
+
+    /** Marks or unmarks a shape; returns whether it is a favourite now. */
+    public boolean toggleFavoriteShape(Identifier shape) {
+        if (this.favoriteShapes.remove(shape)) return false;
+        this.favoriteShapes.add(shape);
+        return true;
+    }
+
+    public PlayerAbilityData clearFavoriteShapes() {
+        this.favoriteShapes.clear();
+        return this;
+    }
+
+    public Set<String> getPerks(String tool) {
+        return this.perks.getOrDefault(tool, Set.of());
+    }
+
+    public Map<String, Set<String>> getAllPerks() {
+        return this.perks;
+    }
+
+    public PlayerAbilityData learnPerk(String tool, String perk) {
+        this.perks.computeIfAbsent(tool, t -> new LinkedHashSet<>()).add(perk);
+        return this;
+    }
+
+    public PlayerAbilityData resetPerks() {
+        this.perks.clear();
+        return this;
+    }
+
+    public Stats getStats() {
+        return this.stats;
+    }
+
+    public PlayerAbilityData setStats(Stats stats) {
+        this.stats = stats;
+        return this;
     }
 
     public Timed getTimed() {

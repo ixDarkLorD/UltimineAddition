@@ -97,6 +97,21 @@ public final class CardHistory {
         return Collections.unmodifiableCollection(this.completedTiers.values());
     }
 
+    /** Forgets everything: the card starts over (a prestige). */
+    public void clear() {
+        this.observedTier = null;
+        this.observed.clear();
+        this.completionTimes.clear();
+        this.completedTiers.clear();
+    }
+
+    /** Every challenge the card has completed, in the tiers behind it and in the current one. */
+    public Set<Identifier> completedChallenges() {
+        Set<Identifier> done = new HashSet<>(this.completionTimes.keySet());
+        for (TierRecord tier : this.completedTiers.values()) tier.challenges().forEach(record -> done.add(record.id()));
+        return done;
+    }
+
     public OptionalLong getCompletionTime(Identifier challengeId) {
         Long time = this.completionTimes.get(challengeId);
         return time == null || time <= 0 ? OptionalLong.empty() : OptionalLong.of(time);

@@ -1,0 +1,28 @@
+{
+  "parent": "ultimine_addition:skills_record",
+  "criteria": {
+    "milestone": {
+      "conditions": {
+        "milestone": "perk"
+      },
+      "trigger": "ultimine_addition:milestone"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.milestone.perk.desc"
+    },
+    "icon": {
+      "id": "minecraft:spyglass"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.milestone.perk"
+    }
+  },
+  "requirements": [
+    [
+      "milestone"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -20,6 +20,8 @@ public class PayloadHandler {
         registerC2S(SkillsRecordPayload.EditChallenge.TYPE, SkillsRecordPayload.EditChallenge.STREAM_CODEC, SkillsRecordPayload.EditChallenge::handle);
         registerC2S(SkillsRecordPayload.RerollChallenge.TYPE, SkillsRecordPayload.RerollChallenge.STREAM_CODEC, SkillsRecordPayload.RerollChallenge::handle);
         registerC2S(SkillsRecordPayload.ClaimCertificate.TYPE, SkillsRecordPayload.ClaimCertificate.STREAM_CODEC, SkillsRecordPayload.ClaimCertificate::handle);
+        registerC2S(SkillsRecordPayload.ClaimPerk.TYPE, SkillsRecordPayload.ClaimPerk.STREAM_CODEC, SkillsRecordPayload.ClaimPerk::handle);
+        registerC2S(SkillsRecordPayload.Prestige.TYPE, SkillsRecordPayload.Prestige.STREAM_CODEC, SkillsRecordPayload.Prestige::handle);
         registerC2S(SkillsRecordPayload.RequestRecord.TYPE, SkillsRecordPayload.RequestRecord.STREAM_CODEC, SkillsRecordPayload.RequestRecord::handle);
         registerC2S(SkillsRecordPayload.RequestCard.TYPE, SkillsRecordPayload.RequestCard.STREAM_CODEC, SkillsRecordPayload.RequestCard::handle);
         registerC2S(UndoPayload.Request.TYPE, UndoPayload.Request.STREAM_CODEC, UndoPayload.Request::handle);
@@ -43,6 +45,7 @@ public class PayloadHandler {
         Network.registerClientbound(ShapeDiagramPayload.Diagrams.class, ShapeDiagramPayload.Diagrams::handle);
         Network.registerClientbound(SyncShapesPayload.class, SyncShapesPayload::handle);
         Network.registerClientbound(SyncCardTypesPayload.class, SyncCardTypesPayload::handle);
+        Network.registerClientbound(net.ixdarklord.ultimine_addition.network.payloads.SyncRewardsPayload.class, net.ixdarklord.ultimine_addition.network.payloads.SyncRewardsPayload::handle);
     }
 
     private static <T extends CustomPacketPayload> void registerC2S(CustomPacketPayload.Type<T> type, StreamCodec<? super RegistryFriendlyByteBuf, T> codec, PayloadReceiver<T> handler) {

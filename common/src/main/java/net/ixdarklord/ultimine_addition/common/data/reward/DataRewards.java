@@ -7,7 +7,10 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -37,6 +40,7 @@ import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 //   { "when": "tier", "card_type": "pickaxe", "tier": 2, "experience": 100, "commands": ["say @s is an Apprentice!"] }
 //   { "when": "timed", "loot_table": "mypack:rewards/daily" }   (the daily or weekly challenge, see TimedChallenge)
 //
+// "description" (text or a translation key) is what the card viewer shows for a challenge's reward before it is earned.
 // "challenge", "card_type" and "tier" narrow a reward down; one left out matches all. Commands run as the server, at the
 // player (@s is the player). They are read with the challenges (ChallengesManager), and only the server needs them.
 public final class DataRewards {
@@ -44,7 +48,7 @@ public final class DataRewards {
     private static List<Reward> rewards = List.of();
 
     private record Reward(Identifier id, String when, Optional<Identifier> challenge, Optional<String> cardType, Optional<Integer> tier,
-                          Optional<Identifier> lootTable, int experience, List<String> commands) {
+                          Optional<Identifier> lootTable, int experience, List<String> commands, String description) {
         boolean matches(MiningSkillCardItem.Type type, int tier, Identifier challenge) {
             return (this.challenge.isEmpty() || this.challenge.get().equals(challenge))
                     && (this.cardType.isEmpty() || this.cardType.get().equals(type.getId()))
@@ -53,7 +57,7 @@ public final class DataRewards {
     }
 
     private record Definition(String when, Optional<Identifier> challenge, Optional<String> cardType, Optional<Integer> tier,
-                              Optional<Identifier> lootTable, int experience, List<String> commands) {
+                              Optional<Identifier> lootTable, int experience, List<String> commands, String description) {
         static final Codec<Definition> CODEC = RecordCodecBuilder.<Definition>create(instance -> instance.group(
                 Codec.STRING.fieldOf("when").forGetter(Definition::when),
                 Identifier.CODEC.optionalFieldOf("challenge").forGetter(Definition::challenge),
@@ -61,7 +65,8 @@ public final class DataRewards {
                 Codec.INT.optionalFieldOf("tier").forGetter(Definition::tier),
                 Identifier.CODEC.optionalFieldOf("loot_table").forGetter(Definition::lootTable),
                 Codec.INT.optionalFieldOf("experience", 0).forGetter(Definition::experience),
-                Codec.STRING.listOf().optionalFieldOf("commands", List.of()).forGetter(Definition::commands)
+                Codec.STRING.listOf().optionalFieldOf("commands", List.of()).forGetter(Definition::commands),
+                Codec.STRING.optionalFieldOf("description", "").forGetter(Definition::description)
         ).apply(instance, Definition::new)).flatXmap(Definition::validate, DataResult::success);
 
         private DataResult<Definition> validate() {
@@ -81,6 +86,53 @@ public final class DataRewards {
     private DataRewards() {
     }
 
+    // --- Previews: what a reward gives, in words, for the card viewer. The server's own list in singleplayer; sent to
+    // the clients of a dedicated server (SyncRewardsPayload). "description" (plain text or a translation key) says it
+    // in the pack maker's words; without one the preview names the experience and says whether there are items.
+    public record Preview(String when, String challenge, String cardType, int tier, String description, int experience, boolean items, boolean other) {
+        Component text() {
+            if (!this.description.isEmpty()) return Component.translatable(this.description);
+            MutableComponent parts = Component.empty();
+            List<Component> list = new ArrayList<>();
+            if (this.experience > 0) list.add(Component.translatable("reward.ultimine_addition.experience", this.experience));
+            if (this.items) list.add(Component.translatable("reward.ultimine_addition.items"));
+            if (this.other || list.isEmpty()) list.add(Component.translatable("reward.ultimine_addition.other"));
+            for (int i = 0; i < list.size(); i++) {
+                if (i > 0) parts.append(", ");
+                parts.append(list.get(i));
+            }
+            return parts;
+        }
+
+        Component line() {
+            return (this.tier >= 0 ? Component.translatable("reward.ultimine_addition.preview.tier", this.tier, this.text())
+                    : Component.translatable("reward.ultimine_addition.preview", this.text())).withStyle(ChatFormatting.GOLD);
+        }
+    }
+
+    private static List<Preview> previews = List.of();
+
+    public static List<Preview> previews() {
+        return previews;
+    }
+
+    /** A remote server's rewards, on its clients. */
+    public static void setPreviews(List<Preview> list) {
+        previews = List.copyOf(list);
+    }
+
+    /** What completing this challenge with a card of this type gives, one line per reward. */
+    public static List<Component> previewChallenge(Identifier challenge, String cardType) {
+        List<Component> lines = new ArrayList<>();
+        for (Preview preview : previews) {
+            if (!preview.when().equals("challenge")) continue;
+            if (!preview.challenge().isEmpty() && !preview.challenge().equals(challenge.toString())) continue;
+            if (!preview.cardType().isEmpty() && !preview.cardType().equals(cardType)) continue;
+            lines.add(preview.line());
+        }
+        return lines;
+    }
+
     /** Reads the rewards of the loaded data packs. */
     public static void load(ResourceManager resourceManager) {
         List<Reward> loaded = new ArrayList<>();
@@ -89,12 +141,14 @@ public final class DataRewards {
             try (Reader reader = file.getValue().openAsReader()) {
                 Definition.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(reader))
                         .resultOrPartial(error -> LOGGER.error("Skipping the Ultimine reward {}: {}", id, error))
-                        .ifPresent(d -> loaded.add(new Reward(id, d.when(), d.challenge(), d.cardType(), d.tier(), d.lootTable(), d.experience(), d.commands())));
+                        .ifPresent(d -> loaded.add(new Reward(id, d.when(), d.challenge(), d.cardType(), d.tier(), d.lootTable(), d.experience(), d.commands(), d.description())));
             } catch (Exception e) {
                 LOGGER.error("Skipping the Ultimine reward {}: {}", id, e.getMessage());
             }
         }
         rewards = List.copyOf(loaded);
+        previews = loaded.stream().map(r -> new Preview(r.when(), r.challenge().map(Identifier::toString).orElse(""), r.cardType().orElse(""),
+                r.tier().orElse(-1), r.description(), r.experience(), r.lootTable().isPresent(), !r.commands().isEmpty())).toList();
         if (!loaded.isEmpty()) LOGGER.info("Loaded {} Ultimine reward(s) from data packs", loaded.size());
     }
 

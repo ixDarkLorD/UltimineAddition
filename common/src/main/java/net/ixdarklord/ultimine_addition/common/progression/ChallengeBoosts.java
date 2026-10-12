@@ -33,7 +33,11 @@ public final class ChallengeBoosts {
 
         int interval = UAServerConfig.STREAK_BONUS_INTERVAL.get();
         boolean streakBonus = interval > 0 && streak.count % interval == 0;
-        boolean lucky = ThreadLocalRandom.current().nextDouble() < UAServerConfig.LUCKY_FIND_CHANCE.get();
+        // The Fortune perk doubles the chance for its tool's challenges.
+        double chance = UAServerConfig.LUCKY_FIND_CHANCE.get();
+        var challengeData = net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager.INSTANCE.getAllChallenges().get(challengeId);
+        if (challengeData != null && CardPerk.FORTUNE.has(player, challengeData.forCardType())) chance *= 2.0;
+        boolean lucky = ThreadLocalRandom.current().nextDouble() < chance;
 
         Component challenge = Component.translatable("challenge.%s.%s.name".formatted(challengeId.getNamespace(), challengeId.getPath().replace('/', '.'))).withStyle(ChatFormatting.YELLOW);
         if (lucky) {

@@ -1,0 +1,28 @@
+{
+  "parent": "ultimine_addition:skills_record",
+  "criteria": {
+    "milestone": {
+      "conditions": {
+        "milestone": "daily"
+      },
+      "trigger": "ultimine_addition:milestone"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.ultimine_addition.milestone.daily.desc"
+    },
+    "icon": {
+      "id": "minecraft:sunflower"
+    },
+    "title": {
+      "translate": "advancement.ultimine_addition.milestone.daily"
+    }
+  },
+  "requirements": [
+    [
+      "milestone"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -19,6 +19,10 @@ import dev.ftb.mods.ftblibrary.util.Lazy;
 import net.minecraft.world.Container;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import net.ixdarklord.ultimine_addition.common.progression.CardPerk;
+import net.ixdarklord.ultimine_addition.common.progression.UltimineStats;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +40,9 @@ import java.util.function.IntSupplier;
 @Mixin(value = FTBUltimine.class)
 public abstract class FTBUltimineMixin {
     @Shadow @Final private Lazy<ItemCollector> tempBlockDropsList;
+    // The operation being carried out: whose it is, and how many blocks it has broken.
+    @Unique private ServerPlayer ua$player;
+    @Unique private int ua$broken;
 
     @Redirect(method = "handleBlockBreak", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/config/FTBUltimineServerConfig;getMaxBlocks(Lnet/minecraft/server/level/ServerPlayer;)I"))
     private int UA$Redirect$blockBroken(ServerPlayer player) {
@@ -56,6 +63,8 @@ public abstract class FTBUltimineMixin {
 
     @Inject(method = "handleBlockBreak", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/utils/ItemCollector;clear()V"))
     private void UA$undoBegin(LevelAccessor level, BlockPos origPos, BlockState state, ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
+        this.ua$player = player;
+        this.ua$broken = 0;
         UltimineUndo.begin(player, origPos);
     }
 
@@ -73,6 +82,7 @@ public abstract class FTBUltimineMixin {
         int collectedBefore = collected.size();
         BlockState[] neighbours = UltimineUndo.neighbours(player.level(), pos);
         boolean result = original.call(player, pos, state, shape, hit);
+        if (result) this.ua$broken++;
         List<ItemStack> blockDrops = collected.size() > collectedBefore ? List.copyOf(collected.subList(collectedBefore, collected.size())) : List.of();
         UltimineUndo.recordBlock(player, pos, before, neighbours, contents, blockDrops);
         return result;
@@ -87,10 +97,52 @@ public abstract class FTBUltimineMixin {
         original.call(collector, level, pos);
         List<ItemEntity> spawned = level.getEntitiesOfClass(ItemEntity.class, area, entity -> !before.contains(entity));
         UltimineUndo.recordDrops(drops, spawned);
+        // Straight to the player, where the server has that on: picked up as if walked over, so what doesn't fit stays
+        // on the ground (and undo finds the rest in the inventory).
+        ServerPlayer player = this.ua$player;
+        if (player != null && !player.isSpectator() && (UAServerConfig.DROPS_TO_INVENTORY.get() || CardPerk.MAGNET.has(player))) {
+            for (ItemEntity entity : spawned) {
+                if (!entity.isAlive()) continue;
+                entity.setNoPickUpDelay();
+                entity.playerTouch(player);
+            }
+        }
+    }
+
+    // An Ultimine with a tool's right-click: what the blocks were and what they became, for undo.
+    @WrapOperation(method = "blockRightClick", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/rightclick/RightClickDispatcher;dispatchRightClick(Ldev/ftb/mods/ftbultimine/api/shape/ShapeContext;Lnet/minecraft/world/InteractionHand;Ldev/ftb/mods/ftbultimine/FTBUltiminePlayerData;)I"))
+    private int UA$undoRecordRightClick(dev.ftb.mods.ftbultimine.rightclick.RightClickDispatcher dispatcher, dev.ftb.mods.ftbultimine.api.shape.ShapeContext context,
+                                        net.minecraft.world.InteractionHand hand, FTBUltiminePlayerData data, Operation<Integer> original) {
+        ServerPlayer player = context.player();
+        List<BlockPos> positions = List.copyOf(data.cachedPositions());
+        List<BlockState> before = positions.stream().map(pos -> player.level().getBlockState(pos)).toList();
+        int result = original.call(dispatcher, context, hand, data);
+        if (result > 0) {
+            net.ixdarklord.ultimine_addition.common.progression.JuicePause.onUltimine(player);
+            List<BlockState> after = positions.stream().map(pos -> player.level().getBlockState(pos)).toList();
+            UltimineUndo.recordRevert(player, context.origPos(), positions, before, after);
+        }
+        return result;
     }
 
     @Inject(method = "handleBlockBreak", at = @At("RETURN"))
     private void UA$undoFinish(LevelAccessor level, BlockPos origPos, BlockState state, ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
         UltimineUndo.finish(player, cir.getReturnValueZ());
+        // Only the outer call that did the work (see UltimineUndo.finish).
+        if (cir.getReturnValueZ() && this.ua$player == player) {
+            UltimineStats.onUltimine(player, this.ua$broken);
+            net.ixdarklord.ultimine_addition.common.progression.JuicePause.onUltimine(player);
+            net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.add(player.getMainHandItem(), this.ua$broken);
+            // A chime for a big one, higher the bigger it was.
+            if (this.ua$broken >= 8 && UAServerConfig.ULTIMINE_SOUND.get()) {
+                player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,
+                        net.minecraft.sounds.SoundSource.PLAYERS, 0.5F, 0.8F + Math.min(this.ua$broken, 64) / 64.0F * 0.8F);
+            }
+            // The Vigor perk: a moment of Haste after the work.
+            if (this.ua$broken > 1 && CardPerk.VIGOR.has(player)) {
+                player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.HASTE, CardPerk.VIGOR_TICKS, 0, true, false, true));
+            }
+            this.ua$player = null;
+        }
     }
 }

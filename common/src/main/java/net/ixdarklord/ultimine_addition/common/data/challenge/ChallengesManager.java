@@ -72,7 +72,7 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener<JsonElem
         for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.getDataTypes()) {
             MiningSkillCardItem.Tier missing = null;
             for (MiningSkillCardItem.Tier tier : List.of(MiningSkillCardItem.Tier.Unlearned, MiningSkillCardItem.Tier.Novice, MiningSkillCardItem.Tier.Apprentice, MiningSkillCardItem.Tier.Adept)) {
-                if (this.challenges.values().stream().noneMatch(data -> data.forCardType().equals(type) && data.forCardTier().isEligible(tier))) {
+                if (this.challenges.values().stream().noneMatch(data -> data.forCardType().equals(type) && data.forCardTier().isEligible(tier) && data.requires().isEmpty())) {
                     missing = tier;
                     break;
                 }
@@ -88,7 +88,20 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener<JsonElem
     }
 
     public Map<Identifier, ChallengeData> getRandomChallenges(int quantity, MiningSkillCardItem.Type type, MiningSkillCardItem.Tier tier) {
-        int available = challenges.values().stream().filter(data -> (data.forCardType().equals(type) && data.forCardTier().isEligible(tier))).toList().size();
+        return this.getRandomChallenges(quantity, type, tier, Set.of());
+    }
+
+    /**
+     * Challenges for a card of this type at this tier. A chained challenge ("requires") is only among them once the
+     * card has completed the ones it names.
+     */
+    public Map<Identifier, ChallengeData> getRandomChallenges(int quantity, MiningSkillCardItem.Type type, MiningSkillCardItem.Tier tier, Set<Identifier> completed) {
+        List<Map.Entry<Identifier, ChallengeData>> eligible = new ArrayList<>();
+        for (Map.Entry<Identifier, ChallengeData> entry : this.challenges.entrySet()) {
+            ChallengeData data = entry.getValue();
+            if (data.forCardType().equals(type) && data.forCardTier().isEligible(tier) && completed.containsAll(data.requires())) eligible.add(entry);
+        }
+        int available = eligible.size();
         if (available > 0 && quantity > available) {
             // Fewer challenges than the tier rolls (the server config's challenges_amount): the card gets them all.
             LOGGER.warn("Only {} {} challenge(s) for tier {}, not the {} a card rolls: using all of them", available, type.getId(), tier.name().toLowerCase(), quantity);
@@ -99,16 +112,9 @@ public class ChallengesManager extends SimpleJsonResourceReloadListener<JsonElem
             throw new IllegalArgumentException(error);
         }
 
+        Collections.shuffle(eligible);
         Map<Identifier, ChallengeData> randomValues = new HashMap<>();
-        Random random = new Random();
-        while (randomValues.size() < quantity) {
-            int randomIndex = random.nextInt(challenges.size());
-            Identifier[] keys = challenges.keySet().toArray(new Identifier[0]);
-            Identifier randomKey = keys[randomIndex];
-            if (challenges.get(randomKey).forCardType().equals(type) && challenges.get(randomKey).forCardTier().isEligible(tier)) {
-                randomValues.put(randomKey, challenges.get(randomKey));
-            }
-        }
+        for (Map.Entry<Identifier, ChallengeData> entry : eligible.subList(0, quantity)) randomValues.put(entry.getKey(), entry.getValue());
         if (UAServerConfig.CHALLENGE_MANAGER_LOGGER.get() || Platform.isDevelopmentEnvironment()) {
             LOGGER.debug("/----------[Challenge Tracker]-----------/");
             LOGGER.debug("| Added Challenges:");

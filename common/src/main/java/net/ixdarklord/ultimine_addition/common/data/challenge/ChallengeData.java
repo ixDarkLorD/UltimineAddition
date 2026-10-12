@@ -9,6 +9,7 @@ import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -17,14 +18,25 @@ import java.util.Random;
 
 public record ChallengeData(MiningSkillCardItem.Type forCardType, MiningSkillCardItem.Tier forCardTier,
                             Type challengeType, Pair<Integer, Integer> requiredAmount, ItemStack requiredSpecificTool,
-                            List<String> targetedBlocks) {
+                            List<String> targetedBlocks,
+                            // Where it counts (dimension, biome, height); NONE for anywhere.
+                            ChallengeConditions conditions,
+                            // A chain: a card only rolls this challenge after it has completed these.
+                            List<Identifier> requires) {
+    public ChallengeData(MiningSkillCardItem.Type forCardType, MiningSkillCardItem.Tier forCardTier, Type challengeType,
+                         Pair<Integer, Integer> requiredAmount, ItemStack requiredSpecificTool, List<String> targetedBlocks) {
+        this(forCardType, forCardTier, challengeType, requiredAmount, requiredSpecificTool, targetedBlocks, ChallengeConditions.NONE, List.of());
+    }
+
     public static final Codec<ChallengeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             MiningSkillCardItem.Type.CODEC.fieldOf("for_card_type").forGetter(ChallengeData::forCardType),
             MiningSkillCardItem.Tier.CODEC.fieldOf("for_card_tier").forGetter(ChallengeData::forCardTier),
             Type.CODEC.fieldOf("challenge_type").forGetter(ChallengeData::challengeType),
             Codec.pair(Codec.INT.fieldOf("min").codec(), Codec.INT.fieldOf("max").codec()).optionalFieldOf("required_amount", new Pair<>(1, 1)).forGetter(ChallengeData::getRequiredAmountPair),
             ItemStack.CODEC.optionalFieldOf("required_specific_tool", ItemStack.EMPTY, Lifecycle.experimental()).forGetter(ChallengeData::requiredSpecificTool),
-            Codec.STRING.listOf().fieldOf("targeted_blocks").forGetter(ChallengeData::targetedBlocks)
+            Codec.STRING.listOf().fieldOf("targeted_blocks").forGetter(ChallengeData::targetedBlocks),
+            ChallengeConditions.CODEC.optionalFieldOf("conditions", ChallengeConditions.NONE).forGetter(ChallengeData::conditions),
+            Identifier.CODEC.listOf().optionalFieldOf("requires", List.of()).forGetter(ChallengeData::requires)
     ).apply(instance, ChallengeData::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ChallengeData> STREAM_CODEC = StreamCodec.of(ChallengeData::writeBuffer, ChallengeData::readBuffer);
@@ -50,6 +62,8 @@ public record ChallengeData(MiningSkillCardItem.Type forCardType, MiningSkillCar
 
         ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, data.requiredSpecificTool());
         buf.writeCollection(data.targetedBlocks(), FriendlyByteBuf::writeUtf);
+        data.conditions().write(buf);
+        buf.writeCollection(data.requires(), (b, id) -> b.writeUtf(id.toString()));
     }
 
     public static ChallengeData readBuffer(RegistryFriendlyByteBuf buf) {
@@ -59,7 +73,9 @@ public record ChallengeData(MiningSkillCardItem.Type forCardType, MiningSkillCar
         Pair<Integer, Integer> requiredAmounts = Pair.of(buf.readInt(), buf.readInt());
         ItemStack requiredSpecificTool = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
         List<String> targetedBlocks = buf.readList(FriendlyByteBuf::readUtf);
-        return new ChallengeData(cardType, cardTier, type, requiredAmounts, requiredSpecificTool, targetedBlocks);
+        ChallengeConditions conditions = ChallengeConditions.read(buf);
+        List<Identifier> requires = buf.readList(b -> Identifier.parse(b.readUtf()));
+        return new ChallengeData(cardType, cardTier, type, requiredAmounts, requiredSpecificTool, targetedBlocks, conditions, requires);
     }
 
     public enum Type {

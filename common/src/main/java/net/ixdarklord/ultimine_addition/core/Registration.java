@@ -210,6 +210,7 @@ public class Registration {
     public static final RegistryEntry<DataComponentType<StorageItemData>> ITEM_STORAGE_DATA = DATA_COMPONENT_TYPE.register("item_storage_data", () -> StorageItemData.DATA_COMPONENT);
     public static final RegistryEntry<DataComponentType<String>> CARD_TYPE_COMPONENT = DATA_COMPONENT_TYPE.register("card_type", () -> GenericMiningSkillCardItem.TYPE_COMPONENT);
     public static final RegistryEntry<DataComponentType<GenericMineGoJuiceItem.Juice>> GENERIC_JUICE_COMPONENT = DATA_COMPONENT_TYPE.register("generic_juice", () -> GenericMineGoJuiceItem.COMPONENT);
+    public static final RegistryEntry<DataComponentType<Integer>> TOOL_AFFINITY_COMPONENT = DATA_COMPONENT_TYPE.register("affinity", () -> net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.COMPONENT);
     public static final RegistryEntry<DataComponentType<SelectedShapeData>> SELECTED_SHAPE_COMPONENT = DATA_COMPONENT_TYPE.register("selected_shape", () -> DataComponentType.<SelectedShapeData>builder().persistent(SelectedShapeData.CODEC).networkSynchronized(SelectedShapeData.STREAM_CODEC).build());
 
     // Particles
@@ -224,4 +225,5 @@ public class Registration {
 
     //Criterion Triggers
     public static final RegistryEntry<UltimineObtainTrigger> ULTIMINE_OBTAIN_TRIGGER = CRITERIA_TRIGGERS.register("ultimine_obtain", UltimineObtainTrigger::new);
+    public static final RegistryEntry<net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger> MILESTONE_TRIGGER = CRITERIA_TRIGGERS.register("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger::new);
 }

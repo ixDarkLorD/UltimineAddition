@@ -15,7 +15,24 @@ This file is for listing all the changes to this project
 - The Shape Selector shows a small diagram of each shape in its list.
 - A Shape Certificate for a data pack card type shows that type's icon.
 
+- **Card perks**: a Mining Skill Card reaching Novice, Apprentice or Adept offers one of two perks for its tool, picked from the tier's box in the Skills Record (after its Shape Certificate) and kept for good: **Reach** (a quarter more blocks in an Ultimine), **Magnet** (drops go into the inventory), **Fortune** (lucky finds twice as often in that tool's challenges) or **Vigor** (a few seconds of Haste after an Ultimine). `progression.card_perks` turns them off; `/ultimine_addition stats` lists yours.
+- **Tool affinity**: a tool counts the blocks Ultimined with it (shown in its tooltip); every 500 add a percent to the blocks its Ultimines can take, up to ten (`progression.tool_affinity`).
+- **Favourite shapes**: `/ultimine_addition favorite <shape>` marks or unmarks a shape; with any marked, cycling shapes only goes through those. `favorite` alone lists them and `favorite clear` unmarks all.
+- An Ultimine of eight blocks or more ends with a soft chime, higher the bigger it was (`general.ultimine_sound`).
+- **Prestige**: a Mastered Mining Skill Card can start over as Unlearned from its Mastered box in the Skills Record (two clicks, up to five times). Each time adds 5% to the blocks an Ultimine with the card's tool can take, for good, and the tiers' perks and Shape Certificates can be claimed again on the way back up (`mining_skill_cards.prestige`).
+- **Undo for tool actions**: stripping logs, tilling and making paths with Ultimine can be undone like mined blocks, for nothing; the blocks still as the tool left them are turned back.
+- **Bound cards**: with `mining_skill_cards.bind_to_player` on, a card belongs to the first player who makes progress on it and nobody else can progress it. Off by default.
+- **Juice that waits**: with `progression.juice_idle_pause` set to a number of seconds, a drunk Mine-Go Juice only runs down for that long after each Ultimine. Off (0) by default.
+- **Advancements**: for the first undo, the first daily challenge, the first perk, an Ultimine of 64 blocks, and 1,000 blocks Ultimined.
+- The Skills Record's tooltip (with Shift) shows your Ultimine statistics.
+- **Challenge conditions**: a challenge file's `conditions` limit where it counts: `dimensions`, `biomes` (ids, or tags starting with `#`), `min_y` and `max_y`. The card viewer and the daily challenge say so.
+- **Challenge chains**: a challenge with `requires` (a list of challenge ids) is only rolled by a card that has completed those, so packs can build follow-ups.
+- **Reward previews**: a challenge's data pack rewards show in its details in the card viewer before they are earned. A reward's `description` (text or a translation key) says what it is; without one the preview names the experience and says whether there are items.
+- **Statistics and a leaderboard**: `/ultimine_addition stats` shows your blocks Ultimined, largest Ultimine, challenges, daily challenges and undos; `/ultimine_addition top [blocks|largest|challenges|dailies|undos]` ranks the players seen since the server started.
+- **Drops to inventory**: `general.drops_to_inventory` in the server config sends an Ultimine's drops straight to the player; what doesn't fit stays on the ground.
+
 ### 🐛 Bug Fixes & Improvements
+- Blocks an undo puts back never count for challenges again, whatever `is_placed_by_entity_condition` and its deny tag say: mining, undoing and mining again could otherwise be repeated for progress. The daily challenge follows the same rule.
 - A Mining Skill Card shows its tool as an item on its plate (the netherite tool for the built-in cards) instead of a picture baked into the texture: the card textures leave the plate empty. The tool is part of the card's item model, so it shows in the hand, on the ground and in item frames too.
 - The Mining Skill Card textures have a slot behind the tool, like the one behind the empty card's question mark.
 - A generic Mining Skill Card or a Shape Certificate whose card type no data pack has anymore shows a question mark where the tool goes, and the certificate is named "Unknown" instead of a raw translation key.
