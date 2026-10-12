@@ -2,7 +2,7 @@
 This file is for listing all the changes to this project
 <hr>
 
-## v2001.2.0.4 Unreleased
+## v2001.2.0.4 Release - Oct 12, 2026
 ### ✨ New Features
 - **Mining Skill Cards from data packs**: `data/<namespace>/mining_skill_cards/<name>.json` adds a card type for other tools, with a `name`, its `tools` (item ids or `#tags`), an `icon` item for the card, and its Mine-Go Juice's `juice_color` and `juice_name`. Challenges name the type in `for_card_type` (`mypack:hammer`). The types reload with `/reload` and are sent to every player.
   - `name` and `juice_name` can be translation keys, for a resource pack's language files (plain text shows as written); without a `name` the key is `ultimine_addition.card_type.<namespace>.<name>`, and without a `juice_name` the juice is named by that key with `.juice` when a language file has it.
@@ -42,6 +42,8 @@ This file is for listing all the changes to this project
 - Blocks an undo puts back never count for challenges again, whatever `is_placed_by_entity_condition` and its deny tag say: mining, undoing and mining again could otherwise be repeated for progress. The daily challenge follows the same rule.
 - A Shape Certificate you carry and haven't used yet is no longer offered again by the next tier's certificate for the same tool.
 - The card viewer's Mastered box no longer says "Mastered" twice.
+- Right-clicking a challenge in the card viewer opens a menu: details, pin, reroll, and for operators with the edit mode on, edit, complete, reset and copy its id. Right-clicking a tier box opens one for the tier: claim its certificate or perk, pin or unpin all its challenges, and for operators, complete or reset them all.
+- The Choose a Shape and Choose a Perk panels are redrawn: a cleaner header with the tier as a chip, perks as rows that say what they do, and shapes on plates with dots for the rest of the list.
 - The Mine-Go Juice effect icons show the redrawn Mining Skill Card (a mastered card with the juice's tool) instead of the old card.
 - The Shape Designer is drawn on the Shape Selector's blueprint, with its layers in a column beside the grid; dragging over the grid draws or erases a stroke and the wheel steps through the layers.
 - The Mining Skill Card textures have a slot behind the tool, like the one behind the empty card's question mark, the tool is drawn a little larger, and the half-transparent shadow pixels along the cards' right and bottom edges are gone.

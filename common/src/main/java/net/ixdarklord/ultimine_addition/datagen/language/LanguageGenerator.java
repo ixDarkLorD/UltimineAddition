@@ -406,6 +406,18 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("gui.ultimine_addition.card_viewer.unpin", "Unpin");
         this.add("gui.ultimine_addition.card_viewer.edit", "Edit");
         this.add("gui.ultimine_addition.card_viewer.reroll", "Reroll");
+        this.add("gui.ultimine_addition.card_viewer.menu.details", "Details");
+        this.add("gui.ultimine_addition.card_viewer.menu.reroll", "Reroll (%s left)");
+        this.add("gui.ultimine_addition.card_viewer.menu.edit", "Edit progress");
+        this.add("gui.ultimine_addition.card_viewer.menu.complete", "Complete");
+        this.add("gui.ultimine_addition.card_viewer.menu.reset", "Reset");
+        this.add("gui.ultimine_addition.card_viewer.menu.copy_id", "Copy ID");
+        this.add("gui.ultimine_addition.card_viewer.menu.claim", "Claim certificate");
+        this.add("gui.ultimine_addition.card_viewer.menu.perk", "Choose a perk");
+        this.add("gui.ultimine_addition.card_viewer.menu.pin_all", "Pin all");
+        this.add("gui.ultimine_addition.card_viewer.menu.unpin_all", "Unpin all");
+        this.add("gui.ultimine_addition.card_viewer.menu.complete_all", "Complete all");
+        this.add("gui.ultimine_addition.card_viewer.menu.reset_all", "Reset all");
         this.add("gui.ultimine_addition.card_viewer.certificate.ready", "Shape Certificate Ready");
         this.add("item.ultimine_addition.shape_certificate.named", "%s Certificate (%s)");
         this.add("gui.ultimine_addition.card_viewer.certificate.choices", "Choose 1 of %s shapes");

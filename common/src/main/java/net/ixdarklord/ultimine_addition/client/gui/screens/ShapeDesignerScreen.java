@@ -459,7 +459,7 @@ public final class ShapeDesignerScreen extends Screen {
         // A popup: the selector behind it (which draws the dimmed world), dimmed, and the designer above it (its z is
         // above the selector's items and their counts), so the selector's items and text stay under it.
         if (this.parent != null) {
-            this.parent.render(graphics, -1, -1, partialTick);
+            this.parent.render(graphics, -10000, -10000, partialTick);
             GuiDraw.nextStratum(graphics);
         } else {
             this.renderBackground(graphics);
