@@ -263,6 +263,18 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     }
 
     @Override
+    public void prestigeCard() {
+        if (this.selectedSlot < 0) return;
+        PayloadHandler.sendToServer(new SkillsRecordPayload.Prestige(this.selectedSlot));
+    }
+
+    @Override
+    public void claimPerk(MiningSkillCardItem.Tier tier, net.ixdarklord.ultimine_addition.common.progression.CardPerk perk) {
+        if (this.selectedSlot < 0) return;
+        PayloadHandler.sendToServer(new SkillsRecordPayload.ClaimPerk(this.selectedSlot, tier.getValue(), perk.id()));
+    }
+
+    @Override
     public void claimCertificate(MiningSkillCardItem.Tier tier, ResourceLocation shape) {
         if (this.selectedSlot < 0) return;
         PayloadHandler.sendToServer(new SkillsRecordPayload.ClaimCertificate(this.selectedSlot, tier.getValue(), shape));

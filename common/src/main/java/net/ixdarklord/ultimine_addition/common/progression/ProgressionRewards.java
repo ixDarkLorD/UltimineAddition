@@ -30,6 +30,7 @@ public final class ProgressionRewards {
     private static void onTierUp(ServerPlayer player, MiningSkillCardData card, MiningSkillCardItem.Tier tier) {
         // What data packs hand out for this tier.
         net.ixdarklord.ultimine_addition.common.data.reward.DataRewards.onTierReached(player, card, tier);
+        ProgressionHooks.fire(ProgressionHooks.Kind.TIER_REACHED, player, card.getType().getId(), tier.getValue(), null, "");
         List<Component> lines = new ArrayList<>();
         ItemStack icon = card.getStack() == null ? ItemStack.EMPTY : card.getStack().copyWithCount(1);
 

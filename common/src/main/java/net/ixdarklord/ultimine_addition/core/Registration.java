@@ -210,6 +210,7 @@ public class Registration {
     public static final ItemComponentType<StorageItemData> ITEM_STORAGE_DATA = StorageItemData.DATA_COMPONENT;
     public static final ItemComponentType<String> CARD_TYPE_COMPONENT = GenericMiningSkillCardItem.TYPE_COMPONENT;
     public static final ItemComponentType<GenericMineGoJuiceItem.Juice> GENERIC_JUICE_COMPONENT = GenericMineGoJuiceItem.COMPONENT;
+    public static final ItemComponentType<Integer> TOOL_AFFINITY_COMPONENT = net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.COMPONENT;
     public static final ItemComponentType<SelectedShapeData> SELECTED_SHAPE_COMPONENT = new ItemComponentType<>(FTBUltimineAddition.id("selected_shape_data"), SelectedShapeData.CODEC);
 
     // Particles
@@ -225,4 +226,5 @@ public class Registration {
     //Criterion Triggers
     // 1.20.1 has no trigger registry: triggers are added to CriteriaTriggers.
     public static final Supplier<UltimineObtainTrigger> ULTIMINE_OBTAIN_TRIGGER = Suppliers.ofInstance(CriteriaTriggers.register(new UltimineObtainTrigger()));
+    public static final Supplier<net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger> MILESTONE_TRIGGER = Suppliers.ofInstance(CriteriaTriggers.register(new net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger()));
 }

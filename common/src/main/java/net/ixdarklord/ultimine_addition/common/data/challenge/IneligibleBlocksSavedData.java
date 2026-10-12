@@ -31,9 +31,30 @@ public class IneligibleBlocksSavedData extends SavedData {
         this.chunkEntries = chunkEntries;
     }
 
+    // The "placer" of the blocks an Ultimine undo put back. They never count for challenges again, whatever the
+    // placed-by-entity setting and its deny tag say: mining, undoing and mining again would otherwise be free progress.
+    public static final ResourceLocation UNDO = FTBUltimineAddition.id("undo");
+
     public void add(Entity entity, BlockInfo blockInfo) {
-        ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-        UUID entityUUID = entity.getUUID();
+        this.add(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()), entity.getUUID(), blockInfo);
+    }
+
+    /** Marks a block an undo put back for this player. */
+    public void addRestored(UUID player, BlockInfo blockInfo) {
+        this.add(UNDO, player, blockInfo);
+    }
+
+    public boolean isRestoredByUndo(BlockPos pos) {
+        List<BlockEntry> entries = this.chunkEntries.get(new ChunkPos(pos));
+        if (entries == null) return false;
+        for (BlockEntry entry : entries) {
+            if (!entry.placerData.entityId.equals(UNDO)) continue;
+            for (BlockInfo info : entry.placedBlocks) if (info.pos.equals(pos)) return true;
+        }
+        return false;
+    }
+
+    private void add(ResourceLocation entityId, UUID entityUUID, BlockInfo blockInfo) {
         ChunkPos chunkPos = new ChunkPos(blockInfo.pos);
 
         List<BlockEntry> blockEntryList = chunkEntries.computeIfAbsent(chunkPos, k -> new ArrayList<>());
@@ -103,10 +124,12 @@ public class IneligibleBlocksSavedData extends SavedData {
     }
 
     public boolean isBlockPlacedByEntity(BlockPos pos) {
-        return chunkEntries.values().stream()
-                .flatMap(List::stream)
-                .flatMap(blockEntry -> blockEntry.placedBlocks.stream())
-                .anyMatch(blockInfo -> blockInfo.pos.equals(pos));
+        List<BlockEntry> entries = this.chunkEntries.get(new ChunkPos(pos));
+        if (entries == null) return false;
+        for (BlockEntry entry : entries) {
+            for (BlockInfo info : entry.placedBlocks) if (info.pos.equals(pos)) return true;
+        }
+        return false;
     }
 
     public Map<ChunkPos, List<BlockEntry>> getChunkEntries() {

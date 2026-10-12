@@ -35,6 +35,10 @@ public final class UAServerConfig {
                     "Press \"F3-H\" and then hold \"Left Shift\" in the Shape Selector to see a shape's ID.",
                     "Example: [\"ftbultimine:shapeless\", \"ftbultimine:small_tunnel\"]")
             .build();
+    public static final ConfigValue<Boolean> ULTIMINE_SOUND = BUILDER.bool("ultimine_sound", true)
+            .comment("An Ultimine of eight blocks or more ends with a soft chime, higher the bigger it was.").build();
+    public static final ConfigValue<Boolean> DROPS_TO_INVENTORY = BUILDER.bool("drops_to_inventory", false)
+            .comment("An Ultimine's drops go straight into the player's inventory; what doesn't fit stays on the ground.").build();
     public static final ConfigValue<Boolean> IS_PLACED_BY_ENTITY_CONDITION = BUILDER.bool("is_placed_by_entity_condition", true)
             .comment("If enabled, blocks placed by entities don't count towards challenges.").build();
     public static final ConfigValue<Integer> CARD_VALIDATOR = BUILDER.intValue("challenge_validator", 2).range(1, 600)
@@ -75,11 +79,36 @@ public final class UAServerConfig {
     public static final ConfigValue<Integer> REROLL_INK_COST = BUILDER.intValue("reroll_ink_cost", 16).range(0, 1000)
             .comment("Ink taken from the Skills Record's pen for each reroll.")
             .enabledWhen(REROLLS_PER_TIER, rerolls -> rerolls > 0).build();
+    public static final ConfigValue<Integer> CUSTOM_SHAPES_PER_PLAYER = BUILDER.intValue("custom_shapes_per_player", 3).range(0, 20)
+            .comment("How many shapes of their own a player may keep, drawn in the Shape Designer (opened from the Shape Selector).",
+                    "A player learns their shape for the tools they can already Ultimine with. 0 turns the designer off.")
+            .build();
+    public static final ConfigValue<Integer> CUSTOM_SHAPES_MAX_BLOCKS = BUILDER.intValue("custom_shapes_max_blocks", 8).range(1, 24)
+            .comment("The most blocks a player-made shape may have, besides the one being broken.")
+            .enabledWhen(CUSTOM_SHAPES_PER_PLAYER, shapes -> shapes > 0).build();
+    public static final ConfigValue<Integer> JUICE_IDLE_PAUSE = BUILDER.intValue("juice_idle_pause", 0).range(0, 600)
+            .comment("With a number of seconds here, a drunk Mine-Go Juice only runs down for that long after each Ultimine,",
+                    "and waits the rest of the time, so it isn't wasted on the way to the mine. 0 keeps it a plain timer.")
+            .build();
+    public static final ConfigValue<Boolean> TOOL_AFFINITY = BUILDER.bool("tool_affinity", true)
+            .comment("A tool counts the blocks Ultimined with it; every 500 add a percent to the blocks its Ultimines can take, up to ten.",
+                    "Has no effect in the legacy playstyle mode.")
+            .build();
+    public static final ConfigValue<Boolean> CARD_PERKS = BUILDER.bool("card_perks", true)
+            .comment("A Mining Skill Card reaching Novice, Apprentice or Adept offers its owner one of two perks for the card's tool,",
+                    "picked in the Skills Record and kept for good: more blocks in an Ultimine, drops into the inventory,",
+                    "more lucky finds, or a moment of Haste after an Ultimine.",
+                    "Has no effect in the legacy playstyle mode.")
+            .build();
     public static final ConfigValue<TimedChallenge.Period> TIMED_CHALLENGE = BUILDER.enumValue("timed_challenge", TimedChallenge.Period.DAILY)
             .comment("A challenge everyone on the server shares, picked anew each day or each week (by the server's clock).",
                     "It needs no card: doing it with the right tool counts. /ultimine_addition challenge shows it.",
                     "Has no effect in the legacy playstyle mode.")
             .build();
+    public static final ConfigValue<Boolean> TIMED_CHALLENGE_TEAM = BUILDER.bool("timed_challenge_team", true)
+            .comment("A team does the daily challenge together: what one member does also counts for the teammates who are online.",
+                    "A team is an FTB Teams party when that mod is installed, otherwise a scoreboard team (/team).")
+            .enabledWhen(TIMED_CHALLENGE, period -> period != TimedChallenge.Period.OFF).build();
     public static final ConfigValue<Integer> TIMED_CHALLENGE_EXPERIENCE = BUILDER.intValue("timed_challenge_experience", 50).range(0, 10000)
             .comment("Experience points for finishing the daily challenge (four times as much for a weekly one).")
             .enabledWhen(TIMED_CHALLENGE, period -> period != TimedChallenge.Period.OFF).build();
@@ -133,6 +162,15 @@ public final class UAServerConfig {
     public static final TierValues CARD_POTION_DURATIONS = new TierValues(BUILDER, "potion_durations",
             Map.of(Novice, 300, Apprentice, 600, Adept, 1200), 60, 3600,
             "Duration (in seconds) of the Mine-Go Juice brewed with a card of each tier.");
+    public static final ConfigValue<Boolean> BIND_CARDS = BUILDER.bool("bind_to_player", false)
+            .comment("A Mining Skill Card belongs to the first player who makes progress on it: nobody else can progress it.",
+                    "Off, a card keeps working for whoever holds it.")
+            .build();
+    public static final ConfigValue<Boolean> CARD_PRESTIGE = BUILDER.bool("prestige", true)
+            .comment("A Mastered Mining Skill Card can start over as Unlearned (from its Mastered box in the Skills Record, up to five times).",
+                    "Each time adds 5% to the blocks an Ultimine with the card's tool can take, for good, and its tiers' perks and",
+                    "Shape Certificates can be claimed again on the way back up.")
+            .build();
     public static final ConfigValue<Boolean> CARD_MASTERED_EFFECT = BUILDER.bool("mastered_effect", true)
             .comment("If enabled, carrying a Mastered Mining Skill Card grants Ultimine for its tool.").build();
     public static final ConfigValue<Boolean> CARD_TIER_BASED_MAX_BLOCKS = BUILDER.bool("tier_based_max_blocks", true)

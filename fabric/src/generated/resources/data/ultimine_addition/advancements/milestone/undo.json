@@ -1,0 +1,32 @@
+{
+  "parent": "ultimine_addition:skills_record",
+  "criteria": {
+    "milestone": {
+      "conditions": {
+        "milestone": "undo"
+      },
+      "trigger": "ultimine_addition:milestone"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.ultimine_addition.milestone.undo.desc"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "minecraft:clock"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.ultimine_addition.milestone.undo"
+    }
+  },
+  "requirements": [
+    [
+      "milestone"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

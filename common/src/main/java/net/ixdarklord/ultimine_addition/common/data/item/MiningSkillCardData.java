@@ -171,6 +171,15 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
         }
 
         List<Challenge> challenges = progress.getChallenges();
+        // What the card has done so far, for the chained challenges: its history, and what it has just finished.
+        Set<ResourceLocation> completed = new HashSet<>();
+        for (Challenge challenge : challenges) {
+            if (challenge.currentPoints >= challenge.requiredPoints) completed.add(challenge.id);
+        }
+        net.minecraft.server.MinecraftServer server = Platform.getServer();
+        if (server != null && server.isSameThread()) {
+            net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData.get(server).getCardHistory(this.getUUID()).ifPresent(history -> completed.addAll(history.completedChallenges()));
+        }
         challenges.clear();
         progress.setRerolls(0);
         if (this.tier == MiningSkillCardItem.Tier.Mastered) return this;
@@ -179,7 +188,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
 
         int quantity = UAServerConfig.CARD_CHALLENGES_AMOUNT.getValue(this.tier);
         int[] order = {1};
-        ChallengesManager.INSTANCE.getRandomChallenges(quantity, type, this.tier).forEach((location, data) ->
+        ChallengesManager.INSTANCE.getRandomChallenges(quantity, type, this.tier, completed).forEach((location, data) ->
                 challenges.add(new Challenge(location, order[0]++, data.getRequiredAmount())));
         return this;
     }
@@ -219,6 +228,51 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
         return FTBUltimineIntegration.isShapeCertificatesActive() && this.getType() != MiningSkillCardItem.Type.EMPTY && !this.isCreativeItem()
                 && ShapeCertificateItem.forTier(tier) != null && this.tier.getValue() >= tier.getValue()
                 && !this.progress().isCertificateClaimed(tier.getValue());
+    }
+
+    public static final int MAX_PRESTIGE = 5;
+    // What each prestige adds, in percent, to the blocks an Ultimine with the card's tool can take.
+    public static final int PRESTIGE_PERCENT = 5;
+
+    public int getPrestige() {
+        return this.progress().getPrestige();
+    }
+
+    // A Mastered card can start over for a lasting bonus (SkillsRecordPayload.Prestige).
+    public boolean canPrestige() {
+        return UAServerConfig.CARD_PRESTIGE.get() && !net.ixdarklord.ultimine_addition.config.PlaystyleModes.isLegacy()
+                && this.tier == MiningSkillCardItem.Tier.Mastered && this.getType() != MiningSkillCardItem.Type.EMPTY
+                && !this.isCreativeItem() && this.getPrestige() < MAX_PRESTIGE;
+    }
+
+    /** One more prestige: see CardProgress.prestige. */
+    public void prestige() {
+        this.progress().prestige();
+    }
+
+    public String getOwnerName() {
+        return this.progress().getOwnerName();
+    }
+
+    /** Whether this player may progress the card: always, unless it is bound to somebody else. */
+    public boolean isOwnedBy(net.minecraft.world.entity.player.Player player) {
+        String owner = this.progress().getOwner();
+        return owner.isEmpty() || owner.equals(player.getUUID().toString());
+    }
+
+    /** Binds the card to its first player (where the server binds cards). */
+    public void bindTo(net.minecraft.world.entity.player.Player player) {
+        if (this.progress().getOwner().isEmpty()) this.progress().setOwner(player.getUUID().toString(), player.getScoreboardName());
+    }
+
+    // The perk of a tier this card has reached, not yet picked (see CardPerk).
+    public boolean canClaimPerk(MiningSkillCardItem.Tier tier) {
+        return net.ixdarklord.ultimine_addition.common.progression.CardPerk.isPerkTier(tier) && this.getType() != MiningSkillCardItem.Type.EMPTY
+                && !this.isCreativeItem() && this.tier.getValue() >= tier.getValue() && !this.progress().isPerkClaimed(tier.getValue());
+    }
+
+    public void claimPerk(MiningSkillCardItem.Tier tier) {
+        this.progress().claimPerk(tier.getValue());
     }
 
     public void claimCertificate(MiningSkillCardItem.Tier tier) {

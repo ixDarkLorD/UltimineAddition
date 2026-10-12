@@ -26,6 +26,8 @@ import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.LOGGER;
 public class DataShapesManager extends SimpleJsonResourceReloadListener {
     public static final DataShapesManager INSTANCE = new DataShapesManager();
     private List<DataShape> shapes = List.of();
+    // The world's player-made shapes (CustomShapes), after the data packs' in the list.
+    private List<DataShape> custom = List.of();
 
     public DataShapesManager() {
         super(new Gson(), "ultimine_shapes");
@@ -42,13 +44,21 @@ public class DataShapesManager extends SimpleJsonResourceReloadListener {
         if (!loaded.isEmpty()) LOGGER.info("Loaded {} Ultimine shape(s) from data packs", loaded.size());
     }
 
+    /** The data packs' shapes, then the players' own: what the server adds to FTB Ultimine's list and tells clients. */
     public List<DataShape> getShapes() {
-        return this.shapes;
+        if (this.custom.isEmpty()) return this.shapes;
+        List<DataShape> all = new ArrayList<>(this.shapes);
+        all.addAll(this.custom);
+        return all;
+    }
+
+    public void setCustom(List<DataShape> custom) {
+        this.custom = List.copyOf(custom);
     }
 
     /** Puts the loaded shapes at the end of the server's shape list (again: harmless when they are there already). */
     public void install() {
-        replace(serverList(), this.shapes);
+        replace(serverList(), this.getShapes());
     }
 
     /** Gives the client's shape list the server's data pack shapes. */

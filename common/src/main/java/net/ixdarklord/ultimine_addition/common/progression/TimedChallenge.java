@@ -84,7 +84,8 @@ public final class TimedChallenge {
                 case BREAK_BLOCK, STRIP_BLOCK, FLATTEN_BLOCK, TILLING_BLOCK -> true;
                 default -> false;
             };
-            if (!action || type == MiningSkillCardItem.Type.EMPTY) continue;
+            // A chained challenge belongs to a card's own story.
+            if (!action || type == MiningSkillCardItem.Type.EMPTY || !data.requires().isEmpty()) continue;
             // Types a data pack no longer has (or that were left out) have no tools to do it with.
             if (type.isData() && !MiningSkillCardItem.Type.getDataTypes().contains(type)) continue;
             if (ChallengesManager.INSTANCE.utilizeTargetedBlocks(data).isEmpty()) continue;
@@ -112,10 +113,19 @@ public final class TimedChallenge {
         if (player.isCreative() || player.isSpectator() || Platform.isFakePlayer(player)) return;
         Current current = current(player.serverLevel().getServer());
         if (current == null || current.data.challengeType() != action || !current.targets.contains(state.getBlock())) return;
-        if (!ChallengesManager.INSTANCE.isCorrectTool(player, current.data)) return;
+        if (!ChallengesManager.INSTANCE.isCorrectTool(player, current.data) || !current.data.conditions().test(player, pos)) return;
+        IneligibleBlocksSavedData ineligible = IneligibleBlocksSavedData.getOrCreate(player.serverLevel());
+        // What an undo put back never counts; what someone placed doesn't either, where that rule is on.
+        if (ineligible.isRestoredByUndo(pos)) return;
         if (UAServerConfig.IS_PLACED_BY_ENTITY_CONDITION.get() && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY)
-                && IneligibleBlocksSavedData.getOrCreate(player.serverLevel()).isBlockPlacedByEntity(pos)) return;
+                && ineligible.isBlockPlacedByEntity(pos)) return;
         advance(player, current, 1);
+        // A team does it together: what one member does counts for the teammates who are online, too.
+        if (UAServerConfig.TIMED_CHALLENGE_TEAM.get()) {
+            for (ServerPlayer mate : TeamBridge.onlineTeammates(player)) {
+                if (!mate.isCreative() && !mate.isSpectator()) advance(mate, current, 1);
+            }
+        }
     }
 
     /** Adds to the player's progress in the running challenge (the command's way in); false when it is already done. */
@@ -146,6 +156,8 @@ public final class TimedChallenge {
                     .withStyle(ChatFormatting.GRAY));
         }
         DataRewards.onTimedChallenge(player, type, current.id);
+        UltimineStats.onDaily(player);
+        ProgressionHooks.fire(ProgressionHooks.Kind.DAILY_COMPLETED, player, type.getId(), 0, current.id, "");
         new UltimineNotice(UltimineNotice.Kind.REWARD, Component.translatable("info.ultimine_addition.timed.completed", current.title()), lines, type.iconStack()).send(player);
         player.serverLevel().sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.6, 0.8, 0.6, 0.1);
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, player.getSoundSource(), 0.8F, 1.4F);
@@ -173,6 +185,7 @@ public final class TimedChallenge {
         // Long lists of blocks are cut short: the notice is a few lines.
         for (int i = 0; i < Math.min(what.size(), 4); i++) lines.add(what.get(i));
         if (what.size() > 4) lines.add(Component.literal("…").withStyle(ChatFormatting.GRAY));
+        lines.addAll(current.data.conditions().describe());
         lines.add(Component.translatable("info.ultimine_addition.timed.tool", current.data.forCardType().displayName().copy().withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GRAY));
         if (timed.done()) {
             lines.add(Component.translatable("info.ultimine_addition.timed.done").withStyle(ChatFormatting.GREEN));

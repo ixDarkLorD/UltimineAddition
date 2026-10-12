@@ -1,0 +1,32 @@
+{
+  "parent": "ultimine_addition:skills_record",
+  "criteria": {
+    "milestone": {
+      "conditions": {
+        "milestone": "big_ultimine"
+      },
+      "trigger": "ultimine_addition:milestone"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.ultimine_addition.milestone.big_ultimine.desc"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "minecraft:tnt"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.ultimine_addition.milestone.big_ultimine"
+    }
+  },
+  "requirements": [
+    [
+      "milestone"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -156,6 +156,78 @@ public final class SkillsRecordPayload {
         }
     }
 
+    // The Mastered card in this slot starts over as Unlearned, for a lasting bonus to its tool (MiningSkillCardData.canPrestige).
+    public record Prestige(int cardSlot) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<Prestige> TYPE = new CustomPacketPayload.Type<>(FTBUltimineAddition.id("prestige_card"));
+        public static final StreamCodec<FriendlyByteBuf, Prestige> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT, Prestige::cardSlot, Prestige::new);
+
+        public static void handle(Prestige msg, PacketContext ctx) {
+            ctx.queue(() -> {
+                if (!(ctx.getPlayer() instanceof ServerPlayer player)) return;
+                getOpenRecord(player).ifPresent(data -> data.getCardData(msg.cardSlot).ifPresent(cardData -> {
+                    if (!cardData.canPrestige()) return;
+                    String tool = cardData.getType().getId();
+                    cardData.prestige();
+                    // The card's story starts over with it.
+                    net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData.get(player.level().getServer()).resetCardHistory(cardData.getUUID());
+                    cardData.setTier(MiningSkillCardItem.Tier.Unlearned).initChallenges().save();
+                    data.save();
+                    net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().modifyAbilityData(player, ability -> ability.addPrestige(tool));
+                    int level = cardData.getPrestige();
+                    net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.fire(net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.Kind.PRESTIGE, player, tool, level, null, "");
+                    new net.ixdarklord.ultimine_addition.common.progression.UltimineNotice(net.ixdarklord.ultimine_addition.common.progression.UltimineNotice.Kind.REWARD,
+                            Component.translatable("info.ultimine_addition.notice.prestige", level),
+                            java.util.List.of(Component.translatable("info.ultimine_addition.notice.prestige.info",
+                                    level * net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData.PRESTIGE_PERCENT).withStyle(ChatFormatting.GRAY)),
+                            new ItemStack(net.minecraft.world.item.Items.NETHER_STAR)).send(player);
+                    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.5F, 1.3F);
+                }));
+            });
+        }
+
+        public CustomPacketPayload.@NotNull Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    // The perk picked for a tier of the card in this slot (see CardPerk). The server checks it against what the card offers.
+    public record ClaimPerk(int cardSlot, int tier, String perk) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<ClaimPerk> TYPE = new CustomPacketPayload.Type<>(FTBUltimineAddition.id("claim_card_perk"));
+        public static final StreamCodec<FriendlyByteBuf, ClaimPerk> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT, ClaimPerk::cardSlot, ByteBufCodecs.INT, ClaimPerk::tier, ByteBufCodecs.STRING_UTF8, ClaimPerk::perk, ClaimPerk::new);
+
+        public static void handle(ClaimPerk msg, PacketContext ctx) {
+            ctx.queue(() -> {
+                if (!(ctx.getPlayer() instanceof ServerPlayer player)) return;
+                MiningSkillCardItem.Tier tier;
+                try {
+                    tier = MiningSkillCardItem.Tier.fromInt(msg.tier);
+                } catch (IllegalArgumentException e) {
+                    return;
+                }
+                net.ixdarklord.ultimine_addition.common.progression.CardPerk perk = net.ixdarklord.ultimine_addition.common.progression.CardPerk.byId(msg.perk);
+                if (perk == null) return;
+                getOpenRecord(player).ifPresent(data -> data.getCardData(msg.cardSlot).ifPresent(cardData -> {
+                    if (!net.ixdarklord.ultimine_addition.common.progression.CardPerk.offer(player, cardData, tier).contains(perk)) return;
+                    String tool = cardData.getType().getId();
+                    net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().modifyAbilityData(player, ability -> ability.learnPerk(tool, perk.id()));
+                    cardData.claimPerk(tier);
+                    net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.fire(net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.Kind.PERK_LEARNED, player, tool, tier.getValue(), null, perk.id());
+                    net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.reach(player, net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.PERK);
+                    cardData.save();
+                    data.save();
+                    new net.ixdarklord.ultimine_addition.common.progression.UltimineNotice(net.ixdarklord.ultimine_addition.common.progression.UltimineNotice.Kind.REWARD,
+                            Component.translatable("info.ultimine_addition.notice.perk", perk.displayName()),
+                            java.util.List.of(perk.description().withStyle(ChatFormatting.GRAY)), perk.icon()).send(player);
+                    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.2F);
+                }));
+            });
+        }
+
+        public CustomPacketPayload.@NotNull Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
     public record ClaimCertificate(int cardSlot, int tier, ResourceLocation shape) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<ClaimCertificate> TYPE = new CustomPacketPayload.Type<>(FTBUltimineAddition.id("claim_shape_certificate"));
         public static final StreamCodec<FriendlyByteBuf, ClaimCertificate> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT, ClaimCertificate::cardSlot, ByteBufCodecs.INT, ClaimCertificate::tier, ByteBufCodecs.RESOURCE_LOCATION, ClaimCertificate::shape, ClaimCertificate::new);

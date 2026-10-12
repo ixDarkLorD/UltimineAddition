@@ -8,6 +8,12 @@ plugins {
 allprojects {
     repositories {
         maven {
+            url "https://maven.latvian.dev/releases"
+            content {
+                includeGroup "dev.latvian.mods"
+            }
+        }
+        maven {
             url "https://maven.saps.dev/releases"
             content {
                 includeGroup "dev.latvian.mods"

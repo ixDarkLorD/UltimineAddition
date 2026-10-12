@@ -1,0 +1,33 @@
+{
+  "parent": "ultimine_addition:skills_record",
+  "criteria": {
+    "milestone": {
+      "conditions": {
+        "milestone": "thousand_blocks"
+      },
+      "trigger": "ultimine_addition:milestone"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.ultimine_addition.milestone.thousand_blocks.desc"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "minecraft:netherite_pickaxe",
+      "nbt": "{Damage:0}"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.ultimine_addition.milestone.thousand_blocks"
+    }
+  },
+  "requirements": [
+    [
+      "milestone"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

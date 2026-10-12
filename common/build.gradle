@@ -10,6 +10,8 @@ dependencies {
 
     modApi "dev.ftb.mods:ftb-ultimine:${ftbultimine_version}"
     modApi "dev.ftb.mods:ftb-library:${ftblibrary_version}"
+    // Optional: with FTB Teams there, the daily challenge is shared by a team (FTBTeamsCompat).
+    modCompileOnly("dev.ftb.mods:ftb-teams:${ftbteams_version}") { transitive = false }
 }
 
 // The shared main.gradle publishes every subproject's shadowJar. For common it must be a plain jar of this

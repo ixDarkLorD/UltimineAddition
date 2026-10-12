@@ -24,6 +24,7 @@ public class ChallengesEvents {
         DatapackEvents.SYNC.register((player, isJoined) -> {
             // Before the challenges, which name card types. Always sent: an empty list clears another server's.
             PayloadHandler.sendToPlayer(SyncCardTypesPayload.current(), player);
+            PayloadHandler.sendToPlayer(net.ixdarklord.ultimine_addition.network.payloads.SyncRewardsPayload.current(), player);
             // Shapes mods register may come after the data packs load: put the data pack shapes back at the end of the
             // list, where the client has them too.
             DataShapesManager.INSTANCE.install();

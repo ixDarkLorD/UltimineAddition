@@ -139,6 +139,27 @@ public final class UltimineUndo {
         op.blockCosts.add(merge(own));
     }
 
+    // An Ultimine with a tool's right-click (stripping logs, tilling, making paths) changed these blocks from what they
+    // were to what they are. Undoing it turns back the ones that are still as it left them, for nothing: there were no
+    // drops, and the tool's wear is not given back. Changes that keep the block (a crop harvested and replanted) are
+    // not for undo: their drops are the player's.
+    public static void recordRevert(ServerPlayer player, BlockPos origin, List<BlockPos> positions, List<BlockState> before, List<BlockState> after) {
+        if (!UAServerConfig.UNDO_ENABLED.get()) return;
+        Operation op = new Operation(player, origin);
+        op.revert = true;
+        for (int i = 0; i < positions.size(); i++) {
+            BlockState was = before.get(i), now = after.get(i);
+            if (was.equals(now)) continue;
+            if (was.isAir() || now.isAir() || was.is(now.getBlock())) return;
+            op.blocks.add(new BlockRecord(positions.get(i).immutable(), was, List.of(), now));
+            op.blockCosts.add(List.of());
+        }
+        if (op.blocks.isEmpty()) return;
+        Deque<Operation> history = HISTORY.computeIfAbsent(player.getUUID(), uuid -> new ArrayDeque<>());
+        history.addFirst(op);
+        while (history.size() > UAServerConfig.UNDO_HISTORY.get()) history.removeLast();
+    }
+
     // A block's six neighbours, by Direction ordinal, for recordBlock.
     public static BlockState[] neighbours(Level level, BlockPos pos) {
         BlockState[] states = new BlockState[Direction.values().length];
@@ -214,7 +235,8 @@ public final class UltimineUndo {
             for (Operation op : history) {
                 Cost cost = cost(player, op);
                 int state = !level.dimension().equals(op.dimension) || player.position().distanceTo(op.origin.getCenter()) > MAX_DISTANCE ? UndoPayload.HistoryEntry.TOO_FAR
-                        : op.all().anyMatch(b -> !level.getBlockState(b.pos()).canBeReplaced()) ? UndoPayload.HistoryEntry.BLOCKED : UndoPayload.HistoryEntry.READY;
+                        : (op.revert ? op.blocks.stream().noneMatch(b -> level.getBlockState(b.pos()).equals(b.after()))
+                        : op.all().anyMatch(b -> !level.getBlockState(b.pos()).canBeReplaced())) ? UndoPayload.HistoryEntry.BLOCKED : UndoPayload.HistoryEntry.READY;
                 ItemStack icon = new ItemStack(op.blocks.get(0).state().getBlock().asItem());
                 entries.add(new UndoPayload.HistoryEntry(icon, (int) op.all().count(), cost.items, op.xp, Math.max(0L, op.time + window - now),
                         cost.free, cost.missing(player, op).isEmpty(), state));
@@ -264,6 +286,7 @@ public final class UltimineUndo {
 
     // Queues the undo behind the one growing back now, or starts it.
     private static void start(ServerPlayer player, Operation op) {
+        net.ixdarklord.ultimine_addition.common.progression.UltimineStats.onUndo(player);
         if (isBusy(player)) {
             // Waits for the undo growing back now; the progress HUD shows how many are waiting.
             QUEUED.computeIfAbsent(player.getUUID(), uuid -> new ArrayDeque<>()).addLast(op);
@@ -310,7 +333,8 @@ public final class UltimineUndo {
             return null;
         }
         ServerLevel level = player.serverLevel();
-        if (op.all().anyMatch(b -> !level.getBlockState(b.pos()).canBeReplaced())) {
+        if (op.revert ? op.blocks.stream().noneMatch(b -> level.getBlockState(b.pos()).equals(b.after()))
+                : op.all().anyMatch(b -> !level.getBlockState(b.pos()).canBeReplaced())) {
             fail(player, List.of(Component.translatable("info.ultimine_addition.undo.blocked")));
             return null;
         }
@@ -326,7 +350,7 @@ public final class UltimineUndo {
     }
 
     private static Cost cost(ServerPlayer player, Operation op) {
-        boolean free = player.isCreative() || op.creative;
+        boolean free = player.isCreative() || op.creative || op.revert;
         List<Integer> fromGround = new ArrayList<>();
         for (ItemStack needed : op.drops) {
             int count = 0;
@@ -415,7 +439,7 @@ public final class UltimineUndo {
     // can't come back leaves what it would have taken for the blocks after it.
     private static boolean[] plan(ServerPlayer player, Operation op) {
         boolean[] keep = new boolean[op.blocks.size()];
-        if (player.isCreative() || op.creative) {
+        if (player.isCreative() || op.creative || op.revert) {
             Arrays.fill(keep, true);
             return keep;
         }
@@ -522,7 +546,8 @@ public final class UltimineUndo {
         MinecraftServer server = level.getServer();
         // In the order FTB Ultimine broke them: the first broken block grows back first, the last one last.
         List<BlockRecord> blocks = new ArrayList<>(op.blocks);
-        boolean animated = UAServerConfig.UNDO_ANIMATION.get();
+        // A turned-back block is already there: nothing to grow.
+        boolean animated = UAServerConfig.UNDO_ANIMATION.get() && !op.revert;
         int perTick = UAServerConfig.UNDO_BLOCKS_PER_TICK.get();
         int now = server.getTickCount();
         // The client's undo HUD follows the placing through Progress packets.
@@ -629,6 +654,8 @@ public final class UltimineUndo {
         private final BlockPos pos;
         private final BlockState state;
         private final List<BlockRecord> linked;
+        // For a tool action: what the block was turned into (it is only turned back while it still is that).
+        private final @Nullable BlockState after;
         private final int startTick;
         private final Job job;
 
@@ -638,6 +665,7 @@ public final class UltimineUndo {
             this.pos = block.pos();
             this.state = block.state();
             this.linked = block.linked();
+            this.after = block.after();
             this.startTick = startTick;
             this.job = job;
         }
@@ -653,15 +681,26 @@ public final class UltimineUndo {
             if (this.placed) return;
             this.placed = true;
             this.job.placed++;
+            if (this.after != null) {
+                if (this.level.getBlockState(this.pos).equals(this.after)) {
+                    this.level.setBlock(this.pos, this.state, Block.UPDATE_ALL);
+                    IneligibleBlocksSavedData.getOrCreate(this.level).addRestored(this.player.getUUID(), new IneligibleBlocksSavedData.BlockInfo(this.pos, this.state));
+                    if (sound) {
+                        var soundType = this.state.getSoundType();
+                        this.level.playSound(null, this.pos, soundType.getPlaceSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
+                    }
+                }
+                return;
+            }
             if (this.level.getBlockState(this.pos).canBeReplaced()) {
                 // The block, then its other half in the same tick, so neither is ever left alone to be updated away.
                 this.level.setBlock(this.pos, this.state, Block.UPDATE_ALL);
                 // Blocks put back by undo don't count for challenges again.
-                IneligibleBlocksSavedData.getOrCreate(this.level).add(this.player, new IneligibleBlocksSavedData.BlockInfo(this.pos, this.state));
+                IneligibleBlocksSavedData.getOrCreate(this.level).addRestored(this.player.getUUID(), new IneligibleBlocksSavedData.BlockInfo(this.pos, this.state));
                 for (BlockRecord half : this.linked) {
                     if (!this.level.getBlockState(half.pos()).canBeReplaced()) continue;
                     this.level.setBlock(half.pos(), half.state(), Block.UPDATE_ALL);
-                    IneligibleBlocksSavedData.getOrCreate(this.level).add(this.player, new IneligibleBlocksSavedData.BlockInfo(half.pos(), half.state()));
+                    IneligibleBlocksSavedData.getOrCreate(this.level).addRestored(this.player.getUUID(), new IneligibleBlocksSavedData.BlockInfo(half.pos(), half.state()));
                 }
                 if (sound) {
                     var soundType = this.state.getSoundType();
@@ -676,7 +715,11 @@ public final class UltimineUndo {
 
     // linked: what the same break removed with it (the other half of a door, bed or tall plant, a torch hung on it...),
     // placed right after it.
-    private record BlockRecord(BlockPos pos, BlockState state, List<BlockRecord> linked) {
+    private record BlockRecord(BlockPos pos, BlockState state, List<BlockRecord> linked, @Nullable BlockState after) {
+        private BlockRecord(BlockPos pos, BlockState state, List<BlockRecord> linked) {
+            this(pos, state, linked, null);
+        }
+
         private List<BlockRecord> withLinked() {
             if (this.linked.isEmpty()) return List.of(this);
             List<BlockRecord> all = new ArrayList<>(this.linked.size() + 1);
@@ -691,6 +734,8 @@ public final class UltimineUndo {
         private final ResourceKey<Level> dimension;
         private final BlockPos origin;
         private final boolean creative;
+        // A tool action (see recordRevert) rather than broken blocks.
+        private boolean revert;
         private final long time = System.currentTimeMillis();
         private final List<BlockRecord> blocks = new ArrayList<>();
         // What each of the blocks (with what popped off it) dropped, in the same order.
@@ -739,6 +784,7 @@ public final class UltimineUndo {
             this.dimension = source.dimension;
             this.origin = source.origin;
             this.creative = source.creative;
+            this.revert = source.revert;
         }
 
         // The same operation with only the kept blocks, for putting back part of it (already paid for).

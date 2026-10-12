@@ -1,7 +1,12 @@
-// 1.20.1	2026-09-30T02:57:43.8156318	Advancements
+// 1.20.1	2026-10-12T08:25:12.0675446	Advancements
 649a42434c80eb0271a6b68b14d07f032edc5378 data/ultimine_addition/advancements/axe_card.json
 66ec6a281f8455b938ece949e3f79a9256b67d3f data/ultimine_addition/advancements/empty_card.json
 707247fb14468d2baa0c3370e9c663186bc6dc18 data/ultimine_addition/advancements/hoe_card.json
+5b813ea8b2e42afff00765a5330cd3abe7ac4c44 data/ultimine_addition/advancements/milestone/big_ultimine.json
+0df21f380717e34684719cc281bdd96509166289 data/ultimine_addition/advancements/milestone/daily.json
+74a0cf13353c1310d35c4eed387b342349a6c2e0 data/ultimine_addition/advancements/milestone/perk.json
+067f8353ff8c85a39593f7300c1d11fa945873eb data/ultimine_addition/advancements/milestone/thousand_blocks.json
+1e0a58607f2809bd1a30c039f7078e97b4282633 data/ultimine_addition/advancements/milestone/undo.json
 c75a8d0ce720ba277955f5684b2e50b753cfe563 data/ultimine_addition/advancements/pen.json
 def401127fdc6b990912132ddfd4c26e1faa32f5 data/ultimine_addition/advancements/pickaxe_card.json
 8d1614e46875f0c9647e67738dd5cfe4dd649094 data/ultimine_addition/advancements/root.json

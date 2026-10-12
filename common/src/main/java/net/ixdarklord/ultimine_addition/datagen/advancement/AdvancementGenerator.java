@@ -158,6 +158,57 @@ public class AdvancementGenerator extends AdvancementProvider {
                     .addCriterion("has_ultimine_ability", UltimineObtainTrigger.Instance.obtain())
                     .requirements(RequirementsStrategy.OR)
                     .save(consumer, FTBUltimineAddition.id("ultimine_ability").toString());
+
+            // The simple "did it once" ones (MilestoneTrigger).
+            Advancement.Builder.advancement().parent(skillsRecord).display(
+                            Items.CLOCK,
+                            Component.translatable("advancement.ultimine_addition.milestone.undo"),
+                            Component.translatable("advancement.ultimine_addition.milestone.undo.desc"),
+                            null,
+                            FrameType.TASK,
+                            true, true, false)
+                    .addCriterion("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.Instance.of("undo"))
+                    .save(consumer, FTBUltimineAddition.id("milestone/undo").toString());
+
+            Advancement.Builder.advancement().parent(skillsRecord).display(
+                            Items.SUNFLOWER,
+                            Component.translatable("advancement.ultimine_addition.milestone.daily"),
+                            Component.translatable("advancement.ultimine_addition.milestone.daily.desc"),
+                            null,
+                            FrameType.TASK,
+                            true, true, false)
+                    .addCriterion("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.Instance.of("daily"))
+                    .save(consumer, FTBUltimineAddition.id("milestone/daily").toString());
+
+            Advancement.Builder.advancement().parent(skillsRecord).display(
+                            Items.SPYGLASS,
+                            Component.translatable("advancement.ultimine_addition.milestone.perk"),
+                            Component.translatable("advancement.ultimine_addition.milestone.perk.desc"),
+                            null,
+                            FrameType.TASK,
+                            true, true, false)
+                    .addCriterion("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.Instance.of("perk"))
+                    .save(consumer, FTBUltimineAddition.id("milestone/perk").toString());
+
+            Advancement.Builder.advancement().parent(skillsRecord).display(
+                            Items.TNT,
+                            Component.translatable("advancement.ultimine_addition.milestone.big_ultimine"),
+                            Component.translatable("advancement.ultimine_addition.milestone.big_ultimine.desc"),
+                            null,
+                            FrameType.TASK,
+                            true, true, false)
+                    .addCriterion("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.Instance.of("big_ultimine"))
+                    .save(consumer, FTBUltimineAddition.id("milestone/big_ultimine").toString());
+
+            Advancement.Builder.advancement().parent(skillsRecord).display(
+                            Items.NETHERITE_PICKAXE,
+                            Component.translatable("advancement.ultimine_addition.milestone.thousand_blocks"),
+                            Component.translatable("advancement.ultimine_addition.milestone.thousand_blocks.desc"),
+                            null,
+                            FrameType.TASK,
+                            true, true, false)
+                    .addCriterion("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.Instance.of("thousand_blocks"))
+                    .save(consumer, FTBUltimineAddition.id("milestone/thousand_blocks").toString());
         }
     }
 }

@@ -49,12 +49,17 @@ public class MSCEvents {
             validateCards(player);
             cardBonusEffect(player);
             SkillsRecordSync.tick(player);
+            net.ixdarklord.ultimine_addition.common.progression.JuicePause.tick(player);
             // A few seconds after joining: the day's challenge, while it is still to do.
             if (player.tickCount == 100) TimedChallenge.announce(player, false);
+            // On the leaderboard from the start of the visit.
+            if (player.tickCount == 20) net.ixdarklord.ultimine_addition.common.progression.UltimineStats.see(player);
         });
         PlayerEvents.LEAVE.register(SkillsRecordSync::forget);
         PlayerEvents.LEAVE.register(ChallengeBoosts::forget);
+        PlayerEvents.LEAVE.register(net.ixdarklord.ultimine_addition.common.progression.JuicePause::forget);
         ServerLifecycleEvents.STOPPED.register(server -> SkillsRecordSync.clear());
+        ServerLifecycleEvents.STOPPED.register(server -> net.ixdarklord.ultimine_addition.common.progression.UltimineStats.clear());
 
         BlockEvents.BREAK.register((level, pos, state, player) -> {
             TimedChallenge.onAction(player, state, pos, ChallengeData.Type.BREAK_BLOCK);

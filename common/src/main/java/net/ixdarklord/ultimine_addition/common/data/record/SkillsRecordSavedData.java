@@ -141,6 +141,14 @@ public final class SkillsRecordSavedData extends SavedData {
         this.setDirty();
     }
 
+    public void resetCardHistory(UUID cardId) {
+        CardEntry entry = this.cards.get(cardId);
+        if (entry == null) return;
+        entry.history.clear();
+        entry.version++;
+        this.setDirty();
+    }
+
     public Optional<CardHistory> getCardHistory(UUID cardId) {
         return Optional.ofNullable(this.cards.get(cardId)).map(entry -> entry.history);
     }

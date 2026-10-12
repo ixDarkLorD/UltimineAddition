@@ -127,10 +127,20 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
     // so FTB Ultimine's shape HUD doesn't offer a shape the player can't use.
     public static List<Shape> getAvailableShapes(@Nullable Player player) {
         List<Shape> enabled = getEnabledShapes();
-        if (player == null || !isShapeCertificatesActive() || hasAllShapes(player)) return enabled;
+        if (player == null) return enabled;
+        if (!isShapeCertificatesActive() || hasAllShapes(player)) return favorites(player, enabled);
         Set<ResourceLocation> learned = getLearnedShapes(player, ItemUtils.getItemInHand(player, true));
         List<Shape> available = enabled.stream().filter(shape -> learned.contains(shapeId(shape))).toList();
-        return available.isEmpty() ? List.of(NoShape.INSTANCE) : available;
+        return available.isEmpty() ? List.of(NoShape.INSTANCE) : favorites(player, available);
+    }
+
+    // Only the player's favourite shapes, of the ones they can use; all of those when none of them is a favourite.
+    // The ability data is the same on both sides, so the client's list and the server's keep the same order.
+    private static List<Shape> favorites(Player player, List<Shape> shapes) {
+        List<ResourceLocation> marked = ServicePlatform.get().players().getAbilityData(player).getFavoriteShapes();
+        if (marked.isEmpty()) return shapes;
+        List<Shape> kept = shapes.stream().filter(shape -> marked.contains(shapeId(shape))).toList();
+        return kept.isEmpty() ? shapes : kept;
     }
 
     public static Shape getAvailableShape(@Nullable Player player, int idx) {
@@ -227,6 +237,29 @@ public class FTBUltimineIntegration implements FTBUltiminePlugin {
     }
 
     public static int getMaxBlocks(ServerPlayer player) {
+        int blocks = baseMaxBlocks(player);
+        // The Reach perk, for the tool in hand.
+        if (net.ixdarklord.ultimine_addition.common.progression.CardPerk.REACH.has(player)) {
+            blocks = Math.round(blocks * net.ixdarklord.ultimine_addition.common.progression.CardPerk.REACH_FACTOR);
+        }
+        if (net.ixdarklord.ultimine_addition.common.progression.CardPerk.EXPANSE.has(player)) {
+            blocks = Math.round(blocks * net.ixdarklord.ultimine_addition.common.progression.CardPerk.REACH_FACTOR);
+        }
+        // What prestiged cards of the tool's types have earned.
+        int prestige = 0;
+        var ability = ServicePlatform.get().players().getAbilityData(player);
+        for (MiningSkillCardItem.Type type : ItemUtils.getToolTypes(ItemUtils.getItemInHand(player, true))) {
+            prestige = Math.max(prestige, ability.getPrestige(type.getId()));
+        }
+        if (prestige > 0 && UAServerConfig.CARD_PRESTIGE.get()) {
+            blocks = Math.round(blocks * (100 + prestige * net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData.PRESTIGE_PERCENT) / 100.0F);
+        }
+        // And what the tool itself has learned (ToolAffinity).
+        int affinity = net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.percent(ItemUtils.getItemInHand(player, true));
+        return affinity > 0 ? Math.round(blocks * (100 + affinity) / 100.0F) : blocks;
+    }
+
+    private static int baseMaxBlocks(ServerPlayer player) {
         if (UAServerConfig.CARD_TIER_BASED_MAX_BLOCKS.get()) {
             List<MobEffectInstance> instances = new ArrayList<>(player.getActiveEffects().stream().filter((mobEffectInstance) -> mobEffectInstance.getEffect() instanceof MineGoJuiceEffect).toList());
             if (!ServicePlatform.get().players().isPlayerUltimineCapable(player) && !instances.isEmpty()) {
