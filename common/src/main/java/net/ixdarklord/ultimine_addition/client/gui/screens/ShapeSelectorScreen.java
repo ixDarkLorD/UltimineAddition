@@ -329,11 +329,16 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
     // 1.20.1's selection lists have no visibility flag and no background toggles of the newer kind.
     private class SelectBox extends ObjectSelectionList<SelectBox.ShapeEntry> {
-        private static final int DIAGRAM_SIZE = 15;
+        // A grid of 4 pixel cells in a 23 pixel row: the diagram keeps clear of the row's frame.
+        private static final int DIAGRAM_SIZE = 20;
+        // What the grid takes of that (five 4 pixel cells less the last gap): what it is centered by.
+        private static final int DIAGRAM_DRAWN = DIAGRAM_SIZE - 1;
+        // A row with the gap under it.
+        private static final int ENTRY_HEIGHT = 27;
         private boolean visible = true;
 
         public SelectBox(int x, int y, int width, int height) {
-            super(Minecraft.getInstance(), width, height, y, y + height, 20);
+            super(Minecraft.getInstance(), width, height, y, y + height, ENTRY_HEIGHT);
             this.setLeftPos(x);
             this.refreshList();
             this.setRenderBackground(false);
@@ -482,7 +487,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
 
                 // The shape's diagram, at the row's right end.
                 int tint = isAllowed() ? 0xFFFFFFFF : 0xFFD13E3E;
-                ShapeDiagrams.draw(guiGraphics, FTBUltimineIntegration.shapeId(this.shape), left + width - DIAGRAM_SIZE - 3, top + (height - DIAGRAM_SIZE) / 2, DIAGRAM_SIZE,
+                ShapeDiagrams.draw(guiGraphics, FTBUltimineIntegration.shapeId(this.shape), left + width - DIAGRAM_DRAWN - 3, top + (height - DIAGRAM_DRAWN) / 2, DIAGRAM_SIZE,
                         tint, 0xFFFBD25A, 0x50103A5C);
             }
 
