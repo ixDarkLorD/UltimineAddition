@@ -38,6 +38,21 @@ Right-click a card inside the record to open its viewer: a map of the card's tie
 
 ![A challenge's details, with the Reroll and Pin buttons](../assets/wiki/challenge-details.png){ .ua-shot .ua-shot--gui loading=lazy }
 
+### Right-click menus
+
+Right-click a challenge or a tier box for a menu of what you can do with it, without opening anything first.
+
+![The menu of a challenge: details, pin and reroll, and an operator's entries under the line](../assets/wiki/challenge-menu.png){ .ua-shot .ua-shot--gui loading=lazy }
+
+| On | The menu offers |
+|---|---|
+| A challenge | **Details**, **Pin** or **Unpin**, and **Reroll** with the number of rerolls left. |
+| A tier box | **Claim certificate** or **Choose a perk** when one is waiting, and **Pin all** or **Unpin all** for the challenges of the tier your card is on. |
+
+A line that can't be used right now is greyed out. Click anywhere else to close the menu.
+
+Operators with the client's `debug.skills_record_edit_mode` setting on get more under a line: **Edit progress**, **Complete**, **Reset** and **Copy ID** for a challenge, and **Complete all** and **Reset all** for a tier.
+
 ## Dyeing
 
 Craft a Skills Record with any dye to color it. The book's cover, the screen's tint and emblem, and the card viewer's background effect all follow the dye. An undyed record is the white edition.

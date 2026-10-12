@@ -63,4 +63,4 @@ After a data pack reload, cards are checked on a timer (`general.challenge_valid
 
 ## Finding a challenge's id
 
-With the client's `debug.skills_record_edit_mode` setting on, operators can copy a challenge's id from the Skills Record and edit its progress there.
+With the client's `debug.skills_record_edit_mode` setting on, operators get more in the card viewer's [right-click menus](../skills-record.md#right-click-menus): **Copy ID** puts a challenge's id on the clipboard, and **Edit progress**, **Complete** and **Reset** change it, for one challenge or a whole tier.

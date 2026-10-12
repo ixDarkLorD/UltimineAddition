@@ -14,6 +14,10 @@ A Mining Skill Card gives more than shapes on its way up: a perk at each tier, a
 
 When a card reaches Novice, Apprentice or Adept, its tier box in the Skills Record offers a perk after the Shape Certificate is claimed. Click the box and pick one of the two on offer. The one you leave may come back at a later tier or on another card of the same tool.
 
+![Choosing a perk: each row has the perk's name and what it does](../assets/wiki/choose-perk.png){ .ua-shot .ua-shot--gui loading=lazy }
+
+Each row says what the perk does, and hovering it shows the same in full. A perk left over from an earlier tier has that tier's name on its row.
+
 Every perk belongs to a tier and is only offered from that tier on, so the small comforts come first and the strong ones last. A tier's box offers its own tier's perks before any left over from earlier tiers.
 
 | Tier | Perk | What it does |
