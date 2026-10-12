@@ -42,8 +42,8 @@ public final class ShapeDiagrams {
         int columns = Math.max(5, shapeWidth), rows = Math.max(5, shapeHeight);
         int offsetX = (columns - shapeWidth) / 2, offsetY = (rows - shapeHeight) / 2;
         int pitch = Math.max(1, size / Math.max(columns, rows));
-        // Cells keep a pixel between them when there is room for it.
-        int cell = pitch >= 3 ? pitch - 1 : pitch;
+        // A grid: cells keep a pixel between them whenever they are more than a pixel wide.
+        int cell = pitch >= 2 ? pitch - 1 : pitch;
         int left = x + (size - (pitch * columns - (pitch - cell))) / 2, top = y + (size - (pitch * rows - (pitch - cell))) / 2;
         for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {

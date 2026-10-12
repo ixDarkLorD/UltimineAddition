@@ -21,6 +21,9 @@ import java.util.Optional;
 public class CertificateEvents {
     public static void init() {
         legacyFunctions();
+        // The world's player-made shapes join the list once the world is there, and leave with it.
+        ServerLifecycleEvents.STARTED.register(net.ixdarklord.ultimine_addition.common.data.shape.CustomShapes::refresh);
+        ServerLifecycleEvents.STOPPED.register(server -> net.ixdarklord.ultimine_addition.common.data.shape.DataShapesManager.INSTANCE.setCustom(List.of()));
         // Let pack makers see where plugin shapes ended up.
         ServerLifecycleEvents.STARTED.register(server -> {
             List<Identifier> extra = ShapeCertificateItem.getUnlistedShapes();

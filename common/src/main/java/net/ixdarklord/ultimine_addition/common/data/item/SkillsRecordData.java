@@ -194,7 +194,7 @@ public final class SkillsRecordData {
             }
 
             // Where the challenge counts: its dimensions, biomes and heights.
-            boolean isRightPlace = challengeData.conditions().test(player.level(), pos);
+            boolean isRightPlace = challengeData.conditions().test(player, pos);
             boolean eligible = !isMissingRequiredItems && !notEnoughInk && !isChallengeAccomplished && isCorrectAction && isValidBlock && isCorrectTool && isRightPlace;
             if (!eligible) continue;
 
@@ -229,6 +229,7 @@ public final class SkillsRecordData {
             if (cardData.getTier() != before || cardData.isChallengeAccomplished(challengeId)) {
                 net.ixdarklord.ultimine_addition.common.data.reward.DataRewards.onChallengeCompleted(player, cardData, before, challengeId);
                 if (hasCorrectGamemode) net.ixdarklord.ultimine_addition.common.progression.UltimineStats.onChallenge(player);
+                net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.fire(net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.Kind.CHALLENGE_COMPLETED, player, cardData.getType().getId(), before.getValue(), challengeId, "");
             }
             ProgressionRewards.checkTierUp(player, cardData, before);
             if (hasCorrectGamemode) this.consumeContents();

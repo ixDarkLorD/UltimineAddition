@@ -24,23 +24,57 @@ import java.util.Set;
 // A perk for a tool, learned for good by the player who picks it. A Mining Skill Card offers two at each of its Novice,
 // Apprentice and Adept tiers (the ones the player doesn't have for that tool yet); the pick is made in the card viewer
 // and stored with the player's ability data, per card type.
+//
+// Every perk belongs to a tier and is only offered from that tier on, so the small comforts come first and the ones that
+// make an Ultimine bigger or free come last: a tier's box offers its own tier's perks before any left over from earlier.
 public enum CardPerk {
-    // A quarter more blocks in an Ultimine.
-    REACH(Items.SPYGLASS),
+    // --- Novice: comforts ---
     // An Ultimine's drops go straight into the inventory.
-    MAGNET(Items.HOPPER),
-    // Lucky finds (challenge blocks counting double) twice as often for this tool's challenges.
-    FORTUNE(Items.RABBIT_FOOT),
+    MAGNET(Items.HOPPER, MiningSkillCardItem.Tier.Novice),
     // A few seconds of Haste after an Ultimine.
-    VIGOR(Items.SUGAR);
+    VIGOR(Items.SUGAR, MiningSkillCardItem.Tier.Novice),
+    // An Ultimine's extra hunger is halved.
+    SATED(Items.BREAD, MiningSkillCardItem.Tier.Novice),
+    // An Ultimine wears the tool a quarter less.
+    THRIFTY(Items.ANVIL, MiningSkillCardItem.Tier.Novice),
+
+    // --- Apprentice: more out of the work ---
+    // A quarter more blocks in an Ultimine.
+    REACH(Items.SPYGLASS, MiningSkillCardItem.Tier.Apprentice),
+    // Lucky finds (challenge blocks counting double) twice as often for this tool's challenges.
+    FORTUNE(Items.RABBIT_FOOT, MiningSkillCardItem.Tier.Apprentice),
+    // A point of experience for every eight blocks of an Ultimine.
+    INSIGHT(Items.EXPERIENCE_BOTTLE, MiningSkillCardItem.Tier.Apprentice),
+
+    // --- Adept: the strong ones ---
+    // Another quarter more blocks (on top of Reach).
+    EXPANSE(Items.ENDER_EYE, MiningSkillCardItem.Tier.Adept),
+    // Haste II after an Ultimine.
+    FRENZY(Items.BLAZE_POWDER, MiningSkillCardItem.Tier.Adept),
+    // An Ultimine costs no extra hunger at all.
+    TIRELESS(Items.GOLDEN_CARROT, MiningSkillCardItem.Tier.Adept);
 
     public static final float REACH_FACTOR = 1.25F;
     public static final int VIGOR_TICKS = 120;
+    public static final float THRIFTY_FACTOR = 0.25F;
+    public static final int INSIGHT_BLOCKS = 8;
 
     private final Item icon;
+    private final MiningSkillCardItem.Tier tier;
 
-    CardPerk(Item icon) {
+    CardPerk(Item icon, MiningSkillCardItem.Tier tier) {
         this.icon = icon;
+        this.tier = tier;
+    }
+
+    /** The tier this perk is offered from. */
+    public MiningSkillCardItem.Tier tier() {
+        return this.tier;
+    }
+
+    /** How much of FTB Ultimine's per-block hunger the player pays with the tool in hand. */
+    public static float hungerFactor(Player player) {
+        return TIRELESS.has(player) ? 0.0F : SATED.has(player) ? 0.5F : 1.0F;
     }
 
     public String id() {
@@ -82,8 +116,10 @@ public enum CardPerk {
         if (!enabled() || !card.canClaimPerk(tier)) return List.of();
         Set<String> known = ServicePlatform.get().players().getAbilityData(player).getPerks(card.getType().getId());
         List<CardPerk> open = new ArrayList<>();
-        for (CardPerk perk : values()) if (!known.contains(perk.id())) open.add(perk);
+        for (CardPerk perk : values()) if (!known.contains(perk.id()) && perk.tier.getValue() <= tier.getValue()) open.add(perk);
         Collections.shuffle(open, new Random(card.getUUID().getMostSignificantBits() ^ card.getUUID().getLeastSignificantBits() ^ tier.getValue() * 0x9E3779B97F4A7C15L));
+        // The claimed tier's own perks first, then what is left of the earlier tiers' (the sort keeps the shuffle within a tier).
+        open.sort(java.util.Comparator.comparingInt((CardPerk perk) -> -perk.tier.getValue()));
         return List.copyOf(open.subList(0, Math.min(2, open.size())));
     }
 

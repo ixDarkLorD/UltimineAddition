@@ -40,8 +40,12 @@ public class ShapeSelectorItem extends ComponentItem {
     @Override
     public @NotNull InteractionResult use(Level level, Player player, InteractionHand usedHand) {
         if (!(player instanceof ServerPlayer serverPlayer)) return super.use(level, player, usedHand);
-        ExtendedMenus.open(serverPlayer, new SimpleMenuProvider(ShapeSelectorMenu::new, TITLE));
+        open(serverPlayer);
         return super.use(level, player, usedHand);
+    }
+
+    public static void open(ServerPlayer player) {
+        ExtendedMenus.open(player, new SimpleMenuProvider(ShapeSelectorMenu::new, TITLE));
     }
 
     @Override

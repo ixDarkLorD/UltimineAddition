@@ -43,6 +43,8 @@ public abstract class FTBUltimineMixin {
     // The operation being carried out: whose it is, and how many blocks it has broken.
     @Unique private ServerPlayer ua$player;
     @Unique private int ua$broken;
+    @Unique private ItemStack ua$tool = ItemStack.EMPTY;
+    @Unique private int ua$toolDamage;
 
     @Redirect(method = "handleBlockBreak", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/config/FTBUltimineServerConfig;getMaxBlocks(Lnet/minecraft/server/level/ServerPlayer;)I"))
     private int UA$Redirect$blockBroken(ServerPlayer player) {
@@ -65,7 +67,16 @@ public abstract class FTBUltimineMixin {
     private void UA$undoBegin(LevelAccessor level, BlockPos origPos, BlockState state, ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
         this.ua$player = player;
         this.ua$broken = 0;
+        this.ua$tool = player.getMainHandItem();
+        this.ua$toolDamage = this.ua$tool.getDamageValue();
         UltimineUndo.begin(player, origPos);
+    }
+
+    // The Sated and Tireless perks: less or none of the hunger FTB Ultimine adds for each block.
+    @WrapOperation(method = "handleBlockBreak", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;causeFoodExhaustion(F)V"))
+    private void UA$perkHunger(ServerPlayer player, float exhaustion, Operation<Void> original) {
+        float factor = CardPerk.hungerFactor(player);
+        if (factor > 0.0F) original.call(player, exhaustion * factor);
     }
 
     @WrapOperation(method = "handleBlockBreak", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/FTBUltimine;tryBreakBlock(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Ldev/ftb/mods/ftbultimine/api/shape/Shape;Lnet/minecraft/world/phys/BlockHitResult;)Z"))
@@ -138,10 +149,19 @@ public abstract class FTBUltimineMixin {
                 player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,
                         net.minecraft.sounds.SoundSource.PLAYERS, 0.5F, 0.8F + Math.min(this.ua$broken, 64) / 64.0F * 0.8F);
             }
-            // The Vigor perk: a moment of Haste after the work.
-            if (this.ua$broken > 1 && CardPerk.VIGOR.has(player)) {
-                player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.HASTE, CardPerk.VIGOR_TICKS, 0, true, false, true));
+            // The Vigor and Frenzy perks: a moment of Haste after the work (Frenzy's is stronger).
+            boolean frenzy = CardPerk.FRENZY.has(player);
+            if (this.ua$broken > 1 && (frenzy || CardPerk.VIGOR.has(player))) {
+                player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.HASTE, CardPerk.VIGOR_TICKS, frenzy ? 1 : 0, true, false, true));
             }
+            // The Insight perk: experience for the work.
+            if (this.ua$broken >= CardPerk.INSIGHT_BLOCKS && CardPerk.INSIGHT.has(player)) player.giveExperiencePoints(this.ua$broken / CardPerk.INSIGHT_BLOCKS);
+            // The Thrifty perk: part of the wear this Ultimine put on the tool is given back (a tool that broke is gone).
+            ItemStack tool = this.ua$tool;
+            if (!tool.isEmpty() && tool == player.getMainHandItem() && tool.getDamageValue() > this.ua$toolDamage && CardPerk.THRIFTY.has(player)) {
+                tool.setDamageValue(tool.getDamageValue() - (int) ((tool.getDamageValue() - this.ua$toolDamage) * CardPerk.THRIFTY_FACTOR));
+            }
+            this.ua$tool = ItemStack.EMPTY;
             this.ua$player = null;
         }
     }

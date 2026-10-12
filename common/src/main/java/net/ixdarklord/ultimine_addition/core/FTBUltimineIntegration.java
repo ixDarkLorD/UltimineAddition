@@ -242,6 +242,9 @@ public class FTBUltimineIntegration implements RestrictionHandler {
         if (net.ixdarklord.ultimine_addition.common.progression.CardPerk.REACH.has(player)) {
             blocks = Math.round(blocks * net.ixdarklord.ultimine_addition.common.progression.CardPerk.REACH_FACTOR);
         }
+        if (net.ixdarklord.ultimine_addition.common.progression.CardPerk.EXPANSE.has(player)) {
+            blocks = Math.round(blocks * net.ixdarklord.ultimine_addition.common.progression.CardPerk.REACH_FACTOR);
+        }
         // What prestiged cards of the tool's types have earned.
         int prestige = 0;
         var ability = ServicePlatform.get().players().getAbilityData(player);

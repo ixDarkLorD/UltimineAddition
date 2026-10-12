@@ -175,6 +175,7 @@ public final class SkillsRecordPayload {
                     data.save();
                     net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().modifyAbilityData(player, ability -> ability.addPrestige(tool));
                     int level = cardData.getPrestige();
+                    net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.fire(net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.Kind.PRESTIGE, player, tool, level, null, "");
                     new net.ixdarklord.ultimine_addition.common.progression.UltimineNotice(net.ixdarklord.ultimine_addition.common.progression.UltimineNotice.Kind.REWARD,
                             Component.translatable("info.ultimine_addition.notice.prestige", level),
                             java.util.List.of(Component.translatable("info.ultimine_addition.notice.prestige.info",
@@ -211,6 +212,7 @@ public final class SkillsRecordPayload {
                     String tool = cardData.getType().getId();
                     net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().modifyAbilityData(player, ability -> ability.learnPerk(tool, perk.id()));
                     cardData.claimPerk(tier);
+                    net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.fire(net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.Kind.PERK_LEARNED, player, tool, tier.getValue(), null, perk.id());
                     net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.reach(player, net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.PERK);
                     cardData.save();
                     data.save();

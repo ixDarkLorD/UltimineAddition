@@ -113,13 +113,19 @@ public final class TimedChallenge {
         if (player.isCreative() || player.isSpectator() || Platform.isFakePlayer(player)) return;
         Current current = current(player.level().getServer());
         if (current == null || current.data.challengeType() != action || !current.targets.contains(state.getBlock())) return;
-        if (!ChallengesManager.INSTANCE.isCorrectTool(player, current.data) || !current.data.conditions().test(player.level(), pos)) return;
+        if (!ChallengesManager.INSTANCE.isCorrectTool(player, current.data) || !current.data.conditions().test(player, pos)) return;
         IneligibleBlocksSavedData ineligible = IneligibleBlocksSavedData.getOrCreate(player.level());
         // What an undo put back never counts; what someone placed doesn't either, where that rule is on.
         if (ineligible.isRestoredByUndo(pos)) return;
         if (UAServerConfig.IS_PLACED_BY_ENTITY_CONDITION.get() && !state.is(ModBlockTags.DENY_IS_PLACED_BY_ENTITY)
                 && ineligible.isBlockPlacedByEntity(pos)) return;
         advance(player, current, 1);
+        // A team does it together: what one member does counts for the teammates who are online, too.
+        if (UAServerConfig.TIMED_CHALLENGE_TEAM.get()) {
+            for (ServerPlayer mate : TeamBridge.onlineTeammates(player)) {
+                if (!mate.isCreative() && !mate.isSpectator()) advance(mate, current, 1);
+            }
+        }
     }
 
     /** Adds to the player's progress in the running challenge (the command's way in); false when it is already done. */
@@ -151,6 +157,7 @@ public final class TimedChallenge {
         }
         DataRewards.onTimedChallenge(player, type, current.id);
         UltimineStats.onDaily(player);
+        ProgressionHooks.fire(ProgressionHooks.Kind.DAILY_COMPLETED, player, type.getId(), 0, current.id, "");
         new UltimineNotice(UltimineNotice.Kind.REWARD, Component.translatable("info.ultimine_addition.timed.completed", current.title()), lines, type.iconStack()).send(player);
         player.level().sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.6, 0.8, 0.6, 0.1);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, player.getSoundSource(), 0.8F, 1.4F);

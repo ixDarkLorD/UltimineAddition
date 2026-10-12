@@ -19,20 +19,28 @@ import java.util.List;
 import java.util.Optional;
 
 // Where a challenge counts (a challenge file's "conditions"): in these dimensions, in these biomes (ids, or tags
-// starting with #), between these heights. Anything left out doesn't matter.
+// starting with #), between these heights, for players with these stages. Anything left out doesn't matter.
 //
 //   "conditions": { "dimensions": ["minecraft:the_nether"], "biomes": ["#minecraft:is_forest"], "min_y": -64, "max_y": 16 }
-public record ChallengeConditions(List<Identifier> dimensions, List<String> biomes, Optional<Integer> minY, Optional<Integer> maxY) {
-    public static final ChallengeConditions NONE = new ChallengeConditions(List.of(), List.of(), Optional.empty(), Optional.empty());
+public record ChallengeConditions(List<Identifier> dimensions, List<String> biomes, Optional<Integer> minY, Optional<Integer> maxY,
+                                  // Stages the player must have: entity tags, as /tag gives them (and scripts or other mods can).
+                                  List<String> stages) {
+    public static final ChallengeConditions NONE = new ChallengeConditions(List.of(), List.of(), Optional.empty(), Optional.empty(), List.of());
     public static final Codec<ChallengeConditions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Identifier.CODEC.listOf().optionalFieldOf("dimensions", List.of()).forGetter(ChallengeConditions::dimensions),
             Codec.STRING.listOf().optionalFieldOf("biomes", List.of()).forGetter(ChallengeConditions::biomes),
             Codec.INT.optionalFieldOf("min_y").forGetter(ChallengeConditions::minY),
-            Codec.INT.optionalFieldOf("max_y").forGetter(ChallengeConditions::maxY)
+            Codec.INT.optionalFieldOf("max_y").forGetter(ChallengeConditions::maxY),
+            Codec.STRING.listOf().optionalFieldOf("stages", List.of()).forGetter(ChallengeConditions::stages)
     ).apply(instance, ChallengeConditions::new));
 
     public boolean isEmpty() {
-        return this.dimensions.isEmpty() && this.biomes.isEmpty() && this.minY.isEmpty() && this.maxY.isEmpty();
+        return this.dimensions.isEmpty() && this.biomes.isEmpty() && this.minY.isEmpty() && this.maxY.isEmpty() && this.stages.isEmpty();
+    }
+
+    /** Whether the challenge counts for this player at this block. */
+    public boolean test(net.minecraft.world.entity.player.Player player, BlockPos pos) {
+        return player.entityTags().containsAll(this.stages) && this.test(player.level(), pos);
     }
 
     public boolean test(Level level, BlockPos pos) {
@@ -74,6 +82,9 @@ public record ChallengeConditions(List<Identifier> dimensions, List<String> biom
         } else if (this.maxY.isPresent()) {
             lines.add(Component.translatable("challenge.ultimine_addition.condition.below", this.maxY.get()));
         }
+        if (!this.stages.isEmpty()) {
+            lines.add(Component.translatable("challenge.ultimine_addition.condition.stage", joined(this.stages.stream().map(stage -> (Component) Component.literal(pretty(stage))).toList())));
+        }
         return lines.stream().map(line -> (Component) line.copy().withStyle(ChatFormatting.AQUA)).toList();
     }
 
@@ -104,6 +115,7 @@ public record ChallengeConditions(List<Identifier> dimensions, List<String> biom
         this.minY.ifPresent(buf::writeInt);
         buf.writeBoolean(this.maxY.isPresent());
         this.maxY.ifPresent(buf::writeInt);
+        buf.writeCollection(this.stages, FriendlyByteBuf::writeUtf);
     }
 
     public static ChallengeConditions read(FriendlyByteBuf buf) {
@@ -111,6 +123,7 @@ public record ChallengeConditions(List<Identifier> dimensions, List<String> biom
         List<String> biomes = buf.readList(FriendlyByteBuf::readUtf);
         Optional<Integer> minY = buf.readBoolean() ? Optional.of(buf.readInt()) : Optional.empty();
         Optional<Integer> maxY = buf.readBoolean() ? Optional.of(buf.readInt()) : Optional.empty();
-        return new ChallengeConditions(dimensions, biomes, minY, maxY);
+        List<String> stages = buf.readList(FriendlyByteBuf::readUtf);
+        return new ChallengeConditions(dimensions, biomes, minY, maxY, stages);
     }
 }

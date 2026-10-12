@@ -12,4 +12,6 @@ dependencies {
 
     api "dev.ftb.mods:ftb-ultimine:${ftbultimine_version}"
     api "dev.ftb.mods:ftb-library:${ftblibrary_version}"
+    // Optional: with FTB Teams there, the daily challenge is shared by a team (FTBTeamsCompat).
+    compileOnly("dev.ftb.mods:ftb-teams:${ftbteams_version}") { transitive = false }
 }

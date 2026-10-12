@@ -78,9 +78,15 @@ public class ShapeCertificateItem extends ModernItem implements net.ixdarklord.c
 
     // The shapes a card can pick from when it claims the certificate of claimTier: that tier's list plus every earlier
     // tier's shapes not picked yet, so a shape passed over stays available later (Mastered: anything left). Shapes
-    // already learned for the tool, and blacklisted ones, are left out.
+    // already learned for the tool, and blacklisted ones, are left out; so are the ones the player carries a certificate
+    // of for that tool and hasn't used yet, or a later tier would offer the same shape a second time.
     public static List<Identifier> claimPool(Player player, String tool, MiningSkillCardItem.Tier claimTier) {
-        Set<Identifier> learned = ServicePlatform.get().players().getUnlockedShapes(player, tool);
+        Set<Identifier> learned = new java.util.HashSet<>(ServicePlatform.get().players().getUnlockedShapes(player, tool));
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            ItemStack stack = player.getInventory().getItem(slot);
+            Identifier held = ShapeCertificateData.getShape(stack);
+            if (held != null && stack.getItem() instanceof ShapeCertificateItem && tool.equals(ShapeCertificateData.getTool(stack))) learned.add(held);
+        }
         List<Identifier> pool = new ArrayList<>();
         for (MiningSkillCardItem.Tier tier : LIST_TIERS) {
             if (tier.getValue() > claimTier.getValue()) break;

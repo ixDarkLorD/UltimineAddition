@@ -79,6 +79,13 @@ public final class UAServerConfig {
     public static final ConfigValue<Integer> REROLL_INK_COST = BUILDER.intValue("reroll_ink_cost", 16).range(0, 1000)
             .comment("Ink taken from the Skills Record's pen for each reroll.")
             .enabledWhen(REROLLS_PER_TIER, rerolls -> rerolls > 0).build();
+    public static final ConfigValue<Integer> CUSTOM_SHAPES_PER_PLAYER = BUILDER.intValue("custom_shapes_per_player", 3).range(0, 20)
+            .comment("How many shapes of their own a player may keep, drawn in the Shape Designer (opened from the Shape Selector).",
+                    "A player learns their shape for the tools they can already Ultimine with. 0 turns the designer off.")
+            .build();
+    public static final ConfigValue<Integer> CUSTOM_SHAPES_MAX_BLOCKS = BUILDER.intValue("custom_shapes_max_blocks", 8).range(1, 24)
+            .comment("The most blocks a player-made shape may have, besides the one being broken.")
+            .enabledWhen(CUSTOM_SHAPES_PER_PLAYER, shapes -> shapes > 0).build();
     public static final ConfigValue<Integer> JUICE_IDLE_PAUSE = BUILDER.intValue("juice_idle_pause", 0).range(0, 600)
             .comment("With a number of seconds here, a drunk Mine-Go Juice only runs down for that long after each Ultimine,",
                     "and waits the rest of the time, so it isn't wasted on the way to the mine. 0 keeps it a plain timer.")
@@ -98,6 +105,10 @@ public final class UAServerConfig {
                     "It needs no card: doing it with the right tool counts. /ultimine_addition challenge shows it.",
                     "Has no effect in the legacy playstyle mode.")
             .build();
+    public static final ConfigValue<Boolean> TIMED_CHALLENGE_TEAM = BUILDER.bool("timed_challenge_team", true)
+            .comment("A team does the daily challenge together: what one member does also counts for the teammates who are online.",
+                    "A team is an FTB Teams party when that mod is installed, otherwise a scoreboard team (/team).")
+            .enabledWhen(TIMED_CHALLENGE, period -> period != TimedChallenge.Period.OFF).build();
     public static final ConfigValue<Integer> TIMED_CHALLENGE_EXPERIENCE = BUILDER.intValue("timed_challenge_experience", 50).range(0, 10000)
             .comment("Experience points for finishing the daily challenge (four times as much for a weekly one).")
             .enabledWhen(TIMED_CHALLENGE, period -> period != TimedChallenge.Period.OFF).build();
