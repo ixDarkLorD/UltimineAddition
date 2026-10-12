@@ -34,6 +34,25 @@ public final class ItemTooltipEvents {
             insertSelectedShapeInfo(stack, components);
         }
 
+        int affinity = net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.blocks(stack);
+        if (affinity > 0 && net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.enabled()) {
+            components.add(Component.translatable("tooltip.ultimine_addition.affinity", affinity,
+                    net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.percent(stack)).withStyle(ChatFormatting.DARK_AQUA));
+        }
+
+        if (stack.getItem() instanceof SkillsRecordItem && net.minecraft.client.gui.screens.Screen.hasShiftDown() && net.minecraft.client.Minecraft.getInstance().player != null) {
+            var stats = net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().getAbilityData(net.minecraft.client.Minecraft.getInstance().player).getStats();
+            if (stats.operations() > 0 || stats.challenges() > 0) {
+                components.add(Component.literal(""));
+                components.add(Component.translatable("command.ultimine_addition.stats.title").withStyle(ChatFormatting.GOLD));
+                for (var line : List.of(new Object[]{"blocks", stats.blocks()}, new Object[]{"largest", stats.largest()}, new Object[]{"challenges", stats.challenges()},
+                        new Object[]{"dailies", stats.dailies()}, new Object[]{"undos", stats.undos()})) {
+                    components.add(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("command.ultimine_addition.stats." + line[0],
+                            Component.literal(String.valueOf(line[1])).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY)));
+                }
+            }
+        }
+
         if (stack.is(ModItemTags.LEGACY_DISABLED_ITEMS)) {
             if (PlaystyleModes.isLegacy()) {
                 components.add(1, Component.translatable("tooltip.ultimine_addition.legacy_mode.disabled_item").withStyle(ChatFormatting.RED));

@@ -48,6 +48,14 @@ final class TierTreePanel extends ViewportPanel {
     private static final ResourceLocation STAR_FILL = sprite("star_fill");
     private static final ResourceLocation STAR_BORDER = sprite("star_border");
     private static final int MASTERED_GOLD = 0xFFFFC940;
+    private static final ItemStack PRESTIGE_ICON = new ItemStack(net.minecraft.world.item.Items.NETHER_STAR);
+    private static final long PRESTIGE_CONFIRM_MS = 4000L;
+    // When the Mastered box's star was first clicked (0 when it wasn't): see worldClicked.
+    private long prestigeArmedAt;
+
+    private boolean prestigeArmed() {
+        return this.prestigeArmedAt != 0L && net.minecraft.Util.getMillis() - this.prestigeArmedAt < PRESTIGE_CONFIRM_MS;
+    }
     private static final ResourceLocation SLOT_FILL = sprite("slot_fill");
     private static final ResourceLocation SLOT_BORDER = sprite("slot_border");
     private static final ResourceLocation SMALL_SLOT_FILL = sprite("slot_small_fill");
@@ -509,8 +517,10 @@ final class TierTreePanel extends ViewportPanel {
         int textX = x + BADGE_SIZE / 2 + 4;
         Component name = node.tier().getDisplayName();
         if (node.state() == TierState.LOCKED) name = name.copy().withStyle(ChatFormatting.DARK_GRAY);
-        GuiDraw.text(graphics, this.font, name, textX, y + 7, ARGB.multiplyAlpha(RenderUtils.textColor(0xFFFFFF), reveal), shadow);
-        GuiDraw.text(graphics, this.font, this.tierStatus(node), textX, y + 18, ARGB.multiplyAlpha(RenderUtils.textColor(0xAAAAAA), reveal), shadow);
+        // Both lines keep clear of the slot on the box's right (a certificate, a perk, the prestige star), shrinking to fit.
+        int room = x + w - SMALL_SLOT_SIZE - 9 - textX;
+        this.fitText(graphics, name, textX, y + 7, room, ARGB.multiplyAlpha(RenderUtils.textColor(0xFFFFFF), reveal), shadow);
+        this.fitText(graphics, this.tierStatus(node), textX, y + 18, room, ARGB.multiplyAlpha(RenderUtils.textColor(0xAAAAAA), reveal), shadow);
 
         // An unclaimed Shape Certificate waits on the box's right, glowing gold.
         ItemStack reward = this.viewer.claimableCertificate(node);
@@ -520,6 +530,24 @@ final class TierTreePanel extends ViewportPanel {
             drawSmallSlot(graphics, sx, sy, ARGB.multiplyAlpha(this.viewer.recordTinted(ARGB.srgbLerp(glow, 0xFF3A2E12, 0xFF6A5420)), reveal),
                     ARGB.multiplyAlpha(this.viewer.recordTinted(ARGB.srgbLerp(glow, 0xFFB08A30, MASTERED_GOLD)), reveal));
             if (reveal > 0.5F) graphics.renderItem(reward, sx + (SMALL_SLOT_SIZE - 16) / 2, sy + (SMALL_SLOT_SIZE - 16) / 2);
+        } else {
+            // With the certificate claimed, a perk still to pick waits in the same place, glowing violet.
+            var offer = this.viewer.perkOffer(node);
+            if (!offer.isEmpty()) {
+                float glow = this.animated() ? (Mth.sin(time() * 4.0F) + 1.0F) / 2.0F : 1.0F;
+                int sx = x + w - SMALL_SLOT_SIZE - 5, sy = y + (h - SMALL_SLOT_SIZE) / 2;
+                drawSmallSlot(graphics, sx, sy, ARGB.multiplyAlpha(this.viewer.recordTinted(ARGB.srgbLerp(glow, 0xFF241A36, 0xFF46306A)), reveal),
+                        ARGB.multiplyAlpha(this.viewer.recordTinted(ARGB.srgbLerp(glow, 0xFF7A5AB0, 0xFFC9A6FF)), reveal));
+                if (reveal > 0.5F) graphics.renderItem(offer.getFirst().icon(), sx + (SMALL_SLOT_SIZE - 16) / 2, sy + (SMALL_SLOT_SIZE - 16) / 2);
+            } else if (this.viewer.canPrestige(node)) {
+                // A Mastered card can start over: a star waits on its box (red once armed by the first click).
+                boolean armed = this.prestigeArmed();
+                float glow = this.animated() ? (Mth.sin(time() * 4.0F) + 1.0F) / 2.0F : 1.0F;
+                int sx = x + w - SMALL_SLOT_SIZE - 5, sy = y + (h - SMALL_SLOT_SIZE) / 2;
+                drawSmallSlot(graphics, sx, sy, ARGB.multiplyAlpha(this.viewer.recordTinted(ARGB.srgbLerp(glow, 0xFF3A2E12, armed ? 0xFF6A2020 : 0xFF6A5420)), reveal),
+                        ARGB.multiplyAlpha(this.viewer.recordTinted(ARGB.srgbLerp(glow, armed ? 0xFFB03030 : 0xFFB08A30, armed ? 0xFFFF6A6A : MASTERED_GOLD)), reveal));
+                if (reveal > 0.5F) graphics.renderItem(PRESTIGE_ICON, sx + (SMALL_SLOT_SIZE - 16) / 2, sy + (SMALL_SLOT_SIZE - 16) / 2);
+            }
         }
         graphics.pose().popPose();
     }
@@ -612,6 +640,17 @@ final class TierTreePanel extends ViewportPanel {
             int color = progressColor(Math.round(progress * 100));
             graphics.fillGradient(x + 1, y + 1, x + 1 + fill, y + PROGRESS_BAR_HEIGHT - 1, ARGB.color(0.75F, color), ARGB.color(0.55F, color));
         }
+    }
+
+    // A line of text, scaled down (around its middle height) when it is wider than the room it has.
+    private void fitText(GuiGraphics graphics, Component text, int x, int y, int room, int color, boolean shadow) {
+        float scale = Math.min(1.0F, room / (float) Math.max(1, this.font.width(text)));
+        var pose = graphics.pose();
+        pose.pushPose();
+        pose.translate(x, y + (1.0F - scale) * 4.0F, 0.0F);
+        pose.scale(scale, scale, 1.0F);
+        GuiDraw.text(graphics, this.font, text, 0, 0, color, shadow);
+        pose.popPose();
     }
 
     private Component tierStatus(TierNode node) {
@@ -714,6 +753,8 @@ final class TierTreePanel extends ViewportPanel {
         } else if (this.hoveredTier != null) {
             ItemStack reward = this.viewer.claimableCertificate(this.hoveredTier);
             if (!reward.isEmpty()) GuiDraw.tooltipLines(graphics, this.font, this.viewer.describeCertificate(this.hoveredTier, reward), mouseX, mouseY);
+            else if (!this.viewer.perkOffer(this.hoveredTier).isEmpty()) GuiDraw.tooltipLines(graphics, this.font, this.viewer.describePerkOffer(this.hoveredTier), mouseX, mouseY);
+            else if (this.viewer.canPrestige(this.hoveredTier)) GuiDraw.tooltipLines(graphics, this.font, this.viewer.describePrestige(this.prestigeArmed()), mouseX, mouseY);
         }
     }
 
@@ -728,6 +769,23 @@ final class TierTreePanel extends ViewportPanel {
                         this.viewer.openShapeChoice(tier);
                         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     }
+                    return true;
+                }
+                if (!this.viewer.perkOffer(tier).isEmpty()) {
+                    this.viewer.openPerkChoice(tier);
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    return true;
+                }
+                if (this.viewer.canPrestige(tier)) {
+                    // Starting a card over can't be taken back: the first click arms it, a second one within a few
+                    // seconds does it.
+                    if (this.prestigeArmed()) {
+                        this.prestigeArmedAt = 0L;
+                        this.viewer.prestigeCard();
+                    } else {
+                        this.prestigeArmedAt = net.minecraft.Util.getMillis();
+                    }
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     return true;
                 }
                 ScreenRectangle b = this.getBounds();

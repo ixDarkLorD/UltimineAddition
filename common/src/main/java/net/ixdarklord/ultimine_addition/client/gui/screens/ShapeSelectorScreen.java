@@ -78,6 +78,13 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
             "XXX.XXX",
             "XX...XX",
     };
+    private static final String[] PENCIL_ICON = {
+            "...XX",
+            "..XXX",
+            ".XXX.",
+            "XXX..",
+            "XX...",
+    };
     private static final String[] FILTER_ICON = {
             "XXXXX",
             ".XXX.",
@@ -91,6 +98,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
     private static final int TOOLTIP_WIDTH = 160;
 
     private ColoredButton filterButton;
+    private ColoredButton designButton;
     private AbstractStringWidget emptyString;
     private SelectBox selectBox;
     private ColorableImageButton setButton;
@@ -134,6 +142,21 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 this.renderTooltip(guiGraphics, mouseX, mouseY);
             }
         });
+
+        // The Shape Designer, for a shape of one's own (where the server allows them).
+        this.designButton = this.addWidget(new ColoredButton(this.leftPos + 150, this.topPos + 35, 9, 9, SkillsRecordScreen.CONFIGURATION_BUTTON_SPRITES,
+                button -> {
+                    // A popup over this screen: the menu stays open under it.
+                    Minecraft.getInstance().setScreen(new ShapeDesignerScreen(this));
+                }, Component.empty(),
+                tooltipInfo -> tooltipInfo.component = Component.translatable("gui.ultimine_addition.shape_designer.open").withStyle(ChatFormatting.WHITE)) {
+            @Override
+            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                drawBlueprintButton(guiGraphics, this, PENCIL_ICON);
+                this.renderTooltip(guiGraphics, mouseX, mouseY);
+            }
+        });
+        this.designButton.visible = net.ixdarklord.ultimine_addition.common.data.shape.CustomShapes.enabled();
 
         this.emptyString = this.addRenderableWidget(new AbstractStringWidget(this.leftPos + LIST_X, this.topPos + LIST_Y, LIST_WIDTH, LIST_HEIGHT,
                 Component.translatable("gui.ultimine_addition.shape_selector.insert"), this.font) {
@@ -212,6 +235,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         this.update();
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         this.filterButton.render(guiGraphics, mouseX, mouseY, partialTick);
+        this.designButton.render(guiGraphics, mouseX, mouseY, partialTick);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
         GuiDraw.renderTooltip(guiGraphics);
     }
@@ -282,10 +306,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
     private static void drawBlueprintButton(GuiGraphics graphics, AbstractWidget button, String[] icon) {
         int x = button.getX(), y = button.getY(), w = button.getWidth(), h = button.getHeight();
         boolean active = button.active, hovered = active && button.isHoveredOrFocused();
-        graphics.fill(x, y, x + w, y + h, active ? ARGB.opaque(BLUEPRINT_LINE) : 0xFF6FB3D6);
-        graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, !active ? 0xFF2A8FC4 : hovered ? 0xFF3A9FD8 : 0xFF2586BD);
-        graphics.fill(x + 1, y + 1, x + w - 1, y + 2, active ? 0xFF55B4E6 : 0xFF3C9ACC);
-        graphics.fill(x + 1, y + h - 2, x + w - 1, y + h - 1, 0xFF1C6FA0);
+        drawBlueprintPlate(graphics, x, y, w, h, active, hovered);
         int ix = x + (w - icon[0].length()) / 2, iy = y + (h - icon.length) / 2;
         int color = active ? 0xFFFFFFFF : 0xFF8FC8E6;
         for (int row = 0; row < icon.length; row++) {
@@ -293,6 +314,14 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 if (icon[row].charAt(col) == 'X') graphics.fill(ix + col, iy + row, ix + col + 1, iy + row + 1, color);
             }
         }
+    }
+
+    // The plate itself, which the Shape Designer's buttons share.
+    static void drawBlueprintPlate(GuiGraphics graphics, int x, int y, int w, int h, boolean active, boolean hovered) {
+        graphics.fill(x, y, x + w, y + h, active ? ARGB.opaque(BLUEPRINT_LINE) : 0xFF6FB3D6);
+        graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, !active ? 0xFF2A8FC4 : hovered ? 0xFF3A9FD8 : 0xFF2586BD);
+        graphics.fill(x + 1, y + 1, x + w - 1, y + 2, active ? 0xFF55B4E6 : 0xFF3C9ACC);
+        graphics.fill(x + 1, y + h - 2, x + w - 1, y + h - 1, 0xFF1C6FA0);
     }
 
     // Each line split to fit TOOLTIP_WIDTH (a blank line kept blank).
@@ -332,6 +361,10 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
         private static final int DIAGRAM_DRAWN = DIAGRAM_SIZE - 1;
         // A row with the gap under it.
         private static final int ENTRY_HEIGHT = 27;
+        private static final int STAR_WIDTH = 9;
+        // Between the star and the diagram.
+        private static final int STAR_GAP = 3;
+
         public SelectBox(int x, int y, int width, int height) {
             super(Minecraft.getInstance(), width, height, y, ENTRY_HEIGHT);
             this.setX(x);
@@ -418,9 +451,28 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 return shapeData != null && shape.getName().equals(shapeData.shape().getName());
             }
 
+            // The star: whether this shape is one the player cycles through (see FTBUltimineIntegration.getAvailableShapes).
+            private boolean isFavorite() {
+                var player = Minecraft.getInstance().player;
+                return player != null && net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().getAbilityData(player).getFavoriteShapes().contains(this.shape.getName());
+            }
+
+            // Where the row was last drawn: 1.21.1's entries don't know their own place.
+            private int rowRight = Integer.MIN_VALUE;
+
+            private int starLeft() {
+                return this.rowRight - DIAGRAM_DRAWN - 3 - STAR_GAP - STAR_WIDTH;
+            }
+
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 SoundManager handler = Minecraft.getInstance().getSoundManager();
+                if (this.rowRight != Integer.MIN_VALUE && mouseX >= this.starLeft() && mouseX < this.starLeft() + STAR_WIDTH) {
+                    PayloadHandler.sendToServer(new net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Favorite(this.shape.getName()));
+                    handler.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, this.isFavorite() ? 0.9F : 1.3F));
+                    // Not a pick of the row: the list leaves its selection alone.
+                    return false;
+                }
                 if (!isAllowed()) {
                     handler.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS, .5F));
                     return false;
@@ -432,6 +484,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
             @Override
             // The list hands each row its box: the row height minus a 4px gap below it.
             public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isHovered, float partialTick) {
+                this.rowRight = left + width;
                 // Drawn in the blueprint's lines: a light wash framed in its line color.
                 Color bgColor = new Color(BLUEPRINT_WASH);
                 Color borderColor = new Color(BLUEPRINT_LINE);
@@ -457,7 +510,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 }
                 // Shrunk to fit when too long (e.g. in other languages), centered in the box's height.
                 Component name = this.shape.getDisplayName().copy().withStyle(style);
-                int room = width - spacing - 6 - DIAGRAM_SIZE - 3;
+                int room = width - spacing - 6 - DIAGRAM_SIZE - 3 - STAR_GAP - STAR_WIDTH;
                 float scale = Math.min(1.0F, room / (float) Math.max(1, font.width(name)));
                 var pose = guiGraphics.pose();
                 pose.pushPose();
@@ -465,6 +518,15 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 pose.scale(scale, scale, 1.0F);
                 GuiDraw.text(guiGraphics, font, name, 0, 0, color.getRGB(), true);
                 pose.popPose();
+
+                // The favourite star, before the diagram: gold when marked, a faint outline otherwise.
+                boolean favorite = this.isFavorite();
+                boolean overStar = isHovered && mouseX >= this.starLeft() && mouseX < this.starLeft() + STAR_WIDTH;
+                GuiDraw.text(guiGraphics, font, Component.literal(favorite ? "★" : "☆"), this.starLeft() + 1, top + height / 2 - 4,
+                        favorite ? 0xFFFBD25A : overStar ? 0xFFFFFFFF : 0x90FFFFFF, favorite);
+                if (overStar) {
+                    GuiDraw.tooltip(guiGraphics, font, Component.translatable(favorite ? "gui.ultimine_addition.shape_selector.unfavorite" : "gui.ultimine_addition.shape_selector.favorite"), mouseX, mouseY);
+                }
 
                 // The shape's diagram, at the row's right end.
                 int tint = isAllowed() ? 0xFFFFFFFF : 0xFFD13E3E;

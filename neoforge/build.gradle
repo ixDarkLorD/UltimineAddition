@@ -27,4 +27,8 @@ dependencies {
 
     modApi "dev.ftb.mods:ftb-ultimine-neoforge:${ftbultimine_version}"
     modApi "dev.ftb.mods:ftb-library-neoforge:${ftblibrary_version}"
+
+    // Optional: KubeJS scripts can listen to the mod's progression events (integration/kubejs).
+    modCompileOnly("dev.latvian.mods:kubejs-neoforge:${kubejs_version}") { transitive = false }
+    modCompileOnly("dev.latvian.mods:rhino:${rhino_version}") { transitive = false }
 }

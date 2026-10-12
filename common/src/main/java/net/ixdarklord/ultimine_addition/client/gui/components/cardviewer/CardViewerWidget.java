@@ -67,6 +67,10 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
 
         void claimCertificate(MiningSkillCardItem.Tier tier, ResourceLocation shape);
 
+        void claimPerk(MiningSkillCardItem.Tier tier, net.ixdarklord.ultimine_addition.common.progression.CardPerk perk);
+
+        void prestigeCard();
+
         int getInkAmount();
 
         void onExpandedChanged(boolean expanded);
@@ -90,6 +94,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     private @Nullable ChallengeNode pendingDetails;
     private final ChallengeDetailsPanel details;
     private final ShapeChoicePanel shapeChoice;
+    private final PerkChoicePanel perkChoice;
     private final MessagePanel preview;
     private ViewerButton.Icon expandButton;
     private ViewerButton.Icon fitButton;
@@ -110,6 +115,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         this.guide = this.addPanel(new GuidePanel(this));
         this.details = this.addPanel(new ChallengeDetailsPanel(this));
         this.shapeChoice = this.addPanel(new ShapeChoicePanel(this));
+        this.perkChoice = this.addPanel(new PerkChoicePanel(this));
         this.preview = this.addPanel(new MessagePanel(this, MessagePanel.Mode.FULL));
         this.preview.setModal(true);
         this.setOverlayColor(0xA0000000);
@@ -137,6 +143,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             this.banner.setVisible(false);
             this.details.setVisible(false);
             this.shapeChoice.setVisible(false);
+            this.perkChoice.setVisible(false);
             this.shownCard = null;
             this.guide.show(state.hasCards() ? GuidePanel.Kind.SELECT_CARD : GuidePanel.Kind.NO_CARDS);
         } else {
@@ -158,6 +165,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
                 this.cancelTransition();
                 this.details.setVisible(false);
                 this.shapeChoice.setVisible(false);
+                this.perkChoice.setVisible(false);
                 this.tree.focus(card.getTier());
             }
             this.updateBanner(card);
@@ -358,6 +366,56 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         if (!pool.isEmpty()) this.shapeChoice.show(node.tier(), pool, this.claimableCertificate(node));
     }
 
+    // A Mastered card can start over for a lasting bonus: its Mastered box says so.
+    boolean canPrestige(TierNode node) {
+        MiningSkillCardData card = this.state.card();
+        return node.tier() == MiningSkillCardItem.Tier.Mastered && card != null && card.hasProgress() && card.canPrestige();
+    }
+
+    void prestigeCard() {
+        this.actions.prestigeCard();
+        // The card starts over: show it from its first tier again, as a card just put in.
+        this.shownCard = null;
+    }
+
+    List<FormattedCharSequence> describePrestige(boolean armed) {
+        MiningSkillCardData card = this.state.card();
+        int next = card == null ? 1 : card.getPrestige() + 1;
+        List<Component> lines = new ArrayList<>();
+        lines.add(Component.literal("✦ ").append(Component.translatable("gui.ultimine_addition.card_viewer.prestige.title", next)).withStyle(ChatFormatting.GOLD));
+        lines.add(Component.translatable("gui.ultimine_addition.card_viewer.prestige.gain", MiningSkillCardData.PRESTIGE_PERCENT).withStyle(ChatFormatting.GRAY));
+        lines.add(Component.translatable("gui.ultimine_addition.card_viewer.prestige.cost").withStyle(ChatFormatting.GRAY));
+        lines.add(Component.literal(" "));
+        lines.add(armed ? Component.translatable("gui.ultimine_addition.card_viewer.prestige.confirm").withStyle(ChatFormatting.RED)
+                : Component.translatable("gui.ultimine_addition.card_viewer.prestige.click").withStyle(ChatFormatting.GREEN));
+        return lines.stream().flatMap(line -> this.minecraft.font.split(line, 170).stream()).toList();
+    }
+
+    // The two perks this tier's box offers, once its certificate is out of the way; empty when there is none to pick.
+    List<net.ixdarklord.ultimine_addition.common.progression.CardPerk> perkOffer(TierNode node) {
+        MiningSkillCardData card = this.state.card();
+        if (card == null || this.minecraft.player == null || !card.hasProgress() || !this.claimPool(node).isEmpty()) return List.of();
+        return net.ixdarklord.ultimine_addition.common.progression.CardPerk.offer(this.minecraft.player, card, node.tier());
+    }
+
+    void openPerkChoice(TierNode node) {
+        var offer = this.perkOffer(node);
+        if (!offer.isEmpty()) this.perkChoice.show(node.tier(), offer);
+    }
+
+    void claimPerk(MiningSkillCardItem.Tier tier, net.ixdarklord.ultimine_addition.common.progression.CardPerk perk) {
+        this.actions.claimPerk(tier, perk);
+    }
+
+    List<FormattedCharSequence> describePerkOffer(TierNode node) {
+        List<Component> lines = new ArrayList<>();
+        lines.add(Component.literal("✦ ").append(Component.translatable("gui.ultimine_addition.card_viewer.perk.ready")).withStyle(ChatFormatting.LIGHT_PURPLE));
+        for (var perk : this.perkOffer(node)) lines.add(Component.literal("• ").append(perk.displayName()).withStyle(ChatFormatting.GRAY));
+        lines.add(Component.literal(" "));
+        lines.add(Component.translatable("gui.ultimine_addition.card_viewer.perk.click").withStyle(ChatFormatting.GREEN));
+        return lines.stream().map(Component::getVisualOrderText).toList();
+    }
+
     boolean hasRoomFor(ItemStack stack) {
         return this.minecraft.player != null && ShapeCertificateItem.hasRoomFor(this.minecraft.player, stack);
     }
@@ -463,7 +521,13 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         List<Component> lines = ChallengesManager.INSTANCE.createChallengeDescription(node.id(), Style.EMPTY.withColor(ChatFormatting.GRAY)).stream()
                 .map(c -> (Component) c.copy().withStyle(ChatFormatting.GRAY))
                 .toList();
-        return withBlockList || lines.isEmpty() ? lines : List.of(lines.getFirst());
+        // Where it counts, and what a data pack hands out for it, come with both forms.
+        List<Component> full = new ArrayList<>(withBlockList || lines.isEmpty() ? lines : List.of(lines.getFirst()));
+        ChallengesManager.INSTANCE.getChallengeData(node.id()).ifPresent(data -> {
+            full.addAll(data.conditions().describe());
+            full.addAll(net.ixdarklord.ultimine_addition.common.data.reward.DataRewards.previewChallenge(node.id(), data.forCardType().getId()));
+        });
+        return full;
     }
 
     Component challengeProgress(ChallengeNode node) {
@@ -495,7 +559,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     }
 
     public boolean isTreeShown() {
-        return this.tree.isVisible() && !this.isTransitioning() && !this.details.isVisible() && !this.shapeChoice.isVisible() && !this.preview.isVisible();
+        return this.tree.isVisible() && !this.isTransitioning() && !this.details.isVisible() && !this.shapeChoice.isVisible() && !this.perkChoice.isVisible() && !this.preview.isVisible();
     }
 
     public double getZoom() {
@@ -563,7 +627,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
             this.expandButton.setPosition(this.toolbarRight - ICON_SIZE, this.toolbarY);
             this.fitButton.setPosition(this.toolbarRight - ICON_SIZE * 2 - 2, this.toolbarY);
         }
-        boolean covered = !this.expanded && (this.isTransitioning() || this.details.isVisible() || this.shapeChoice.isVisible() || this.preview.isVisible());
+        boolean covered = !this.expanded && (this.isTransitioning() || this.details.isVisible() || this.shapeChoice.isVisible() || this.perkChoice.isVisible() || this.preview.isVisible());
         boolean treeControls = this.tree.isVisible() && !covered;
         // Always there beside the configuration button; only usable while browsing the challenges.
         this.expandButton.setState(this.visible, !covered && (treeControls || this.expanded));

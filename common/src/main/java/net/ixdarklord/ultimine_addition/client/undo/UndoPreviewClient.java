@@ -151,7 +151,7 @@ public final class UndoPreviewClient {
         // Footer: what it costs (free / missing), how to confirm, how to cancel.
         Component keyName = KeyHandler.undoKeyName().copy().withStyle(ChatFormatting.YELLOW);
         List<Component> footer = new ArrayList<>();
-        if (preview.free()) footer.add(Component.translatable("gui.ultimine_addition.undo.free").withStyle(ChatFormatting.GREEN));
+        if (preview.free()) footer.add(Component.translatable(player.isCreative() ? "gui.ultimine_addition.undo.free" : "gui.ultimine_addition.undo.free.plain").withStyle(ChatFormatting.GREEN));
         if (affordable) footer.add(Component.translatable("gui.ultimine_addition.undo.confirm", keyName).withStyle(ChatFormatting.WHITE));
         else if (preview.restorable() > 0) footer.add(Component.translatable("gui.ultimine_addition.undo.confirm_partial", keyName,
                 preview.restorable(), preview.positions().size()).withStyle(ChatFormatting.GOLD));

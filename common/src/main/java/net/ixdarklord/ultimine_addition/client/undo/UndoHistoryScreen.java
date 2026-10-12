@@ -113,7 +113,9 @@ public final class UndoHistoryScreen extends Screen {
     }
 
     private static String cost(UndoPayload.HistoryEntry entry) {
-        if (entry.free()) return Component.translatable("gui.ultimine_addition.undo.free").getString();
+        var player = net.minecraft.client.Minecraft.getInstance().player;
+        String free = player != null && player.isCreative() ? "gui.ultimine_addition.undo.free" : "gui.ultimine_addition.undo.free.plain";
+        if (entry.free()) return Component.translatable(free).getString();
         StringBuilder items = new StringBuilder();
         for (ItemStack stack : entry.cost()) {
             if (!items.isEmpty()) items.append(", ");
@@ -123,7 +125,7 @@ public final class UndoHistoryScreen extends Screen {
             if (!items.isEmpty()) items.append(", ");
             items.append(Component.translatable("gui.ultimine_addition.undo.xp", entry.xp()).getString());
         }
-        if (items.isEmpty()) return Component.translatable("gui.ultimine_addition.undo.free").getString();
+        if (items.isEmpty()) return Component.translatable(free).getString();
         return Component.translatable("gui.ultimine_addition.undo.history.cost", items.toString()).getString();
     }
 
