@@ -2,6 +2,10 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v26.1.2-6 Release - Oct 13, 2026
+### 🐛 Bug Fixes & Improvements
+- Tools from other mods count for challenges, Shape Certificates and Mine-Go Juice even when the mod left them out of the tool tags (a pickaxe missing from `#minecraft:pickaxes` was not seen as a pickaxe): a tool is also recognized by what it digs.
+
 ## v26.1.2-5 Release - Oct 12, 2026
 ### ✨ New Features
 - **Mining Skill Cards from data packs**: `data/<namespace>/mining_skill_cards/<name>.json` adds a card type for other tools, with a `name`, its `tools` (item ids or `#tags`), an `icon` item for the card, and its Mine-Go Juice's `juice_color` and `juice_name`. Challenges name the type in `for_card_type` (`mypack:hammer`). The types reload with `/reload` and are sent to every player.
