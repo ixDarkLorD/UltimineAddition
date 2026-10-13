@@ -13,6 +13,17 @@ loom {
     }
 }
 
+// Fabric API 0.116.5+1.21.1 publishes fabric-loot-api-v2 with dependencies on modules of a newer Minecraft
+// (fabric-resource-loader-v0 2.0.0, fabric-api-base 0.4.43), which Gradle then picks over the ones the API itself
+// ships. With them a dev world doesn't load (Trinkets: NoSuchFieldError ResourceReloadListenerKeys.TAGS) and a dev
+// server doesn't start (LanguageMixin), so those two dependencies are dropped from that module: the API brings its own.
+// Jars are not affected.
+dependencies.components.withModule("net.fabricmc.fabric-api:fabric-loot-api-v2") {
+    allVariants {
+        withDependencies { deps -> deps.removeAll { it.name in ["fabric-resource-loader-v0", "fabric-api-base"] } }
+    }
+}
+
 dependencies {
     // CoolCatLib: Core (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
     // render utilities, easing), published from ../CoolCatLib-1.21.
