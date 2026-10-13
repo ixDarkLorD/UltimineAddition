@@ -1,6 +1,7 @@
 package net.ixdarklord.ultimine_addition.util;
 
 import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.Item;
 import com.google.common.collect.Lists;
 import net.ixdarklord.coolcatcore.api.utils.SlotReference;
@@ -166,22 +167,44 @@ public class ItemUtils {
     }
     public static boolean isItemInHandPickaxe(Player player) {
         ItemStack stack = getItemInHand(player, true);
-        return isItemInHandPaxel(player) || stack.is(ItemTags.PICKAXES);
+        return isItemInHandPaxel(player) || isPickaxe(stack);
     }
 
     public static boolean isItemInHandAxe(Player player) {
         ItemStack stack = getItemInHand(player, true);
-        return isItemInHandPaxel(player) || stack.is(ItemTags.AXES) || stack.getItem() instanceof AxeItem;
+        return isItemInHandPaxel(player) || isAxe(stack);
     }
 
     public static boolean isItemInHandShovel(Player player) {
         ItemStack stack = getItemInHand(player, true);
-        return isItemInHandPaxel(player) || stack.is(ItemTags.SHOVELS) || stack.getItem() instanceof ShovelItem;
+        return isItemInHandPaxel(player) || isShovel(stack);
     }
 
     public static boolean isItemInHandHoe(Player player) {
         ItemStack stack = getItemInHand(player, true);
-        return isItemInHandPaxel(player) || stack.is(ItemTags.HOES) || stack.getItem() instanceof HoeItem;
+        return isItemInHandPaxel(player) || isHoe(stack);
+    }
+
+    // What kind of tool an item is: by its tag or class, and for other mods' tools that have neither (a pickaxe that
+    // isn't in #minecraft:pickaxes), by what it digs faster than a bare hand.
+    public static boolean isPickaxe(ItemStack stack) {
+        return stack.is(ItemTags.PICKAXES) || digs(stack, Blocks.STONE);
+    }
+
+    public static boolean isAxe(ItemStack stack) {
+        return stack.is(ItemTags.AXES) || stack.getItem() instanceof AxeItem || digs(stack, Blocks.OAK_PLANKS);
+    }
+
+    public static boolean isShovel(ItemStack stack) {
+        return stack.is(ItemTags.SHOVELS) || stack.getItem() instanceof ShovelItem || digs(stack, Blocks.DIRT);
+    }
+
+    public static boolean isHoe(ItemStack stack) {
+        return stack.is(ItemTags.HOES) || stack.getItem() instanceof HoeItem || digs(stack, Blocks.HAY_BLOCK);
+    }
+
+    private static boolean digs(ItemStack stack, Block block) {
+        return !stack.isEmpty() && stack.getDestroySpeed(block.defaultBlockState()) > 1.0F;
     }
 
     // The Mining Skill Card types whose tools include this item (a paxel counts for all four).
@@ -189,10 +212,10 @@ public class ItemUtils {
         List<MiningSkillCardItem.Type> types = new ArrayList<>();
         if (stack.isEmpty()) return types;
         boolean paxel = ServicePlatform.get().players().isToolPaxel(stack);
-        if (paxel || stack.is(ItemTags.PICKAXES)) types.add(MiningSkillCardItem.Type.PICKAXE);
-        if (paxel || stack.is(ItemTags.AXES) || stack.getItem() instanceof AxeItem) types.add(MiningSkillCardItem.Type.AXE);
-        if (paxel || stack.is(ItemTags.SHOVELS) || stack.getItem() instanceof ShovelItem) types.add(MiningSkillCardItem.Type.SHOVEL);
-        if (paxel || stack.is(ItemTags.HOES) || stack.getItem() instanceof HoeItem) types.add(MiningSkillCardItem.Type.HOE);
+        if (paxel || isPickaxe(stack)) types.add(MiningSkillCardItem.Type.PICKAXE);
+        if (paxel || isAxe(stack)) types.add(MiningSkillCardItem.Type.AXE);
+        if (paxel || isShovel(stack)) types.add(MiningSkillCardItem.Type.SHOVEL);
+        if (paxel || isHoe(stack)) types.add(MiningSkillCardItem.Type.HOE);
         for (MiningSkillCardItem.Type type : MiningSkillCardItem.Type.TYPES) {
             if (type.isCustomType() && type.utilizeRequiredTools().contains(stack.getItem())) types.add(type);
         }
