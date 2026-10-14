@@ -14,10 +14,9 @@ loom {
 }
 
 dependencies {
-    // CoolCatLib: Core (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
+    // CoolCatLib (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
     // render utilities, easing), published from ../CoolCatLib-1.21.
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-core-neoforge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-canvas-neoforge:${libs.versions.minecraft.get()}-${coolcatlib_canvas_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-neoforge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
 
     modCompileOnly "${libs.curios.neoforge.get()}:api"
     modRuntimeOnly libs.curios.neoforge

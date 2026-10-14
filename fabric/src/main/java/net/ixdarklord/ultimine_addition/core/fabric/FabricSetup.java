@@ -8,7 +8,7 @@ import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
 import net.minecraft.client.Minecraft;
 
-// Fabric-only setup. The mod itself is constructed by CoolCatLib: Core from the "coolcatcore:common" entrypoint
+// Fabric-only setup. The mod itself is constructed by CoolCatLib from the "coolcatlib:common" entrypoint
 // (UltimineAdditionConstructor).
 public class FabricSetup implements ModInitializer {
 

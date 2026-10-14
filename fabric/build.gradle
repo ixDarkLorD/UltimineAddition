@@ -25,10 +25,9 @@ dependencies.components.withModule("net.fabricmc.fabric-api:fabric-loot-api-v2")
 }
 
 dependencies {
-    // CoolCatLib: Core (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
+    // CoolCatLib (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
     // render utilities, easing), published from ../CoolCatLib-1.21.
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-core-fabric:${libs.versions.minecraft.get()}-${coolcatlib_version}"
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-canvas-fabric:${libs.versions.minecraft.get()}-${coolcatlib_canvas_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-fabric:${libs.versions.minecraft.get()}-${coolcatlib_version}"
 
     modCompileOnlyApi libs.jei.api.fabric
     modRuntimeOnly libs.jei.fabric

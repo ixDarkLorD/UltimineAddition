@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
-// The config popup's scrolling list (from CoolCatLib: Core's config screens). Vanilla's lists give every row the same height; these give each row its own,
+// The config popup's scrolling list (from CoolCatLib's config screens). Vanilla's lists give every row the same height; these give each row its own,
 // laying the rows out top to bottom, and each row knows its own bounds. No background or separators are drawn.
 public abstract class StyledList<E extends StyledList.Entry<E>> extends ContainerObjectSelectionList<E> {
     private static final ResourceLocation SCROLLER_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller");

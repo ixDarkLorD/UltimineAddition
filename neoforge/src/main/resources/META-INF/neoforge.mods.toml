@@ -27,16 +27,9 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${modid}]]
-modId = "coolcatcore"
+modId = "coolcatlib"
 type = "required"
 versionRange = "[${coolcatlib_version},)"
-ordering = "NONE"
-side = "BOTH"
-
-[[dependencies.${modid}]]
-modId = "coolcatcanvas"
-type = "required"
-versionRange = "[${coolcatlib_canvas_version},)"
 ordering = "NONE"
 side = "BOTH"
 
