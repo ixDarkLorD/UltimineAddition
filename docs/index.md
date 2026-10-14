@@ -76,11 +76,35 @@ hide:
 
     [:octicons-arrow-right-24: Ultimine Undo](wiki/undo.md)
 
+-   :material-star-four-points:{ .lg .middle } **Perks and prestige**
+
+    ---
+
+    Each tier a card reaches offers a perk for its tool, and a Mastered card can start over for a lasting bonus.
+
+    [:octicons-arrow-right-24: Perks and Prestige](wiki/perks-and-prestige.md)
+
+-   :material-pencil-ruler:{ .lg .middle } **Shape Designer**
+
+    ---
+
+    Draw Ultimine shapes of your own, layers deep, with a 3D preview. Keep them, and share them as JSON.
+
+    [:octicons-arrow-right-24: Shape Designer](wiki/shape-designer.md)
+
+-   :material-calendar-star:{ .lg .middle } **Daily challenge**
+
+    ---
+
+    One challenge for the whole server each day, with no card needed. Teammates share the progress.
+
+    [:octicons-arrow-right-24: Daily Challenge](wiki/daily-challenge.md)
+
 -   :material-tune-variant:{ .lg .middle } **Made for modpacks**
 
     ---
 
-    Challenges are data pack files, card types can be added from the config folder, and nearly every number is a server setting.
+    Challenges, card types, shapes and rewards come from data packs, hooks react to progress, and nearly every number is a server setting.
 
     [:octicons-arrow-right-24: Configuration](wiki/packs/configuration.md)
 

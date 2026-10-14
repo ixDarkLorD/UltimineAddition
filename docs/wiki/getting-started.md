@@ -12,11 +12,13 @@ Download FTB Ultimine Addition from [CurseForge](https://www.curseforge.com/mine
 | Requires | Where |
 |---|---|
 | **FTB Ultimine** (it brings FTB Library) | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/ftb-ultimine-forge) |
-| **CoolCatLib: Core** | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/coolcatlib) · [Modrinth](https://modrinth.com/mod/ASkaoGC8) |
-| **CoolCatLib: Canvas** | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/coolcatlib-canvas) · [Modrinth](https://modrinth.com/mod/NtytwOvv) |
+| **CoolCatLib** | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/coolcatlib) · [Modrinth](https://modrinth.com/mod/ASkaoGC8) |
 | **Fabric API** (Fabric only) | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/fabric-api) · [Modrinth](https://modrinth.com/mod/fabric-api) |
 
 On 1.21.1 and 1.20.1 the Fabric versions also need Forge Config API Port.
+
+!!! note "CoolCatLib is one mod now"
+    CoolCatLib used to be two mods, **CoolCatLib: Core** and **CoolCatLib: Canvas**. Since FTB Ultimine Addition **26.1.2-7**, **2101.2.0.6** (1.21.1) and **2001.2.0.6** (1.20.1) it needs the merged **CoolCatLib** instead. Remove both old jars when you update; older releases of this mod still need Core and Canvas.
 
 Optional:
 
