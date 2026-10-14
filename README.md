@@ -32,8 +32,11 @@ With [FTB Ultimine](https://www.curseforge.com/minecraft/mc-mods/ftb-ultimine-fo
 - 🔒 **Locked by default**: no Ultimine until a player has earned it
 - 🎯 **Challenges to clear**: mining goals for the pickaxe, axe, shovel and hoe
 - 📜 **Shapes to learn**: each finished tier teaches one Ultimine shape for its tool
+- ✏️ **Shapes of your own**: draw them in the Shape Designer, layers deep, and share them as JSON
+- ⭐ **Perks and prestige**: a perk for the tool at each tier, and Mastered cards that start over for a lasting bonus
+- 📅 **A daily challenge**: one challenge for the whole server each day, done alone or as a team
 - ↩️ **Ultimine undo**: put a wrongly mined vein back
-- ⚙️ **Made for modpacks**: synced server settings and data-driven challenges
+- ⚙️ **Made for modpacks**: synced server settings, and challenges, card types, shapes and rewards from data packs
 
 ## ⛏️ How it works
 
@@ -47,12 +50,18 @@ Along the way, **Mine-Go Juice** brewed from your cards lets you Ultimine with a
 
 The [wiki](https://ixdarklord.github.io/UltimineAddition/wiki/) has the full walkthrough.
 
-## 🆕 New in 26.1.2
+## 🆕 What's new
 
-- **Shape Certificates**: cards reaching Novice, Apprentice, Adept or Mastered let you claim a certificate that teaches one Ultimine shape for that tool.
-- **Ultimine undo**: press <kbd>Ctrl</kbd> + <kbd>Z</kbd> after an Ultimine to preview putting the blocks back, and again to confirm. The dropped items and experience are taken back.
-- **A redesigned card viewer**: a pan-and-zoom map of the card's tiers and challenges, with challenge rerolls, streaks and lucky finds, and a notice HUD above the hotbar.
-- **In-game config screens** (`/ultimine_addition config`), with TOML config files.
+On every supported version (26.1.2, 1.21.1 and 1.20.1):
+
+- **Shape Designer**: draw an Ultimine shape of your own from the Shape Selector, up to five layers deep with a 3D preview. Keep a few, replace or delete them, and copy them as JSON to share.
+- **Card perks**: each tier a card reaches offers a choice of two perks for its tool, from small comforts at Novice to bigger, stronger Ultimines at Adept.
+- **Prestige**: start a Mastered card over for a lasting bonus to that tool's Ultimines.
+- **Daily challenge**: one challenge for the whole server each day (or week), with its own reward. Teammates share the progress.
+- **Data packs**: add Mining Skill Card types for other tools, Ultimine shapes, rewards, and challenges with conditions, chains and stages.
+- **Hooks**: function tags, and KubeJS events, for every step of a player's progress.
+- **Undo history** (<kbd>Ctrl</kbd> + <kbd>H</kbd>), undo of tool actions like stripping and tilling, and statistics with a leaderboard.
+- **Tools from other mods** count for challenges even when their mod left them out of the tool tags.
 
 Everything else is in the [changelog](https://ixdarklord.github.io/UltimineAddition/changelog/).
 
@@ -63,10 +72,11 @@ Get it on **[CurseForge](https://www.curseforge.com/minecraft/mc-mods/ultimine-a
 | Mod | CurseForge | Modrinth |
 |---|---|---|
 | **FTB Ultimine** | [ftb-ultimine-forge](https://www.curseforge.com/minecraft/mc-mods/ftb-ultimine-forge) | – |
-| **CoolCatLib: Core** | [coolcatlib](https://www.curseforge.com/minecraft/mc-mods/coolcatlib) | [CoolCatLib: Core](https://modrinth.com/mod/ASkaoGC8) |
-| **CoolCatLib: Canvas** | [coolcatlib-canvas](https://www.curseforge.com/minecraft/mc-mods/coolcatlib-canvas) | [CoolCatLib: Canvas](https://modrinth.com/mod/NtytwOvv) |
+| **CoolCatLib** | [coolcatlib](https://www.curseforge.com/minecraft/mc-mods/coolcatlib) | [CoolCatLib](https://modrinth.com/mod/ASkaoGC8) |
 
 FTB Ultimine brings FTB Library with it. Before 26.1.2, the Fabric versions also need Forge Config API Port.
+
+CoolCatLib used to be two mods, CoolCatLib: Core and CoolCatLib: Canvas. Since 26.1.2-7, 2101.2.0.6 and 2001.2.0.6 this mod needs the merged **CoolCatLib** instead: remove both old jars when you update. Older releases still need Core and Canvas.
 
 **Optional:** JEI, and Curios or Trinkets for a Skills Record slot.
 
@@ -83,15 +93,17 @@ Each Minecraft version lives on its own branch.
 | 1.19.2 | Forge, Fabric | [`1.19.2`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.19.2) | Discontinued |
 | 1.18.2 | Forge, Fabric | [`1.18.2`](https://github.com/ixDarkLorD/UltimineAddition/tree/1.18.2) | Discontinued |
 
-Supported versions require FTB Ultimine, CoolCatLib: Core and CoolCatLib: Canvas; discontinued ones require FTB Ultimine and CoolCatLib, and get no more updates or fixes.
+Supported versions require FTB Ultimine and CoolCatLib. Discontinued ones get no more updates or fixes.
 
 ## 🧩 For pack makers and mod authors
 
-Challenges are data-driven: a data pack can add or change them, and other mods can add their own card types. Server settings sync to every player and apply live.
+Data packs can add or change challenges, Mining Skill Card types for other tools, Ultimine shapes and rewards, and function tags or KubeJS scripts can react to a player's progress. Server settings sync to every player and apply live.
 
 - [Configuration](https://ixdarklord.github.io/UltimineAddition/wiki/packs/configuration/)
 - [Challenges](https://ixdarklord.github.io/UltimineAddition/wiki/packs/challenges/)
+- [Ultimine shapes](https://ixdarklord.github.io/UltimineAddition/wiki/packs/shapes/)
 - [Custom cards](https://ixdarklord.github.io/UltimineAddition/wiki/packs/custom-cards/)
+- [Hooks](https://ixdarklord.github.io/UltimineAddition/wiki/packs/hooks/)
 - [Developer docs](https://ixdarklord.github.io/UltimineAddition/docs/)
 
 ## 🛠️ Building
