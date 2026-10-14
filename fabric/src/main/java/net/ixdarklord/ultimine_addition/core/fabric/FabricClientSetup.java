@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.ixdarklord.ultimine_addition.client.particle.CelebrateParticle;
 import net.ixdarklord.ultimine_addition.core.Registration;
 
-// Fabric-only client setup. The mod's client side is constructed by CoolCatLib: Core from the "coolcatcore:client"
+// Fabric-only client setup. The mod's client side is constructed by CoolCatLib from the "coolcatlib:client"
 // entrypoint (UltimineAdditionClientConstructor).
 public class FabricClientSetup implements ClientModInitializer {
     @Override
