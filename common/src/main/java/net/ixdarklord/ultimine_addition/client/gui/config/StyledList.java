@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
-// The config popup's scrolling list (from CoolCatLib: Core's config screens), laid out like newer versions' lists: a rectangle placed with
+// The config popup's scrolling list (from CoolCatLib's config screens), laid out like newer versions' lists: a rectangle placed with
 // updateSizeAndPosition (vanilla's lists here span the screen's width between two heights), and rows of their own
 // heights (vanilla's give every row the same one), laid out top to bottom, each knowing its own bounds. No background
 // or separators are drawn.

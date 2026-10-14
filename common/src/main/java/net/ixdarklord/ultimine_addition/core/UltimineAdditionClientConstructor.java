@@ -12,7 +12,7 @@ import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
 import net.ixdarklord.ultimine_addition.config.UAConfigs;
 import net.minecraft.client.Minecraft;
 
-// The mod's client entry point, constructed by CoolCatLib: Core only on a client: the "coolcatcore:client" entrypoint on
+// The mod's client entry point, constructed by CoolCatLib only on a client: the "coolcatlib:client" entrypoint on
 // Fabric, ForgeSetup on Forge. Loader-only client setup (item models, particles, render hooks) stays in
 // FabricClientSetup / ForgeClientSetup.
 public final class UltimineAdditionClientConstructor implements ClientModConstructor {

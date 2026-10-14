@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * <ul>
  *     <li>GUI sprites: 1.20.1 has no GUI sprite atlas, so a sprite id ({@code ns:path}) is the texture
  *     {@code ns:textures/gui/sprites/path.png}, scaled as its {@code .mcmeta} says (stretch, tile, nine_slice), as on
- *     newer versions. Drawn by CoolCatLib: Core's sprite loader (the one its config screens use), which also takes a
+ *     newer versions. Drawn by CoolCatLib's sprite loader (the one its config screens use), which also takes a
  *     full {@code .png} texture path.</li>
  *     <li>Blits take an ARGB tint (1.20.1 tints through the shader color, set around the call here).</li>
  *     <li>Tooltips are drawn once the screen is done ({@link #renderTooltip}), as on 26.1: 1.20.1 draws them right away,

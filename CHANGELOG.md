@@ -2,6 +2,10 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v2001.2.0.6 Release - Oct 14, 2026
+### ⚙️ Refactoring
+- Now requires **CoolCatLib** 2001.3.0.0 or newer, which merged CoolCatLib: Core and CoolCatLib: Canvas into one mod. Install it in place of both: the separate Core and Canvas jars are no longer used, and the new CoolCatLib refuses to start beside them.
+
 ## v2001.2.0.5 Release - Oct 13, 2026
 ### 🐛 Bug Fixes & Improvements
 - Tools from other mods count for challenges, Shape Certificates and Mine-Go Juice even when the mod left them out of the tool tags (a pickaxe missing from `#minecraft:pickaxes` was not seen as a pickaxe): a tool is also recognized by what it digs.
