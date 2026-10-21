@@ -22,12 +22,8 @@ public record OpenConfigPayload(Target target) implements CustomPacketPayload {
                 case CLIENT -> ConfigScreens.create(null, UAClientConfig.CONFIG);
                 case SERVER -> ConfigScreens.create(null, UAServerConfig.CONFIG);
             };
-            if (screen != null) {
-                Minecraft.getInstance().setScreen(screen);
-            } else {
-                // No screens without Glazed: how to change the config instead.
-                ConfigScreens.tellUnavailable(message.target == Target.SERVER ? UAServerConfig.CONFIG : UAClientConfig.CONFIG);
-            }
+            // Glazed Menu's screens, or CoolCatLib's own without it; null only for a config that isn't registered.
+            if (screen != null) Minecraft.getInstance().setScreen(screen);
         });
     }
 

@@ -573,16 +573,6 @@ public class LanguageGenerator extends LanguageProvider {
         this.add("gui.ultimine_addition.undo.partial.missing", "Missing:");
         this.add("gui.ultimine_addition.undo.partial.dont_ask", "Don't ask again");
         this.add("gui.ultimine_addition.undo.partial.confirm", "Undo Anyway");
-        this.add("gui.ultimine_addition.config.save", "Save");
-        this.add("gui.ultimine_addition.config.save.errors", "Fix the invalid values first:");
-        this.add("gui.ultimine_addition.config.reset.tooltip", "Sets the values shown here to their defaults");
-        this.add("gui.ultimine_addition.config.reset_value", "Reset to default");
-        this.add("gui.ultimine_addition.config.default", "Default: %s");
-        this.add("gui.ultimine_addition.config.status.errors", "%s invalid");
-        this.add("gui.ultimine_addition.config.status.modified", "%s unsaved");
-        this.add("gui.ultimine_addition.config.discard.title", "Discard changes?");
-        this.add("gui.ultimine_addition.config.discard.message", "%s unsaved changes will be lost.");
-        this.add("gui.ultimine_addition.config.discard.yes", "Discard");
         this.add("gui.ultimine_addition.undo.key_with_ctrl", "Ctrl + %s");
         this.add("gui.ultimine_addition.undo.missing", "Missing items: can't undo");
         this.add("gui.ultimine_addition.undo.cancel", "Sneak to cancel");

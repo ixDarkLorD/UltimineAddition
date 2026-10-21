@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
+import net.ixdarklord.coolcatcore.api.config.client.ConfigScreens;
 import net.ixdarklord.coolcatcanvas.api.utils.ColorGradient;
 import net.ixdarklord.coolcatcanvas.api.client.utils.Outline;
 import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
@@ -12,7 +13,6 @@ import net.ixdarklord.coolcatcore.api.client.utils.MouseHelper;
 import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.coolcatcore.api.utils.MathUtils;
-import net.ixdarklord.ultimine_addition.client.gui.config.CategoryPopup;
 import net.ixdarklord.ultimine_addition.client.gui.components.SlotSelectionOutline;
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardViewerWidget;
@@ -133,10 +133,13 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
 
     private void createButtons() {
         this.configurationButton = this.addRenderableWidget(new ColorableImageButton(this.leftPos + SIDE_BUTTON_X, this.topPos + 6, 10, 10, CONFIGURATION_BUTTON_SPRITES,
-                // The settings' category popup (this mod's copy of Glazed Menu's, so it needs no Glazed), floating over the
-                // book; it comes back here without closing the menu.
-                button -> this.minecraft.setScreen(CategoryPopup.create(this, UAClientConfig.CONFIG, UAClientConfig.SKILLS_RECORD_CATEGORY,
-                        UAConfigs.SKILLS_RECORD_POPUP_THEME))));
+                // The settings' category popup (Glazed Menu's, or CoolCatLib's own) in the Skills Record's theme, floating
+                // over the book; it comes back here without closing the menu.
+                button -> {
+                    Screen popup = ConfigScreens.categoryPopup(this, UAClientConfig.CONFIG, UAClientConfig.SKILLS_RECORD_CATEGORY,
+                            UAConfigs.SKILLS_RECORD_POPUP_THEME);
+                    if (popup != null) this.minecraft.setScreen(popup);
+                }));
 
         this.consumeButton = this.addRenderableWidget(new ConsumeButton(this.leftPos + SIDE_BUTTON_X, this.topPos + 114, 10, 18, this.menu.getData().isConsumeModeActive()) {
             @Override
