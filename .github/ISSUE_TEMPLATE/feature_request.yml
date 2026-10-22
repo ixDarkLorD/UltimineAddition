@@ -1,0 +1,13 @@
+name: Feature Request
+description: Suggest an idea for this mod!
+title: "[Feature]: "
+labels: [ "enhancement" ]
+assignees:
+  - ixDarkLorD
+body:
+  -   type: textarea
+      attributes:
+        label: What feature do you want to see in the upcoming releases?
+        description: Type anything you would like to see in future updates.
+      validations:
+        required: false

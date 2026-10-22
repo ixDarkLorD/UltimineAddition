@@ -1,0 +1,74 @@
+name: Bug Report
+description: Report a bug to help us improve the mod.
+title: "[Bug]: "
+labels: [ "bug" ]
+assignees:
+  - ixDarkLorD
+body:
+  - type: markdown
+    attributes:
+      value: "**Thank you for reporting this issue! Your feedback helps us improve. We appreciate your time and effort!**"
+  - type: textarea
+    attributes:
+      label: Bug Description
+      description: Provide a clear and concise description of the bug.
+      placeholder: "Example: Clicking the button causes the game to crash."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: List the steps to reproduce the bug.
+      value: |
+        1.
+        2.
+        3.
+        4.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Screenshots or Videos
+      description: If possible, attach screenshots or videos to illustrate the issue.
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Crash Report or Log
+      description: If applicable, provide a **link** to the crash report or log (e.g., Pastebin or GitHub Gist).  
+      placeholder: "Do not paste the full crash report here."
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Operating System
+      description: Specify the operating system used when the bug occurred.
+      placeholder: "e.g., Windows 11, macOS Ventura"
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Minecraft Version
+      description: Select the version of Minecraft you were using. 1.21, 1.19.2 and 1.18.2 are discontinued.
+      options:
+        - "26.1.2"
+        - "1.21.1"
+        - "1.20.1"
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Mod Loader
+      description: Select the Mod Loader you were using.
+      options:
+        - "Forge"
+        - "Fabric"
+        - "NeoForge"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Mod Version
+      description: Enter the mod version used when the bug occurred.
+    validations:
+      required: true
