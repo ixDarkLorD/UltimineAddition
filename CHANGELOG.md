@@ -2,6 +2,10 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v8.0.0 Release | Unreleased
+### 🔧 Changes
+- New version numbers: `<version>+<minecraft>`, this one `8.0.0+26.1.2`, the same for every Minecraft version and loader. They follow on from 26.1.2-7; the part before the `+` is what launchers and loaders compare, the Minecraft version after it is only a label.
+
 ## v26.1.2-7 Release - Oct 14, 2026
 ### ⚙️ Refactoring
 - Now requires **CoolCatLib** 26.1.2-5 or newer, which merged CoolCatLib: Core and CoolCatLib: Canvas into one mod. Install it in place of both: the separate Core and Canvas jars are no longer used, and the new CoolCatLib refuses to start beside them.

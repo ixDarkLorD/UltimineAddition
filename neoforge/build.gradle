@@ -20,7 +20,7 @@ loom {
 dependencies {
     // CoolCatLib (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
     // render utilities, easing), published from ../CoolCatLib-26.1.2.
-    api "net.ixdarklord.coolcatlib:coolcatlib-neoforge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    api "net.ixdarklord.coolcatlib:coolcatlib-neoforge:${coolcatlib_version}"
 
     compileOnly "${libs.curios.neoforge.get()}:api"
     runtimeOnly libs.curios.neoforge
@@ -41,6 +41,6 @@ dependencies {
     // MCP Bridge (../MCPBridge-26.1.2) in dev runs only, when it's been published to Maven Local: lets Claude Code
     // drive the running game (its MCP server is registered in Claude Code as "minecraft"). Never part of the built jar.
     if (new File("${System.getProperty('user.home')}/.m2/repository/net/ixdarklord/mcp_bridge").exists()) {
-        localRuntime "net.ixdarklord.mcp_bridge:mcp_bridge-neoforge:${libs.versions.minecraft.get()}-1"
+        localRuntime "net.ixdarklord.mcp_bridge:mcp_bridge-neoforge:1.0.0+${libs.versions.minecraft.get()}"
     }
 }

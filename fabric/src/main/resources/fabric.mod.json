@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "${modid}",
-  "version": "${mc_version}-${mod_version}",
+  "version": "${version}",
 
   "name": "${mod_name}",
   "description": "${mod_description}",
@@ -43,7 +43,7 @@
     "minecraft": ">=${mc_version} <=${max_mc_version}",
     "fabricloader": ">=${min_fabric_version}",
     "fabric-api": ">=${min_fabric_api_version}",
-    "coolcatlib": ">=${mc_version}-${coolcatlib_version}",
+    "coolcatlib": ">=${coolcatlib_version}",
     "ftbultimine": ">=${ftbultimine_version}"
   },
   "suggests": {
