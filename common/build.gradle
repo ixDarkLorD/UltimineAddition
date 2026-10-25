@@ -3,7 +3,7 @@ apply from: "${rootProject.sharedScripts}/common.gradle"
 dependencies {
     // CoolCatLib (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
     // render utilities, easing), published from ../CoolCatLib-1.21.
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-common:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-common:${coolcatlib_version}"
     modApi libs.jei.libs.common
     modApi libs.jei.api.common
 
