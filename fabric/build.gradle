@@ -16,7 +16,7 @@ loom {
 dependencies {
     // CoolCatLib (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
     // render utilities, easing), published from ../CoolCatLib-1.20.1.
-    modApi "net.ixdarklord.coolcatlib:coolcatlib-fabric:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-fabric:${coolcatlib_version}"
 
     modCompileOnlyApi libs.jei.api.fabric
     modRuntimeOnly libs.jei.fabric
