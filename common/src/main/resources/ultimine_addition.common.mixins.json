@@ -11,6 +11,7 @@
   ],
   "mixins": [
     "BrewingStandBlockEntityMixin",
+    "DropsAccumulatorMixin",
     "FTBUltimineMixin",
     "FTBUltiminePlayerDataMixin",
     "ItemCollectorAccessor",

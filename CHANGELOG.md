@@ -2,7 +2,14 @@
 This file is for listing all the changes to this project
 <hr>
 
-## v8.0.0 Release | Unreleased
+## v8.0.1 Release | Nov 2, 2026
+### 🐛 Bug Fixes & Improvements
+- Works with **FTB Ultimine 26.1.2.6**, and needs it: the game no longer crashes on startup with it ("@Shadow field tempBlockDropsList was not located"). Undo, the merged drops, the perks and the statistics follow FTB Ultimine's reworked block breaking.
+
+## v8.0.0 Release | Oct 29, 2026
+### 🐛 Bug Fixes & Improvements
+- Works with **CoolCatLib 8.0.0** (`8.0.0+26.1.2`) and needs it. With CoolCatLib's new version numbers, 26.1.2-7 refused to start beside it ("requires coolcatlib … or above"): update both together.
+- The Skills Record's settings open in CoolCatLib's own popup, in the Skills Record's look, instead of a copy kept in this mod.
 ### 🔧 Changes
 - New version numbers: `<version>+<minecraft>`, this one `8.0.0+26.1.2`, the same for every Minecraft version and loader. They follow on from 26.1.2-7; the part before the `+` is what launchers and loaders compare, the Minecraft version after it is only a label.
 
