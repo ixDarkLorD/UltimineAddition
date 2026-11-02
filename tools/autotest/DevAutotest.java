@@ -1,10 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.event;
 
-import net.ixdarklord.ultimine_addition.client.gui.config.CategoryPopup;
-import net.ixdarklord.ultimine_addition.client.gui.config.ConfirmPopup;
-import net.ixdarklord.ultimine_addition.client.gui.config.DropdownScreen;
-import net.ixdarklord.ultimine_addition.client.gui.config.FlatButton;
-import net.ixdarklord.ultimine_addition.client.gui.config.ToggleSwitch;
+import net.ixdarklord.coolcatcore.api.config.client.ConfigScreens;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.config.UAConfigs;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -31,13 +27,15 @@ import java.util.List;
 import java.util.function.Consumer;
 
 // The Skills Record settings popup's client smoke test, copied into a version's sources by tools/autotest/run.py (never
-// committed there) and run with -Dultimine_addition.autotest=true. From the title screen it opens the popup, flips a
-// switch, opens the option dropdown and closes with unsaved changes (the discard question); then it checks the
+// committed there) and run with -Dultimine_addition.autotest=true. From the title screen it opens the popup (CoolCatLib's,
+// through ConfigScreens), flips a switch, uses the option picker (a dropdown on 26.1.2, a cycling button on the older
+// versions) and closes with unsaved changes (the discard question); then it checks the
 // Completion Envelope's name and the cards' pips decorator, shows the items (older versions) and quits. Nothing is saved.
 // Each check logs "AUTOTEST PASS|FAIL <name>"; the last line is "AUTOTEST RESULT passed=<n> failed=<n>".
 //
 // One file serves every Minecraft version: the calls that differ between versions (how a button is pressed or clicked,
-// how a screenshot is taken) go through reflection.
+// how a screenshot is taken) go through reflection, and CoolCatLib's popup classes, whose packages differ between
+// versions, are known by their names.
 public final class DevAutotest {
     // Ticks between steps: enough for a screen to be laid out and drawn a few times.
     private static final int STEP_TICKS = 4;
@@ -47,6 +45,8 @@ public final class DevAutotest {
     private static int passed;
     private static int failed;
     private static Screen showcase;
+    // The option picker's text before it was clicked, to see a cycling one change.
+    private static String pickerBefore;
 
     private DevAutotest() {}
 
@@ -61,37 +61,48 @@ public final class DevAutotest {
         try {
             Screen screen = minecraft.screen;
             switch (step++) {
-                case 0 -> minecraft.setScreen(CategoryPopup.create(screen, UAClientConfig.CONFIG, UAClientConfig.SKILLS_RECORD_CATEGORY,
+                case 0 -> minecraft.setScreen(ConfigScreens.categoryPopup(screen, UAClientConfig.CONFIG, UAClientConfig.SKILLS_RECORD_CATEGORY,
                         UAConfigs.SKILLS_RECORD_POPUP_THEME));
                 case 1 -> {
-                    check("popup_opens", screen instanceof CategoryPopup, describe(screen));
+                    check("popup_opens", is(screen, "CategoryPopup"), describe(screen));
                     List<AbstractWidget> widgets = widgets(screen);
-                    check("popup_has_two_switches", widgets.stream().filter(ToggleSwitch.class::isInstance).count() == 2, widgets.size() + " widgets");
+                    check("popup_has_two_switches", widgets.stream().filter(widget -> is(widget, "ToggleSwitch")).count() == 2, widgets.size() + " widgets");
                     check("popup_has_option_picker", selector(screen) != null, widgets.size() + " widgets");
                     check("popup_button_says_done", footer(screen, "Done") != null, labels(screen));
                     shot(minecraft, "a_popup");
                 }
-                case 2 -> press(widgets(screen).stream().filter(ToggleSwitch.class::isInstance).findFirst().orElseThrow());
+                case 2 -> press(widgets(screen).stream().filter(widget -> is(widget, "ToggleSwitch")).findFirst().orElseThrow());
                 case 3 -> {
                     check("switch_marks_unsaved", footer(screen, "Save") != null, labels(screen));
                     shot(minecraft, "b_changed");
                 }
                 case 4 -> {
                     AbstractWidget selector = selector(screen);
+                    pickerBefore = selector.getMessage().getString();
                     click(selector, selector.getX() + selector.getWidth() / 2.0, selector.getY() + selector.getHeight() / 2.0);
                 }
                 case 5 -> {
-                    check("option_picker_opens_dropdown", screen instanceof DropdownScreen, describe(screen));
-                    shot(minecraft, "c_dropdown");
+                    if (is(screen, "DropdownScreen")) {
+                        check("option_picker_opens_dropdown", true, describe(screen));
+                        shot(minecraft, "c_dropdown");
+                    } else {
+                        // A cycling picker: still the popup, showing the next choice.
+                        AbstractWidget selector = selector(screen);
+                        check("option_picker_cycles", is(screen, "CategoryPopup") && selector != null && !selector.getMessage().getString().equals(pickerBefore),
+                                describe(screen) + " " + pickerBefore + " -> " + (selector == null ? "?" : selector.getMessage().getString()));
+                        shot(minecraft, "c_picker");
+                    }
                 }
-                case 6 -> screen.onClose();
+                case 6 -> {
+                    if (is(screen, "DropdownScreen")) screen.onClose();
+                }
                 case 7 -> {
-                    check("dropdown_returns_to_popup", screen instanceof CategoryPopup, describe(screen));
+                    check("picker_returns_to_popup", is(screen, "CategoryPopup"), describe(screen));
                     check("changes_kept_after_dropdown", footer(screen, "Save") != null, labels(screen));
                     screen.onClose();
                 }
                 case 8 -> {
-                    check("closing_unsaved_asks_to_discard", screen instanceof ConfirmPopup, describe(screen));
+                    check("closing_unsaved_asks_to_discard", is(screen, "ConfirmPopup"), describe(screen));
                     shot(minecraft, "d_discard");
                 }
                 case 9 -> press(footer(screen, "Discard"));
@@ -178,13 +189,21 @@ public final class DevAutotest {
         }
     }
 
-    // The option picker: a private class of the list.
+    // Whether an object's class, or one it extends, has this simple name.
+    private static boolean is(Object object, String name) {
+        for (Class<?> type = object == null ? null : object.getClass(); type != null; type = type.getSuperclass()) {
+            if (type.getSimpleName().equals(name)) return true;
+        }
+        return false;
+    }
+
+    // The option picker: a private class of the list (26.1.2) or of the enum editor (older versions).
     private static AbstractWidget selector(Screen screen) {
-        return widgets(screen).stream().filter(widget -> widget.getClass().getSimpleName().equals("EnumSelector")).findFirst().orElse(null);
+        return widgets(screen).stream().filter(widget -> is(widget, "EnumSelector") || is(widget, "CycleButton")).findFirst().orElse(null);
     }
 
     private static AbstractWidget footer(Screen screen, String label) {
-        return widgets(screen).stream().filter(widget -> widget instanceof FlatButton && widget.getMessage().getString().equals(label)).findFirst().orElse(null);
+        return widgets(screen).stream().filter(widget -> is(widget, "FlatButton") && widget.getMessage().getString().equals(label)).findFirst().orElse(null);
     }
 
     private static String labels(Screen screen) {
