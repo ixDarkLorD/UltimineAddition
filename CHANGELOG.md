@@ -2,7 +2,10 @@
 This file is for listing all the changes to this project
 <hr>
 
-## v8.0.0 Release | Unreleased
+## v8.0.0 Release | Oct 29, 2026
+### 🐛 Bug Fixes & Improvements
+- Works with **CoolCatLib 8.0.0** (`8.0.0+1.20.1`) and needs it. With CoolCatLib's new version numbers, 2001.2.0.6 refused to start beside it ("requires coolcatlib … or above"): update both together.
+- The Skills Record's settings open in CoolCatLib's own popup, in the Skills Record's look, instead of a copy kept in this mod.
 ### 🔧 Changes
 - New version numbers: `<version>+<minecraft>`, this one `8.0.0+1.20.1`, the same for every Minecraft version and loader. They follow on from 2001.2.0.6; the part before the `+` is what launchers and loaders compare, the Minecraft version after it is only a label.
 
