@@ -10,12 +10,14 @@
 </p>
 
 <p align="center">
-  <a href="https://www.curseforge.com/minecraft/mc-mods/ultimine-addition"><img src="https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/badges/ftb-ultimine-addition/curseforge.svg" alt="CurseForge" height="26"></a>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/ultimine-addition"><img src="https://ixdarklord.github.io/ModResources/badges/ftb-ultimine-addition/curseforge-downloads.svg" alt="CurseForge downloads" height="26"></a>
   <a href="https://ixdarklord.github.io/UltimineAddition/"><img src="https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/badges/ftb-ultimine-addition/website.svg" alt="Website" height="26"></a>
   <a href="https://ixdarklord.github.io/UltimineAddition/wiki/"><img src="https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/badges/ftb-ultimine-addition/wiki.svg" alt="Wiki" height="26"></a>
   <a href="https://discord.gg/ZapGEPqm2V"><img src="https://img.shields.io/discord/1173075408556654592?style=flat&logo=discord&logoColor=white&label=&labelColor=f48255&color=3A3F58" alt="Discord" width="110" height="26"></a>
 </p>
 <p align="center">
+  <img src="https://ixdarklord.github.io/ModResources/badges/ftb-ultimine-addition/version.svg" alt="Version" height="26">
+  <img src="https://ixdarklord.github.io/ModResources/badges/ftb-ultimine-addition/minecraft.svg" alt="Minecraft versions" height="26">
   <img src="https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/badges/ftb-ultimine-addition/fabric.svg" alt="Fabric" height="26">
   <img src="https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/badges/ftb-ultimine-addition/neoforge.svg" alt="NeoForge" height="26">
   <img src="https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/badges/ftb-ultimine-addition/forge.svg" alt="Forge" height="26">
