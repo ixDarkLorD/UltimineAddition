@@ -1,21 +1,23 @@
 package net.ixdarklord.ultimine_addition.client.event;
 
-import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
-import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
-import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
+import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
+import net.ixdarklord.ultimine_addition.common.progression.ToolAffinity;
 import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.ultimine_addition.core.Registration;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.ChatFormatting;
-import net.minecraft.util.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PotionItem;
@@ -34,14 +36,14 @@ public final class ItemTooltipEvents {
             insertSelectedShapeInfo(stack, components);
         }
 
-        int affinity = net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.blocks(stack);
-        if (affinity > 0 && net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.enabled()) {
+        int affinity = ToolAffinity.blocks(stack);
+        if (affinity > 0 && ToolAffinity.enabled()) {
             components.add(Component.translatable("tooltip.ultimine_addition.affinity", affinity,
-                    net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.percent(stack)).withStyle(ChatFormatting.DARK_AQUA));
+                    ToolAffinity.percent(stack)).withStyle(ChatFormatting.DARK_AQUA));
         }
 
-        if (stack.getItem() instanceof SkillsRecordItem && net.minecraft.client.Minecraft.getInstance().hasShiftDown() && net.minecraft.client.Minecraft.getInstance().player != null) {
-            var stats = net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().getAbilityData(net.minecraft.client.Minecraft.getInstance().player).getStats();
+        if (stack.getItem() instanceof SkillsRecordItem && Minecraft.getInstance().hasShiftDown() && Minecraft.getInstance().player != null) {
+            var stats = ServicePlatform.get().players().getAbilityData(Minecraft.getInstance().player).getStats();
             if (stats.operations() > 0 || stats.challenges() > 0) {
                 components.add(Component.literal(""));
                 components.add(Component.translatable("command.ultimine_addition.stats.title").withStyle(ChatFormatting.GOLD));

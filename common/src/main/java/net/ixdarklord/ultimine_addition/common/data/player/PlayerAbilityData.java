@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.data.player;
 
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.coolcatcore.api.data.DataComponent;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -12,9 +12,9 @@ import net.minecraft.resources.Identifier;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class PlayerAbilityData extends DataComponent<PlayerAbilityData> {

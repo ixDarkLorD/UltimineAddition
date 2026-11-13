@@ -1,6 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.OpenConfigPayload;
@@ -25,7 +26,7 @@ public final class ConfigCommand {
                         .executes(context -> open(context.getSource(), OpenConfigPayload.Target.SERVER))));
     }
 
-    private static int open(CommandSourceStack source, OpenConfigPayload.Target target) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+    private static int open(CommandSourceStack source, OpenConfigPayload.Target target) throws CommandSyntaxException {
         PayloadHandler.sendToPlayer(new OpenConfigPayload(target), source.getPlayerOrException());
         return 1;
     }

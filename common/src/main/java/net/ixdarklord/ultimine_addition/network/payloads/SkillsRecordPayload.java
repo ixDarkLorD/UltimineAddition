@@ -1,34 +1,40 @@
 package net.ixdarklord.ultimine_addition.network.payloads;
 
 import net.ixdarklord.coolcatcore.api.network.PacketContext;
-import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.ixdarklord.ultimine_addition.common.progression.ProgressionRewards;
-import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger;
+import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.data.record.CardSync;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordClientCache;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSync;
+import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
+import net.ixdarklord.ultimine_addition.common.progression.CardPerk;
+import net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks;
+import net.ixdarklord.ultimine_addition.common.progression.ProgressionRewards;
+import net.ixdarklord.ultimine_addition.common.progression.UltimineNotice;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -170,17 +176,17 @@ public final class SkillsRecordPayload {
                     String tool = cardData.getType().getId();
                     cardData.prestige();
                     // The card's story starts over with it.
-                    net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData.get(player.level().getServer()).resetCardHistory(cardData.getUUID());
+                    SkillsRecordSavedData.get(player.level().getServer()).resetCardHistory(cardData.getUUID());
                     cardData.setTier(MiningSkillCardItem.Tier.Unlearned).initChallenges().save();
                     data.save();
-                    net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().modifyAbilityData(player, ability -> ability.addPrestige(tool));
+                    ServicePlatform.get().players().modifyAbilityData(player, ability -> ability.addPrestige(tool));
                     int level = cardData.getPrestige();
-                    net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.fire(net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.Kind.PRESTIGE, player, tool, level, null, "");
-                    new net.ixdarklord.ultimine_addition.common.progression.UltimineNotice(net.ixdarklord.ultimine_addition.common.progression.UltimineNotice.Kind.REWARD,
+                    ProgressionHooks.fire(ProgressionHooks.Kind.PRESTIGE, player, tool, level, null, "");
+                    new UltimineNotice(UltimineNotice.Kind.REWARD,
                             Component.translatable("info.ultimine_addition.notice.prestige", level),
-                            java.util.List.of(Component.translatable("info.ultimine_addition.notice.prestige.info",
-                                    level * net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData.PRESTIGE_PERCENT).withStyle(ChatFormatting.GRAY)),
-                            new ItemStack(net.minecraft.world.item.Items.NETHER_STAR)).send(player);
+                            List.of(Component.translatable("info.ultimine_addition.notice.prestige.info",
+                                    level * MiningSkillCardData.PRESTIGE_PERCENT).withStyle(ChatFormatting.GRAY)),
+                            new ItemStack(Items.NETHER_STAR)).send(player);
                     player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.5F, 1.3F);
                 }));
             });
@@ -205,20 +211,20 @@ public final class SkillsRecordPayload {
                 } catch (IllegalArgumentException e) {
                     return;
                 }
-                net.ixdarklord.ultimine_addition.common.progression.CardPerk perk = net.ixdarklord.ultimine_addition.common.progression.CardPerk.byId(msg.perk);
+                CardPerk perk = CardPerk.byId(msg.perk);
                 if (perk == null) return;
                 getOpenRecord(player).ifPresent(data -> data.getCardData(msg.cardSlot).ifPresent(cardData -> {
-                    if (!net.ixdarklord.ultimine_addition.common.progression.CardPerk.offer(player, cardData, tier).contains(perk)) return;
+                    if (!CardPerk.offer(player, cardData, tier).contains(perk)) return;
                     String tool = cardData.getType().getId();
-                    net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().modifyAbilityData(player, ability -> ability.learnPerk(tool, perk.id()));
+                    ServicePlatform.get().players().modifyAbilityData(player, ability -> ability.learnPerk(tool, perk.id()));
                     cardData.claimPerk(tier);
-                    net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.fire(net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.Kind.PERK_LEARNED, player, tool, tier.getValue(), null, perk.id());
-                    net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.reach(player, net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.PERK);
+                    ProgressionHooks.fire(ProgressionHooks.Kind.PERK_LEARNED, player, tool, tier.getValue(), null, perk.id());
+                    MilestoneTrigger.reach(player, MilestoneTrigger.PERK);
                     cardData.save();
                     data.save();
-                    new net.ixdarklord.ultimine_addition.common.progression.UltimineNotice(net.ixdarklord.ultimine_addition.common.progression.UltimineNotice.Kind.REWARD,
+                    new UltimineNotice(UltimineNotice.Kind.REWARD,
                             Component.translatable("info.ultimine_addition.notice.perk", perk.displayName()),
-                            java.util.List.of(perk.description().withStyle(ChatFormatting.GRAY)), perk.icon()).send(player);
+                            List.of(perk.description().withStyle(ChatFormatting.GRAY)), perk.icon()).send(player);
                     player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.2F);
                 }));
             });

@@ -1,19 +1,13 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import org.jetbrains.annotations.Nullable;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.server.level.ServerLevel;
-import java.util.function.Consumer;
-import net.minecraft.world.item.component.TooltipDisplay;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.handler.codec.CodecException;
 import net.ixdarklord.coolcatcore.api.utils.ChatFormattingUtils;
-import net.ixdarklord.coolcatcore.api.utils.CodecUtils;
 import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -25,22 +19,27 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.Type.EMPTY;
 
@@ -97,7 +96,7 @@ public class MiningSkillCardItem extends DataAbstractItem<MiningSkillCardData> {
                 component = Component.translatable("tooltip.ultimine_addition.skill_card.prestige", Component.literal(String.valueOf(data.getPrestige())).withStyle(ChatFormatting.GOLD));
                 tooltipComponents.accept(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
             }
-            if (!data.getOwnerName().isEmpty() && net.ixdarklord.ultimine_addition.config.UAServerConfig.BIND_CARDS.get()) {
+            if (!data.getOwnerName().isEmpty() && UAServerConfig.BIND_CARDS.get()) {
                 component = Component.translatable("tooltip.ultimine_addition.skill_card.owner", Component.literal(data.getOwnerName()).withStyle(ChatFormatting.AQUA));
                 tooltipComponents.accept(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY).append(component.withStyle(ChatFormatting.GRAY)));
             }

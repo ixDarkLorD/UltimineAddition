@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.progression;
 
+import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
@@ -55,7 +56,7 @@ public final class TimedChallenge {
         }
     }
 
-    public enum Period implements net.ixdarklord.coolcatcore.api.config.type.EnumType.Displayable {
+    public enum Period implements EnumType.Displayable {
         OFF, DAILY, WEEKLY;
 
         @Override

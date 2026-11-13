@@ -1,7 +1,5 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe;
 
-import net.ixdarklord.ultimine_addition.datagen.record.SkillsRecordRecipes;
-import net.minecraft.data.PackOutput;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.tag.ModItemTags;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
@@ -10,7 +8,9 @@ import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.datagen.recipe.builder.ItemStorageDataRecipeBuilder;
 import net.ixdarklord.ultimine_addition.datagen.recipe.builder.MCRecipeBuilder;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
+import net.ixdarklord.ultimine_addition.datagen.record.SkillsRecordRecipes;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;

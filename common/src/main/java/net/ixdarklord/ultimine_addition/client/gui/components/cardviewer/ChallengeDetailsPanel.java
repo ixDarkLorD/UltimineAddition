@@ -1,18 +1,18 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.minecraft.network.chat.FontDescription;
-import net.minecraft.util.ARGB;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.ChatFormatting;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.ScrollPanel;
 import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;

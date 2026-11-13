@@ -1,8 +1,11 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
+import net.ixdarklord.coolcatcore.api.client.gui.ItemDecorator;
+import net.ixdarklord.coolcatcore.api.item.DecoratedItem;
 import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.client.handler.ClientHandler;
+import net.ixdarklord.ultimine_addition.client.renderer.item.CertificateToolIcon;
 import net.ixdarklord.ultimine_addition.common.data.item.ShapeCertificateData;
 import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
@@ -25,16 +28,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
 // Unlocks its tier's Ultimine shapes for one tool: the Mining Skill Card type it was earned with.
-public class ShapeCertificateItem extends ModernItem implements net.ixdarklord.coolcatcore.api.item.DecoratedItem {
+public class ShapeCertificateItem extends ModernItem implements DecoratedItem {
     // CoolCatLib takes it on the client, the first time a certificate is drawn: a data pack tool's icon on the page.
     @Override
-    public void registerDecorators(java.util.function.Consumer<net.ixdarklord.coolcatcore.api.client.gui.ItemDecorator> registrar) {
-        registrar.accept(net.ixdarklord.ultimine_addition.client.renderer.item.CertificateToolIcon.INSTANCE);
+    public void registerDecorators(Consumer<ItemDecorator> registrar) {
+        registrar.accept(CertificateToolIcon.INSTANCE);
     }
 
     private final MiningSkillCardItem.Tier tier;
@@ -81,7 +85,7 @@ public class ShapeCertificateItem extends ModernItem implements net.ixdarklord.c
     // already learned for the tool, and blacklisted ones, are left out; so are the ones the player carries a certificate
     // of for that tool and hasn't used yet, or a later tier would offer the same shape a second time.
     public static List<Identifier> claimPool(Player player, String tool, MiningSkillCardItem.Tier claimTier) {
-        Set<Identifier> learned = new java.util.HashSet<>(ServicePlatform.get().players().getUnlockedShapes(player, tool));
+        Set<Identifier> learned = new HashSet<>(ServicePlatform.get().players().getUnlockedShapes(player, tool));
         for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
             ItemStack stack = player.getInventory().getItem(slot);
             Identifier held = ShapeCertificateData.getShape(stack);

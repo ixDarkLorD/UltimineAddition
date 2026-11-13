@@ -1,8 +1,5 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
-import net.ixdarklord.coolcatcore.api.platform.Platform;
-import net.ixdarklord.ultimine_addition.util.ItemUtils;
-import net.minecraft.server.permissions.Permissions;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -11,9 +8,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Consumer;
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.CardHolderArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.CardTierArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.ChallengesArgument;
@@ -24,6 +19,7 @@ import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -33,10 +29,15 @@ import net.minecraft.commands.arguments.SlotArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public final class CardsCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {

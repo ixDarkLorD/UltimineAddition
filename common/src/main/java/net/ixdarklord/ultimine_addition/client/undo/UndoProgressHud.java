@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

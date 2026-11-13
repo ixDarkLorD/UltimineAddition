@@ -1,21 +1,21 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe.builder;
 
-import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.data.recipes.RecipeUnlockAdvancementBuilder;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.recipe.MCRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.ingredient.MCIngredient;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.RecipeUnlockAdvancementBuilder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

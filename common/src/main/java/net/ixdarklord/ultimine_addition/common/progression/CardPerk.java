@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -119,7 +120,7 @@ public enum CardPerk {
         for (CardPerk perk : values()) if (!known.contains(perk.id()) && perk.tier.getValue() <= tier.getValue()) open.add(perk);
         Collections.shuffle(open, new Random(card.getUUID().getMostSignificantBits() ^ card.getUUID().getLeastSignificantBits() ^ tier.getValue() * 0x9E3779B97F4A7C15L));
         // The claimed tier's own perks first, then what is left of the earlier tiers' (the sort keeps the shuffle within a tier).
-        open.sort(java.util.Comparator.comparingInt((CardPerk perk) -> -perk.tier.getValue()));
+        open.sort(Comparator.comparingInt((CardPerk perk) -> -perk.tier.getValue()));
         return List.copyOf(open.subList(0, Math.min(2, open.size())));
     }
 

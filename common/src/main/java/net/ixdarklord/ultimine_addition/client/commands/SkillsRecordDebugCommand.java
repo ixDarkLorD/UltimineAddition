@@ -1,17 +1,18 @@
 package net.ixdarklord.ultimine_addition.client.commands;
 
-import net.ixdarklord.coolcatcore.api.event.v2.client.ClientCommandEvents;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.ixdarklord.coolcatcore.api.event.v2.client.ClientCommandEvents;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordInspector;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 
 public class SkillsRecordDebugCommand {
@@ -27,7 +28,7 @@ public class SkillsRecordDebugCommand {
     }
 
     private static int inspect() {
-        var player = net.minecraft.client.Minecraft.getInstance().player;
+        var player = Minecraft.getInstance().player;
         if (player == null) return 0;
         ClientCommandEvents.sendFeedback(Component.literal("[client] " + player.getScoreboardName() + ":"));
         for (String line : SkillsRecordInspector.describe(player, SkillsRecordData::getClient)) {

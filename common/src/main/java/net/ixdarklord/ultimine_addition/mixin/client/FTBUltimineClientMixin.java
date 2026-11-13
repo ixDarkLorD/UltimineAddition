@@ -1,6 +1,5 @@
 package net.ixdarklord.ultimine_addition.mixin.client;
 
-import net.minecraft.client.Minecraft;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
@@ -9,6 +8,7 @@ import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;

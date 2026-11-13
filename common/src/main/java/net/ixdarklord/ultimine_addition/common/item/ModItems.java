@@ -1,11 +1,14 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
+import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.ixdarklord.coolcatcore.api.item.ComponentItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.Consumables;
 
 public class ModItems {
     public static final MinerCertificateItem MINER_CERTIFICATE = new MinerCertificateItem(properties("miner_certificate")
@@ -35,8 +38,8 @@ public class ModItems {
             .stacksTo(1));
     public static final GenericMineGoJuiceItem MINE_GO_JUICE_GENERIC = new GenericMineGoJuiceItem(properties("mine_go_juice_generic")
             .stacksTo(1)
-            .component(net.minecraft.core.component.DataComponents.CONSUMABLE, net.minecraft.world.item.component.Consumables.DEFAULT_DRINK)
-            .usingConvertsTo(net.minecraft.world.item.Items.GLASS_BOTTLE));
+            .component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)
+            .usingConvertsTo(Items.GLASS_BOTTLE));
     public static final MiningSkillCardItem MINING_SKILL_CARD_PICKAXE = new MiningSkillCardItem(MiningSkillCardItem.Type.PICKAXE, properties("mining_skill_card_pickaxe")
             .stacksTo(1));
     public static final MiningSkillCardItem MINING_SKILL_CARD_AXE = new MiningSkillCardItem(MiningSkillCardItem.Type.AXE, properties("mining_skill_card_axe")

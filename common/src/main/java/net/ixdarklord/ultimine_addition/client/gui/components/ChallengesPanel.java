@@ -1,27 +1,18 @@
 package net.ixdarklord.ultimine_addition.client.gui.components;
 
-import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
-import net.ixdarklord.ultimine_addition.config.UAClientConfig;
-import org.joml.Matrix3x2fStack;
-import net.minecraft.util.ARGB;
-import net.minecraft.client.renderer.RenderPipelines;
-import java.awt.Color;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
-import java.util.function.Consumer;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.AnimatedComponent;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.SlideAnimation;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.SlideAnimation.Direction;
 import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.ixdarklord.coolcatcanvas.api.client.utils.ScreenAnchor;
+import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.coolcatcore.api.utils.MathUtils;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -31,13 +22,23 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.ixdarklord.coolcatcore.api.config.type.EnumType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix3x2fStack;
+
+import java.awt.Color;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 public class ChallengesPanel implements LayoutElement {
     private static final Identifier SLOT_INDICATOR_TEXTURE = FTBUltimineAddition.id("challenge_panel/slot_indicator");

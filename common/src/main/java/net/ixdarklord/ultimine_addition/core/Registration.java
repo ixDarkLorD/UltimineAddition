@@ -3,60 +3,58 @@ package net.ixdarklord.ultimine_addition.core;
 import net.ixdarklord.coolcatcore.api.attachment.Attachment;
 import net.ixdarklord.coolcatcore.api.attachment.AttachmentRegistry;
 import net.ixdarklord.coolcatcore.api.attachment.SyncPolicy;
+import net.ixdarklord.coolcatcore.api.core.commands.ArgumentTypeRegistry;
 import net.ixdarklord.coolcatcore.api.menu.ExtendedMenus;
-import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
+import net.ixdarklord.coolcatcore.api.registry.CreativeTabs;
 import net.ixdarklord.coolcatcore.api.registry.DeferredRegister;
 import net.ixdarklord.coolcatcore.api.registry.RegistryEntry;
-import net.minecraft.resources.Identifier;
-import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
-import net.ixdarklord.ultimine_addition.common.data.item.ShapeCertificateData;
-import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
-import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
-import net.ixdarklord.coolcatcore.api.core.commands.ArgumentTypeRegistry;
 import net.ixdarklord.coolcatcore.api.utils.ParticleTypes;
+import net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger;
 import net.ixdarklord.ultimine_addition.common.advancement.UltimineObtainTrigger;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.CardHolderArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.CardTierArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.ChallengesArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.UltimineShapeArgument;
 import net.ixdarklord.ultimine_addition.common.data.item.*;
-import net.ixdarklord.ultimine_addition.common.item.GenericMineGoJuiceItem;
-import net.ixdarklord.ultimine_addition.common.item.GenericMiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.common.recipe.DataCardRecipe;
+import net.ixdarklord.ultimine_addition.common.data.item.ShapeCertificateData;
+import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffectInstance;
 import net.ixdarklord.ultimine_addition.common.effect.ModMobEffects;
+import net.ixdarklord.ultimine_addition.common.item.GenericMineGoJuiceItem;
+import net.ixdarklord.ultimine_addition.common.item.GenericMiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
+import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
 import net.ixdarklord.ultimine_addition.common.menu.ShapeSelectorMenu;
 import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
+import net.ixdarklord.ultimine_addition.common.progression.ToolAffinity;
+import net.ixdarklord.ultimine_addition.common.recipe.DataCardRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.ItemStorageDataRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.MCRecipe;
 import net.ixdarklord.ultimine_addition.common.recipe.SkillsRecordDyeRecipe;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.inventory.MenuType;
-import net.ixdarklord.coolcatcore.api.registry.CreativeTabs;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.DyeColor;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static net.ixdarklord.ultimine_addition.core.FTBUltimineAddition.MOD_ID;
 
@@ -210,7 +208,7 @@ public class Registration {
     public static final RegistryEntry<DataComponentType<StorageItemData>> ITEM_STORAGE_DATA = DATA_COMPONENT_TYPE.register("item_storage_data", () -> StorageItemData.DATA_COMPONENT);
     public static final RegistryEntry<DataComponentType<String>> CARD_TYPE_COMPONENT = DATA_COMPONENT_TYPE.register("card_type", () -> GenericMiningSkillCardItem.TYPE_COMPONENT);
     public static final RegistryEntry<DataComponentType<GenericMineGoJuiceItem.Juice>> GENERIC_JUICE_COMPONENT = DATA_COMPONENT_TYPE.register("generic_juice", () -> GenericMineGoJuiceItem.COMPONENT);
-    public static final RegistryEntry<DataComponentType<Integer>> TOOL_AFFINITY_COMPONENT = DATA_COMPONENT_TYPE.register("affinity", () -> net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.COMPONENT);
+    public static final RegistryEntry<DataComponentType<Integer>> TOOL_AFFINITY_COMPONENT = DATA_COMPONENT_TYPE.register("affinity", () -> ToolAffinity.COMPONENT);
     public static final RegistryEntry<DataComponentType<SelectedShapeData>> SELECTED_SHAPE_COMPONENT = DATA_COMPONENT_TYPE.register("selected_shape", () -> DataComponentType.<SelectedShapeData>builder().persistent(SelectedShapeData.CODEC).networkSynchronized(SelectedShapeData.STREAM_CODEC).build());
 
     // Particles
@@ -225,5 +223,5 @@ public class Registration {
 
     //Criterion Triggers
     public static final RegistryEntry<UltimineObtainTrigger> ULTIMINE_OBTAIN_TRIGGER = CRITERIA_TRIGGERS.register("ultimine_obtain", UltimineObtainTrigger::new);
-    public static final RegistryEntry<net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger> MILESTONE_TRIGGER = CRITERIA_TRIGGERS.register("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger::new);
+    public static final RegistryEntry<MilestoneTrigger> MILESTONE_TRIGGER = CRITERIA_TRIGGERS.register("milestone", MilestoneTrigger::new);
 }

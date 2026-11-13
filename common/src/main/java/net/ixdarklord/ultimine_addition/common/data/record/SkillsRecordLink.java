@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.common.data.record;
 
 import com.mojang.serialization.Codec;
-import io.netty.buffer.ByteBuf;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;

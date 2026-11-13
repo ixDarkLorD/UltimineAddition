@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.coolcatcore.api.data.ItemDataComponent;
 import net.ixdarklord.coolcatcore.api.item.ComponentItem;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class DataAbstractItem<T extends ItemDataComponent<T>> extends ComponentItem {

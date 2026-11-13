@@ -1,9 +1,9 @@
 package net.ixdarklord.ultimine_addition.datagen.challenge.builder;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import com.mojang.datafixers.util.Pair;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;

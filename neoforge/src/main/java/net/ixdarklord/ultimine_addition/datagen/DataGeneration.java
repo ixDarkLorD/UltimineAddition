@@ -1,11 +1,11 @@
 package net.ixdarklord.ultimine_addition.datagen;
 
-import net.ixdarklord.ultimine_addition.datagen.model.ItemModelDataProvider;
 import net.ixdarklord.coolcatcore.api.datagen.NeoForgeLanguageWrapper;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.datagen.advancement.AdvancementGenerator;
 import net.ixdarklord.ultimine_addition.datagen.challenge.ChallengeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.language.LanguageGenerator;
+import net.ixdarklord.ultimine_addition.datagen.model.ItemModelDataProvider;
 import net.ixdarklord.ultimine_addition.datagen.particle.ParticleGenerator;
 import net.ixdarklord.ultimine_addition.datagen.recipe.RecipeGenerator;
 import net.ixdarklord.ultimine_addition.datagen.tag.BlockTagGenerator;

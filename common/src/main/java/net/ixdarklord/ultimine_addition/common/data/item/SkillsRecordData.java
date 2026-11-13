@@ -1,9 +1,5 @@
 package net.ixdarklord.ultimine_addition.common.data.item;
 
-import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.ixdarklord.ultimine_addition.common.progression.ChallengeBoosts;
-import net.ixdarklord.ultimine_addition.common.progression.ProgressionRewards;
-import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -13,10 +9,17 @@ import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSa
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordClientCache;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData;
+import net.ixdarklord.ultimine_addition.common.data.reward.DataRewards;
+import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.PenItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
+import net.ixdarklord.ultimine_addition.common.progression.ChallengeBoosts;
+import net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks;
+import net.ixdarklord.ultimine_addition.common.progression.ProgressionRewards;
+import net.ixdarklord.ultimine_addition.common.progression.UltimineStats;
 import net.ixdarklord.ultimine_addition.common.tag.ModBlockTags;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -227,9 +230,9 @@ public final class SkillsRecordData {
             cardData.addAmount(challengeId, points).save();
             // Done when the card still lists it as accomplished, or moved on to its next tier with it.
             if (cardData.getTier() != before || cardData.isChallengeAccomplished(challengeId)) {
-                net.ixdarklord.ultimine_addition.common.data.reward.DataRewards.onChallengeCompleted(player, cardData, before, challengeId);
-                if (hasCorrectGamemode) net.ixdarklord.ultimine_addition.common.progression.UltimineStats.onChallenge(player);
-                net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.fire(net.ixdarklord.ultimine_addition.common.progression.ProgressionHooks.Kind.CHALLENGE_COMPLETED, player, cardData.getType().getId(), before.getValue(), challengeId, "");
+                DataRewards.onChallengeCompleted(player, cardData, before, challengeId);
+                if (hasCorrectGamemode) UltimineStats.onChallenge(player);
+                ProgressionHooks.fire(ProgressionHooks.Kind.CHALLENGE_COMPLETED, player, cardData.getType().getId(), before.getValue(), challengeId, "");
             }
             ProgressionRewards.checkTierUp(player, cardData, before);
             if (hasCorrectGamemode) this.consumeContents();

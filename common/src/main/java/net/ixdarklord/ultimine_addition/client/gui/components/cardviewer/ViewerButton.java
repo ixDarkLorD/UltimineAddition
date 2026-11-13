@@ -1,19 +1,20 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.minecraft.util.ARGB;
+import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
@@ -96,7 +97,7 @@ final class ViewerButton extends AbstractButton {
             this.sprites = sprites;
             this.tint = tint;
             this.onPress = onPress;
-            this.setTooltip(net.minecraft.client.gui.components.Tooltip.create(tooltip));
+            this.setTooltip(Tooltip.create(tooltip));
         }
 
         static WidgetSprites sprites(String name) {

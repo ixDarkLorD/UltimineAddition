@@ -1,27 +1,26 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
-import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.ShapeDiagrams;
-import net.ixdarklord.coolcatcore.api.config.type.EnumType;
-import net.ixdarklord.ultimine_addition.config.UAClientConfig;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.util.ARGB;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.ActiveTextCollector;
-import net.minecraft.client.renderer.RenderPipelines;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
 import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.ultimine_addition.client.gui.components.ColoredButton;
+import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.ShapeDiagrams;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
+import net.ixdarklord.ultimine_addition.common.data.shape.CustomShapes;
 import net.ixdarklord.ultimine_addition.common.menu.ShapeSelectorMenu;
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.Registration;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.ShapePayload;
 import net.ixdarklord.ultimine_addition.network.payloads.UpdateItemShapePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractStringWidget;
@@ -30,6 +29,8 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
@@ -37,8 +38,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -154,7 +157,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 this.renderTooltip(guiGraphics, mouseX, mouseY);
             }
         });
-        this.designButton.visible = net.ixdarklord.ultimine_addition.common.data.shape.CustomShapes.enabled();
+        this.designButton.visible = CustomShapes.enabled();
 
         this.emptyString = this.addRenderableWidget(new AbstractStringWidget(this.leftPos + LIST_X, this.topPos + LIST_Y, LIST_WIDTH, LIST_HEIGHT,
                 Component.translatable("gui.ultimine_addition.shape_selector.insert"), this.font) {
@@ -463,7 +466,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
             // The star: whether this shape is one the player cycles through (see FTBUltimineIntegration.getAvailableShapes).
             private boolean isFavorite() {
                 var player = Minecraft.getInstance().player;
-                return player != null && net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().getAbilityData(player).getFavoriteShapes().contains(this.shape.getName());
+                return player != null && ServicePlatform.get().players().getAbilityData(player).getFavoriteShapes().contains(this.shape.getName());
             }
 
             private int starLeft() {
@@ -474,7 +477,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
             public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
                 SoundManager handler = Minecraft.getInstance().getSoundManager();
                 if (event.x() >= this.starLeft() && event.x() < this.starLeft() + STAR_WIDTH) {
-                    PayloadHandler.sendToServer(new net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Favorite(this.shape.getName()));
+                    PayloadHandler.sendToServer(new ShapePayload.Favorite(this.shape.getName()));
                     handler.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, this.isFavorite() ? 0.9F : 1.3F));
                     // Not a pick of the row: the list leaves its selection alone.
                     return false;

@@ -1,16 +1,16 @@
 package net.ixdarklord.ultimine_addition.client.handler;
 
-import net.ixdarklord.coolcatcore.api.client.registry.KeyMappingRegistry;
-import net.ixdarklord.coolcatcore.api.platform.Platform;
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.platform.client.PlatformClient;
-import net.minecraft.network.chat.Component;
 import dev.ftb.mods.ftblibrary.platform.client.input.InputHelper;
 import dev.ftb.mods.ftblibrary.platform.client.input.KeyModifier;
-import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.platform.InputConstants;
+import net.ixdarklord.coolcatcore.api.client.registry.KeyMappingRegistry;
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 

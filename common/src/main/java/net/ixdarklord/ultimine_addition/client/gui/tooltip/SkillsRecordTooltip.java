@@ -1,10 +1,10 @@
 package net.ixdarklord.ultimine_addition.client.gui.tooltip;
 
-import org.jetbrains.annotations.Nullable;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public class SkillsRecordTooltip implements TooltipComponent {
     private final NonNullList<ItemStack> items;

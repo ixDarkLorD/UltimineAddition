@@ -1,9 +1,9 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe.conditions;
 
-import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import org.jetbrains.annotations.NotNull;
 

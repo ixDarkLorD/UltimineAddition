@@ -4,8 +4,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData.Stats;
+import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.common.progression.CardPerk;
 import net.ixdarklord.ultimine_addition.common.progression.UltimineStats;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -45,17 +48,17 @@ public final class StatsCommand {
         source.sendSuccess(() -> line("challenges", stats.challenges()), false);
         source.sendSuccess(() -> line("dailies", stats.dailies()), false);
         source.sendSuccess(() -> line("undos", stats.undos()), false);
-        var ability = net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().getAbilityData(source.getPlayerOrException());
+        var ability = ServicePlatform.get().players().getAbilityData(source.getPlayerOrException());
         ability.getAllPerks().forEach((tool, perks) -> {
             if (perks.isEmpty()) return;
             var names = Component.empty();
             for (String id : perks) {
-                var perk = net.ixdarklord.ultimine_addition.common.progression.CardPerk.byId(id);
+                var perk = CardPerk.byId(id);
                 if (perk == null) continue;
                 if (!names.getSiblings().isEmpty()) names.append(", ");
                 names.append(perk.displayName().withStyle(ChatFormatting.LIGHT_PURPLE));
             }
-            var type = net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem.Type.byId(tool);
+            var type = MiningSkillCardItem.Type.byId(tool);
             Component toolName = type == null ? Component.literal(tool) : type.displayName();
             source.sendSuccess(() -> Component.translatable("command.ultimine_addition.stats.perks", toolName, names).withStyle(ChatFormatting.GRAY), false);
         });

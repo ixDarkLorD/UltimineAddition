@@ -1,9 +1,9 @@
 package net.ixdarklord.ultimine_addition.network.payloads;
 
 import net.ixdarklord.coolcatcore.api.network.PacketContext;
-import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

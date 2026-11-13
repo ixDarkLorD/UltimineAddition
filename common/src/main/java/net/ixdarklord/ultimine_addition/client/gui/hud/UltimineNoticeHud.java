@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.client.gui.hud;
 
-import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
 import net.ixdarklord.ultimine_addition.common.progression.UltimineNotice;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
@@ -14,9 +14,9 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

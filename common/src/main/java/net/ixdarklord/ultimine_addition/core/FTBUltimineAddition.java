@@ -1,15 +1,15 @@
 package net.ixdarklord.ultimine_addition.core;
 
-import org.jetbrains.annotations.Nullable;
-import net.minecraft.commands.Commands;
-import net.minecraft.server.permissions.PermissionCheck;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.PermissionCheck;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.function.Consumer;

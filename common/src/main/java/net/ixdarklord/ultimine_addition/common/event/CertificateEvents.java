@@ -3,17 +3,19 @@ package net.ixdarklord.ultimine_addition.common.event;
 import net.ixdarklord.coolcatcore.api.event.v2.common.BlockEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.core.EventResult;
-import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
-import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.minecraft.resources.Identifier;
 import net.ixdarklord.coolcatcore.api.utils.SlotReference;
 import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSavedData;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
+import net.ixdarklord.ultimine_addition.common.data.shape.CustomShapes;
+import net.ixdarklord.ultimine_addition.common.data.shape.DataShapesManager;
+import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
+import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +24,8 @@ public class CertificateEvents {
     public static void init() {
         legacyFunctions();
         // The world's player-made shapes join the list once the world is there, and leave with it.
-        ServerLifecycleEvents.STARTED.register(net.ixdarklord.ultimine_addition.common.data.shape.CustomShapes::refresh);
-        ServerLifecycleEvents.STOPPED.register(server -> net.ixdarklord.ultimine_addition.common.data.shape.DataShapesManager.INSTANCE.setCustom(List.of()));
+        ServerLifecycleEvents.STARTED.register(CustomShapes::refresh);
+        ServerLifecycleEvents.STOPPED.register(server -> DataShapesManager.INSTANCE.setCustom(List.of()));
         // Let pack makers see where plugin shapes ended up.
         ServerLifecycleEvents.STARTED.register(server -> {
             List<Identifier> extra = ShapeCertificateItem.getUnlistedShapes();

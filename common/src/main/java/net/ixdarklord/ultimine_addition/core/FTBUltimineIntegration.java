@@ -1,33 +1,33 @@
 package net.ixdarklord.ultimine_addition.core;
 
-import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
-import net.ixdarklord.coolcatcore.api.platform.Platform;
 import dev.ftb.mods.ftbultimine.api.restriction.RestrictionHandler;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import dev.ftb.mods.ftbultimine.api.util.CanUltimineResult;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
 import dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig;
 import dev.ftb.mods.ftbultimine.shape.ShapeRegistry;
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.ultimine_addition.client.gui.hud.UltimineNoticeHud;
+import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
-import net.ixdarklord.ultimine_addition.common.item.ModItems;
-import net.ixdarklord.ultimine_addition.common.progression.UltimineNotice;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.common.item.ModItems;
+import net.ixdarklord.ultimine_addition.common.progression.CardPerk;
+import net.ixdarklord.ultimine_addition.common.progression.ToolAffinity;
+import net.ixdarklord.ultimine_addition.common.progression.UltimineNotice;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffect;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -239,11 +239,11 @@ public class FTBUltimineIntegration implements RestrictionHandler {
     public static int getMaxBlocks(ServerPlayer player) {
         int blocks = baseMaxBlocks(player);
         // The Reach perk, for the tool in hand.
-        if (net.ixdarklord.ultimine_addition.common.progression.CardPerk.REACH.has(player)) {
-            blocks = Math.round(blocks * net.ixdarklord.ultimine_addition.common.progression.CardPerk.REACH_FACTOR);
+        if (CardPerk.REACH.has(player)) {
+            blocks = Math.round(blocks * CardPerk.REACH_FACTOR);
         }
-        if (net.ixdarklord.ultimine_addition.common.progression.CardPerk.EXPANSE.has(player)) {
-            blocks = Math.round(blocks * net.ixdarklord.ultimine_addition.common.progression.CardPerk.REACH_FACTOR);
+        if (CardPerk.EXPANSE.has(player)) {
+            blocks = Math.round(blocks * CardPerk.REACH_FACTOR);
         }
         // What prestiged cards of the tool's types have earned.
         int prestige = 0;
@@ -252,10 +252,10 @@ public class FTBUltimineIntegration implements RestrictionHandler {
             prestige = Math.max(prestige, ability.getPrestige(type.getId()));
         }
         if (prestige > 0 && UAServerConfig.CARD_PRESTIGE.get()) {
-            blocks = Math.round(blocks * (100 + prestige * net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData.PRESTIGE_PERCENT) / 100.0F);
+            blocks = Math.round(blocks * (100 + prestige * MiningSkillCardData.PRESTIGE_PERCENT) / 100.0F);
         }
         // And what the tool itself has learned (ToolAffinity).
-        int affinity = net.ixdarklord.ultimine_addition.common.progression.ToolAffinity.percent(ItemUtils.getItemInHand(player, true));
+        int affinity = ToolAffinity.percent(ItemUtils.getItemInHand(player, true));
         return affinity > 0 ? Math.round(blocks * (100 + affinity) / 100.0F) : blocks;
     }
 

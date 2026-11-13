@@ -1,13 +1,12 @@
 package net.ixdarklord.ultimine_addition.common.brewing;
 
-import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
-import net.ixdarklord.coolcatcore.api.brewing.IBrewingRecipe;
 import net.ixdarklord.coolcatcore.api.brewing.BrewingBuilder;
+import net.ixdarklord.coolcatcore.api.brewing.IBrewingRecipe;
 import net.ixdarklord.coolcatcore.api.event.v1.server.RegisterBrewingRecipesEvent;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
-import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.potion.MineGoPotion;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;

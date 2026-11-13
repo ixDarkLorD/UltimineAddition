@@ -1,16 +1,16 @@
 package net.ixdarklord.ultimine_addition.client.undo;
 
-import net.ixdarklord.ultimine_addition.network.payloads.UndoPayload;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
+import net.ixdarklord.ultimine_addition.network.payloads.UndoPayload;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -114,7 +114,7 @@ public final class UndoHistoryScreen extends Screen {
     }
 
     private static String cost(UndoPayload.HistoryEntry entry) {
-        var player = net.minecraft.client.Minecraft.getInstance().player;
+        var player = Minecraft.getInstance().player;
         String free = player != null && player.isCreative() ? "gui.ultimine_addition.undo.free" : "gui.ultimine_addition.undo.free.plain";
         if (entry.free()) return Component.translatable(free).getString();
         StringBuilder items = new StringBuilder();

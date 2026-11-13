@@ -1,9 +1,9 @@
 package net.ixdarklord.ultimine_addition.hooks.neoforge;
 
-import net.minecraft.client.input.KeyEvent;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.ixdarklord.ultimine_addition.hooks.KeyBindingHooks;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.input.KeyEvent;
 
 public class KeyBindingHooksImpl {
     /**

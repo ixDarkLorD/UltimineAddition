@@ -1,5 +1,6 @@
 package net.ixdarklord.ultimine_addition.common.progression;
 
+import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -35,7 +36,7 @@ public final class ChallengeBoosts {
         boolean streakBonus = interval > 0 && streak.count % interval == 0;
         // The Fortune perk doubles the chance for its tool's challenges.
         double chance = UAServerConfig.LUCKY_FIND_CHANCE.get();
-        var challengeData = net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager.INSTANCE.getAllChallenges().get(challengeId);
+        var challengeData = ChallengesManager.INSTANCE.getAllChallenges().get(challengeId);
         if (challengeData != null && CardPerk.FORTUNE.has(player, challengeData.forCardType())) chance *= 2.0;
         boolean lucky = ThreadLocalRandom.current().nextDouble() < chance;
 

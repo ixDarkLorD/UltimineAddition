@@ -6,14 +6,15 @@
 package net.ixdarklord.ultimine_addition.util;
 
 import com.mojang.datafixers.util.Pair;
-import java.lang.reflect.Field;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.lang.reflect.Field;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public record TillResult(BlockState resultState, ItemLike droppedItem) {
     public static TillResult getTillResult(Block block) {

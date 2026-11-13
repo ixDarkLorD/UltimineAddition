@@ -1,10 +1,6 @@
 package net.ixdarklord.ultimine_addition.datagen.advancement;
 
-import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.world.item.Item;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.core.HolderGetter;
+import net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger;
 import net.ixdarklord.ultimine_addition.common.advancement.UltimineObtainTrigger;
 import net.ixdarklord.ultimine_addition.common.data.item.MinerCertificateData;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
@@ -16,10 +12,15 @@ import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.criterion.InventoryChangeTrigger;
 import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.advancements.criterion.KilledTrigger;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 
 import java.util.List;
@@ -173,7 +174,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             null,
                             AdvancementType.TASK,
                             true, true, false)
-                    .addCriterion("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.Instance.of("undo"))
+                    .addCriterion("milestone", MilestoneTrigger.Instance.of("undo"))
                     .save(consumer, FTBUltimineAddition.id("milestone/undo").toString());
 
             Advancement.Builder.advancement().parent(skillsRecord).display(
@@ -183,7 +184,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             null,
                             AdvancementType.TASK,
                             true, true, false)
-                    .addCriterion("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.Instance.of("daily"))
+                    .addCriterion("milestone", MilestoneTrigger.Instance.of("daily"))
                     .save(consumer, FTBUltimineAddition.id("milestone/daily").toString());
 
             Advancement.Builder.advancement().parent(skillsRecord).display(
@@ -193,7 +194,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             null,
                             AdvancementType.TASK,
                             true, true, false)
-                    .addCriterion("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.Instance.of("perk"))
+                    .addCriterion("milestone", MilestoneTrigger.Instance.of("perk"))
                     .save(consumer, FTBUltimineAddition.id("milestone/perk").toString());
 
             Advancement.Builder.advancement().parent(skillsRecord).display(
@@ -203,7 +204,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             null,
                             AdvancementType.TASK,
                             true, true, false)
-                    .addCriterion("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.Instance.of("big_ultimine"))
+                    .addCriterion("milestone", MilestoneTrigger.Instance.of("big_ultimine"))
                     .save(consumer, FTBUltimineAddition.id("milestone/big_ultimine").toString());
 
             Advancement.Builder.advancement().parent(skillsRecord).display(
@@ -213,7 +214,7 @@ public class AdvancementGenerator extends AdvancementProvider {
                             null,
                             AdvancementType.TASK,
                             true, true, false)
-                    .addCriterion("milestone", net.ixdarklord.ultimine_addition.common.advancement.MilestoneTrigger.Instance.of("thousand_blocks"))
+                    .addCriterion("milestone", MilestoneTrigger.Instance.of("thousand_blocks"))
                     .save(consumer, FTBUltimineAddition.id("milestone/thousand_blocks").toString());
         }
     }

@@ -1,25 +1,26 @@
 package net.ixdarklord.ultimine_addition.client.event;
 
+import net.ixdarklord.coolcatcore.api.client.gui.ItemDecorator;
 import net.ixdarklord.coolcatcore.api.config.client.ConfigScreens;
+import net.ixdarklord.coolcatcore.api.item.DecoratedItem;
+import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.config.UAConfigs;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.ixdarklord.coolcatcore.api.client.gui.ItemDecorator;
-import net.ixdarklord.coolcatcore.api.item.DecoratedItem;
-import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -278,7 +279,7 @@ public final class DevAutotest {
             } catch (ReflectiveOperationException ignored) {
             }
         }
-        for (java.lang.reflect.Field field : root.getClass().getFields()) {
+        for (Field field : root.getClass().getFields()) {
             if (Modifier.isStatic(field.getModifiers()) || field.getType().isPrimitive()) continue;
             try {
                 Object value = field.get(root);

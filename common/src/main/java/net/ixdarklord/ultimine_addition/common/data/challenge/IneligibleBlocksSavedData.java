@@ -1,11 +1,10 @@
 package net.ixdarklord.ultimine_addition.common.data.challenge;
 
-import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.core.UUIDUtil;
 import com.mojang.serialization.Codec;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -17,6 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 
 import java.util.*;
 

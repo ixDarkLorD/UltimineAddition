@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.hooks.fabric;
 
-import net.minecraft.client.input.KeyEvent;
 import net.ixdarklord.ultimine_addition.hooks.KeyBindingHooks;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.input.KeyEvent;
 
 public class KeyBindingHooksImpl {
     /**

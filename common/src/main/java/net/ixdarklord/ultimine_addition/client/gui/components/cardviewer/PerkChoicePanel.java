@@ -15,6 +15,8 @@ import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -91,7 +93,7 @@ final class PerkChoicePanel extends Panel {
             graphics.fill(b.left(), b.top(), b.right(), b.bottom(), this.viewer.themed(ChallengeDetailsPanel.PANEL_FILL));
             return;
         }
-        ChoiceChrome.frame(graphics, this.viewer, this.font, b, net.minecraft.world.item.ItemStack.EMPTY,
+        ChoiceChrome.frame(graphics, this.viewer, this.font, b, ItemStack.EMPTY,
                 Component.translatable("gui.ultimine_addition.card_viewer.perk.choose"),
                 Component.translatable("gui.ultimine_addition.card_viewer.perk.kept").withStyle(ChatFormatting.GRAY), this.tier);
     }
@@ -132,7 +134,7 @@ final class PerkChoicePanel extends Panel {
         @Override
         protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
             boolean hovered = this.active && this.isHoveredOrFocused();
-            long now = net.minecraft.util.Util.getMillis();
+            long now = Util.getMillis();
             float seconds = Math.min(0.1F, (now - this.lastFrame) / 1000.0F);
             this.lastFrame = now;
             this.hover = this.viewer.isAnimated() ? ChoiceChrome.approach(this.hover, hovered ? 1.0F : 0.0F, seconds, 16.0F) : hovered ? 1.0F : 0.0F;

@@ -1,9 +1,9 @@
 package net.ixdarklord.ultimine_addition.core.neoforge;
 
-import net.minecraft.world.level.block.Blocks;
 import net.ixdarklord.ultimine_addition.common.tag.PlatformTags;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.ItemAbility;
 

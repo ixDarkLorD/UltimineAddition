@@ -1,9 +1,7 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.ixdarklord.coolcatcore.api.menu.ExtendedMenus;
-import java.util.function.Consumer;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.ixdarklord.coolcatcore.api.item.ComponentItem;
+import net.ixdarklord.coolcatcore.api.menu.ExtendedMenus;
 import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.common.menu.ShapeSelectorMenu;
 import net.minecraft.ChatFormatting;
@@ -15,10 +13,12 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ShapeSelectorItem extends ComponentItem {
     public static final Component TITLE = Component.translatable("item.ultimine_addition.shape_selector");

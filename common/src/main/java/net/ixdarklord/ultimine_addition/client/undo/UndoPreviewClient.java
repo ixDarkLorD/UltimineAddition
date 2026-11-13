@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.client.undo;
 
-import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
 import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
+import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
 import net.ixdarklord.ultimine_addition.common.undo.UltimineUndo;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;

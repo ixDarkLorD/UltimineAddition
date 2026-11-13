@@ -1,39 +1,39 @@
 package net.ixdarklord.ultimine_addition.common.item;
 
-import net.minecraft.util.ARGB;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.core.component.DataComponents;
-import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
-import org.jetbrains.annotations.Nullable;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.server.level.ServerLevel;
-import java.util.function.Consumer;
-import net.minecraft.world.item.component.TooltipDisplay;
-import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.coolcatcore.api.item.ComponentItem;
-import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
-import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
+import net.ixdarklord.coolcatcore.api.utils.ComponentHelper;
 import net.ixdarklord.ultimine_addition.client.gui.tooltip.SkillsRecordTooltip;
+import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordLink;
 import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class SkillsRecordItem extends ComponentItem {
     public static final Component TITLE = Component.translatable("item.ultimine_addition.skills_record");

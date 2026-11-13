@@ -6,25 +6,27 @@ import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerTickEvents;
 import net.ixdarklord.ultimine_addition.common.data.challenge.IneligibleBlocksSavedData;
 import net.ixdarklord.ultimine_addition.common.progression.UltimineNotice;
+import net.ixdarklord.ultimine_addition.common.progression.UltimineStats;
 import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.UndoPayload;
-import net.minecraft.world.item.component.ItemContainerContents;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.util.Mth;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,6 +34,8 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 // Undoing an Ultimine operation: blocks go back, paid for with the items (and experience) they dropped, taken from the
 // drops still on the ground first, then from the player's inventory. When something is missing the player can still
@@ -284,7 +288,7 @@ public final class UltimineUndo {
 
     // Queues the undo behind the one growing back now, or starts it.
     private static void start(ServerPlayer player, Operation op) {
-        net.ixdarklord.ultimine_addition.common.progression.UltimineStats.onUndo(player);
+        UltimineStats.onUndo(player);
         if (isBusy(player)) {
             // Waits for the undo growing back now; the progress HUD shows how many are waiting.
             QUEUED.computeIfAbsent(player.getUUID(), uuid -> new ArrayDeque<>()).addLast(op);
@@ -360,7 +364,7 @@ public final class UltimineUndo {
         return new Cost(op.drops, fromGround, free);
     }
 
-    public static int countInInventory(net.minecraft.world.entity.player.Player player, ItemStack stack) {
+    public static int countInInventory(Player player, ItemStack stack) {
         int count = 0;
         for (ItemStack slot : player.getInventory().getNonEquipmentItems()) {
             if (matches(slot, stack)) count += slot.getCount();
@@ -625,7 +629,7 @@ public final class UltimineUndo {
         }
     }
 
-    private static void finishPlacements(java.util.function.Predicate<Placement> filter) {
+    private static void finishPlacements(Predicate<Placement> filter) {
         Iterator<Placement> it = PLACEMENTS.iterator();
         while (it.hasNext()) {
             Placement p = it.next();
@@ -741,7 +745,7 @@ public final class UltimineUndo {
         private @Nullable ExperienceOrb orb;
         private int xp;
 
-        private java.util.stream.Stream<BlockRecord> all() {
+        private Stream<BlockRecord> all() {
             return this.blocks.stream().flatMap(block -> block.withLinked().stream());
         }
 

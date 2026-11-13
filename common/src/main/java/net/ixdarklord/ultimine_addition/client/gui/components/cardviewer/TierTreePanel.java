@@ -1,12 +1,9 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.coolcatcanvas.api.utils.ColorGradient;
-import net.ixdarklord.coolcatcanvas.api.utils.Easing;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.sounds.SoundEvents;
 import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.ViewportPanel;
 import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcanvas.api.utils.ColorGradient;
+import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeState;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
@@ -18,17 +15,20 @@ import net.ixdarklord.ultimine_addition.common.item.GenericMiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
@@ -50,13 +50,13 @@ final class TierTreePanel extends ViewportPanel {
     private static final Identifier STAR_FILL = sprite("star_fill");
     private static final Identifier STAR_BORDER = sprite("star_border");
     private static final int MASTERED_GOLD = 0xFFFFC940;
-    private static final ItemStack PRESTIGE_ICON = new ItemStack(net.minecraft.world.item.Items.NETHER_STAR);
+    private static final ItemStack PRESTIGE_ICON = new ItemStack(Items.NETHER_STAR);
     private static final long PRESTIGE_CONFIRM_MS = 4000L;
     // When the Mastered box's star was first clicked (0 when it wasn't): see worldClicked.
     private long prestigeArmedAt;
 
     private boolean prestigeArmed() {
-        return this.prestigeArmedAt != 0L && net.minecraft.util.Util.getMillis() - this.prestigeArmedAt < PRESTIGE_CONFIRM_MS;
+        return this.prestigeArmedAt != 0L && Util.getMillis() - this.prestigeArmedAt < PRESTIGE_CONFIRM_MS;
     }
     private static final Identifier SLOT_FILL = sprite("slot_fill");
     private static final Identifier SLOT_BORDER = sprite("slot_border");
@@ -985,7 +985,7 @@ final class TierTreePanel extends ViewportPanel {
                         this.prestigeArmedAt = 0L;
                         this.viewer.prestigeCard();
                     } else {
-                        this.prestigeArmedAt = net.minecraft.util.Util.getMillis();
+                        this.prestigeArmedAt = Util.getMillis();
                     }
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     return true;

@@ -1,10 +1,10 @@
 package net.ixdarklord.ultimine_addition.client.particle;
 
-import net.minecraft.util.RandomSource;
-import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.NotNull;
 
 public class CelebrateParticle extends RisingParticle {

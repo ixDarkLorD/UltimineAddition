@@ -2,10 +2,12 @@ package net.ixdarklord.ultimine_addition.network;
 
 import net.ixdarklord.coolcatcore.api.network.Network;
 import net.ixdarklord.coolcatcore.api.network.PayloadReceiver;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.ixdarklord.ultimine_addition.network.payloads.*;
+import net.ixdarklord.ultimine_addition.network.payloads.ShapePayload;
+import net.ixdarklord.ultimine_addition.network.payloads.SyncRewardsPayload;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,15 +44,15 @@ public class PayloadHandler {
         // Codec derived from the record by CoolCatLib.
         Network.registerClientbound(OpenConfigPayload.class, OpenConfigPayload::handle);
         Network.registerServerbound(ShapeDiagramPayload.Request.class, ShapeDiagramPayload.Request::handle);
-        Network.registerServerbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Favorite.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Favorite::handle);
-        Network.registerServerbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Design.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Design::handle);
-        Network.registerServerbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Delete.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Delete::handle);
-        Network.registerServerbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.ListRequest.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.ListRequest::handle);
-        Network.registerClientbound(net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Mine.class, net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Mine::handle);
+        Network.registerServerbound(ShapePayload.Favorite.class, ShapePayload.Favorite::handle);
+        Network.registerServerbound(ShapePayload.Design.class, ShapePayload.Design::handle);
+        Network.registerServerbound(ShapePayload.Delete.class, ShapePayload.Delete::handle);
+        Network.registerServerbound(ShapePayload.ListRequest.class, ShapePayload.ListRequest::handle);
+        Network.registerClientbound(ShapePayload.Mine.class, ShapePayload.Mine::handle);
         Network.registerClientbound(ShapeDiagramPayload.Diagrams.class, ShapeDiagramPayload.Diagrams::handle);
         Network.registerClientbound(SyncShapesPayload.class, SyncShapesPayload::handle);
         Network.registerClientbound(SyncCardTypesPayload.class, SyncCardTypesPayload::handle);
-        Network.registerClientbound(net.ixdarklord.ultimine_addition.network.payloads.SyncRewardsPayload.class, net.ixdarklord.ultimine_addition.network.payloads.SyncRewardsPayload::handle);
+        Network.registerClientbound(SyncRewardsPayload.class, SyncRewardsPayload::handle);
     }
 
     private static <T extends CustomPacketPayload> void registerC2S(CustomPacketPayload.Type<T> type, StreamCodec<? super RegistryFriendlyByteBuf, T> codec, PayloadReceiver<T> handler) {

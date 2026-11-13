@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.mixin.fabric;
 
-import net.ixdarklord.coolcatcore.api.event.v2.core.EventResultHolder;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import net.ixdarklord.coolcatcore.api.event.v2.core.EventResultHolder;
 import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationEvent;
 import net.ixdarklord.ultimine_addition.util.ToolActions;
 import net.minecraft.core.BlockPos;

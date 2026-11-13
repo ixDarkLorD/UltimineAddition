@@ -1,32 +1,33 @@
 package net.ixdarklord.ultimine_addition.common.event;
 
-import net.ixdarklord.ultimine_addition.common.progression.TimedChallenge;
+import com.mojang.datafixers.util.Pair;
+import dev.ftb.mods.ftbultimine.FTBUltimine;
 import net.ixdarklord.coolcatcore.api.event.v2.common.BlockEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.core.EventResult;
 import net.ixdarklord.coolcatcore.api.event.v2.core.EventResultHolder;
 import net.ixdarklord.coolcatcore.api.platform.Platform;
-import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.ixdarklord.ultimine_addition.common.progression.ChallengeBoosts;
-import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSync;
-import com.mojang.datafixers.util.Pair;
-import dev.ftb.mods.ftbultimine.FTBUltimine;
 import net.ixdarklord.coolcatcore.api.utils.SlotReference;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSync;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.event.impl.BlockToolModificationEvent;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
+import net.ixdarklord.ultimine_addition.common.progression.ChallengeBoosts;
+import net.ixdarklord.ultimine_addition.common.progression.JuicePause;
+import net.ixdarklord.ultimine_addition.common.progression.TimedChallenge;
+import net.ixdarklord.ultimine_addition.common.progression.UltimineStats;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.PlayConsumeEffectPayload;
 import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.ixdarklord.ultimine_addition.util.ToolAction;
 import net.ixdarklord.ultimine_addition.util.ToolActions;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -49,17 +50,17 @@ public class MSCEvents {
             validateCards(player);
             cardBonusEffect(player);
             SkillsRecordSync.tick(player);
-            net.ixdarklord.ultimine_addition.common.progression.JuicePause.tick(player);
+            JuicePause.tick(player);
             // A few seconds after joining: the day's challenge, while it is still to do.
             if (player.tickCount == 100) TimedChallenge.announce(player, false);
             // On the leaderboard from the start of the visit.
-            if (player.tickCount == 20) net.ixdarklord.ultimine_addition.common.progression.UltimineStats.see(player);
+            if (player.tickCount == 20) UltimineStats.see(player);
         });
         PlayerEvents.LEAVE.register(SkillsRecordSync::forget);
         PlayerEvents.LEAVE.register(ChallengeBoosts::forget);
-        PlayerEvents.LEAVE.register(net.ixdarklord.ultimine_addition.common.progression.JuicePause::forget);
+        PlayerEvents.LEAVE.register(JuicePause::forget);
         ServerLifecycleEvents.STOPPED.register(server -> SkillsRecordSync.clear());
-        ServerLifecycleEvents.STOPPED.register(server -> net.ixdarklord.ultimine_addition.common.progression.UltimineStats.clear());
+        ServerLifecycleEvents.STOPPED.register(server -> UltimineStats.clear());
 
         BlockEvents.BREAK.register((level, pos, state, player) -> {
             if (player instanceof ServerPlayer serverPlayer) TimedChallenge.onAction(serverPlayer, state, pos, ChallengeData.Type.BREAK_BLOCK);

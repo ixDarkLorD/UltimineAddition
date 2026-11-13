@@ -1,24 +1,20 @@
 package net.ixdarklord.ultimine_addition.common.progression;
 
-import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
+import net.ixdarklord.ultimine_addition.common.data.reward.DataRewards;
 import net.ixdarklord.ultimine_addition.common.effect.MineGoJuiceEffect;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 // Rewards for a Mining Skill Card tiering up through its challenges: a Shape Certificate and a short taste of Ultimine.
 public final class ProgressionRewards {
@@ -30,7 +26,7 @@ public final class ProgressionRewards {
 
     private static void onTierUp(ServerPlayer player, MiningSkillCardData card, MiningSkillCardItem.Tier tier) {
         // What data packs hand out for this tier.
-        net.ixdarklord.ultimine_addition.common.data.reward.DataRewards.onTierReached(player, card, tier);
+        DataRewards.onTierReached(player, card, tier);
         ProgressionHooks.fire(ProgressionHooks.Kind.TIER_REACHED, player, card.getType().getId(), tier.getValue(), null, "");
         List<Component> lines = new ArrayList<>();
         ItemStack icon = card.getStack() == null ? ItemStack.EMPTY : card.getStack().copyWithCount(1);

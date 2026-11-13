@@ -1,12 +1,12 @@
 package net.ixdarklord.ultimine_addition.core.fabric;
 
-import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import dev.ftb.mods.ftbultimine.api.fabric.FTBUltimineEvents;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.ixdarklord.ultimine_addition.common.event.impl.DatapackEvents;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
 import net.minecraft.client.Minecraft;
 

@@ -1,8 +1,5 @@
 package net.ixdarklord.ultimine_addition.datagen.recipe;
 
-import net.ixdarklord.ultimine_addition.datagen.record.SkillsRecordRecipes;
-import org.jetbrains.annotations.NotNull;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
@@ -14,12 +11,15 @@ import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.datagen.recipe.builder.ItemStorageDataRecipeBuilder;
 import net.ixdarklord.ultimine_addition.datagen.recipe.builder.MCRecipeBuilder;
 import net.ixdarklord.ultimine_addition.datagen.recipe.conditions.LegacyModeCondition;
+import net.ixdarklord.ultimine_addition.datagen.record.SkillsRecordRecipes;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 

@@ -1,16 +1,19 @@
 package net.ixdarklord.ultimine_addition.common.data.item;
 
-import net.ixdarklord.coolcatcore.api.platform.Platform;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
-import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
-import net.ixdarklord.ultimine_addition.config.UAServerConfig;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.coolcatcore.api.data.ItemDataComponent;
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.record.CardProgress;
 import net.ixdarklord.ultimine_addition.common.data.record.CardStore;
+import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
+import net.ixdarklord.ultimine_addition.common.progression.CardPerk;
+import net.ixdarklord.ultimine_addition.config.PlaystyleModes;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,8 +21,10 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Util;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -168,9 +173,9 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
         for (Challenge challenge : challenges) {
             if (challenge.currentPoints >= challenge.requiredPoints) completed.add(challenge.id);
         }
-        net.minecraft.server.MinecraftServer server = Platform.getServer();
+        MinecraftServer server = Platform.getServer();
         if (server != null && server.isSameThread()) {
-            net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordSavedData.get(server).getCardHistory(this.getUUID()).ifPresent(history -> completed.addAll(history.completedChallenges()));
+            SkillsRecordSavedData.get(server).getCardHistory(this.getUUID()).ifPresent(history -> completed.addAll(history.completedChallenges()));
         }
         challenges.clear();
         progress.setRerolls(0);
@@ -232,7 +237,7 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
 
     // A Mastered card can start over for a lasting bonus (SkillsRecordPayload.Prestige).
     public boolean canPrestige() {
-        return UAServerConfig.CARD_PRESTIGE.get() && !net.ixdarklord.ultimine_addition.config.PlaystyleModes.isLegacy()
+        return UAServerConfig.CARD_PRESTIGE.get() && !PlaystyleModes.isLegacy()
                 && this.tier == MiningSkillCardItem.Tier.Mastered && this.getType() != MiningSkillCardItem.Type.EMPTY
                 && !this.isCreativeItem() && this.getPrestige() < MAX_PRESTIGE;
     }
@@ -247,19 +252,19 @@ public final class MiningSkillCardData extends ItemDataComponent<MiningSkillCard
     }
 
     /** Whether this player may progress the card: always, unless it is bound to somebody else. */
-    public boolean isOwnedBy(net.minecraft.world.entity.player.Player player) {
+    public boolean isOwnedBy(Player player) {
         String owner = this.progress().getOwner();
         return owner.isEmpty() || owner.equals(player.getUUID().toString());
     }
 
     /** Binds the card to its first player (where the server binds cards). */
-    public void bindTo(net.minecraft.world.entity.player.Player player) {
+    public void bindTo(Player player) {
         if (this.progress().getOwner().isEmpty()) this.progress().setOwner(player.getUUID().toString(), player.getScoreboardName());
     }
 
     // The perk of a tier this card has reached, not yet picked (see CardPerk).
     public boolean canClaimPerk(MiningSkillCardItem.Tier tier) {
-        return net.ixdarklord.ultimine_addition.common.progression.CardPerk.isPerkTier(tier) && this.getType() != MiningSkillCardItem.Type.EMPTY
+        return CardPerk.isPerkTier(tier) && this.getType() != MiningSkillCardItem.Type.EMPTY
                 && !this.isCreativeItem() && this.tier.getValue() >= tier.getValue() && !this.progress().isPerkClaimed(tier.getValue());
     }
 

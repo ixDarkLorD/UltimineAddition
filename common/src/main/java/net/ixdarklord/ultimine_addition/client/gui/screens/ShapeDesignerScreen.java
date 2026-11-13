@@ -23,10 +23,12 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -178,7 +180,7 @@ public final class ShapeDesignerScreen extends Screen {
     }
 
     private void clear() {
-        for (boolean[][] grid : this.cells) for (boolean[] row : grid) java.util.Arrays.fill(row, false);
+        for (boolean[][] grid : this.cells) for (boolean[] row : grid) Arrays.fill(row, false);
         this.layer = 0;
     }
 
@@ -496,7 +498,7 @@ public final class ShapeDesignerScreen extends Screen {
             List<Component> lines = new ArrayList<>();
             lines.add(Component.translatable("gui.ultimine_addition.shape_designer.blocks.tooltip", max));
             if (blocks > max) lines.add(Component.translatable("gui.ultimine_addition.shape_designer.blocks.over", blocks - max).withColor(0xFF8A80));
-            List<net.minecraft.util.FormattedCharSequence> wrapped = new ArrayList<>();
+            List<FormattedCharSequence> wrapped = new ArrayList<>();
             for (Component line : lines) wrapped.addAll(this.font.split(line, 170));
             graphics.setTooltipForNextFrame(this.font, wrapped, mouseX, mouseY);
         }

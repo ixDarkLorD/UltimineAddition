@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 
@@ -39,7 +40,7 @@ public record ChallengeConditions(List<Identifier> dimensions, List<String> biom
     }
 
     /** Whether the challenge counts for this player at this block. */
-    public boolean test(net.minecraft.world.entity.player.Player player, BlockPos pos) {
+    public boolean test(Player player, BlockPos pos) {
         return player.entityTags().containsAll(this.stages) && this.test(player.level(), pos);
     }
 

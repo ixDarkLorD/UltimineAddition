@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.client.gui.toasts;
 
+import dev.ftb.mods.ftblibrary.client.gui.SimpleToast;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.client.gui.SimpleToast;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
