@@ -2,6 +2,11 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v8.0.2 Release | Nov 13, 2026
+### 🐛 Bug Fixes & Improvements
+- Works with **FTB Ultimine 26.1.2.7**, and needs it: the game no longer crashes on startup with it ("No candidates were found matching items"). Undo now follows each drop as FTB Ultimine collects it, so a change to how FTB Ultimine stores the drops won't break it again.
+- Fabric: the Skills Record's Trinkets slot shows its icon again, instead of the missing texture.
+
 ## v8.0.1 Release | Nov 2, 2026
 ### 🐛 Bug Fixes & Improvements
 - Works with **FTB Ultimine 26.1.2.6**, and needs it: the game no longer crashes on startup with it ("@Shadow field tempBlockDropsList was not located"). Undo, the merged drops, the perks and the statistics follow FTB Ultimine's reworked block breaking.

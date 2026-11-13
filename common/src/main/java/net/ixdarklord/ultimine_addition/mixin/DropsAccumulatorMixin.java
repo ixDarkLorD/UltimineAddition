@@ -39,7 +39,7 @@ public abstract class DropsAccumulatorMixin {
     // The merged drops, and the item entities FTB Ultimine spawns for them at the origin.
     @WrapOperation(method = "finish", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbultimine/utils/ItemCollector;drop(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"))
     private void UA$undoRecordDrops(ItemCollector collector, Level level, BlockPos pos, Operation<Void> original) {
-        List<ItemStack> drops = ((ItemCollectorAccessor) collector).ua$getItems().stream().map(ItemStack::copy).toList();
+        List<ItemStack> drops = List.copyOf(UltimineInProgress.collected);
         AABB area = new AABB(pos).inflate(1.5);
         Set<ItemEntity> before = new HashSet<>(level.getEntitiesOfClass(ItemEntity.class, area));
         original.call(collector, level, pos);

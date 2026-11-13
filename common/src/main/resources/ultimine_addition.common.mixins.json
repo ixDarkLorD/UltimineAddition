@@ -14,7 +14,7 @@
     "DropsAccumulatorMixin",
     "FTBUltimineMixin",
     "FTBUltiminePlayerDataMixin",
-    "ItemCollectorAccessor",
+    "ItemCollectorMixin",
     "ShapeRegistryMixin"
   ],
   "injectors": {

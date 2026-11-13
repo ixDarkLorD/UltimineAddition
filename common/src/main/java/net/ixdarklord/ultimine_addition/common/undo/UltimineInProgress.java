@@ -5,6 +5,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The FTB Ultimine operation being carried out on the server thread, shared by the mixins on {@code FTBUltimine} and its
  * drops accumulator: whose it is, how many blocks it broke, the tool's wear before it, and the collector FTB Ultimine
@@ -16,6 +19,8 @@ public final class UltimineInProgress {
     public static ItemStack tool = ItemStack.EMPTY;
     public static int toolDamage;
     public static @Nullable ItemCollector collector;
+    // What went into the collector, in order (filled by ItemCollectorMixin).
+    public static final List<ItemStack> collected = new ArrayList<>();
 
     private UltimineInProgress() {}
 
@@ -24,11 +29,13 @@ public final class UltimineInProgress {
         broken = 0;
         tool = who.getMainHandItem();
         toolDamage = tool.getDamageValue();
+        collected.clear();
     }
 
     public static void clear() {
         player = null;
         tool = ItemStack.EMPTY;
         collector = null;
+        collected.clear();
     }
 }
