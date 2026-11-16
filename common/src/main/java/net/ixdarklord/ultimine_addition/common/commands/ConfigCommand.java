@@ -1,30 +1,27 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.OpenConfigPayload;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 
-// Same layout as FTB Ultimine's: "config" opens the mod's configs (CoolCatLib's screens let only ops save the server
-// ones), "clientconfig" the client settings and "serverconfig" (ops only) the server settings.
+// Same layout as FTB Ultimine's: "clientconfig" opens the client settings and "serverconfig" (ops only) the server
+// settings. "config" (every config of the mod; "config reload" for ops) is CoolCatLib's, added under the mod's names.
 public final class ConfigCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
-        FTBUltimineAddition.withCommandPrompt(dispatcher, builder -> builder
-                .then(Commands.literal("config")
-                        .requires(CommandSourceStack::isPlayer)
-                        .executes(context -> open(context.getSource(), OpenConfigPayload.Target.ALL)))
+    public static void register(LiteralArgumentBuilder<CommandSourceStack> root, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
+        root
                 .then(Commands.literal("clientconfig")
                         .requires(CommandSourceStack::isPlayer)
                         .executes(context -> open(context.getSource(), OpenConfigPayload.Target.CLIENT)))
                 .then(Commands.literal("serverconfig")
                         .requires(source -> source.isPlayer() && source.hasPermission(Commands.LEVEL_GAMEMASTERS))
-                        .executes(context -> open(context.getSource(), OpenConfigPayload.Target.SERVER))));
+                        .executes(context -> open(context.getSource(), OpenConfigPayload.Target.SERVER)));
     }
 
-    private static int open(CommandSourceStack source, OpenConfigPayload.Target target) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+    private static int open(CommandSourceStack source, OpenConfigPayload.Target target) throws CommandSyntaxException {
         PayloadHandler.sendToPlayer(new OpenConfigPayload(target), source.getPlayerOrException());
         return 1;
     }

@@ -28,6 +28,7 @@ dependencies {
     // CoolCatLib (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
     // render utilities, easing), published from ../CoolCatLib-1.21.
     modApi "net.ixdarklord.coolcatlib:coolcatlib-fabric:${coolcatlib_version}"
+    modApi "net.ixdarklord.coolcatlib:coolcatlib-canvas-fabric:${coolcatlib_version}"
 
     modCompileOnlyApi libs.jei.api.fabric
     modRuntimeOnly libs.jei.fabric
