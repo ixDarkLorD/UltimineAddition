@@ -1,45 +1,42 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
-import java.util.List;
-import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
-import org.jetbrains.annotations.Nullable;
-import net.minecraft.commands.SharedSuggestionProvider;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public final class UltimineAbilityCommand {
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored1, Commands.CommandSelection ignored2) {
-        FTBUltimineAddition.withCommandPrompt(dispatcher, builder ->
-                builder.then(Commands.literal("ultimine_ability")
-                        .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
-                        .then(Commands.argument("targets", EntityArgument.players())
-                                .then(Commands.literal("set")
-                                        .then(Commands.argument("state", BoolArgumentType.bool()).executes(context ->
-                                                setAbility(context.getSource(), EntityArgument.getPlayers(context, "targets"), BoolArgumentType.getBool(context, "state"))
-                                        )))
-                                .then(Commands.literal("shapes")
-                                        .then(Commands.literal("grant")
-                                                .then(grantTier(MiningSkillCardItem.Tier.Novice))
-                                                .then(grantTier(MiningSkillCardItem.Tier.Apprentice))
-                                                .then(grantTier(MiningSkillCardItem.Tier.Adept)))
-                                        .then(Commands.literal("reset").executes(context -> resetShapes(context.getSource(), EntityArgument.getPlayers(context, "targets"))))))));
+    public static void register(LiteralArgumentBuilder<CommandSourceStack> root, CommandBuildContext ignored1, Commands.CommandSelection ignored2) {
+        root.then(Commands.literal("ultimine_ability")
+                .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(Commands.argument("targets", EntityArgument.players())
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("state", BoolArgumentType.bool()).executes(context ->
+                                        setAbility(context.getSource(), EntityArgument.getPlayers(context, "targets"), BoolArgumentType.getBool(context, "state"))
+                                )))
+                        .then(Commands.literal("shapes")
+                                .then(Commands.literal("grant")
+                                        .then(grantTier(MiningSkillCardItem.Tier.Novice))
+                                        .then(grantTier(MiningSkillCardItem.Tier.Apprentice))
+                                        .then(grantTier(MiningSkillCardItem.Tier.Adept)))
+                                .then(Commands.literal("reset").executes(context -> resetShapes(context.getSource(), EntityArgument.getPlayers(context, "targets")))))));
     }
 
     // "grant <tier> [tool]": without a tool, every card type gets the tier's shapes.

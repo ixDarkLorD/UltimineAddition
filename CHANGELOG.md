@@ -2,6 +2,13 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v8.1.0 Release | Unreleased
+### ✨ New Features
+- `/ultimine_addition config` (or `/ua config`) still opens the mod's config screens, and now `/ua config client` or `/ua config server` opens just one of them. `/ua clientconfig` and `/ua serverconfig` still work as before.
+- `/ultimine_addition config reload` (or `/ua config reload`) reloads the config files after you edit them by hand. For operators.
+### 🔧 Changes
+- Needs **CoolCatLib 8.3.0** (`8.3.0+1.20.1`) or newer.
+
 ## v8.0.0 Release | Oct 29, 2026
 ### 🐛 Bug Fixes & Improvements
 - Works with **CoolCatLib 8.0.0** (`8.0.0+1.20.1`) and needs it. With CoolCatLib's new version numbers, 2001.2.0.6 refused to start beside it ("requires coolcatlib … or above"): update both together.

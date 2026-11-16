@@ -25,6 +25,3 @@ package-lock.json
 .husky
 commitlint.config.js
 node_modules
-
-# Claude Code project notes (local only)
-CLAUDE.md

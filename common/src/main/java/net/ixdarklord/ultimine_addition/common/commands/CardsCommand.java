@@ -1,8 +1,5 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
-import net.ixdarklord.coolcatcore.api.platform.Platform;
-import net.ixdarklord.ultimine_addition.util.ItemUtils;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -10,9 +7,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Consumer;
+import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.CardHolderArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.CardTierArgument;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.ChallengesArgument;
@@ -23,6 +18,7 @@ import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.util.ItemUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -37,8 +33,12 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Consumer;
+
 public final class CardsCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
+    public static void register(LiteralArgumentBuilder<CommandSourceStack> root, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
         LiteralArgumentBuilder<CommandSourceStack> challengeInInventory =
                 Commands.literal("in_inventory")
                         .then(Commands.argument("slot_index", SlotArgument.slot())
@@ -66,14 +66,14 @@ public final class CardsCommand {
             tierArg.then(tierInApi);
         }
 
-        FTBUltimineAddition.withCommandPrompt(dispatcher, (builder) -> builder.then(
+        root.then(
                 Commands.literal("mining_skill_card")
                         .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.literal("challenge")
                                         .then(challengeArg))
                                 .then(Commands.literal("tier")
-                                        .then(tierArg)))));
+                                        .then(tierArg))));
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> attachChallengeActions(ArgumentBuilder<CommandSourceStack, ?> parent) {

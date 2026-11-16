@@ -1,11 +1,10 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
-import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
-import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbultimine.shape.Shape;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.UltimineShapeArgument;
 import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -19,20 +18,19 @@ import java.util.List;
 public final class UltimineShapeCommand {
     private static final Component BLACKLIST = Component.translatable("command.ultimine_addition.ultimine_shape.blacklist");
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
-        FTBUltimineAddition.withCommandPrompt(dispatcher, builder ->
-                builder.then(Commands.literal("ultimine_shape")
-                        .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
-                        .then(Commands.literal("blacklist")
-                                .then(Commands.literal("add")
-                                        .then(Commands.argument("shape_id", UltimineShapeArgument.shape())
-                                                .executes(context -> updateBlacklistedShapes(context.getSource(), UltimineShapeArgument.getShape(context, "shape_id"), true))))
-                                .then(Commands.literal("remove")
-                                        .then(Commands.argument("shape_id", UltimineShapeArgument.shape())
-                                                .executes(context -> updateBlacklistedShapes(context.getSource(), UltimineShapeArgument.getShape(context, "shape_id"), false))))
-                                .then(Commands.literal("clear")
-                                        .executes(context -> clearBlacklist(context.getSource())))
-                        )));
+    public static void register(LiteralArgumentBuilder<CommandSourceStack> root, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
+        root.then(Commands.literal("ultimine_shape")
+                .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(Commands.literal("blacklist")
+                        .then(Commands.literal("add")
+                                .then(Commands.argument("shape_id", UltimineShapeArgument.shape())
+                                        .executes(context -> updateBlacklistedShapes(context.getSource(), UltimineShapeArgument.getShape(context, "shape_id"), true))))
+                        .then(Commands.literal("remove")
+                                .then(Commands.argument("shape_id", UltimineShapeArgument.shape())
+                                        .executes(context -> updateBlacklistedShapes(context.getSource(), UltimineShapeArgument.getShape(context, "shape_id"), false))))
+                        .then(Commands.literal("clear")
+                                .executes(context -> clearBlacklist(context.getSource())))
+                ));
     }
 
     private static Component lowercase(Component component) {

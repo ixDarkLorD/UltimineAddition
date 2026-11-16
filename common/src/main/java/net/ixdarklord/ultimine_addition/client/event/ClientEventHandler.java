@@ -1,22 +1,24 @@
 package net.ixdarklord.ultimine_addition.client.event;
 
-import net.ixdarklord.coolcatcore.api.event.v2.client.ClientCommandEvents;
+import net.ixdarklord.coolcatcore.api.command.ModCommands;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
+import net.ixdarklord.ultimine_addition.client.commands.SkillsRecordDebugCommand;
+import net.ixdarklord.ultimine_addition.client.gui.hud.ChallengesPanelManager;
+import net.ixdarklord.ultimine_addition.client.gui.hud.MinerCertificateStatus;
+import net.ixdarklord.ultimine_addition.client.gui.hud.UltimineNoticeHud;
+import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
 import net.ixdarklord.ultimine_addition.client.undo.UndoGrowthClient;
 import net.ixdarklord.ultimine_addition.client.undo.UndoPreviewClient;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordClientCache;
-import net.ixdarklord.ultimine_addition.client.commands.SkillsRecordDebugCommand;
-import net.ixdarklord.ultimine_addition.client.gui.hud.MinerCertificateStatus;
-import net.ixdarklord.ultimine_addition.client.gui.hud.UltimineNoticeHud;
-import net.ixdarklord.ultimine_addition.client.gui.hud.ChallengesPanelManager;
-import net.ixdarklord.ultimine_addition.client.handler.KeyHandler;
-import net.ixdarklord.ultimine_addition.network.PayloadHandler;
-import net.ixdarklord.ultimine_addition.network.payloads.SkillsRecordPayload;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
+import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.SkillsRecordPayload;
 import net.minecraft.client.Minecraft;
+
 
 public final class ClientEventHandler {
     public static void register() {
@@ -45,6 +47,8 @@ public final class ClientEventHandler {
                 PayloadHandler.sendToServer(new SkillsRecordPayload.Open());
             }
         });
-        ClientCommandEvents.REGISTER.register(SkillsRecordDebugCommand::register);
+        // Beside the server command (/ua_client, /ultimine_addition_client): its "skills_record inspect" is the server's
+        // view of the same thing.
+        ModCommands.registerClient(FTBUltimineAddition.MOD_ID, ModCommands.ClientNames.SUFFIXED, SkillsRecordDebugCommand::register);
     }
 }
