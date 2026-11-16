@@ -17,6 +17,7 @@ dependencies {
     // CoolCatLib (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
     // render utilities, easing), published from ../CoolCatLib-26.1.2.
     api "net.ixdarklord.coolcatlib:coolcatlib-fabric:${coolcatlib_version}"
+    api "net.ixdarklord.coolcatlib:coolcatlib-canvas-fabric:${coolcatlib_version}"
 
     // Dev runs: the loader JEI 29.43 settles on brings sponge-mixin 0.17.4, which crashes MixinExtras 0.5.4 (a
     // ClassCastException in FactoryRedirectWrapperMixinTransformer on this mod's @Redirects); the catalog's 0.5.5 works.

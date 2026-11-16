@@ -1,10 +1,9 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import net.ixdarklord.ultimine_addition.common.commands.arguments.UltimineShapeArgument;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.ChatFormatting;
@@ -20,14 +19,14 @@ import java.util.List;
 // "/ultimine_addition favorite <shape>" marks or unmarks a shape; with any marked, cycling shapes only goes through
 // those (of the ones the player can use). "favorite" alone lists them, "favorite clear" unmarks all. For everyone.
 public final class FavoriteShapeCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
-        FTBUltimineAddition.withCommandPrompt(dispatcher, builder -> builder
+    public static void register(LiteralArgumentBuilder<CommandSourceStack> root, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
+        root
                 .then(Commands.literal("favorite")
                         .requires(CommandSourceStack::isPlayer)
                         .executes(context -> list(context.getSource()))
                         .then(Commands.literal("clear").executes(context -> clear(context.getSource())))
                         .then(Commands.argument("shape_id", UltimineShapeArgument.shape())
-                                .executes(context -> toggle(context.getSource(), UltimineShapeArgument.getShape(context, "shape_id"))))));
+                                .executes(context -> toggle(context.getSource(), UltimineShapeArgument.getShape(context, "shape_id")))));
     }
 
     private static int toggle(CommandSourceStack source, Shape shape) throws CommandSyntaxException {

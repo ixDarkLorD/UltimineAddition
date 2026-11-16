@@ -1,6 +1,5 @@
 package net.ixdarklord.ultimine_addition.client.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -8,7 +7,6 @@ import net.ixdarklord.coolcatcore.api.event.v2.client.ClientCommandEvents;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordInspector;
 import net.ixdarklord.ultimine_addition.config.UAClientConfig;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.Commands;
@@ -17,14 +15,14 @@ import net.minecraft.network.chat.Component;
 
 public class SkillsRecordDebugCommand {
 
-    public static void register(CommandDispatcher<SharedSuggestionProvider> dispatcher, CommandBuildContext ignored) {
-        FTBUltimineAddition.withClientCommandPrompt(dispatcher, Commands.LEVEL_GAMEMASTERS, builder ->
-                builder.then(LiteralArgumentBuilder.<SharedSuggestionProvider>literal("skills_record")
+    public static void register(LiteralArgumentBuilder<SharedSuggestionProvider> root, CommandBuildContext ignored) {
+        root.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(LiteralArgumentBuilder.<SharedSuggestionProvider>literal("skills_record")
                         // The client's view of the carried Skills Records and cards, to compare with the server's
                         // (/ultimine_addition skills_record inspect).
                         .then(LiteralArgumentBuilder.<SharedSuggestionProvider>literal("inspect").executes(context -> inspect()))
                         .then(LiteralArgumentBuilder.<SharedSuggestionProvider>literal("debug_mode")
-                                .then(RequiredArgumentBuilder.<SharedSuggestionProvider, Boolean>argument("state", BoolArgumentType.bool()).executes(context -> setEditMode(context.getSource(), BoolArgumentType.getBool(context, "state")))))));
+                                .then(RequiredArgumentBuilder.<SharedSuggestionProvider, Boolean>argument("state", BoolArgumentType.bool()).executes(context -> setEditMode(context.getSource(), BoolArgumentType.getBool(context, "state"))))));
     }
 
     private static int inspect() {

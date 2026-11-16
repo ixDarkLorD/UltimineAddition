@@ -1,6 +1,5 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -40,7 +39,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public final class CardsCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
+    public static void register(LiteralArgumentBuilder<CommandSourceStack> root, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
         LiteralArgumentBuilder<CommandSourceStack> challengeInInventory =
                 Commands.literal("in_inventory")
                         .then(Commands.argument("slot_index", SlotArgument.slot())
@@ -68,14 +67,14 @@ public final class CardsCommand {
             tierArg.then(tierInApi);
         }
 
-        FTBUltimineAddition.withCommandPrompt(dispatcher, (builder) -> builder.then(
+        root.then(
                 Commands.literal("mining_skill_card")
                         .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.literal("challenge")
                                         .then(challengeArg))
                                 .then(Commands.literal("tier")
-                                        .then(tierArg)))));
+                                        .then(tierArg))));
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> attachChallengeActions(ArgumentBuilder<CommandSourceStack, ?> parent) {

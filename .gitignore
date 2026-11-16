@@ -26,8 +26,5 @@ package-lock.json
 commitlint.config.js
 node_modules
 
-# Claude Code project notes (local only)
-CLAUDE.md
-
 # Smoke test output (tools/autotest/run.py)
 tools/autotest/results/

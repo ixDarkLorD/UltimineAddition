@@ -1,13 +1,11 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.ixdarklord.ultimine_addition.common.data.player.PlayerAbilityData.Stats;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.progression.CardPerk;
 import net.ixdarklord.ultimine_addition.common.progression.UltimineStats;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
@@ -21,17 +19,15 @@ import java.util.Locale;
 // "/ultimine_addition stats": the player's own numbers. "/ultimine_addition top [board]": the best of the players seen
 // since the server started. Both are for everyone.
 public final class StatsCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
-        FTBUltimineAddition.withCommandPrompt(dispatcher, builder -> {
-            builder.then(Commands.literal("stats")
-                    .requires(CommandSourceStack::isPlayer)
-                    .executes(context -> stats(context.getSource())));
-            LiteralArgumentBuilder<CommandSourceStack> top = Commands.literal("top").executes(context -> top(context.getSource(), UltimineStats.Board.BLOCKS));
-            for (UltimineStats.Board board : UltimineStats.Board.values()) {
-                top.then(Commands.literal(board.name().toLowerCase(Locale.ROOT)).executes(context -> top(context.getSource(), board)));
-            }
-            builder.then(top);
-        });
+    public static void register(LiteralArgumentBuilder<CommandSourceStack> root, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
+        root.then(Commands.literal("stats")
+                .requires(CommandSourceStack::isPlayer)
+                .executes(context -> stats(context.getSource())));
+        LiteralArgumentBuilder<CommandSourceStack> top = Commands.literal("top").executes(context -> top(context.getSource(), UltimineStats.Board.BLOCKS));
+        for (UltimineStats.Board board : UltimineStats.Board.values()) {
+            top.then(Commands.literal(board.name().toLowerCase(Locale.ROOT)).executes(context -> top(context.getSource(), board)));
+        }
+        root.then(top);
     }
 
     private static Component line(String key, Object value) {

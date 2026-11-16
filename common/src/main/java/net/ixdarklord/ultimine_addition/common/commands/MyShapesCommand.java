@@ -1,10 +1,9 @@
 package net.ixdarklord.ultimine_addition.common.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.ixdarklord.ultimine_addition.common.data.shape.CustomShapes;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -17,14 +16,14 @@ import java.util.List;
 // "/ultimine_addition my_shapes": the shapes the player drew in the Shape Designer, numbered.
 // "/ultimine_addition my_shapes delete <number>": removes one, making room for another. For everyone.
 public final class MyShapesCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
-        FTBUltimineAddition.withCommandPrompt(dispatcher, builder -> builder
+    public static void register(LiteralArgumentBuilder<CommandSourceStack> root, CommandBuildContext ignored, Commands.CommandSelection ignored2) {
+        root
                 .then(Commands.literal("my_shapes")
                         .requires(CommandSourceStack::isPlayer)
                         .executes(context -> list(context.getSource()))
                         .then(Commands.literal("delete")
                                 .then(Commands.argument("number", IntegerArgumentType.integer(1))
-                                        .executes(context -> delete(context.getSource(), IntegerArgumentType.getInteger(context, "number")))))));
+                                        .executes(context -> delete(context.getSource(), IntegerArgumentType.getInteger(context, "number"))))));
     }
 
     private static int list(CommandSourceStack source) throws CommandSyntaxException {

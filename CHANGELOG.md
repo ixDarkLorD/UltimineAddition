@@ -2,6 +2,13 @@
 This file is for listing all the changes to this project
 <hr>
 
+## v8.1.0 Release | Unreleased
+### ✨ New Features
+- `/ultimine_addition config` (or `/ua config`) still opens the mod's config screens, and now `/ua config client` or `/ua config server` opens just one of them. `/ua clientconfig` and `/ua serverconfig` still work as before.
+- `/ultimine_addition config reload` (or `/ua config reload`) reloads the config files after you edit them by hand. For operators.
+### 🔧 Changes
+- Needs **CoolCatLib 8.3.0** (`8.3.0+26.1.2`) or newer.
+
 ## v8.0.2 Release | Nov 13, 2026
 ### 🐛 Bug Fixes & Improvements
 - Works with **FTB Ultimine 26.1.2.7**, and needs it: the game no longer crashes on startup with it ("No candidates were found matching items"). Undo now follows each drop as FTB Ultimine collects it, so a change to how FTB Ultimine stores the drops won't break it again.

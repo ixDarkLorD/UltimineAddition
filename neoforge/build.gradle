@@ -21,6 +21,7 @@ dependencies {
     // CoolCatLib (constructors, events, networking, registries, configs, attachments) and Canvas (GUI widgets,
     // render utilities, easing), published from ../CoolCatLib-26.1.2.
     api "net.ixdarklord.coolcatlib:coolcatlib-neoforge:${coolcatlib_version}"
+    api "net.ixdarklord.coolcatlib:coolcatlib-canvas-neoforge:${coolcatlib_version}"
 
     compileOnly "${libs.curios.neoforge.get()}:api"
     runtimeOnly libs.curios.neoforge
