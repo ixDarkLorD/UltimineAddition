@@ -2,7 +2,7 @@
 This file is for listing all the changes to this project
 <hr>
 
-## v8.1.0 Release | Unreleased
+## v8.1.0 Release | Nov 16, 2026
 ### ✨ New Features
 - `/ultimine_addition config` (or `/ua config`) still opens the mod's config screens, and now `/ua config client` or `/ua config server` opens just one of them. `/ua clientconfig` and `/ua serverconfig` still work as before.
 - `/ultimine_addition config reload` (or `/ua config reload`) reloads the config files after you edit them by hand. For operators.
