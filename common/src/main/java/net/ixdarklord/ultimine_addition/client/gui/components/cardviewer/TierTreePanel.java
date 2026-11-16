@@ -1,35 +1,36 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.ixdarklord.coolcatcanvas.api.client.gui.panel.ViewportPanel;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
 import net.ixdarklord.coolcatcanvas.api.utils.ColorGradient;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.sounds.SoundEvents;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.ViewportPanel;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeState;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierState;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
+import net.ixdarklord.ultimine_addition.client.renderer.item.CardToolIcon;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.item.GenericMiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.ixdarklord.ultimine_addition.util.ARGB;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.Util;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
-import com.mojang.blaze3d.vertex.PoseStack;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ final class TierTreePanel extends ViewportPanel {
     private static final ResourceLocation STAR_FILL = sprite("star_fill");
     private static final ResourceLocation STAR_BORDER = sprite("star_border");
     private static final int MASTERED_GOLD = 0xFFFFC940;
-    private static final ItemStack PRESTIGE_ICON = new ItemStack(net.minecraft.world.item.Items.NETHER_STAR);
+    private static final ItemStack PRESTIGE_ICON = new ItemStack(Items.NETHER_STAR);
     private static final long PRESTIGE_CONFIRM_MS = 4000L;
     // When the Mastered box's star was first clicked (0 when it wasn't): see worldClicked.
     private long prestigeArmedAt;
@@ -685,7 +686,7 @@ final class TierTreePanel extends ViewportPanel {
             if (!icon.isEmpty()) {
                 graphics.renderItem(icon, bx + (BADGE_SIZE - 16) / 2, by + (BADGE_SIZE - 16) / 2);
                 // The card's tool, as its slot shows it.
-                net.ixdarklord.ultimine_addition.client.renderer.item.CardToolIcon.drawOver(graphics, icon, bx + (BADGE_SIZE - 16) / 2, by + (BADGE_SIZE - 16) / 2);
+                CardToolIcon.drawOver(graphics, icon, bx + (BADGE_SIZE - 16) / 2, by + (BADGE_SIZE - 16) / 2);
             }
             else GuiDraw.centeredText(graphics, this.font, "?", bx + BADGE_SIZE / 2, by + (BADGE_SIZE - 8) / 2, ARGB.multiplyAlpha(0xFF8A8A8A, reveal));
         }

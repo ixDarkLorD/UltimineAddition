@@ -1,16 +1,17 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.ixdarklord.ultimine_addition.util.ARGB;
-import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.WidgetSprites;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.WidgetSprites;
 import net.ixdarklord.ultimine_addition.client.gui.screens.SkillsRecordScreen;
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -96,7 +97,7 @@ final class ViewerButton extends AbstractButton {
             this.sprites = sprites;
             this.tint = tint;
             this.onPress = onPress;
-            this.setTooltip(net.minecraft.client.gui.components.Tooltip.create(tooltip));
+            this.setTooltip(Tooltip.create(tooltip));
         }
 
         // Canvas's WidgetSprites (1.20.1 has none of its own) take texture paths.

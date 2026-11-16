@@ -1,23 +1,24 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.Panel;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.ixdarklord.coolcatcanvas.api.client.gui.panel.Panel;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.client.gui.components.SlotSelectionOutline;
 import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
+import net.ixdarklord.ultimine_addition.client.renderer.item.CardToolIcon;
 import net.ixdarklord.ultimine_addition.common.item.ModItems;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.ChatFormatting;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraft.Util;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -200,7 +201,7 @@ final class GuidePanel extends Panel {
 
         this.drawSlot(graphics, slotX, slotY, 0.0F, SELECTED, intro);
         graphics.renderItem(card, slotX + (SLOT - 16) / 2, slotY + (SLOT - 16) / 2);
-        net.ixdarklord.ultimine_addition.client.renderer.item.CardToolIcon.drawOver(graphics, card, slotX + (SLOT - 16) / 2, slotY + (SLOT - 16) / 2);
+        CardToolIcon.drawOver(graphics, card, slotX + (SLOT - 16) / 2, slotY + (SLOT - 16) / 2);
         if (selected > 0.0F) {
             // Over the card (items draw after fills in a stratum), as over the record's card slots.
             GuiDraw.nextStratum(graphics);

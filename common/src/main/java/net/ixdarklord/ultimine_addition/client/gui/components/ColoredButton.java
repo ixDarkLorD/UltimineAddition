@@ -1,11 +1,11 @@
 package net.ixdarklord.ultimine_addition.client.gui.components;
 
-import net.minecraft.client.gui.Font;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.ColorableImageButton;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.WidgetSprites;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
