@@ -1,9 +1,9 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.ColorableImageButton;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengeData;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;

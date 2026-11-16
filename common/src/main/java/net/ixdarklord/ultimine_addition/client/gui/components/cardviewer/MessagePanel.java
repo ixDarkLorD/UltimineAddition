@@ -1,14 +1,14 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
+import net.ixdarklord.coolcatcanvas.api.client.gui.panel.Panel;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
+import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.Panel;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.ultimine_addition.util.ARGB;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
-import net.ixdarklord.coolcatcanvas.api.utils.Easing;
-import net.ixdarklord.ultimine_addition.util.ARGB;
-import net.minecraft.Util;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;

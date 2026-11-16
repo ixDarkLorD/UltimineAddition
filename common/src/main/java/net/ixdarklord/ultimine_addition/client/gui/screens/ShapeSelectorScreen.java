@@ -1,23 +1,25 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
-import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.ShapeDiagrams;
-import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
-import net.ixdarklord.coolcatcore.api.config.type.EnumType;
-import net.ixdarklord.ultimine_addition.config.UAClientConfig;
-import net.minecraft.world.entity.player.Player;
-import net.ixdarklord.ultimine_addition.util.ARGB;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.ColorableImageButton;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
+import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
+import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.client.gui.components.ColoredButton;
+import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.ShapeDiagrams;
 import net.ixdarklord.ultimine_addition.common.data.item.SelectedShapeData;
+import net.ixdarklord.ultimine_addition.common.data.shape.CustomShapes;
 import net.ixdarklord.ultimine_addition.common.menu.ShapeSelectorMenu;
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineIntegration;
 import net.ixdarklord.ultimine_addition.core.Registration;
+import net.ixdarklord.ultimine_addition.core.ServicePlatform;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
+import net.ixdarklord.ultimine_addition.network.payloads.ShapePayload;
 import net.ixdarklord.ultimine_addition.network.payloads.UpdateItemShapePayload;
+import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -39,6 +41,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -156,7 +159,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
                 this.renderTooltip(guiGraphics, mouseX, mouseY);
             }
         });
-        this.designButton.visible = net.ixdarklord.ultimine_addition.common.data.shape.CustomShapes.enabled();
+        this.designButton.visible = CustomShapes.enabled();
 
         this.emptyString = this.addRenderableWidget(new AbstractStringWidget(this.leftPos + LIST_X, this.topPos + LIST_Y, LIST_WIDTH, LIST_HEIGHT,
                 Component.translatable("gui.ultimine_addition.shape_selector.insert"), this.font) {
@@ -454,7 +457,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
             // The star: whether this shape is one the player cycles through (see FTBUltimineIntegration.getAvailableShapes).
             private boolean isFavorite() {
                 var player = Minecraft.getInstance().player;
-                return player != null && net.ixdarklord.ultimine_addition.core.ServicePlatform.get().players().getAbilityData(player).getFavoriteShapes().contains(this.shape.getName());
+                return player != null && ServicePlatform.get().players().getAbilityData(player).getFavoriteShapes().contains(this.shape.getName());
             }
 
             // Where the row was last drawn: 1.21.1's entries don't know their own place.
@@ -468,7 +471,7 @@ public class ShapeSelectorScreen extends AbstractContainerScreen<ShapeSelectorMe
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 SoundManager handler = Minecraft.getInstance().getSoundManager();
                 if (this.rowRight != Integer.MIN_VALUE && mouseX >= this.starLeft() && mouseX < this.starLeft() + STAR_WIDTH) {
-                    PayloadHandler.sendToServer(new net.ixdarklord.ultimine_addition.network.payloads.ShapePayload.Favorite(this.shape.getName()));
+                    PayloadHandler.sendToServer(new ShapePayload.Favorite(this.shape.getName()));
                     handler.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, this.isFavorite() ? 0.9F : 1.3F));
                     // Not a pick of the row: the list leaves its selection alone.
                     return false;

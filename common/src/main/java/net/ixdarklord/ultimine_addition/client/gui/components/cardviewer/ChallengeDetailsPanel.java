@@ -1,15 +1,15 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
+import net.ixdarklord.coolcatcanvas.api.client.gui.panel.ScrollPanel;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
-import net.ixdarklord.ultimine_addition.util.ARGB;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.ChatFormatting;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.ScrollPanel;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.util.ARGB;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

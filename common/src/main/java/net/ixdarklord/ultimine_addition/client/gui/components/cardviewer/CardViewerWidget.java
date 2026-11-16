@@ -1,38 +1,40 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
-import net.minecraft.commands.Commands;
-import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
-import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
-import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
-import net.ixdarklord.ultimine_addition.config.UAServerConfig;
-import net.ixdarklord.ultimine_addition.config.UAClientConfig;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.AbstractMultiPanelWidget;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.AbstractMultiPanelWidget;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
-import net.minecraft.Util;
+import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeState;
+import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.common.data.challenge.ChallengesManager;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.record.CardHistory;
+import net.ixdarklord.ultimine_addition.common.data.reward.DataRewards;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
+import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;
+import net.ixdarklord.ultimine_addition.common.progression.CardPerk;
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
+import net.ixdarklord.ultimine_addition.config.UAServerConfig;
+import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.commands.Commands;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import com.mojang.blaze3d.vertex.PoseStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
@@ -70,7 +72,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
 
         void claimCertificate(MiningSkillCardItem.Tier tier, ResourceLocation shape);
 
-        void claimPerk(MiningSkillCardItem.Tier tier, net.ixdarklord.ultimine_addition.common.progression.CardPerk perk);
+        void claimPerk(MiningSkillCardItem.Tier tier, CardPerk perk);
 
         void prestigeCard();
 
@@ -405,10 +407,10 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
     }
 
     // The two perks this tier's box offers, once its certificate is out of the way; empty when there is none to pick.
-    List<net.ixdarklord.ultimine_addition.common.progression.CardPerk> perkOffer(TierNode node) {
+    List<CardPerk> perkOffer(TierNode node) {
         MiningSkillCardData card = this.state.card();
         if (card == null || this.minecraft.player == null || !card.hasProgress() || !this.claimPool(node).isEmpty()) return List.of();
-        return net.ixdarklord.ultimine_addition.common.progression.CardPerk.offer(this.minecraft.player, card, node.tier());
+        return CardPerk.offer(this.minecraft.player, card, node.tier());
     }
 
     void openPerkChoice(TierNode node) {
@@ -416,7 +418,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         if (!offer.isEmpty()) this.perkChoice.show(node.tier(), offer);
     }
 
-    void claimPerk(MiningSkillCardItem.Tier tier, net.ixdarklord.ultimine_addition.common.progression.CardPerk perk) {
+    void claimPerk(MiningSkillCardItem.Tier tier, CardPerk perk) {
         this.actions.claimPerk(tier, perk);
     }
 
@@ -538,7 +540,7 @@ public final class CardViewerWidget extends AbstractMultiPanelWidget {
         List<Component> full = new ArrayList<>(withBlockList || lines.isEmpty() ? lines : List.of(lines.getFirst()));
         ChallengesManager.INSTANCE.getChallengeData(node.id()).ifPresent(data -> {
             full.addAll(data.conditions().describe());
-            full.addAll(net.ixdarklord.ultimine_addition.common.data.reward.DataRewards.previewChallenge(node.id(), data.forCardType().getId()));
+            full.addAll(DataRewards.previewChallenge(node.id(), data.forCardType().getId()));
         });
         return full;
     }

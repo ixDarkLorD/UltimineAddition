@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.Panel;
+import net.ixdarklord.coolcatcanvas.api.client.gui.panel.Panel;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.ShapeCertificateItem;

@@ -1,11 +1,12 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.Panel;
+import net.ixdarklord.coolcatcanvas.api.client.gui.panel.Panel;
 import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.progression.CardPerk;
 import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -90,7 +92,7 @@ final class PerkChoicePanel extends Panel {
             graphics.fill(b.left(), b.top(), b.right(), b.bottom(), this.viewer.themed(ChallengeDetailsPanel.PANEL_FILL));
             return;
         }
-        ChoiceChrome.frame(graphics, this.viewer, this.font, b, net.minecraft.world.item.ItemStack.EMPTY,
+        ChoiceChrome.frame(graphics, this.viewer, this.font, b, ItemStack.EMPTY,
                 Component.translatable("gui.ultimine_addition.card_viewer.perk.choose"),
                 Component.translatable("gui.ultimine_addition.card_viewer.perk.kept").withStyle(ChatFormatting.GRAY), this.tier);
         // Its rows, and panels drawn later, cover what the panels below drew.
@@ -133,7 +135,7 @@ final class PerkChoicePanel extends Panel {
         @Override
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             boolean hovered = this.active && this.isHoveredOrFocused();
-            long now = net.minecraft.Util.getMillis();
+            long now = Util.getMillis();
             float seconds = Math.min(0.1F, (now - this.lastFrame) / 1000.0F);
             this.lastFrame = now;
             this.hover = this.viewer.isAnimated() ? ChoiceChrome.approach(this.hover, hovered ? 1.0F : 0.0F, seconds, 16.0F) : hovered ? 1.0F : 0.0F;

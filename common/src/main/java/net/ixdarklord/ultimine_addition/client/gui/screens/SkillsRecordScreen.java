@@ -1,36 +1,39 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
-import net.ixdarklord.coolcatcore.api.config.client.ConfigScreens;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.AbstractDraggableWidget;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.ColorableImageButton;
+import net.ixdarklord.coolcatcanvas.api.client.render.Outline;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
 import net.ixdarklord.coolcatcanvas.api.utils.ColorGradient;
-import net.ixdarklord.coolcatcanvas.api.client.utils.Outline;
-import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
-import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
-import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
-import net.ixdarklord.ultimine_addition.config.UAClientConfig;
-import net.ixdarklord.ultimine_addition.config.UAConfigs;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.AbstractDraggableWidget;
 import net.ixdarklord.coolcatcore.api.client.utils.MouseHelper;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcore.api.config.client.ConfigScreens;
 import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.coolcatcore.api.utils.MathUtils;
+import net.ixdarklord.ultimine_addition.client.gui.GuiDraw;
 import net.ixdarklord.ultimine_addition.client.gui.components.SlotSelectionOutline;
-import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardViewerWidget;
+import net.ixdarklord.ultimine_addition.client.gui.theme.RecordTheme;
+import net.ixdarklord.ultimine_addition.client.renderer.ItemAlpha;
 import net.ixdarklord.ultimine_addition.common.data.item.MiningSkillCardData;
 import net.ixdarklord.ultimine_addition.common.data.item.SkillsRecordData;
 import net.ixdarklord.ultimine_addition.common.data.record.CardHistory;
 import net.ixdarklord.ultimine_addition.common.data.record.SkillsRecordClientCache;
+import net.ixdarklord.ultimine_addition.common.item.MiningSkillCardItem;
 import net.ixdarklord.ultimine_addition.common.item.SkillsRecordItem;
 import net.ixdarklord.ultimine_addition.common.menu.SkillsRecordMenu;
 import net.ixdarklord.ultimine_addition.common.menu.slot.CustomSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.MiningSkillCardSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.PaperSlot;
 import net.ixdarklord.ultimine_addition.common.menu.slot.PenSlot;
+import net.ixdarklord.ultimine_addition.common.progression.CardPerk;
+import net.ixdarklord.ultimine_addition.config.UAClientConfig;
+import net.ixdarklord.ultimine_addition.config.UAConfigs;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;
 import net.ixdarklord.ultimine_addition.core.Registration;
 import net.ixdarklord.ultimine_addition.network.PayloadHandler;
 import net.ixdarklord.ultimine_addition.network.payloads.SkillsRecordPayload;
+import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -43,13 +46,11 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.ixdarklord.ultimine_addition.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import com.mojang.blaze3d.vertex.PoseStack;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -275,7 +276,7 @@ public class SkillsRecordScreen extends AbstractContainerScreen<SkillsRecordMenu
     }
 
     @Override
-    public void claimPerk(MiningSkillCardItem.Tier tier, net.ixdarklord.ultimine_addition.common.progression.CardPerk perk) {
+    public void claimPerk(MiningSkillCardItem.Tier tier, CardPerk perk) {
         if (this.selectedSlot < 0) return;
         PayloadHandler.sendToServer(new SkillsRecordPayload.ClaimPerk(this.selectedSlot, tier.getValue(), perk.id()));
     }
