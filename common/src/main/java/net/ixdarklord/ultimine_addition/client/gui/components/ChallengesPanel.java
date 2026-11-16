@@ -1,10 +1,10 @@
 package net.ixdarklord.ultimine_addition.client.gui.components;
 
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.AnimatedComponent;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.SlideAnimation;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.animations.SlideAnimation.Direction;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
-import net.ixdarklord.coolcatcanvas.api.client.utils.ScreenAnchor;
+import net.ixdarklord.coolcatcanvas.api.client.gui.animation.AnimatedComponent;
+import net.ixdarklord.coolcatcanvas.api.client.gui.animation.SlideAnimation;
+import net.ixdarklord.coolcatcanvas.api.client.gui.animation.SlideAnimation.Direction;
+import net.ixdarklord.coolcatcanvas.api.client.gui.placement.ScreenAnchor;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
 import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.coolcatcore.api.utils.MathUtils;

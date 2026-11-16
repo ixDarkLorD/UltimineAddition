@@ -1,8 +1,8 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.ColorableImageButton;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
 import net.ixdarklord.coolcatcore.api.config.type.EnumType;
 import net.ixdarklord.coolcatcore.api.utils.ColorUtils;
 import net.ixdarklord.ultimine_addition.client.gui.components.ColoredButton;

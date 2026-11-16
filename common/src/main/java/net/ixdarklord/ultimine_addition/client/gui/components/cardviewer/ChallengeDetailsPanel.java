@@ -1,7 +1,7 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.panel.ScrollPanel;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcanvas.api.client.gui.panel.ScrollPanel;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.TierNode;
 import net.ixdarklord.ultimine_addition.core.FTBUltimineAddition;

@@ -1,9 +1,9 @@
 package net.ixdarklord.ultimine_addition.client.gui.screens;
 
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.ColorableImageButton;
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.AbstractDraggableWidget;
-import net.ixdarklord.coolcatcanvas.api.client.utils.Outline;
-import net.ixdarklord.coolcatcanvas.api.client.utils.RenderUtils;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.AbstractDraggableWidget;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.ColorableImageButton;
+import net.ixdarklord.coolcatcanvas.api.client.render.Outline;
+import net.ixdarklord.coolcatcanvas.api.client.render.RenderUtils;
 import net.ixdarklord.coolcatcanvas.api.utils.ColorGradient;
 import net.ixdarklord.coolcatcore.api.client.utils.MouseHelper;
 import net.ixdarklord.coolcatcore.api.config.client.ConfigScreens;

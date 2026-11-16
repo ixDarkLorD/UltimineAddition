@@ -1,6 +1,6 @@
 package net.ixdarklord.ultimine_addition.client.gui.components.cardviewer;
 
-import net.ixdarklord.coolcatcanvas.api.client.gui.components.widgets.AbstractMultiPanelWidget;
+import net.ixdarklord.coolcatcanvas.api.client.gui.widget.AbstractMultiPanelWidget;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeNode;
 import net.ixdarklord.ultimine_addition.client.gui.components.cardviewer.CardTree.ChallengeState;
